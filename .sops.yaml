@@ -1,0 +1,7 @@
+keys:
+  - &nixosTest age1enpjjgxya9w3mnmwfezejqe7pq35003zmd772rruvfakz0e349msf26dmv
+creation_rules:
+  - path_regex: secrets/[^/]+(\.(yaml|json|env|ini|conf))?$
+    key_groups:
+      - age:
+          - *nixosTest
