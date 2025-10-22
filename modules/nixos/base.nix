@@ -72,7 +72,6 @@
     networkmanager.enable = false;
   };
 
-  programs.bash.enable = true;
   security.sudo.wheelNeedsPassword = false;
   time.timeZone = "America/Toronto";
   zramSwap.enable = true;
