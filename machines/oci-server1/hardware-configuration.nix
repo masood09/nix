@@ -16,10 +16,37 @@
     initrd = {
       availableKernelModules = ["xhci_pci" "virtio_pci" "virtio_scsi" "usbhid"];
       kernelModules = [];
+
+      luks = {
+        reusePassphrases = true;
+        devices = {
+          "cryptroot" = {
+            device = "/dev/sda2";
+            allowDiscards = true;
+          };
+        };
+      };
     };
 
     kernelModules = [];
     extraModulePackages = [];
+  };
+
+  fileSystems = {
+    "/" = {
+      device = "none";
+      fsType = "tmpfs";
+      options = ["defaults" "size=4G" "mode=0755"];
+    };
+    "/boot" = {
+      device = "/dev/disk/by-label/boot";
+      fsType = "vfat";
+      options = ["umask=0077"];
+    };
+    "/nix" = {
+      device = "/dev/disk/by-label/nix";
+      fsType = "ext4";
+    };
   };
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
