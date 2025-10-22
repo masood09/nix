@@ -20,7 +20,7 @@ jobs:
       - name: Build ISO
         run: |
           nix_bin=$(which nix)
-          sudo $nix_bin build .#nixosConfigurations.isobuilder.config.system.build.isoImage
+          sudo $nix_bin build .#nixosConfigurations.nixiso.config.system.build.isoImage
 
       - name: Rename ISO
         run: sudo mv result/iso/nixos-*.iso nixos.iso
