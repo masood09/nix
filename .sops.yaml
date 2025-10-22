@@ -1,7 +1,7 @@
 keys:
-  - &nixosTest age1enpjjgxya9w3mnmwfezejqe7pq35003zmd772rruvfakz0e349msf26dmv
+  - &murderbot age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
 creation_rules:
   - path_regex: secrets/[^/]+(\.(yaml|json|env|ini|conf))?$
     key_groups:
       - age:
-          - *nixosTest
+          - *murderbot
