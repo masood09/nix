@@ -3,6 +3,7 @@
   config,
   pkgs,
   vars,
+  lib,
   ...
 }: {
   imports = [
@@ -84,7 +85,11 @@
       "/var/log"
       # inspo: https://github.com/nix-community/impermanence/issues/178
       "/var/lib/nixos"
-      "/var/lib/postgresql"
+      (
+        if config.networking.hostName == "oci-server1"
+        then "/var/lib/postgresql"
+        else null
+      )
     ];
 
     files = [
@@ -95,6 +100,11 @@
       "/etc/ssh/ssh_host_rsa_key"
     ];
   };
+
+  # Ensure /var/lib/postgresql exists with proper ownership and permissions
+  systemd.tmpfiles.rules = lib.mkIf (config.networking.hostName == "oci-server1") [
+    "d /var/lib/postgresql 0755 postgres postgres -"
+  ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "25.05";
