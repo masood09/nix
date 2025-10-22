@@ -1,7 +1,4 @@
-{
-  vars,
-  ...
-}: {
+{vars, ...}: {
   home = {
     # inspo: https://jeppesen.io/git-commit-sign-nix-home-manager-ssh/
     file.".ssh/allowed_signers".text = "* ${vars.sshPublicKeyPersonal}";

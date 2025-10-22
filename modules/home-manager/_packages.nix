@@ -26,8 +26,10 @@ in {
         xz
       ]
       ++ (
-        if builtins.substring 0 3 osConfig.networking.hostName == "oci" ||
-           builtins.substring 0 3 osConfig.networking.hostName == "pve"
+        if
+          builtins.substring 0 3 osConfig.networking.hostName
+          == "oci"
+          || builtins.substring 0 3 osConfig.networking.hostName == "pve"
         then [
           # Below packages are for servers only; excluded from personal machines
         ]

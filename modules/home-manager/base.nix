@@ -35,7 +35,7 @@
 
     zoxide = {
       enable = true;
-      enableFishIntegration= true;
+      enableFishIntegration = true;
     };
 
     bat.enable = true;
