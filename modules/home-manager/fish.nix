@@ -17,11 +17,11 @@
       plugins = [
         {
           name = "tide";
-          src = pkgs.fishPlugins.tide.src;
+          inherit (pkgs.fishPlugins.tide) src;
         }
         {
           name = "fzf";
-          src = pkgs.fishPlugins.fzf.src;
+          inherit (pkgs.fishPlugins.fzf) src;
         }
       ];
     };

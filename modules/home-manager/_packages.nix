@@ -5,7 +5,7 @@
   ...
 }: let
   pkgs-unstable = import inputs.nixpkgs-unstable {
-    system = pkgs.system;
+    inherit (pkgs) system;
     config.allowUnfree = true;
   };
 in {
@@ -59,6 +59,7 @@ in {
           opentofu
           pkgs-unstable.vscode-json-languageserver
           shellcheck
+          statix
           stylelint
           talosctl
           terraform

@@ -6,7 +6,7 @@
 
   programs.git = {
     enable = true;
-    userEmail = vars.userEmail;
+    inherit (vars) userEmail;
     userName = vars.fullName;
     delta.enable = true;
     lfs.enable = true;
