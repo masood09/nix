@@ -40,6 +40,7 @@ in {
           cmake
           coreutils-prefixed
           fluxcd
+          glibtool
           go
           gomodifytags
           gopls
