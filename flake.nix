@@ -78,12 +78,12 @@
       oci-server2 = mkNixOSConfig ./machines/oci-server2/configuration.nix;
       oci-server3 = mkNixOSConfig ./machines/oci-server3/configuration.nix;
       oci-server4 = mkNixOSConfig ./machines/oci-server4/configuration.nix;
-      isoserver = nixpkgs.lib.nixosSystem {
+      nixiso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {inherit inputs outputs vars;};
         modules = [
           (nixpkgs + "/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix")
-          ./machines/isoserver/configuration.nix
+          ./machines/nixiso/configuration.nix
         ];
       };
     };

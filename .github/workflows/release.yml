@@ -1,6 +1,6 @@
 ---
 # inspo: https://github.com/LGUG2Z/nixos-wsl-starter/blob/master/.github/workflows/build.yml
-name: "Release custom WSL tarball and NixOS ISO"
+name: "Release custom NixOS ISO"
 on:
   push:
     tags:
@@ -17,24 +17,13 @@ jobs:
 
       - uses: cachix/install-nix-action@v31
 
-      - name: Build tarball
-        run: |
-          nix_bin=$(which nix)
-          sudo $nix_bin run .#nixosConfigurations.workchng.config.system.build.tarballBuilder
-
       - name: Build ISO
         run: |
           nix_bin=$(which nix)
-          sudo $nix_bin build .#nixosConfigurations.iso1chng.config.system.build.isoImage
+          sudo $nix_bin build .#nixosConfigurations.isobuilder.config.system.build.isoImage
 
       - name: Rename ISO
         run: sudo mv result/iso/nixos-*.iso nixos.iso
-
-      - name: Upload tarball
-        uses: actions/upload-artifact@v4
-        with:
-          name: nixos.wsl
-          path: nixos.wsl
 
       - name: Upload ISO
         uses: actions/upload-artifact@v4
@@ -47,5 +36,4 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            nixos.wsl
             nixos.iso

@@ -37,4 +37,4 @@ sops-update:
     for file in secrets/*; do sops updatekeys "$file"; done
 
 build-iso:
-    nix build .#nixosConfigurations.isoserver.config.system.build.isoImage
+    nix build .#nixosConfigurations.nixiso.config.system.build.isoImage
