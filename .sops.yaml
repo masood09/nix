@@ -1,7 +1,9 @@
 keys:
   - &murderbot age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
+  - &oci-server1 age1uhjqhz3m3mzx225y4h59xm2k8n09teyeejc95trzpvkefthjc3kshzfdvn
 creation_rules:
   - path_regex: secrets/[^/]+(\.(yaml|json|env|ini|conf))?$
     key_groups:
       - age:
           - *murderbot
+          - *oci-server1
