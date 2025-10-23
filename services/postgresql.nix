@@ -11,10 +11,6 @@
     };
   };
 
-  systemd.services.postgresql.serviceConfig = {
-    EnvironmentFile = config.sops.secrets."postgres-password".path;
-  };
-
   services.postgresql = {
     enable = true;
     package = pkgs.postgresql_16;
