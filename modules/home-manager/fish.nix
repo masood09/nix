@@ -17,6 +17,9 @@
       interactiveShellInit = ''
         # Disable greeting
         set fish_greeting
+
+        set -x EDITOR nvim
+        set -x VISUAL nvim
       '';
 
       plugins = [

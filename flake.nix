@@ -42,6 +42,11 @@
     };
 
     catppuccin.url = "github:catppuccin/nix/release-25.05";
+
+    nvf = {
+      url = "github:notashelf/nvf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -82,7 +87,7 @@
     };
 
     nixosConfigurations = {
-      oci-db-server   = mkNixOSConfig ./machines/oci-db-server/configuration.nix;
+      oci-db-server = mkNixOSConfig ./machines/oci-db-server/configuration.nix;
       oci-auth-server = mkNixOSConfig ./machines/oci-auth-server/configuration.nix;
       oci-server3 = mkNixOSConfig ./machines/oci-server3/configuration.nix;
       oci-server4 = mkNixOSConfig ./machines/oci-server4/configuration.nix;

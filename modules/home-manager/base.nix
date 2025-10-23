@@ -6,23 +6,32 @@
   ...
 }: {
   imports = [
+    inputs.catppuccin.homeModules.catppuccin
+    inputs.nvf.homeManagerModules.default
+
     ./_packages.nix
     ./fish.nix
     ./neovim.nix
-
-    inputs.catppuccin.homeModules.catppuccin
   ];
 
   home = {
     username = vars.userName;
+
     homeDirectory = lib.mkMerge [
       (lib.mkIf pkgs.stdenv.isLinux "/home/${vars.userName}")
       (lib.mkIf pkgs.stdenv.isDarwin "/Users/${vars.userName}")
     ];
+
     stateVersion = "25.05";
-    sessionVariables = lib.mkIf pkgs.stdenv.isDarwin {
-      SOPS_AGE_KEY_FILE = "$HOME/.config/sops/age/keys.txt";
-    };
+
+    sessionVariables =
+      {
+        EDITOR = "nvim";
+        VISUAL = "nvim";
+      }
+      // lib.mkIf pkgs.stdenv.isDarwin {
+        SOPS_AGE_KEY_FILE = "$HOME/.config/sops/age/keys.txt";
+      };
   };
 
   programs = {
