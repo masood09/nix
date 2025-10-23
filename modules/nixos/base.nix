@@ -86,7 +86,7 @@
       # inspo: https://github.com/nix-community/impermanence/issues/178
       "/var/lib/nixos"
       (
-        if config.networking.hostName == "oci-server1"
+        if config.networking.hostName == "oci-db-server"
         then "/var/lib/postgresql"
         else null
       )
@@ -102,7 +102,7 @@
   };
 
   # Ensure /var/lib/postgresql exists with proper ownership and permissions
-  systemd.tmpfiles.rules = lib.mkIf (config.networking.hostName == "oci-server1") [
+  systemd.tmpfiles.rules = lib.mkIf (config.networking.hostName == "oci-db-server") [
     "d /var/lib/postgresql 0755 postgres postgres -"
   ];
 

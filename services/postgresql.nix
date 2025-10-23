@@ -97,7 +97,7 @@
   system.activationScripts.postgresqlSetDbUsers = {
     text = ''
       echo "Triggering postgresql-set-db-users after rebuild..."
-      systemctl start postgresql-set-db-users || true
+      ${pkgs.systemd}/bin/systemctl start postgresql-set-db-users || true
     '';
   };
 }

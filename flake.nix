@@ -74,7 +74,7 @@
     };
 
     nixosConfigurations = {
-      oci-server1 = mkNixOSConfig ./machines/oci-server1/configuration.nix;
+      oci-db-server = mkNixOSConfig ./machines/oci-db-server/configuration.nix;
       oci-server2 = mkNixOSConfig ./machines/oci-server2/configuration.nix;
       oci-server3 = mkNixOSConfig ./machines/oci-server3/configuration.nix;
       oci-server4 = mkNixOSConfig ./machines/oci-server4/configuration.nix;

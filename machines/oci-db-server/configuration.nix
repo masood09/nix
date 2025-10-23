@@ -30,5 +30,5 @@
     };
   };
 
-  networking.hostName = "oci-server1";
+  networking.hostName = "oci-db-server";
 }
