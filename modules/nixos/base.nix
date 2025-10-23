@@ -95,12 +95,8 @@
       "/var/log"
       # inspo: https://github.com/nix-community/impermanence/issues/178
       "/var/lib/nixos"
-      (
-        if config.networking.hostName == "oci-db-server"
-        then "/var/lib/postgresql"
-        else null
-      )
-    ];
+    ]
+    ++ lib.optional (config.networking.hostName == "oci-db-server") "/var/lib/postgresql";
 
     files = [
       "/etc/machine-id"
