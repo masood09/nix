@@ -47,6 +47,11 @@
       url = "github:notashelf/nvf";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    fps = {
+      url = "github:wamserma/flake-programs-sqlite";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -65,6 +70,7 @@
       nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs vars;};
         modules = [
+          inputs.fps.nixosModules.programs-sqlite
           inputs.home-manager.nixosModules.home-manager
           path
         ];
