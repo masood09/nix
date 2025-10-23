@@ -40,6 +40,8 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
+
+    catppuccin.url = "github:catppuccin/nix/release-25.05";
   };
 
   outputs = {
@@ -57,13 +59,19 @@
     mkNixOSConfig = path:
       nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs vars;};
-        modules = [path];
+        modules = [
+          inputs.home-manager.nixosModules.home-manager
+          path
+        ];
       };
 
     mkDarwinConfig = path:
       nix-darwin.lib.darwinSystem {
         specialArgs = {inherit inputs outputs vars;};
-        modules = [path];
+        modules = [
+          inputs.home-manager.darwinModules.home-manager
+          path
+        ];
       };
   in {
     # Enables `nix fmt` at root of repo to format all nix files

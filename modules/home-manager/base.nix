@@ -2,12 +2,15 @@
   lib,
   pkgs,
   vars,
+  inputs,
   ...
 }: {
   imports = [
     ./_packages.nix
     ./fish.nix
     ./neovim.nix
+
+    inputs.catppuccin.homeModules.catppuccin
   ];
 
   home = {
@@ -44,6 +47,10 @@
     fastfetch.enable = true;
     htop.enable = true;
     nh.enable = true;
+  };
+
+  catppuccin = {
+    enable = true;
   };
 
   # Nicely reload system units when changing configs
