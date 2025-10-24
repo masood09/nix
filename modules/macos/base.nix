@@ -85,7 +85,7 @@
         NSWindowShouldDragOnGesture = true;
         PMPrintingExpandedStateForPrint = true;
         PMPrintingExpandedStateForPrint2 = true;
-        _HIHideMenuBar = false;
+        _HIHideMenuBar = true;
         "com.apple.mouse.tapBehavior" = 1;
         "com.apple.trackpad.forceClick" = true;
       };
