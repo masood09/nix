@@ -35,25 +35,6 @@
   # inspo: https://github.com/nix-darwin/nix-darwin/issues/1339
   ids.gids.nixbld = 350;
 
-  programs.zsh = {
-    enable = true;
-
-    interactiveShellInit = ''
-      if [[ $(${pkgs.procps}/bin/ps -p $PPID -o comm=) != "fish" ]]; then
-        # Check if this is a login shell
-        if [[ -o login ]]; then
-          LOGIN_OPTION="--login"
-        else
-          LOGIN_OPTION=""
-        fi
-
-        exec ${pkgs.fish}/bin/fish $LOGIN_OPTION
-      fi
-    '';
-  };
-
-  programs.fish.enable = true;
-
   security.pam.services.sudo_local = {
     enable = true;
     touchIdAuth = true;

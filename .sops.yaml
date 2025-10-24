@@ -1,7 +1,7 @@
 keys:
   - &murderbot age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
   - &oci-db-server age1zg6x79xnx82svtjyavd4kcf049lqasa22486v4a7fxka6rz5y4vsj36mcz
-  - &oci-auth-server age19jxcyf4q7udvpz26k6l5rxsd8vznxw2yvwwp87r0jnr9hvsjcygsrxcrhd
+  - &oci-auth-server age1357vpgg20nzv06key6scrw2ykyuw669m578tvzu7h0y8e8e2lsgqavux8g
 creation_rules:
   - path_regex: secrets/[^/]+(\.(yaml|json|env|ini|conf))?$
     key_groups:

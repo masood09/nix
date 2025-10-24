@@ -4,6 +4,33 @@
   ...
 }: {
   programs = {
+    bash = {
+      enable = true;
+      bashrcExtra = ''
+        if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
+        then
+          shopt -q login_shell && LOGIN_OPTION='--login' || LOGIN_OPTION=""
+          exec ${pkgs.fish}/bin/fish $LOGIN_OPTION
+        fi
+      '';
+    };
+
+    zsh = {
+      enable = true;
+      initContent = lib.mkOrder 500 ''
+        if [[ $(${pkgs.procps}/bin/ps -p $PPID -o comm=) != "fish" ]]; then
+          # Check if this is a login shell
+          if [[ -o login ]]; then
+            LOGIN_OPTION="--login"
+          else
+            LOGIN_OPTION=""
+          fi
+
+          exec ${pkgs.fish}/bin/fish $LOGIN_OPTION
+        fi
+      '';
+    };
+
     fish = {
       enable = true;
 

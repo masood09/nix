@@ -56,16 +56,6 @@
     hashedPasswordFile = config.sops.secrets."user-password".path;
   };
 
-  programs.bash = {
-    shellInit = ''
-      if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
-      then
-        shopt -q login_shell && LOGIN_OPTION='--login' || LOGIN_OPTION=""
-        exec ${pkgs.fish}/bin/fish $LOGIN_OPTION
-      fi
-    '';
-  };
-
   services = {
     openssh = {
       enable = true;
@@ -91,12 +81,13 @@
     # Hide these mounts from the sidebar of file managers
     hideMounts = true;
 
-    directories = [
-      "/var/log"
-      # inspo: https://github.com/nix-community/impermanence/issues/178
-      "/var/lib/nixos"
-    ]
-    ++ lib.optional (config.networking.hostName == "oci-db-server") "/var/lib/postgresql";
+    directories =
+      [
+        "/var/log"
+        # inspo: https://github.com/nix-community/impermanence/issues/178
+        "/var/lib/nixos"
+      ]
+      ++ lib.optional (config.networking.hostName == "oci-db-server") "/var/lib/postgresql";
 
     files = [
       "/etc/machine-id"
