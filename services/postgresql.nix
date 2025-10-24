@@ -15,6 +15,11 @@
     enable = true;
     package = pkgs.postgresql_16;
     enableTCPIP = true;
+
+    settings = {
+      ssl = "on";
+    };
+
     authentication = pkgs.lib.mkOverride 10 ''
       # PostgreSQL Client Authentication Configuration File
       # ===================================================
