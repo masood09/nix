@@ -20,7 +20,7 @@
   environment.etc."postgresql/server.crt".source = ./../files/certs/oci-db-server.crt;
 
   services.postgresql = {
-    enable = true;
+    enable = false;
     package = pkgs.postgresql_16;
     enableTCPIP = true;
 
