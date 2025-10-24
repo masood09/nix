@@ -9,7 +9,15 @@
       group = "postgres";
       mode = "0400";
     };
+
+    "postgres-cert-key" = {
+      owner = "postgres";
+      group = "postgres";
+      mode = "0400";
+    };
   };
+
+  environment.etc."postgresql/server.crt".source = ./../files/certs/oci-db-server.crt;
 
   services.postgresql = {
     enable = true;
@@ -18,6 +26,8 @@
 
     settings = {
       ssl = "on";
+      ssl_key_file = "${config.sops.secrets."postgres-cert-key".path}";
+      ssl_cert_file = "/etc/postgresql/server.crt";
     };
 
     authentication = pkgs.lib.mkOverride 10 ''
