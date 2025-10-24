@@ -107,6 +107,10 @@
     ./../../files/certs/root.publicsubnet.ocivcn.oraclevcn.com.crt
   ];
 
+  security.pki.trustedCerts = lib.mkIf (lib.hasPrefix "oci-" config.networking.hostName) [
+    ./../../files/certs/root.publicsubnet.ocivcn.oraclevcn.com.crt
+  ];
+
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "25.05";
 }
