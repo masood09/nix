@@ -17,7 +17,7 @@
     };
   };
 
-  environment.etc."postgresql/server.crt".source = ./../files/certs/oci-db-server.crt;
+  environment.etc."postgresql/server.crt".source = ./../files/certs/oci-db-server.publicsubnet.ocivcn.oraclevcn.com.crt;
 
   services.postgresql = {
     enable = true;
