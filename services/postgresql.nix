@@ -30,6 +30,17 @@
     package = pkgs.postgresql_16;
     enableTCPIP = true;
 
+    ensureDatabases = [
+      "authentik"
+    ];
+
+    ensureUsers = [
+      {
+        name = "authentik";
+        ensureDBOwnership = true;
+      }
+    ];
+
     settings = {
       ssl = "on";
       ssl_key_file = "${config.sops.secrets."postgres-cert-key".path}";
@@ -100,10 +111,6 @@
           sleep 2
         done
 
-
-        echo "Ensuring 'authentik' user exists..."
-        ${pkgs.postgresql_16}/bin/psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c \
-          "DO \$\$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authentik') THEN CREATE ROLE authentik LOGIN PASSWORD '$(cat ${config.sops.secrets."postgres-authentik-password".path} | tr -d '\n')'; END IF; END \$\$;"
 
         echo "Setting password for postgres user..."
         ${pkgs.postgresql_16}/bin/psql -U postgres -d postgres -c "ALTER USER postgres PASSWORD '$(cat ${config.sops.secrets."postgres-password".path} | tr -d '\n')';"
