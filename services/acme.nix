@@ -20,7 +20,7 @@
     };
   };
 
-  users.users.nginx.extraGroups = ["acme"];
+  # users.users.nginx.extraGroups = ["acme"];
 
   environment.persistence."/nix/persist" = {
     directories = [
