@@ -124,12 +124,4 @@
     # Ensure it runs once on boot, and again if PostgreSQL is restarted
     wantedBy = ["postgresql.service" "multi-user.target"];
   };
-
-  # Run the service on every nixos-rebuild
-  system.activationScripts.postgresqlRestart = {
-    text = ''
-      echo "Restarting PostgreSQL service after rebuild..."
-      ${pkgs.systemd}/bin/systemctl restart postgresql || true
-    '';
-  };
 }
