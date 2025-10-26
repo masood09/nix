@@ -58,24 +58,24 @@
       local   all             postgres                                peer
 
       # Allow other local users via password
-      local   all             all                                     md5
+      local   sameuser        all                                     scram-sha-256
 
       # 2. Localhost (IPv4 and IPv6)
       # Allow postgres to connect via localhost (loopback only)
-      host    all             postgres        127.0.0.1/32            md5
-      host    all             postgres        ::1/128                 md5
+      host    all             postgres        127.0.0.1/32            scram-sha-256
+      host    all             postgres        ::1/128                 scram-sha-256
 
       # Allow all other users on localhost
-      host    all             all             127.0.0.1/32            md5
-      host    all             all             ::1/128                 md5
+      host    sameuser        all             127.0.0.1/32            scram-sha-256
+      host    sameuser        all             ::1/128                 scram-sha-256
 
       # 3. Internal LAN
       # Allow *only non-postgres* users from internal network
-      host    all             all             172.16.0.0/24           md5
+      host    sameuser        all             172.16.0.0/24           scram-sha-256
 
       # 4. Remote connections — SSL required (optional)
       # Allow *only non-postgres* users over SSL
-      hostssl all             all             172.16.0.0/24           scram-sha-256
+      hostssl sameuser        all             172.16.0.0/24           scram-sha-256
 
       # ------------------------------------------------------------------------------
 
