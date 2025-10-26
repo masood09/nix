@@ -70,6 +70,10 @@
       host    sameuser        all             ::1/128                 scram-sha-256
 
       # 3. Internal LAN
+      # Explicitly deny postgres from the LAN or remote
+      host    all             postgres        172.16.0.0/24           reject
+      hostssl all             postgres        0.0.0.0/0               reject
+
       # Allow *only non-postgres* users from internal network
       host    sameuser        all             172.16.0.0/24           scram-sha-256
 
@@ -78,11 +82,6 @@
       hostssl sameuser        all             172.16.0.0/24           scram-sha-256
 
       # ------------------------------------------------------------------------------
-
-      # Explicitly deny postgres from the LAN or remote
-      # (Placed at the end; order matters — first match wins)
-      host    all             postgres        172.16.0.0/24           reject
-      hostssl all             postgres        0.0.0.0/0               reject
     '';
   };
 
