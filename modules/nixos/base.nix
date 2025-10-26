@@ -101,6 +101,17 @@
     "d /var/lib/postgresql 0755 postgres postgres -"
   ];
 
+  # Increase system-wide file descriptor limit
+  security.pam.loginLimits = [
+    { domain = "*"; type = "soft"; item = "nofile"; value = "65536"; }
+    { domain = "*"; type = "hard"; item = "nofile"; value = "65536"; }
+  ];
+
+  # For systemd services (like nix-daemon)
+  systemd.extraConfig = ''
+    DefaultLimitNOFILE=65536
+  '';
+
   security.pki.certificateFiles = lib.mkIf (lib.hasPrefix "oci-" config.networking.hostName) [
     ./../../files/certs/root.publicsubnet.ocivcn.oraclevcn.com.crt
   ];
