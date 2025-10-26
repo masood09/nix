@@ -127,10 +127,10 @@
   };
 
   # Run the service on every nixos-rebuild
-  system.activationScripts.postgresqlSetDbUsers = {
+  system.activationScripts.postgresqlRestart = {
     text = ''
-      echo "Triggering postgresql-set-db-users after rebuild..."
-      ${pkgs.systemd}/bin/systemctl start postgresql-set-db-users || true
+      echo "Restarting PostgreSQL service after rebuild..."
+      ${pkgs.systemd}/bin/systemctl restart postgresql || true
     '';
   };
 }
