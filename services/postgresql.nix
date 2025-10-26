@@ -116,7 +116,7 @@
         ${pkgs.postgresql_16}/bin/psql -U postgres -d postgres -c "ALTER USER postgres PASSWORD '$(cat ${config.sops.secrets."postgres-password".path} | tr -d '\n')';"
 
         echo "Setting password for authentik user..."
-        ${pkgs.postgresql_16}/bin/psql -U postgres -d postgres -c "ALTER USER authetik PASSWORD '$(cat ${config.sops.secrets."postgres-authentik-password".path} | tr -d '\n')';"
+        ${pkgs.postgresql_16}/bin/psql -U postgres -d postgres -c "ALTER USER authentik PASSWORD '$(cat ${config.sops.secrets."postgres-authentik-password".path} | tr -d '\n')';"
 
         echo "User setup complete."
       ''}";
