@@ -9,3 +9,8 @@ creation_rules:
           - *murderbot
           - *oci-db-server
           - *oci-auth-server
+stores:
+  yaml:
+    indent: 2
+  json:
+    indent: 2

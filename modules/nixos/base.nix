@@ -81,13 +81,11 @@
     # Hide these mounts from the sidebar of file managers
     hideMounts = true;
 
-    directories =
-      [
-        "/var/log"
-        # inspo: https://github.com/nix-community/impermanence/issues/178
-        "/var/lib/nixos"
-      ]
-      ++ lib.optional (config.networking.hostName == "oci-db-server") "/var/lib/postgresql";
+    directories = [
+      "/var/log"
+      # inspo: https://github.com/nix-community/impermanence/issues/178
+      "/var/lib/nixos"
+    ];
 
     files = [
       "/etc/machine-id"

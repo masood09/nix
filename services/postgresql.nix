@@ -124,4 +124,10 @@
     # Ensure it runs once on boot, and again if PostgreSQL is restarted
     wantedBy = ["postgresql.service" "multi-user.target"];
   };
+
+  environment.persistence."/nix/persist" = {
+    directories = [
+      "/var/lib/postgresql"
+    ];
+  };
 }
