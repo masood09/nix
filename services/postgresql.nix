@@ -130,4 +130,8 @@
       "/var/lib/postgresql"
     ];
   };
+
+  networking.firewall.allowedTCPPorts = [
+    5432
+  ];
 }

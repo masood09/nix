@@ -69,7 +69,7 @@
   };
 
   networking = {
-    firewall.enable = false;
+    firewall.enable = true;
     networkmanager.enable = false;
   };
 
