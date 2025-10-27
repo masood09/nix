@@ -16,6 +16,12 @@
       mode = "0400";
     };
 
+    "postgres-netbird-password" = {
+      owner = "postgres";
+      group = "postgres";
+      mode = "0400";
+    };
+
     "postgres-cert-key" = {
       owner = "postgres";
       group = "postgres";
@@ -32,11 +38,16 @@
 
     ensureDatabases = [
       "authentik"
+      "netbird"
     ];
 
     ensureUsers = [
       {
         name = "authentik";
+        ensureDBOwnership = true;
+      }
+      {
+        name = "netbird";
         ensureDBOwnership = true;
       }
     ];
@@ -114,8 +125,11 @@
         echo "Setting password for postgres user..."
         ${pkgs.postgresql_16}/bin/psql -U postgres -d postgres -c "ALTER USER postgres PASSWORD '$(cat ${config.sops.secrets."postgres-password".path} | tr -d '\n')';"
 
-        echo "Setting password for authentik user..."
-        ${pkgs.postgresql_16}/bin/psql -U postgres -d postgres -c "ALTER USER authentik PASSWORD '$(cat ${config.sops.secrets."postgres-authentik-password".path} | tr -d '\n')';"
+        echo "setting password for authentik user..."
+        ${pkgs.postgresql_16}/bin/psql -u postgres -d postgres -c "alter user authentik password '$(cat ${config.sops.secrets."postgres-authentik-password".path} | tr -d '\n')';"
+
+        echo "setting password for authentik user..."
+        ${pkgs.postgresql_16}/bin/psql -u postgres -d postgres -c "alter user netbird password '$(cat ${config.sops.secrets."postgres-netbird-password".path} | tr -d '\n')';"
 
         echo "User setup complete."
       ''}";
