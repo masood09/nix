@@ -96,11 +96,6 @@
     ];
   };
 
-  # Ensure /var/lib/postgresql exists with proper ownership and permissions
-  systemd.tmpfiles.rules = lib.mkIf (config.networking.hostName == "oci-db-server") [
-    "d /var/lib/postgresql 0755 postgres postgres -"
-  ];
-
   # Increase system-wide file descriptor limit
   security.pam.loginLimits = [
     { domain = "*"; type = "soft"; item = "nofile"; value = "65536"; }
