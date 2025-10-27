@@ -73,7 +73,6 @@
     networkmanager.enable = false;
   };
 
-  security.sudo.wheelNeedsPassword = false;
   time.timeZone = "America/Toronto";
   zramSwap.enable = true;
 
@@ -96,20 +95,34 @@
     ];
   };
 
-  # Increase system-wide file descriptor limit
-  security.pam.loginLimits = [
-    { domain = "*"; type = "soft"; item = "nofile"; value = "65536"; }
-    { domain = "*"; type = "hard"; item = "nofile"; value = "65536"; }
-  ];
+  security = {
+    sudo.wheelNeedsPassword = false;
+
+    # Increase system-wide file descriptor limit
+    pam.loginLimits = [
+      {
+        domain = "*";
+        type = "soft";
+        item = "nofile";
+        value = "65536";
+      }
+      {
+        domain = "*";
+        type = "hard";
+        item = "nofile";
+        value = "65536";
+      }
+    ];
+
+    pki.certificateFiles = lib.mkIf (lib.hasPrefix "oci-" config.networking.hostName) [
+      ./../../files/certs/root.publicsubnet.ocivcn.oraclevcn.com.crt
+    ];
+  };
 
   # For systemd services (like nix-daemon)
   systemd.extraConfig = ''
     DefaultLimitNOFILE=65536
   '';
-
-  security.pki.certificateFiles = lib.mkIf (lib.hasPrefix "oci-" config.networking.hostName) [
-    ./../../files/certs/root.publicsubnet.ocivcn.oraclevcn.com.crt
-  ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "25.05";
