@@ -320,6 +320,22 @@
         "type": "github"
       }
     },
+    "netbirdio-taps": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1761068988,
+        "narHash": "sha256-fBjb0Q/iLrdb4PQYw+zd+CiWI/Q00MvGKFT0qU/zm4E=",
+        "owner": "netbirdio",
+        "repo": "homebrew-tap",
+        "rev": "436038f17210dd4dca4accaf92707fa258f4b1f3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "netbirdio",
+        "repo": "homebrew-tap",
+        "type": "github"
+      }
+    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -506,6 +522,7 @@
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
         "impermanence": "impermanence",
+        "netbirdio-taps": "netbirdio-taps",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs_2",
