@@ -36,7 +36,7 @@ in {
       turnDomain = netbirdDomain;
       dnsDomain = "dns.${netbirdDomain}";
       singleAccountModeDomain = netbirdDomain;
-      disableSingleAccountMode = true;
+      disableSingleAccountMode = false;
       oidcConfigEndpoint = "https://${oidcDomain}/application/o/netbird/.well-known/openid-configuration";
 
       settings = {
