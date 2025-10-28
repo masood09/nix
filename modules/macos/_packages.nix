@@ -44,6 +44,7 @@
       "lm-studio"
       "netbirdio/tap/netbird-ui"
       "opencloud"
+      "pgadmin4"
       "raycast"
       "zoom"
       "zen"
