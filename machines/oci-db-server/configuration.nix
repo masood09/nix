@@ -15,6 +15,7 @@
     ./../../modules/nixos/remote-unlock.nix
 
     ./../../services/postgresql.nix
+    ./../../services/netbird-client.nix
   ];
 
   home-manager = {

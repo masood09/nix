@@ -16,6 +16,7 @@
 
     ./../../services/acme.nix
     ./../../services/authentik.nix
+    ./../../services/netbird-client.nix
   ];
 
   home-manager = {
