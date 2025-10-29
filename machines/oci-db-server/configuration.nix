@@ -16,7 +16,7 @@
 
     ./../../services/postgresql.nix
     ./../../services/netbird-client.nix
-    ./../../services/systemd-resolved.nix
+    # ./../../services/systemd-resolved.nix
   ];
 
   home-manager = {
