@@ -9,7 +9,7 @@
     inherit (pkgs) system;
     config.allowUnfree = true;
   };
-  
+
   domain = "mantannest.com";
   netbirdDomain = "netbird.${domain}";
   oidcDomain = "auth.${domain}";
@@ -83,7 +83,7 @@ in {
         PKCEAuthorizationFlow.ProviderConfig = {
           Audience = clientId;
           ClientID = clientId;
-          ClientSecret = ""; 
+          ClientSecret = "";
           Scope = "openid profile email offline_access api";
           AuthorizationEndpoint = "https://${oidcDomain}/application/o/authorize/";
           TokenEndpoint = "https://${oidcDomain}/application/o/token/";
@@ -127,7 +127,6 @@ in {
   systemd.services.netbird-management.serviceConfig = {
     EnvironmentFile = "${config.sops.secrets."netbird-envirnoment-file".path}";
   };
-
 
   # Override ACME settings to get a cert
   services.nginx.virtualHosts = lib.mkMerge [

@@ -59,9 +59,9 @@
     };
 
     netbirdio-taps = {
-	  url = "github:netbirdio/homebrew-tap";
-	  flake = false;
-	};
+      url = "github:netbirdio/homebrew-tap";
+      flake = false;
+    };
   };
 
   outputs = {
@@ -91,7 +91,7 @@
       nix-darwin.lib.darwinSystem {
         specialArgs = {inherit inputs outputs vars;};
         modules = [
-          ({ config, ...}: {
+          ({config, ...}: {
             homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
           })
           inputs.home-manager.darwinModules.home-manager
