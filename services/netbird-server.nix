@@ -7,7 +7,6 @@
 }: let
   pkgs-unstable = import inputs.nixpkgs-unstable {
     inherit (pkgs) system;
-    config.allowUnfree = true;
   };
 
   domain = "mantannest.com";
@@ -30,6 +29,7 @@ in {
     domain = netbirdDomain;
 
     management = {
+      package = pkgs-unstable.netbird-management;
       enable = true;
       enableNginx = true;
       domain = netbirdDomain;
@@ -95,6 +95,7 @@ in {
     };
 
     signal = {
+      package = pkgs-unstable.netbird-signal;
       enable = true;
       port = 10000;
       domain = netbirdDomain;
@@ -102,8 +103,8 @@ in {
     };
 
     dashboard = {
-      enable = true;
       package = pkgs-unstable.netbird-dashboard;
+      enable = true;
       enableNginx = true;
       domain = netbirdDomain;
       managementServer = "https://${netbirdDomain}";
