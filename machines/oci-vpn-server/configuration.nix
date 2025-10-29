@@ -17,6 +17,7 @@
     ./../../services/acme.nix
     ./../../services/netbird-server.nix
     ./../../services/netbird-client.nix
+    ./../../services/systemd-resolved.nix
   ];
 
   home-manager = {
