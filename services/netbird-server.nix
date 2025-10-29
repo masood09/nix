@@ -20,6 +20,7 @@ in {
       mode = "0400";
     };
     "netbird-authentik-password" = {};
+    "netbird-authentik-client-secret" = {};
     "netbird-envirnoment-file" = {};
   };
 
@@ -72,7 +73,7 @@ in {
             Issuer = "https://${oidcDomain}/application/o/netbird/";
             ClientID = clientId;
             TokenEndpoint = "https://${oidcDomain}/application/o/token/";
-            ClientSecret = "";
+            ClientSecret._secret = "${config.sops.secrets."netbird-authentik-client-secret".path}";
           };
           ExtraConfig = {
             Password._secret = "${config.sops.secrets."netbird-authentik-password".path}";
@@ -83,7 +84,7 @@ in {
         PKCEAuthorizationFlow.ProviderConfig = {
           Audience = clientId;
           ClientID = clientId;
-          ClientSecret = "";
+          ClientSecret._secret = "${config.sops.secrets."netbird-authentik-client-secret".path}";
           Scope = "openid profile email offline_access api";
           AuthorizationEndpoint = "https://${oidcDomain}/application/o/authorize/";
           TokenEndpoint = "https://${oidcDomain}/application/o/token/";
