@@ -22,6 +22,12 @@
       mode = "0400";
     };
 
+    "postgres-zitadel-password" = {
+      owner = "postgres";
+      group = "postgres";
+      mode = "0400";
+    };
+
     "postgres-cert-key" = {
       owner = "postgres";
       group = "postgres";
@@ -39,6 +45,7 @@
     ensureDatabases = [
       "authentik"
       "netbird"
+      "zitadel"
     ];
 
     ensureUsers = [
@@ -48,6 +55,10 @@
       }
       {
         name = "netbird";
+        ensureDBOwnership = true;
+      }
+      {
+        name = "zitadel";
         ensureDBOwnership = true;
       }
     ];
@@ -82,15 +93,15 @@
 
       # 3. Internal LAN
       # Explicitly deny postgres from the LAN or remote
-      host    all             postgres        172.16.0.0/24           reject
-      hostssl all             postgres        0.0.0.0/0               reject
+      # host    all             postgres        172.16.0.0/24           reject
+      # hostssl all             postgres        0.0.0.0/0               reject
 
       # Allow *only non-postgres* users from internal network
       host    sameuser        all             172.16.0.0/24           scram-sha-256
 
       # 4. Remote connections — SSL required (optional)
       # Allow *only non-postgres* users over SSL
-      hostssl sameuser        all             172.16.0.0/24           scram-sha-256
+      hostssl sameuser        all             0.0.0.0/0               scram-sha-256
 
       # ------------------------------------------------------------------------------
     '';
@@ -130,6 +141,9 @@
 
         echo "Setting password for netbird user..."
         ${pkgs.postgresql_16}/bin/psql -U postgres -d postgres -c "ALTER USER netbird PASSWORD '$(cat ${config.sops.secrets."postgres-netbird-password".path} | tr -d '\n')';"
+
+        echo "Setting password for zitadel user..."
+        ${pkgs.postgresql_16}/bin/psql -U postgres -d postgres -c "ALTER USER zitadel PASSWORD '$(cat ${config.sops.secrets."postgres-zitadel-password".path} | tr -d '\n')';"
 
         echo "User setup complete."
       ''}";

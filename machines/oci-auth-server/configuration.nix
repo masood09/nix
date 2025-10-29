@@ -15,8 +15,9 @@
     ./../../modules/nixos/remote-unlock.nix
 
     ./../../services/acme.nix
-    ./../../services/authentik.nix
-    ./../../services/netbird-client.nix
+    ./../../services/zitadel.nix
+    # ./../../services/authentik.nix
+    # ./../../services/netbird-client.nix
     # ./../../services/systemd-resolved.nix
   ];
 
