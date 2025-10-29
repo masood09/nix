@@ -29,7 +29,7 @@ in {
     domain = netbirdDomain;
 
     management = {
-      package = pkgs-unstable.netbird-management;
+      # package = pkgs-unstable.netbird-management;
       enable = true;
       enableNginx = true;
       domain = netbirdDomain;
@@ -95,7 +95,7 @@ in {
     };
 
     signal = {
-      package = pkgs-unstable.netbird-signal;
+      # package = pkgs-unstable.netbird-signal;
       enable = true;
       port = 10000;
       domain = netbirdDomain;
