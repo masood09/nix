@@ -12,11 +12,12 @@
   domain = "mantannest.com";
   netbirdDomain = "netbird.${domain}";
   oidcDomain = "auth.${domain}";
-  oidcIssuer = "https://${oidcDomain}";
-  oidcEndpoint = "https://${oidcDomain}/.well-known/openid-configuration";
-  oidcManagementEndpoint = "${oidcIssuer}/management/v1";
-  oidcTokenEndpoint = "https://${oidcDomain}/oauth/v2/token";
-  clientId = "344377599402770511";
+  oidcIssuer = "https://${oidcDomain}/application/o/netbird/";
+  oidcEndpoint = "https://${oidcDomain}/application/o/netbird/.well-known/openid-configuration";
+  oidcKeysLocation = "https://${oidcDomain}/application/o/netbird/jwks/";
+  oidcTokenEndpoint = "https://${oidcDomain}/application/o/token/";
+  oidcAuthorizationEndpoint = "https://${oidcDomain}/application/o/authorize/";
+  clientId = "cTWcU0CyVpSKtu6IbzLqxRuoC0Ykjtum5jICbaRR";
 in {
   sops.secrets = {
     "netbird-turn-password" = {
@@ -27,7 +28,7 @@ in {
     "netbird-data-store-encryption-key" = {};
     "netbird-relay-secret" = {};
     "netbird-relay-secret-container-file" = {};
-    "netbird-zitadel-client-secret" = {};
+    "netbird-authentik-sa-password" = {};
   };
 
   services.netbird.server = {
@@ -70,42 +71,43 @@ in {
         DataStoreEncryptionKey._secret = config.sops.secrets."netbird-data-store-encryption-key".path;
 
         DeviceAuthorizationFlow = {
-          Provider = "hosted";
-
           ProviderConfig = {
             Audience = clientId;
             ClientID = clientId;
-            Scope = "openid";
           };
         };
 
         HttpConfig = {
           AuthAudience = clientId;
           AuthIssuer = oidcIssuer;
-          IdpSignKeyRefreshEnabled = true;
+          AuthKeysLocation = oidcKeysLocation;
+          AuthUserIDClaim = "sub";
           OIDCConfigEndpoint = oidcEndpoint;
         };
 
         IdpManagerConfig = {
-          ManagerType = "zitadel";
+          ManagerType = "authentik";
 
           ClientConfig = {
-            ClientID = "netbird";
-            ClientSecret._secret = config.sops.secrets."netbird-zitadel-client-secret".path;
-            GrantType = "client_credentials";
+            ClientID = clientId;
+            ClientSecret = "";
             Issuer = oidcIssuer;
             TokenEndpoint = oidcTokenEndpoint;
           };
 
           ExtraConfig = {
-            ManagementEndpoint = oidcManagementEndpoint;
+            Password._secret = config.sops.secrets."netbird-authentik-sa-password".path;
+            Username = "Netbird";
           };
         };
 
         PKCEAuthorizationFlow.ProviderConfig = {
           Audience = clientId;
           ClientID = clientId;
+          ClientSecret = "";
           Scope = "openid profile email offline_access api";
+          AuthorizationEndpoint = oidcAuthorizationEndpoint;
+          TokenEndpoint = oidcTokenEndpoint;
           RedirectURLs = ["http://localhost:53000"];
         };
 
