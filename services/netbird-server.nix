@@ -68,7 +68,7 @@ in {
 
       settings = {
         DataStoreEncryptionKey._secret = config.sops.secrets."netbird-data-store-encryption-key".path;
-        
+
         DeviceAuthorizationFlow = {
           Provider = "hosted";
 
@@ -110,7 +110,7 @@ in {
         };
 
         Relay = {
-          Addresses = [ "rels://${netbirdDomain}:33080" ];
+          Addresses = ["rels://${netbirdDomain}:33080"];
           CredentialsTTL = "24h";
           Secret._secret = config.sops.secrets."netbird-relay-secret".path;
         };
