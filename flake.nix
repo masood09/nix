@@ -53,11 +53,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    authentik-nix = {
-      url = "github:nix-community/authentik-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     netbirdio-taps = {
       url = "github:netbirdio/homebrew-tap";
       flake = false;
@@ -82,7 +77,6 @@
         modules = [
           inputs.fps.nixosModules.programs-sqlite
           inputs.home-manager.nixosModules.home-manager
-          inputs.authentik-nix.nixosModules.default
           path
         ];
       };
