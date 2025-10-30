@@ -31,69 +31,83 @@
 
   environment.etc."postgresql/server.crt".source = ./../files/certs/oci-db-server.publicsubnet.ocivcn.oraclevcn.com.crt;
 
-  services.postgresql = {
-    enable = true;
-    package = pkgs.postgresql_16;
-    enableTCPIP = true;
+  services = {
+    postgresql = {
+      enable = true;
+      package = pkgs.postgresql_16;
+      enableTCPIP = true;
 
-    ensureDatabases = [
-      "authentik"
-      "netbird"
-    ];
+      ensureDatabases = [
+        "authentik"
+        "netbird"
+      ];
 
-    ensureUsers = [
-      {
-        name = "authentik";
-        ensureDBOwnership = true;
-      }
-      {
-        name = "netbird";
-        ensureDBOwnership = true;
-      }
-    ];
+      ensureUsers = [
+        {
+          name = "authentik";
+          ensureDBOwnership = true;
+        }
+        {
+          name = "netbird";
+          ensureDBOwnership = true;
+        }
+      ];
 
-    settings = {
-      ssl = "on";
-      ssl_key_file = "${config.sops.secrets."postgres-cert-key".path}";
-      ssl_cert_file = "/etc/postgresql/server.crt";
+      settings = {
+        ssl = "on";
+        ssl_key_file = "${config.sops.secrets."postgres-cert-key".path}";
+        ssl_cert_file = "/etc/postgresql/server.crt";
+      };
+
+      authentication = pkgs.lib.mkOverride 10 ''
+        # PostgreSQL Client Authentication Configuration File
+        # ===================================================
+        # TYPE  DATABASE        USER            ADDRESS                 METHOD            OPTIONS
+        # ------------------------------------------------------------------------------
+
+        # 1. Local connections (Unix domain sockets)
+        # Allow postgres only on Unix socket
+        local   all             postgres                                peer
+
+        # Allow other local users via password
+        local   sameuser        all                                     scram-sha-256
+
+        # 2. Localhost (IPv4 and IPv6)
+        # Allow postgres to connect via localhost (loopback only)
+        host    all             postgres        127.0.0.1/32            scram-sha-256
+        host    all             postgres        ::1/128                 scram-sha-256
+
+        # Allow all other users on localhost
+        host    sameuser        all             127.0.0.1/32            scram-sha-256
+        host    sameuser        all             ::1/128                 scram-sha-256
+
+        # 3. Internal LAN
+        # Explicitly deny postgres from the LAN or remote
+        host    all             postgres        172.16.0.0/24           reject
+        hostssl all             postgres        0.0.0.0/0               reject
+
+        # Allow *only non-postgres* users from internal network
+        host    sameuser        all             172.16.0.0/24           scram-sha-256
+
+        # 4. Remote connections — SSL required (optional)
+        # Allow *only non-postgres* users over SSL
+        hostssl sameuser        all             0.0.0.0/0               scram-sha-256
+
+        # ------------------------------------------------------------------------------
+      '';
     };
 
-    authentication = pkgs.lib.mkOverride 10 ''
-      # PostgreSQL Client Authentication Configuration File
-      # ===================================================
-      # TYPE  DATABASE        USER            ADDRESS                 METHOD            OPTIONS
-      # ------------------------------------------------------------------------------
+    postgresqlBackup = {
+      enable = true;
 
-      # 1. Local connections (Unix domain sockets)
-      # Allow postgres only on Unix socket
-      local   all             postgres                                peer
+      databases = [
+        "authentik"
+        "netbird"
+      ];
 
-      # Allow other local users via password
-      local   sameuser        all                                     scram-sha-256
-
-      # 2. Localhost (IPv4 and IPv6)
-      # Allow postgres to connect via localhost (loopback only)
-      host    all             postgres        127.0.0.1/32            scram-sha-256
-      host    all             postgres        ::1/128                 scram-sha-256
-
-      # Allow all other users on localhost
-      host    sameuser        all             127.0.0.1/32            scram-sha-256
-      host    sameuser        all             ::1/128                 scram-sha-256
-
-      # 3. Internal LAN
-      # Explicitly deny postgres from the LAN or remote
-      host    all             postgres        172.16.0.0/24           reject
-      hostssl all             postgres        0.0.0.0/0               reject
-
-      # Allow *only non-postgres* users from internal network
-      host    sameuser        all             172.16.0.0/24           scram-sha-256
-
-      # 4. Remote connections — SSL required (optional)
-      # Allow *only non-postgres* users over SSL
-      hostssl sameuser        all             0.0.0.0/0               scram-sha-256
-
-      # ------------------------------------------------------------------------------
-    '';
+      pgdumpOptions = "--no-owner";
+      startAt = "*-*-* *:15:00";
+    };
   };
 
   systemd.services."postgresql-set-db-users" = {
