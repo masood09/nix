@@ -27,6 +27,10 @@
       group = "postgres";
       mode = "0400";
     };
+
+    "restic-env-file" = {};
+    "restic-oci-repo" = {};
+    "restic-encrypt-password" = {};
   };
 
   environment.etc."postgresql/server.crt".source = ./../files/certs/oci-db-server.publicsubnet.ocivcn.oraclevcn.com.crt;
@@ -107,6 +111,29 @@
 
       pgdumpOptions = "--no-owner";
       startAt = "*-*-* *:15:00";
+    };
+
+    restic.backups.postgresql = {
+      initialize = true;
+      environmentFile = config.sops.secrets."restic-env-file".path;
+      repositoryFile = config.sops.secrets."restic-oci-repo".path;
+      passwordFile = config.sops.secrets."restic-encrypt-password".path;
+
+      paths = [
+        "/var/backup/postgresql/"
+      ];
+
+      pruneOpts = [
+        "--keep-daily 24"
+        "--keep-weekly 7"
+        "--keep-monthly 30"
+        "--keep-yearly 12"
+      ];
+
+      timerConfig = {
+        OnCalendar = "*-*-* *:30:00";
+        Persistent = true;
+      };
     };
   };
 
