@@ -8,11 +8,18 @@
       owner = "root";
       group = "root";
       mode = "0400";
+      sopsFile = ./../secrets/oci-authentik.yaml;
     };
 
-    "restic-env-file" = {};
-    "restic-oci-repo" = {};
-    "restic-encrypt-password" = {};
+    "restic-env-file" = {
+      sopsFile = ./../secrets/oci-restic.yaml;
+    };
+    "restic-oci-repo" = {
+      sopsFile = ./../secrets/oci-restic.yaml;
+    };
+    "restic-encrypt-password" = {
+      sopsFile = ./../secrets/oci-restic.yaml;
+    };
   };
 
   services = {

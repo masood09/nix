@@ -1,18 +1,36 @@
 keys:
   - &murderbot age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
-  - &oci-db-server age1zg6x79xnx82svtjyavd4kcf049lqasa22486v4a7fxka6rz5y4vsj36mcz
   - &oci-auth-server age1357vpgg20nzv06key6scrw2ykyuw669m578tvzu7h0y8e8e2lsgqavux8g
   - &oci-vpn-server age13tez0lp6f7235nxlw9ddszfqsl0v748l5pu9nvt7yz3a9ewxky8qnntpjd
   - &pve-server-1 age1yt77nvav359rslqx62ppfp4rdzyde5ampkzjqml97cr5chzxlvxqtnenqp
 creation_rules:
-  - path_regex: secrets/[^/]+(\.(yaml|json|env|ini|conf))?$
+  - path_regex: secrets/secrets\.yaml$
     key_groups:
       - age:
           - *murderbot
-          - *oci-db-server
           - *oci-auth-server
           - *oci-vpn-server
           - *pve-server-1
+
+  - path_regex: secrets/oci-restic\.yaml$
+    key_groups:
+      - age:
+        - *murderbot
+        - *oci-auth-server
+        - *oci-vpn-server
+
+  - path_regex: secrets/oci-headscale\.yaml$
+    key_groups:
+      - age:
+        - *murderbot
+        - *oci-vpn-server
+
+  - path_regex: ^secrets/oci-authentik\.yaml$
+    key_groups:
+      - age:
+        - *murderbot
+        - *oci-auth-server
+
 stores:
   yaml:
     indent: 2
