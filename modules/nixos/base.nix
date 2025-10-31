@@ -113,10 +113,6 @@
         value = "65536";
       }
     ];
-
-    pki.certificateFiles = lib.mkIf (lib.hasPrefix "oci-" config.networking.hostName) [
-      ./../../files/certs/root.publicsubnet.ocivcn.oraclevcn.com.crt
-    ];
   };
 
   # For systemd services (like nix-daemon)
