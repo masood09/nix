@@ -105,6 +105,7 @@
       oci-db-server = mkNixOSConfig ./machines/oci-db-server/configuration.nix;
       oci-auth-server = mkNixOSConfig ./machines/oci-auth-server/configuration.nix;
       oci-vpn-server = mkNixOSConfig ./machines/oci-vpn-server/configuration.nix;
+      pve-server-1 = mkNixOSConfig ./machines/pve-server-1/configuration.nix;
       nixiso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {inherit inputs outputs vars;};
