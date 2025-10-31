@@ -10,7 +10,7 @@
   services.authentik = {
     enable = true;
     environmentFile = "${config.sops.secrets."authentik-envirnoment-file".path}";
-    createDatabase = false;
+    # createDatabase = false;
     settings = {
       disable_startup_analytics = true;
       avatars = "initials";
