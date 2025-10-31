@@ -1,4 +1,8 @@
-{config, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   sops.secrets = {
     "authentik-envirnoment-file" = {
       owner = "root";
@@ -7,18 +11,29 @@
     };
   };
 
-  services.authentik = {
-    enable = true;
-    environmentFile = "${config.sops.secrets."authentik-envirnoment-file".path}";
-    # createDatabase = false;
-    settings = {
-      disable_startup_analytics = true;
-      avatars = "initials";
-    };
-    nginx = {
+  services= {
+    authentik = {
       enable = true;
-      enableACME = true;
-      host = "auth.mantannest.com";
+      environmentFile = "${config.sops.secrets."authentik-envirnoment-file".path}";
+      settings = {
+        disable_startup_analytics = true;
+        avatars = "initials";
+      };
+      nginx = {
+        enable = true;
+        enableACME = true;
+        host = "auth.mantannest.com";
+      };
     };
+
+    postgresql = {
+      package = pkgs.postgresql_16;
+    };
+  };
+
+  environment.persistence."/nix/persist" = {
+    directories = [
+      "/var/lib/postgresql"
+    ];
   };
 }
