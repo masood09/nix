@@ -108,6 +108,8 @@ in {
               enabled = true;
               method = "S256";
             };
+
+            strip_email_domain = true;
           };
 
           policy.path = aclFile;
