@@ -16,7 +16,6 @@
       "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
       "homebrew/homebrew-core" = inputs.homebrew-core;
-      "netbirdio/homebrew-tap" = inputs.netbirdio-taps;
     };
   };
 
@@ -42,10 +41,10 @@
       "ghostty"
       "hyperkey"
       "lm-studio"
-      "netbirdio/tap/netbird-ui"
       "opencloud"
       "pgadmin4"
       "raycast"
+      "tailscale-app"
       "zoom"
       "zen"
     ];

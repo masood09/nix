@@ -182,11 +182,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1761819403,
-        "narHash": "sha256-1qYKtJdLqfw19MZHyK9n4AXiHsRUEZux4dQinxzCOPU=",
+        "lastModified": 1761867757,
+        "narHash": "sha256-pvmCYWRM3CCVWj0Dri4N2iJweKF3++q4DwklnWJ2doA=",
         "owner": "wamserma",
         "repo": "flake-programs-sqlite",
-        "rev": "433331d0d2ad756fb9d5eb7c04ab714a8e007198",
+        "rev": "671655f1a74ad32b830e429c68736eaf9969d342",
         "type": "github"
       },
       "original": {
@@ -235,11 +235,11 @@
     "homebrew-cask": {
       "flake": false,
       "locked": {
-        "lastModified": 1761823850,
-        "narHash": "sha256-o1L2nOKDGqe5CSnyt9uZMjHeUDQobXy60vUPBZgH/DQ=",
+        "lastModified": 1761884837,
+        "narHash": "sha256-XbloUv1wgFAx3VGd7wseNMf8FqeIKg8jf7MIFyhOeFk=",
         "owner": "homebrew",
         "repo": "homebrew-cask",
-        "rev": "d14ced2a0676e02f9f529909be7acd78d6533f32",
+        "rev": "7b318ac355f5bba2c5167d778a3d29795af10de8",
         "type": "github"
       },
       "original": {
@@ -251,11 +251,11 @@
     "homebrew-core": {
       "flake": false,
       "locked": {
-        "lastModified": 1761826126,
-        "narHash": "sha256-py9+8NoknCW828KzcI6XuUvR1hn4dqcnkTqf6XMTpOE=",
+        "lastModified": 1761883685,
+        "narHash": "sha256-a6X07uHmbFSJf8CoZz8ZiBTBc9PX+RRiv4YfXsXpiD0=",
         "owner": "homebrew",
         "repo": "homebrew-core",
-        "rev": "a320d06f2eeffdd443d6cc5cd563d2aa9f01652d",
+        "rev": "03d1a3b0337926f7cef9023dbe4358bd3f1ac731",
         "type": "github"
       },
       "original": {
@@ -317,22 +317,6 @@
         "owner": "willibutz",
         "ref": "avoid-foldl-stack-overflow",
         "repo": "napalm",
-        "type": "github"
-      }
-    },
-    "netbirdio-taps": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1761757057,
-        "narHash": "sha256-jpM+yopvQT0q7vgCP8sdsDe5o0u4hyhuIEizuAVqgz0=",
-        "owner": "netbirdio",
-        "repo": "homebrew-tap",
-        "rev": "169c943df5e4e631511006dadfcf3afc4424e668",
-        "type": "github"
-      },
-      "original": {
-        "owner": "netbirdio",
-        "repo": "homebrew-tap",
         "type": "github"
       }
     },
@@ -522,7 +506,6 @@
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
         "impermanence": "impermanence",
-        "netbirdio-taps": "netbirdio-taps",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs_2",

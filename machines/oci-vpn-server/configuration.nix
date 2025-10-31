@@ -15,7 +15,6 @@
     ./../../modules/nixos/remote-unlock.nix
 
     ./../../services/acme.nix
-    ./../../services/netbird-server.nix
     ./../../services/headscale.nix
   ];
 

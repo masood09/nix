@@ -14,7 +14,6 @@
     ./../../modules/nixos/base.nix
     ./../../modules/nixos/remote-unlock.nix
 
-    ./../../services/netbird-client.nix
     ./../../services/systemd-resolved.nix
   ];
 

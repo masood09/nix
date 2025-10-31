@@ -57,11 +57,6 @@
       url = "github:nix-community/authentik-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    netbirdio-taps = {
-      url = "github:netbirdio/homebrew-tap";
-      flake = false;
-    };
   };
 
   outputs = {

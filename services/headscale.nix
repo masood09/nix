@@ -1,12 +1,17 @@
 {
   config,
   lib,
+  inputs,
   pkgs,
   ...
 }: let
   domain = "mantannest.com";
   headscaleDomain = "headscale.${domain}";
   authDomain = "auth.${domain}";
+
+  pkgs-unstable = import inputs.nixpkgs-unstable {
+    inherit (pkgs) system;
+  };
 in {
   options.services.headscale = {
     adminUser = lib.mkOption {
@@ -75,6 +80,7 @@ in {
 
     services = {
       headscale = {
+        package = pkgs-unstable.headscale;
         enable = true;
         adminUser = "admin";
         port = 3009;
@@ -102,8 +108,6 @@ in {
               enabled = true;
               method = "S256";
             };
-
-            strip_email_domain = true;
           };
 
           policy.path = aclFile;
@@ -111,30 +115,6 @@ in {
         };
       };
     };
-
-    # Create a systemd service to ensure the admin user exists
-    # systemd.services.headscale-ensure-admin = lib.mkIf config.services.headscale.enable {
-    #   description = "Ensure Headscale admin user exists";
-    #   after = ["headscale.service"];
-    #   requires = ["headscale.service"];
-    #   wantedBy = ["multi-user.target"];
-    #   serviceConfig = {
-    #     Type = "oneshot";
-    #     RemainAfterExit = true;
-    #     User = "headscale";
-    #     Group = "headscale";
-    #   };
-
-    #   script = ''
-    #     # Check if user exists and create if needed
-    #     if ! ${pkgs.headscale}/bin/headscale users list | grep -q "${adminUser}"; then
-    #       echo "Creating headscale admin user: ${adminUser}"
-    #       ${pkgs.headscale}/bin/headscale users create "${adminUser}"
-    #     else
-    #       echo "Headscale admin user ${adminUser} already exists"
-    #     fi
-    #   '';
-    # };
 
     services = {
       nginx = {
