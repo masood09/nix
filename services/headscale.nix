@@ -1,17 +1,12 @@
 {
   config,
   lib,
-  inputs,
   pkgs,
   ...
 }: let
   domain = "mantannest.com";
   headscaleDomain = "headscale.${domain}";
   authDomain = "auth.${domain}";
-
-  pkgs-unstable = import inputs.nixpkgs-unstable {
-    inherit (pkgs) system;
-  };
 in {
   options.services.headscale = {
     adminUser = lib.mkOption {
@@ -80,7 +75,6 @@ in {
 
     services = {
       headscale = {
-        package = pkgs-unstable.headscale;
         enable = true;
         adminUser = "admin";
         port = 3009;
@@ -108,6 +102,8 @@ in {
               enabled = true;
               method = "S256";
             };
+
+            strip_email_domain = true;
           };
 
           policy.path = aclFile;
