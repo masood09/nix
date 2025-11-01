@@ -14,7 +14,6 @@
     ./../../modules/nixos/base.nix
     ./../../modules/nixos/remote-unlock.nix
 
-    ./../../services/acme.nix
     ./../../services/authentik.nix
     ./../../services/systemd-resolved.nix
   ];
