@@ -16,7 +16,7 @@
 
     ./../../services/acme.nix
     ./../../services/authentik.nix
-    # ./../../services/systemd-resolved.nix
+    ./../../services/systemd-resolved.nix
   ];
 
   home-manager = {
@@ -32,5 +32,10 @@
     };
   };
 
-  networking.hostName = "oci-auth-server";
+  networking = {
+    hostName = "oci-auth-server";
+    dhcpcd.enable = false;
+    useNetworkd = true;
+    interfaces.enp0s6.useDHCP = true;
+  };
 }

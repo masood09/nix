@@ -16,6 +16,7 @@
 
     ./../../services/acme.nix
     ./../../services/headscale.nix
+    ./../../services/systemd-resolved.nix
   ];
 
   home-manager = {
@@ -31,5 +32,10 @@
     };
   };
 
-  networking.hostName = "oci-vpn-server";
+  networking = {
+    hostName = "oci-vpn-server";
+    dhcpcd.enable = false;
+    useNetworkd = true;
+    interfaces.enp0s6.useDHCP = true;
+  };
 }
