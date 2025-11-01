@@ -31,6 +31,12 @@ creation_rules:
         - *murderbot
         - *oci-auth-server
 
+  - path_regex: ^secrets/vaultwarden-env$
+    key_groups:
+      - age:
+        - *murderbot
+        - *pve-server-1
+
 stores:
   yaml:
     indent: 2
