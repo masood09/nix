@@ -4,7 +4,7 @@
   ...
 }: {
   sops.secrets = {
-    "authentik-envirnoment-file" = {
+    "authentik-environment-file" = {
       owner = "root";
       group = "root";
       mode = "0400";
@@ -25,7 +25,7 @@
   services = {
     authentik = {
       enable = true;
-      environmentFile = "${config.sops.secrets."authentik-envirnoment-file".path}";
+      environmentFile = config.sops.secrets."authentik-environment-file".path;
       settings = {
         disable_startup_analytics = true;
         avatars = "initials";
