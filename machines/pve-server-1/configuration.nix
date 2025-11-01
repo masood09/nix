@@ -32,5 +32,10 @@
     };
   };
 
-  networking.hostName = "pve-server-1";
+  networking = {
+    hostName = "pve-server-1";
+    dhcpcd.enable = false;
+    useNetworkd = true;
+    interfaces.ens18.useDHCP = true;
+  };
 }
