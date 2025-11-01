@@ -1,8 +1,13 @@
 {
   config,
-  pkgs,
   ...
 }: {
+  imports = [
+    ./_acme.nix
+    ./_nginx.nix
+    ./_postgresql.nix
+  ];
+
   sops.secrets = {
     "authentik-environment-file" = {
       owner = "root";
@@ -37,19 +42,8 @@
       };
     };
 
-    postgresql = {
-      package = pkgs.postgresql_16;
-    };
-
     postgresqlBackup = {
-      enable = true;
-
-      databases = [
-        "authentik"
-      ];
-
-      pgdumpOptions = "--no-owner";
-      startAt = "*-*-* *:15:00";
+      databases = ["authentik"];
     };
 
     restic.backups.postgresql = {
@@ -74,11 +68,5 @@
         Persistent = true;
       };
     };
-  };
-
-  environment.persistence."/nix/persist" = {
-    directories = [
-      "/var/lib/postgresql"
-    ];
   };
 }
