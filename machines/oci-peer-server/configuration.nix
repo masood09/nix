@@ -30,5 +30,10 @@
     };
   };
 
-  networking.hostName = "oci-peer-server";
+  networking = {
+    hostName = "oci-peer-server";
+    dhcpcd.enable = false;
+    useNetworkd = true;
+    interfaces.enp0s6.useDHCP = true;
+  };
 }
