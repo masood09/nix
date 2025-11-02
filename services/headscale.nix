@@ -71,7 +71,7 @@ in {
       "headscale-authentik-client-secret" = {
         owner = "headscale";
         mode = "0400";
-        sopsFile = ./../secrets/oci-headscale.yaml;
+        sopsFile = ./../secrets/headscale.yaml;
       };
 
       "restic-env-file" = {
