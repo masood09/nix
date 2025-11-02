@@ -17,6 +17,7 @@
 
     ./../../services/systemd-resolved.nix
     ./../../services/vaultwarden.nix
+    ./../../services/tailscale.nix
   ];
 
   sops.secrets = {

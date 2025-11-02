@@ -16,6 +16,7 @@
 
     ./../../services/authentik.nix
     ./../../services/systemd-resolved.nix
+    ./../../services/tailscale.nix
   ];
 
   home-manager = {

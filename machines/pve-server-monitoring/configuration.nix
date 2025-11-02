@@ -15,6 +15,7 @@
     ./../../modules/nixos/remote-unlock.nix
 
     ./../../services/systemd-resolved.nix
+    ./../../services/tailscale.nix
   ];
 
   services = {
