@@ -19,6 +19,12 @@ creation_rules:
         - *oci-auth-server
         - *oci-vpn-server
 
+  - path_regex: secrets/hl-restic\.yaml$
+    key_groups:
+      - age:
+        - *murderbot
+        - *pve-server-1
+
   - path_regex: secrets/oci-headscale\.yaml$
     key_groups:
       - age:
