@@ -3,6 +3,8 @@ keys:
   - &oci-auth-server age1357vpgg20nzv06key6scrw2ykyuw669m578tvzu7h0y8e8e2lsgqavux8g
   - &oci-vpn-server age13tez0lp6f7235nxlw9ddszfqsl0v748l5pu9nvt7yz3a9ewxky8qnntpjd
   - &pve-server-1 age1yt77nvav359rslqx62ppfp4rdzyde5ampkzjqml97cr5chzxlvxqtnenqp
+  - &pve-server-monitoring
+    age17v58lelflw6rs3s0mak9ewa8vqnykctjp6fkn2z9mfurs0lduu7szlh4qx
 creation_rules:
   - path_regex: secrets/secrets\.yaml$
     key_groups:
@@ -11,6 +13,7 @@ creation_rules:
           - *oci-auth-server
           - *oci-vpn-server
           - *pve-server-1
+          - *pve-server-monitoring
 
   - path_regex: secrets/oci-restic\.yaml$
     key_groups:
@@ -24,8 +27,9 @@ creation_rules:
       - age:
         - *murderbot
         - *pve-server-1
+        - *pve-server-monitoring
 
-  - path_regex: secrets/oci-headscale\.yaml$
+  - path_regex: secrets/headscale\.yaml$
     key_groups:
       - age:
         - *murderbot
