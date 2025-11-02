@@ -45,6 +45,7 @@
       useACMEHost = "mantannest.com";
       locations."/" = {
         proxyPass = "http://${config.services.vaultwarden.config.ROCKET_ADDRESS}:${toString config.services.vaultwarden.config.ROCKET_PORT}";
+        proxyWebsockets = true;
       };
     };
   };
