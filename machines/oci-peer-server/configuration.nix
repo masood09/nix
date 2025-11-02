@@ -16,6 +16,7 @@
 
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
+    ./../../services/prometheus-exporter-node.nix
   ];
 
   home-manager = {

@@ -18,6 +18,7 @@
     ./../../services/systemd-resolved.nix
     ./../../services/vaultwarden.nix
     ./../../services/tailscale.nix
+    ./../../services/prometheus-exporter-node.nix
   ];
 
   sops.secrets = {
