@@ -10,10 +10,8 @@
 
   sops.secrets = {
     "authentik-environment-file" = {
-      owner = "root";
-      group = "root";
-      mode = "0400";
-      sopsFile = ./../secrets/oci-authentik.yaml;
+      sopsFile = ./../secrets/authentik-env;
+      format = "binary";
     };
 
     "restic-env-file" = {

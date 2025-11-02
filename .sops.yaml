@@ -25,7 +25,7 @@ creation_rules:
         - *murderbot
         - *oci-vpn-server
 
-  - path_regex: ^secrets/oci-authentik\.yaml$
+  - path_regex: ^secrets/authentik-env$
     key_groups:
       - age:
         - *murderbot
