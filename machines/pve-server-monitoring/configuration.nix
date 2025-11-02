@@ -18,6 +18,7 @@
     ./../../services/tailscale.nix
     ./../../services/prometheus.nix
     ./../../services/prometheus-exporter-node.nix
+    ./../../services/grafana.nix
   ];
 
   services = {
