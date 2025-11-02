@@ -1,4 +1,8 @@
 {pkgs, ...}: {
+  imports = [
+    ./_prometheus-exporter-postgresql.nix
+  ];
+
   services = {
     postgresql = {
       enable = true;
