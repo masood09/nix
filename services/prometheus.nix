@@ -20,6 +20,17 @@
             }
           ];
         }
+        {
+          job_name = "authentik";
+          static_configs = [
+            {
+              targets = [
+                "oci-auth-server.dns.headscale.mantannest.com:9300"
+                "oci-auth-server.dns.headscale.mantannest.com:9301"
+              ];
+            }
+          ];
+        }
       ];
     };
   };

@@ -26,14 +26,20 @@
     authentik = {
       enable = true;
       environmentFile = config.sops.secrets."authentik-environment-file".path;
+
       settings = {
         disable_startup_analytics = true;
         avatars = "initials";
       };
+
       nginx = {
         enable = true;
         enableACME = true;
         host = "auth.mantannest.com";
+      };
+
+      worker = {
+        listenMetrics = "0.0.0.0:9301";
       };
     };
 
