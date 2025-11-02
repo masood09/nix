@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   outputs,
   vars,
@@ -18,7 +19,45 @@
     ./../../services/vaultwarden.nix
   ];
 
-  services.qemuGuest.enable = true;
+  sops.secrets = {
+    "restic-env-file" = {
+      sopsFile = ./../../secrets/hl-restic.yaml;
+    };
+    "restic-oci-repo" = {
+      sopsFile = ./../../secrets/hl-restic.yaml;
+    };
+    "restic-encrypt-password" = {
+      sopsFile = ./../../secrets/hl-restic.yaml;
+    };
+  };
+
+  services = {
+    qemuGuest.enable = true;
+
+    restic.backups.homelab = {
+      initialize = true;
+      environmentFile = config.sops.secrets."restic-env-file".path;
+      repositoryFile = config.sops.secrets."restic-oci-repo".path;
+      passwordFile = config.sops.secrets."restic-encrypt-password".path;
+
+      paths = [
+        "/var/lib/vaultwarden"
+        "/var/backup/postgresql/"
+      ];
+
+      pruneOpts = [
+        "--keep-daily 24"
+        "--keep-weekly 7"
+        "--keep-monthly 30"
+        "--keep-yearly 12"
+      ];
+
+      timerConfig = {
+        OnCalendar = "*-*-* *:30:00";
+        Persistent = true;
+      };
+    };
+  };
 
   home-manager = {
     extraSpecialArgs = {inherit inputs outputs vars;};
