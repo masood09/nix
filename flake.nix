@@ -105,6 +105,7 @@
       oci-auth-server = mkNixOSConfig ./machines/oci-auth-server/configuration.nix;
       oci-vpn-server = mkNixOSConfig ./machines/oci-vpn-server/configuration.nix;
 
+      pve-database = mkNixOSConfig ./machines/pve-database/configuration.nix;
       pve-nix-builder = mkNixOSConfig ./machines/pve-nix-builder/configuration.nix;
       pve-proxy = mkNixOSConfig ./machines/pve-proxy/configuration.nix;
 
