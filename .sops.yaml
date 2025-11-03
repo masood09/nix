@@ -4,6 +4,8 @@ keys:
   - &oci-vpn-server age13tez0lp6f7235nxlw9ddszfqsl0v748l5pu9nvt7yz3a9ewxky8qnntpjd
   - &pve-nix-builder
     age1zd58799unxaj4a47kkwxzd2a2jqwycz8hu9c0asg32lu5amx4ytq7mtjx0
+  - &pve-proxy
+    age16fd6tkmtpqy9kg04s0amn37mdj2vp0p7fngalu3244kw589x9qvqfnw62q
 
 creation_rules:
   - path_regex: secrets/secrets\.yaml$
@@ -13,6 +15,7 @@ creation_rules:
           - *oci-auth-server
           - *oci-vpn-server
           - *pve-nix-builder
+          - *pve-proxy
 
   - path_regex: secrets/oci-restic\.yaml$
     key_groups:
