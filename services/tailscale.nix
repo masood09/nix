@@ -10,4 +10,10 @@
       "--login-server=https://headscale.mantannest.com"
     ];
   };
+
+  environment.persistence."/nix/persist" = {
+    directories = [
+      "/var/lib/tailscale"
+    ];
+  };
 }
