@@ -20,6 +20,7 @@
       ${vars.userName} = {
         imports = [
           ./../../modules/home-manager/base.nix
+          ./../../modules/home-manager/packages-dev.nix
           ./../../modules/home-manager/fonts.nix
           ./../../modules/home-manager/git.nix
         ];
