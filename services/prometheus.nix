@@ -40,6 +40,19 @@
             }
           ];
         }
+        {
+          job_name = "nginx";
+          static_configs = [
+            {
+              targets = [
+                "oci-auth-server.dns.headscale.mantannest.com:9113"
+                "oci-vpn-server.dns.headscale.mantannest.com:9113"
+                "pve-server-1.dns.headscale.mantannest.com:9113"
+                "pve-server-monitoring.dns.headscale.mantannest.com:9113"
+              ];
+            }
+          ];
+        }
       ];
     };
   };
