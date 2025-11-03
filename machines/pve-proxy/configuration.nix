@@ -15,6 +15,9 @@
 
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
+
+    ./../../services/_acme.nix
+    ./services/nginx.nix
   ];
 
   services = {
