@@ -104,9 +104,7 @@
     nixosConfigurations = {
       oci-auth-server = mkNixOSConfig ./machines/oci-auth-server/configuration.nix;
       oci-vpn-server = mkNixOSConfig ./machines/oci-vpn-server/configuration.nix;
-      oci-peer-server = mkNixOSConfig ./machines/oci-peer-server/configuration.nix;
       pve-server-1 = mkNixOSConfig ./machines/pve-server-1/configuration.nix;
-      pve-server-container = mkNixOSConfig ./machines/pve-server-container/configuration.nix;
       pve-server-monitoring = mkNixOSConfig ./machines/pve-server-monitoring/configuration.nix;
       nixiso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
