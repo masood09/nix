@@ -11,7 +11,6 @@
 
     ./_packages.nix
     ./fish.nix
-    ./neovim.nix
   ];
 
   home = {
@@ -26,8 +25,8 @@
 
     sessionVariables =
       {
-        EDITOR = "nvim";
-        VISUAL = "nvim";
+        EDITOR = "vim";
+        VISUAL = "vim";
       }
       // lib.mkIf pkgs.stdenv.isDarwin {
         SOPS_AGE_KEY_FILE = "$HOME/.config/sops/age/keys.txt";
