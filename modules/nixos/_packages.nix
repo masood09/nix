@@ -8,11 +8,9 @@
   ];
 
   programs = {
-    neovim = {
+    vim = {
       defaultEditor = true;
       enable = true;
-      viAlias = true;
-      vimAlias = true;
     };
   };
 }

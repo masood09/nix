@@ -2,6 +2,8 @@ keys:
   - &murderbot age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
   - &oci-auth-server age1357vpgg20nzv06key6scrw2ykyuw669m578tvzu7h0y8e8e2lsgqavux8g
   - &oci-vpn-server age13tez0lp6f7235nxlw9ddszfqsl0v748l5pu9nvt7yz3a9ewxky8qnntpjd
+  - &pve-app-1
+    age1vs8ffqtt3hfdtur82tv59z6kfwf27nk4e46nrkrj79jcmuxdsy2sag38sf
   - &pve-database
     age1m72xl459t3rws9y9m8ks2madx64f86dde33www6fqpnd6h4lec2skhlwxd
   - &pve-nix-builder
@@ -16,6 +18,7 @@ creation_rules:
           - *murderbot
           - *oci-auth-server
           - *oci-vpn-server
+          - *pve-app-1
           - *pve-database
           - *pve-nix-builder
           - *pve-proxy
