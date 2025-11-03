@@ -41,13 +41,4 @@
     useNetworkd = true;
     interfaces.ens18.useDHCP = true;
   };
-
-  environment.persistence."/nix/persist" = {
-    directories = [
-      {
-        directory = "/home/${vars.userName}/.ssh";
-        user = vars.userName;
-      }
-    ];
-  };
 }
