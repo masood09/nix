@@ -10,7 +10,6 @@
 
     prometheus.exporters.nginx = {
       enable = true;
-      openFirewall = true;
       scrapeUri = "http://localhost/nginx_status";
     };
   };
