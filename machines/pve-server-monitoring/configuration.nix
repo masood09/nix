@@ -19,6 +19,8 @@
     ./../../services/prometheus.nix
     ./../../services/prometheus-exporter-node.nix
     ./../../services/grafana.nix
+    ./../../services/grafana-loki.nix
+    ./../../services/grafana-alloy.nix
   ];
 
   services = {
