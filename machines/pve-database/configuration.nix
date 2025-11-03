@@ -15,6 +15,8 @@
 
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
+
+    ./services/postgresql.nix
   ];
 
   services = {
