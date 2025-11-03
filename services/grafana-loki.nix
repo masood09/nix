@@ -33,7 +33,7 @@
               schema = "v13";
               index = {
                 prefix = "index_";
-                period = "24h";        
+                period = "24h";
               };
             }
           ];
