@@ -51,6 +51,7 @@
     extraGroups = ["networkmanager" "wheel"];
     openssh.authorizedKeys.keys = [
       vars.sshPublicKeyPersonal
+      vars.sshPublicKeyRemoteBuilder
     ];
     shell = pkgs.bash;
     hashedPasswordFile = config.sops.secrets."user-password".path;
