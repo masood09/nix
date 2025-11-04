@@ -10,7 +10,7 @@
 
     ./../../modules/nixos/pve-hardware-configuration.nix
 
-    # ./../../modules/nixos/auto-update.nix
+    ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
 
     ./../../services/systemd-resolved.nix
@@ -44,6 +44,7 @@
       openssh.authorizedKeys.keyFiles = [
         ./../../files/ssh/pve-app-1.pub
         ./../../files/ssh/pve-database.pub
+        ./../../files/ssh/pve-monitoring.pub
         ./../../files/ssh/pve-proxy.pub
       ];
     };
