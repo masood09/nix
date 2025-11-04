@@ -15,6 +15,9 @@
 
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
+
+    ./services/vaultwarden.nix
+    ./services/restic.nix
   ];
 
   services = {

@@ -34,7 +34,7 @@ creation_rules:
     key_groups:
       - age:
         - *murderbot
-        - *pve-nix-builder
+        - *pve-app-1
 
   - path_regex: secrets/headscale\.yaml$
     key_groups:
@@ -52,6 +52,7 @@ creation_rules:
     key_groups:
       - age:
         - *murderbot
+        - *pve-app-1
 
 stores:
   yaml:
