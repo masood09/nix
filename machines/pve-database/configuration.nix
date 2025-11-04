@@ -17,6 +17,7 @@
     ./../../services/tailscale.nix
 
     ./services/postgresql.nix
+    ./services/restic.nix
   ];
 
   services = {
