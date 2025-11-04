@@ -12,6 +12,7 @@
 
     # ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
+    ./../../modules/nixos/distributed-builds-x86_64_linux.nix
 
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
