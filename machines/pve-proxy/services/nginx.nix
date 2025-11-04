@@ -1,4 +1,8 @@
 {
+  imports = [
+    ./_passwords.mantannest.com.nix
+  ];
+
   services = {
     nginx = {
       enable = true;
