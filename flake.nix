@@ -107,6 +107,7 @@
 
       pve-app-1 = mkNixOSConfig ./machines/pve-app-1/configuration.nix;
       pve-database = mkNixOSConfig ./machines/pve-database/configuration.nix;
+      pve-monitoring = mkNixOSConfig ./machines/pve-monitoring/configuration.nix;
       pve-nix-builder = mkNixOSConfig ./machines/pve-nix-builder/configuration.nix;
       pve-proxy = mkNixOSConfig ./machines/pve-proxy/configuration.nix;
 

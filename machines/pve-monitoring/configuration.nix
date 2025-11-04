@@ -12,6 +12,7 @@
 
     ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
+    ./../../modules/nixos/distributed-builds-x86_64_linux.nix
 
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
@@ -35,27 +36,8 @@
     };
   };
 
-  users = {
-    users.remotebuild = {
-      isSystemUser = true;
-      group = "remotebuild";
-      useDefaultShell = true;
-
-      openssh.authorizedKeys.keyFiles = [
-        ./../../files/ssh/pve-app-1.pub
-        ./../../files/ssh/pve-database.pub
-        ./../../files/ssh/pve-monitoring.pub
-        ./../../files/ssh/pve-proxy.pub
-      ];
-    };
-
-    groups.remotebuild = {};
-  };
-
-  nix.settings.trusted-users = [ "remotebuild" ];
-
   networking = {
-    hostName = "pve-nix-builder";
+    hostName = "pve-monitoring";
     dhcpcd.enable = false;
     useNetworkd = true;
     interfaces.ens18.useDHCP = true;
