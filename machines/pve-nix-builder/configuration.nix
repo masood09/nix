@@ -35,6 +35,24 @@
     };
   };
 
+  users = {
+    users.remotebuild = {
+      isSystemUser = true;
+      group = "remotebuild";
+      useDefaultShell = true;
+
+      openssh.authorizedKeys.keyFiles = [
+        ./../../files/ssh/pve-app-1.pub
+        ./../../files/ssh/pve-database.pub
+        ./../../files/ssh/pve-proxy.pub
+      ];
+    };
+
+    groups.remotebuild = {};
+  };
+
+  nix.settings.trusted-users = [ "remotebuild" ];
+
   networking = {
     hostName = "pve-nix-builder";
     dhcpcd.enable = false;
