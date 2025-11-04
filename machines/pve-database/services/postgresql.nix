@@ -11,7 +11,6 @@
 
       ensureDatabases = [
         "babybuddy"
-        "immich"
         "rxresume"
         "vaultwarden"
       ];
@@ -22,10 +21,6 @@
           ensureDBOwnership = true;
         }
         {
-          name = "immich";
-          ensureDBOwnership = true;
-        }
-        {
           name = "rxresume";
           ensureDBOwnership = true;
         }
@@ -33,12 +28,6 @@
           name = "vaultwarden";
           ensureDBOwnership = true;
         }
-      ];
-
-      extensions = with pkgs.postgresql_16.pkgs; [ pgvector vectorchord ];
-
-      settings.shared_preload_libraries = [
-        "vchord.so"
       ];
 
       authentication = pkgs.lib.mkOverride 10 ''
@@ -84,6 +73,8 @@
       enable = true;
 
       databases = [
+        "babybuddy"
+        "rxresume"
         "vaultwarden"
       ];
 
