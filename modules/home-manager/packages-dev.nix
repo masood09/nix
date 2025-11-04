@@ -35,6 +35,7 @@ in {
       oci-cli
       opentofu
       pkgs-unstable.vscode-json-languageserver
+      restic
       shellcheck
       statix
       stylelint
