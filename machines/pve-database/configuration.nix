@@ -10,7 +10,7 @@
 
     ./../../modules/nixos/pve-hardware-configuration.nix
 
-    ./../../modules/nixos/auto-update.nix
+    # ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
 
     ./../../services/systemd-resolved.nix
