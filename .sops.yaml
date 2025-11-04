@@ -35,6 +35,7 @@ creation_rules:
       - age:
         - *murderbot
         - *pve-app-1
+        - *pve-database
 
   - path_regex: secrets/headscale\.yaml$
     key_groups:
