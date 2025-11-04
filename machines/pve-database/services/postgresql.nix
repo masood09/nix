@@ -10,10 +10,25 @@
       enableTCPIP = true;
 
       ensureDatabases = [
+        "babybuddy"
+        "immich"
+        "rxresume"
         "vaultwarden"
       ];
 
       ensureUsers = [
+        {
+          name = "babybuddy";
+          ensureDBOwnership = true;
+        }
+        {
+          name = "immich";
+          ensureDBOwnership = true;
+        }
+        {
+          name = "rxresume";
+          ensureDBOwnership = true;
+        }
         {
           name = "vaultwarden";
           ensureDBOwnership = true;
@@ -70,6 +85,8 @@
       startAt = "*-*-* *:15:00";
     };
   };
+
+  networking.firewall.allowedTCPPorts = [5432];
 
   environment.persistence."/nix/persist" = {
     directories = [
