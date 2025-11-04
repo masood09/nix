@@ -47,8 +47,9 @@
         host    all             postgres        0.0.0.0/0               reject
         hostssl all             postgres        0.0.0.0/0               reject
 
-        # Allow *only non-postgres* users from internal network
+        # Allow *only non-postgres* users from internal network and Tailnet
         host    sameuser        all             10.0.20.0/24            scram-sha-256
+        host    sameuser        all             100.64.0.0/16           scram-sha-256
 
         # 4. Remote connections — SSL required (optional)
         # Allow *only non-postgres* users over SSL
