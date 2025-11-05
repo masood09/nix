@@ -29,6 +29,12 @@ creation_rules:
           - *pve-nix-builder
           - *pve-proxy
 
+  - path_regex: secrets/oci-auth-server\.yaml$
+    key_groups:
+      - age:
+        - *murderbot
+        - *oci-auth-server
+
   - path_regex: secrets/oci-restic\.yaml$
     key_groups:
       - age:
@@ -48,12 +54,6 @@ creation_rules:
       - age:
         - *murderbot
         - *oci-vpn-server
-
-  - path_regex: ^secrets/authentik-env$
-    key_groups:
-      - age:
-        - *murderbot
-        - *oci-auth-server
 
   - path_regex: ^secrets/vaultwarden-env$
     key_groups:
