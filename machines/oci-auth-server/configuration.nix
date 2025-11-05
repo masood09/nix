@@ -10,10 +10,11 @@
 
     ./../../modules/nixos/oci-hardware-configuration.nix
 
-    # ./../../modules/nixos/auto-update.nix
+    ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
     ./../../modules/nixos/remote-unlock.nix
 
+    ./../../services/grafana-alloy.nix
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
 
@@ -39,5 +40,9 @@
     dhcpcd.enable = false;
     useNetworkd = true;
     interfaces.enp0s6.useDHCP = true;
+
+    hosts = {
+      "100.64.0.8" = ["loki.monitoring.server.mantannest.com"];
+    };
   };
 }
