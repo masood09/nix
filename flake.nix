@@ -74,6 +74,7 @@
     mkNixOSConfig = path:
       nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs vars;};
+
         modules = [
           inputs.fps.nixosModules.programs-sqlite
           inputs.home-manager.nixosModules.home-manager
