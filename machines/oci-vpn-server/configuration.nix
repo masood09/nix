@@ -14,10 +14,10 @@
     ./../../modules/nixos/base.nix
     ./../../modules/nixos/remote-unlock.nix
 
-    ./../../services/headscale.nix
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
-    ./../../services/prometheus-exporter-node.nix
+
+    ./services/headscale.nix
   ];
 
   home-manager = {

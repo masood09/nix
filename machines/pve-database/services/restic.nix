@@ -4,7 +4,7 @@
   ];
 
   services = {
-    restic.backups.localbackup = {
+    restic.backups.localBackup = {
       initialize = true;
       environmentFile = config.sops.secrets."restic-env".path;
       repositoryFile = config.sops.secrets."restic-repo".path;

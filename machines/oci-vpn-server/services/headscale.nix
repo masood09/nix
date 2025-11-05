@@ -9,8 +9,8 @@
   authDomain = "auth.${domain}";
 in {
   imports = [
-    ./_acme.nix
-    ./_nginx.nix
+    ./../../../services/_acme.nix
+    ./../../../services/_nginx.nix
   ];
 
   options.services.headscale = {
@@ -71,17 +71,17 @@ in {
       "headscale-authentik-client-secret" = {
         owner = "headscale";
         mode = "0400";
-        sopsFile = ./../secrets/headscale.yaml;
+        sopsFile = ./../../../secrets/oci-vpn-server.yaml;
       };
 
-      "restic-env-file" = {
-        sopsFile = ./../secrets/oci-restic.yaml;
+      "restic-env" = {
+        sopsFile = ./../../../secrets/oci-vpn-server.yaml;
       };
-      "restic-oci-repo" = {
-        sopsFile = ./../secrets/oci-restic.yaml;
+      "restic-repo" = {
+        sopsFile = ./../../../secrets/oci-vpn-server.yaml;
       };
-      "restic-encrypt-password" = {
-        sopsFile = ./../secrets/oci-restic.yaml;
+      "restic-password" = {
+        sopsFile = ./../../../secrets/oci-vpn-server.yaml;
       };
     };
 
@@ -142,11 +142,11 @@ in {
         };
       };
 
-      restic.backups.headscale = {
+      restic.backups.localBackup = {
         initialize = true;
-        environmentFile = config.sops.secrets."restic-env-file".path;
-        repositoryFile = config.sops.secrets."restic-oci-repo".path;
-        passwordFile = config.sops.secrets."restic-encrypt-password".path;
+        environmentFile = config.sops.secrets."restic-env".path;
+        repositoryFile = config.sops.secrets."restic-repo".path;
+        passwordFile = config.sops.secrets."restic-password".path;
 
         paths = [
           "/var/lib/headscale"
