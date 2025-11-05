@@ -16,6 +16,11 @@
 
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
+
+    ./services/acme.nix
+    ./services/nginx.nix
+    ./services/grafana-loki.nix
+    ./services/restic.nix
   ];
 
   services = {

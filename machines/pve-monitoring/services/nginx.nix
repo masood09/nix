@@ -1,6 +1,6 @@
 {
   imports = [
-    ./_passwords.mantannest.com.nix
+    ./_loki.monitoring.server.mantannest.com.nix
   ];
 
   services = {

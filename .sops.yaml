@@ -53,6 +53,12 @@ creation_rules:
         - *murderbot
         - *pve-database
 
+  - path_regex: secrets/pve-monitoring\.yaml$
+    key_groups:
+      - age:
+        - *murderbot
+        - *pve-monitoring
+
 stores:
   yaml:
     indent: 2
