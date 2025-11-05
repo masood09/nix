@@ -36,7 +36,7 @@
             {
               from = "2025-11-05";
               store = "tsdb";
-              object_store = "filesystem";
+              object_store = "s3";
               schema = "v13";
 
               index = {
