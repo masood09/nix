@@ -1,7 +1,15 @@
 { config, ... }: {
-  imports = [
-    ../../../modules/nixos/_pve-restic-secrets.nix
-  ];
+  sops.secrets = {
+    "restic-env" = {
+      sopsFile = ./../../../secrets/pve-app-1.yaml;
+    };
+    "restic-repo" = {
+      sopsFile = ./../../../secrets/pve-app-1.yaml;
+    };
+    "restic-password" = {
+      sopsFile = ./../../../secrets/pve-app-1.yaml;
+    };
+  };
 
   services = {
     restic.backups.localBackup = {

@@ -41,6 +41,12 @@ creation_rules:
         - *murderbot
         - *oci-vpn-server
 
+  - path_regex: secrets/pve-app-1\.yaml$
+    key_groups:
+      - age:
+        - *murderbot
+        - *pve-app-1
+
   - path_regex: secrets/hl-restic\.yaml$
     key_groups:
       - age:

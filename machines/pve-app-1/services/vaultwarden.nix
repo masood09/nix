@@ -5,10 +5,9 @@
   listenPort = 8222;
 in {
   sops.secrets = {
-    "vaultwarden-env-file" = {
+    "vaultwarden-env" = {
       owner = "vaultwarden";
-      sopsFile = ./../../../secrets/vaultwarden-env;
-      format = "binary";
+      sopsFile = ./../../../secrets/pve-app-1.yaml;
     };
   };
 
@@ -16,7 +15,7 @@ in {
     vaultwarden = {
       enable = true;
       dbBackend = "postgresql";
-      environmentFile = config.sops.secrets."vaultwarden-env-file".path;
+      environmentFile = config.sops.secrets."vaultwarden-env".path;
 
       config = {
         DOMAIN = vaultwardenDomain;
