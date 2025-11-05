@@ -35,11 +35,10 @@ creation_rules:
         - *murderbot
         - *oci-auth-server
 
-  - path_regex: secrets/oci-restic\.yaml$
+  - path_regex: secrets/oci-vpn-server\.yaml$
     key_groups:
       - age:
         - *murderbot
-        - *oci-auth-server
         - *oci-vpn-server
 
   - path_regex: secrets/hl-restic\.yaml$
@@ -48,12 +47,6 @@ creation_rules:
         - *murderbot
         - *pve-app-1
         - *pve-database
-
-  - path_regex: secrets/headscale\.yaml$
-    key_groups:
-      - age:
-        - *murderbot
-        - *oci-vpn-server
 
   - path_regex: ^secrets/vaultwarden-env$
     key_groups:
