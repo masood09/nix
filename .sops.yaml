@@ -47,18 +47,11 @@ creation_rules:
         - *murderbot
         - *pve-app-1
 
-  - path_regex: secrets/hl-restic\.yaml$
+  - path_regex: secrets/pve-database\.yaml$
     key_groups:
       - age:
         - *murderbot
-        - *pve-app-1
         - *pve-database
-
-  - path_regex: ^secrets/vaultwarden-env$
-    key_groups:
-      - age:
-        - *murderbot
-        - *pve-app-1
 
 stores:
   yaml:
