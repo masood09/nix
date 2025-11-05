@@ -1,7 +1,18 @@
-{
+{ config, ... }: {
+  sops.secrets = {
+    "loki-env" = {
+      owner = "loki";
+      sopsFile = ./../../../secrets/pve-monitoring.yaml;
+    };
+  };
+
   services = {
     loki = {
       enable = true;
+
+      extraFlags = [
+        "-config.expand-env=true"
+      ];
 
       configuration = {
         auth_enabled = false;
@@ -37,12 +48,22 @@
         };
 
         storage_config = {
-          filesystem = {
-            directory = "/var/lib/loki/chunks";
+          tsdb_shipper = {
+            active_index_directory = "/var/lib/loki/index";
+            cache_location = "/var/lib/loki/index_cache";
+          };
+
+          aws = {
+            s3 = "\${S3_URL}";
+            s3forcepathstyle = true;
           };
         };
       };
     };
+  };
+
+  systemd.services.loki.serviceConfig = {
+    EnvironmentFile = config.sops.secrets."loki-env".path;
   };
 
   environment.persistence."/nix/persist" = {
