@@ -49,19 +49,19 @@ if [ "$(uname)" == "Linux" ]; then
   mkdir -pv /mnt/{boot,nix,etc/ssh,var/{lib,log}}
   mount /dev/disk/by-label/boot /mnt/boot
   mount /dev/disk/by-label/nix /mnt/nix
-  mkdir -pv /mnt/nix/{secret/initrd,persist/{etc/ssh,var/{lib,log}}}
+  mkdir -pv /mnt/nix/{secret/age,persist/{etc/ssh,var/{lib,log}}}
   chmod 0700 /mnt/nix/secret
   mount -o bind /mnt/nix/persist/var/log /mnt/var/log
   echo -e "\033[32mFilesystems mounted successfully.\033[0m"
 
   # Generating initrd SSH host key
-  echo -e "\n\033[1mGenerating initrd SSH host key...\033[0m"
-  ssh-keygen -t ed25519 -N "" -C "" -f /mnt/nix/secret/initrd/ssh_host_ed25519_key
-  echo -e "\033[32mSSH host key generated successfully.\033[0m"
+  echo -e "\n\033[1mGenerating SSH key for age...\033[0m"
+  ssh-keygen -t ed25519 -N "" -C "" -f /mnt/nix/secret/age/ssh_ed25519_key
+  echo -e "\033[32mSSH key generated successfully.\033[0m"
 
   # Creating public age key for sops-nix
-  echo -e "\n\033[1mConverting initrd public SSH host key into public age key for sops-nix...\033[0m"
-  sudo nix-shell --extra-experimental-features flakes -p ssh-to-age --run 'cat /mnt/nix/secret/initrd/ssh_host_ed25519_key.pub | ssh-to-age'
+  echo -e "\n\033[1mConverting public SSH key into public age key for sops-nix...\033[0m"
+  nix-shell --extra-experimental-features flakes -p ssh-to-age --run 'cat /mnt/nix/secret/age/ssh_ed25519_key.pub | ssh-to-age'
   echo -e "\033[32mAge public key generated successfully.\033[0m"
 
   # Completed
