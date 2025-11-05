@@ -17,7 +17,7 @@
           };
 
           replication_factor = 1;
-          path_prefix = "/tmp/loki";
+          path_prefix = "/var/lib/loki";
         };
 
         schema_config = {
@@ -38,10 +38,20 @@
 
         storage_config = {
           filesystem = {
-            directory = "/tmp/loki/chunks";
+            directory = "/var/lib/loki/chunks";
           };
         };
       };
     };
   };
+
+  environment.persistence."/nix/persist" = {
+    directories = [
+      "/var/lib/loki"
+    ];
+  };
+
+  systemd.tmpfiles.rules = [
+    "d /var/lib/loki 0750 loki loki -"
+  ];
 }
