@@ -11,11 +11,6 @@
       recommendedGzipSettings = true;
       statusPage = true;
     };
-
-    prometheus.exporters.nginx = {
-      enable = true;
-      scrapeUri = "http://localhost/nginx_status";
-    };
   };
 
   networking.firewall.allowedTCPPorts = [
