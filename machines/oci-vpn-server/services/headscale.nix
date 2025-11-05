@@ -93,6 +93,14 @@ in {
         settings = {
           dns = {
             base_domain = "dns.headscale.mantannest.com";
+
+            extra_records = [
+              {
+                name = "loki.monitoring.server.mantannest.com";
+                type = "A";
+                value = "100.64.0.8";
+              }
+            ];
           };
 
           logtail.enabled = false;
