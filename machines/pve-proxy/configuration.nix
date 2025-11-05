@@ -14,6 +14,7 @@
     ./../../modules/nixos/base.nix
     ./../../modules/nixos/distributed-builds-x86_64_linux.nix
 
+    ./../../services/grafana-alloy.nix
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
 
