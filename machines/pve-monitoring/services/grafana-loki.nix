@@ -21,6 +21,6 @@
   };
 
   systemd.tmpfiles.rules = [
-    "d /var/lib/loki 0750 loki loki -"
+    "d /var/lib/loki 0700 loki loki -"
   ];
 }
