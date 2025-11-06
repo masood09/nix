@@ -1,4 +1,4 @@
-{ config, ... }: {
+{config, ...}: {
   sops.secrets = {
     "loki-config" = {
       owner = "loki";

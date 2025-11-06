@@ -1,4 +1,4 @@
-{ config, ... }: {
+{config, ...}: {
   sops.secrets = {
     "restic-env" = {
       sopsFile = ./../../../secrets/pve-monitoring.yaml;
@@ -19,7 +19,6 @@
       passwordFile = config.sops.secrets."restic-password".path;
 
       paths = [
-
       ];
 
       pruneOpts = [

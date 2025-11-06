@@ -9,7 +9,7 @@
     config.allowUnfree = true;
   };
 in {
-  disabledModules = [ "services/monitoring/alloy.nix" ];
+  disabledModules = ["services/monitoring/alloy.nix"];
 
   imports = [
     "${inputs.nixpkgs-unstable}/nixos/modules/services/monitoring/alloy.nix"
