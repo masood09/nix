@@ -20,6 +20,7 @@
 
     ./services/acme.nix
     ./services/nginx.nix
+    ./services/grafana.nix
     ./services/grafana-loki.nix
     ./services/restic.nix
   ];
