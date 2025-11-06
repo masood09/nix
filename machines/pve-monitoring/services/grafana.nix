@@ -28,4 +28,14 @@
       };
     };
   };
+
+  environment.persistence."/nix/persist" = {
+    directories = [
+      "/var/lib/grafana"
+    ];
+  };
+
+  systemd.tmpfiles.rules = [
+    "d /var/lib/grafana 0700 grafana grafana -"
+  ];
 }
