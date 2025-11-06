@@ -10,7 +10,12 @@
 
     certs."monitoring.server.mantannest.com" = {
       domain = "monitoring.server.mantannest.com";
-      extraDomainNames = ["*.monitoring.server.mantannest.com"];
+
+      extraDomainNames = [
+        "*.monitoring.server.mantannest.com"
+        "*.mantannest.com"
+      ];
+
       dnsProvider = "cloudflare";
       dnsPropagationCheck = true;
       # inspo: https://go-acme.github.io/lego/dns/cloudflare/
