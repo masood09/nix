@@ -1,4 +1,4 @@
-{ config, ... }: {
+{config, ...}: {
   services = {
     grafana = {
       enable = true;
@@ -19,7 +19,6 @@
 
       settings = {
         analytics.reporting_enabled = false;
-
 
         server = {
           enforce_domain = true;

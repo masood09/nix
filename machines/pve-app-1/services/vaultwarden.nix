@@ -1,4 +1,4 @@
-{ config, ... }: let
+{config, ...}: let
   domain = "mantannest.com";
   vaultwardenDomain = "https://passwords.${domain}";
   listenAddress = "0.0.0.0";

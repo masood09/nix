@@ -1,4 +1,4 @@
-{ config, ... }: {
+{config, ...}: {
   sops.secrets = {
     "restic-env" = {
       sopsFile = ./../../../secrets/pve-app-1.yaml;

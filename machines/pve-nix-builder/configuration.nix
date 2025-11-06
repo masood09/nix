@@ -53,7 +53,7 @@
     groups.remotebuild = {};
   };
 
-  nix.settings.trusted-users = [ "remotebuild" ];
+  nix.settings.trusted-users = ["remotebuild"];
 
   networking = {
     hostName = "pve-nix-builder";

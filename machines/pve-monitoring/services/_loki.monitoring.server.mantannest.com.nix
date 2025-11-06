@@ -1,4 +1,4 @@
-{ config, ... }: {
+{config, ...}: {
   sops.secrets = {
     "nginx-loki-auth" = {
       owner = "nginx";
