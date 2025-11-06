@@ -1,5 +1,6 @@
 {
   imports = [
+    ./_grafana.mantannest.com.nix
     ./_loki.monitoring.server.mantannest.com.nix
   ];
 
