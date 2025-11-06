@@ -1,10 +1,4 @@
 {config, ...}: {
-  imports = [
-    ./../../../services/_acme.nix
-    ./../../../services/_nginx.nix
-    ./../../../services/_postgresql.nix
-  ];
-
   sops.secrets = {
     "authentik-env" = {
       sopsFile = ./../../../secrets/oci-auth-server.yaml;
@@ -29,12 +23,6 @@
       settings = {
         disable_startup_analytics = true;
         avatars = "initials";
-      };
-
-      nginx = {
-        enable = true;
-        enableACME = true;
-        host = "auth.mantannest.com";
       };
     };
 
