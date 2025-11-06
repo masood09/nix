@@ -96,6 +96,16 @@ in {
 
             extra_records = [
               {
+                name = "grafana.mantannest.com";
+                type = "A";
+                value = "100.64.0.8";
+              }
+              {
+                name = "passwords.mantannest.com";
+                type = "A";
+                value = "100.64.0.4";
+              }
+              {
                 name = "loki.monitoring.server.mantannest.com";
                 type = "A";
                 value = "100.64.0.8";
