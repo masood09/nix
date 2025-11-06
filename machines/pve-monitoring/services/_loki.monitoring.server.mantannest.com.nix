@@ -11,7 +11,7 @@
     useACMEHost = "monitoring.server.mantannest.com";
     locations."/" = {
       basicAuthFile = config.sops.secrets."nginx-loki-auth".path;
-      proxyPass = "http://localhost:3100";
+      proxyPass = "http://127.0.0.1:3100";
       extraConfig = ''
         proxy_read_timeout 1800s;
         proxy_connect_timeout 1600s;
@@ -24,7 +24,7 @@
     };
 
     locations."/ready" = {
-      proxyPass = "http://localhost:3100";
+      proxyPass = "http://127.0.0.1:3100";
       extraConfig = ''
         proxy_http_version 1.1;
         proxy_set_header Connection "Keep-Alive";
