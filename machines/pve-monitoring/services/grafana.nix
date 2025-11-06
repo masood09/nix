@@ -12,7 +12,7 @@
             name = "Loki";
             type = "loki";
             access = "proxy";
-            url = "http://127.0.0.1:3100";
+            url = "http://localhost:3100";
           }
         ];
       };
