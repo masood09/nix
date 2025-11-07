@@ -2,62 +2,45 @@
 {
   sops.secrets = {
     "authelia-jwt-secret" = {
-      owner = "authelia";
+      owner = "authelia-mantannest";
       sopsFile = ./../../../secrets/oci-auth-server.yaml;
     };
     "authelia-storage-encryption-key" = {
-      owner = "authelia";
+      owner = "authelia-mantannest";
       sopsFile = ./../../../secrets/oci-auth-server.yaml;
     };
     "authelia-jwks" = {
-      owner = "authelia";
+      owner = "authelia-mantannest";
       sopsFile = ./../../../secrets/oci-auth-server.yaml;
     };
     "authelia-hmac-secret" = {
-      owner = "authelia";
+      owner = "authelia-mantannest";
       sopsFile = ./../../../secrets/oci-auth-server.yaml;
     };
     "authelia-session-secret" = {
-      owner = "authelia";
+      owner = "authelia-mantannest";
       sopsFile = ./../../../secrets/oci-auth-server.yaml;
     };
     "authelia-lldap-password" = {
-      owner = "authelia";
+      owner = "authelia-mantannest";
       sopsFile = ./../../../secrets/oci-auth-server.yaml;
     };
     "authelia-smtp-password" = {
-      owner = "authelia";
+      owner = "authelia-mantannest";
       sopsFile = ./../../../secrets/oci-auth-server.yaml;
     };
-    "authelia-smtp-username" = {
-      owner = "authelia";
-      sopsFile = ./../../../secrets/oci-auth-server.yaml;
-    };
-    "authelia-immich-oidc-client-id" = {
-      owner = "authelia";
+    "authelia-headscale-oidc-client-secret" = {
+      owner = "authelia-mantannest";
       sopsFile = ./../../../secrets/oci-auth-server.yaml;
     };
     "authelia-immich-oidc-client-secret" = {
-      owner = "authelia";
-      sopsFile = ./../../../secrets/oci-auth-server.yaml;
-    };
-    "authelia-karakeep-oidc-client-id" = {
-      owner = "authelia";
+      owner = "authelia-mantannest";
       sopsFile = ./../../../secrets/oci-auth-server.yaml;
     };
     "authelia-karakeep-oidc-client-secret" = {
-      owner = "authelia";
+      owner = "authelia-mantannest";
       sopsFile = ./../../../secrets/oci-auth-server.yaml;
     };
-  };
-
-  users.groups.authelia = {};
-
-  users.users.authelia = {
-    name = "authelia";
-    group = "authelia";
-    description = "authelia server user";
-    isSystemUser = true;
   };
 
   services = {
@@ -72,7 +55,7 @@
           base_dn = "dc=homelab,dc=mantannest,dc=com";
           users_filter = "(&({username_attribute}={input})(objectClass=person))";
           groups_filter = "(member={dn})";
-          user = "authelia";
+          user = "uid=authelia,ou=people,dc=homelab,dc=mantannest,dc=com";
         };
 
         access_control = {
@@ -88,12 +71,12 @@
 
         storage.postgres = {
           address = "unix:///run/postgresql";
-          database = "authelia";
-          username = "authelia";
+          database = "authelia-mantannest";
+          username = "authelia-mantannest";
         };
 
         session = {
-          redis.host = "/var/run/redis-haddock/redis.sock";
+          redis.host = "/var/run/redis-oci-auth/redis.sock";
           cookies = [
             {
               domain = "mantannest.com";
@@ -111,6 +94,7 @@
 
         notifier.smtp = {
           address = "smtp://smtp.email.ca-toronto-1.oci.oraclecloud.com:587";
+          username = "ocid1.user.oc1..aaaaaaaasqsnfpwp6k7f4pn4bycnomrny4hhilksa5yh5jauo6npxga7mhxa@ocid1.tenancy.oc1..aaaaaaaaabdnzyn2ijeptsm5hlfr74d4mwc5qnngv3nmhyzjqdvtv54vxk3q.7i.com";
           sender = "auth@mantannest.com";
         };
 
@@ -141,9 +125,11 @@
         webauthn = {
           enable_passkey_login = true;
         };
+
+        server.address = "tcp://127.0.0.1:9091/";
       };
 
-      settingsFiles = [ ./../../../files/authelia_oidc_clients.yaml ];
+      settingsFiles = [ ./files/authelia_oidc_clients.yaml ];
 
       secrets = with config.sops; {
         jwtSecretFile = secrets."authelia-jwt-secret".path;
@@ -156,9 +142,11 @@
       environmentVariables = with config.sops; {
         AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE =
           secrets."authelia-lldap-password".path;
-        AUTHELIA_NOTIFIER_SMTP_USERNAME_FILE = secrets."authelia-smtp-username".path;
         AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE = secrets."authelia-smtp-password".path;
       };
     };
-  };    
+  };
+
+  # Give Authelia access to the Redis socket
+  users.users."authelia-mantannest".extraGroups = ["redis-oci-auth"];
 }

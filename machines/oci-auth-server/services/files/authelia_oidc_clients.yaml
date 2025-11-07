@@ -1,0 +1,57 @@
+# Hashed client secrets go here, and unhashed ones go in the client configurations
+
+identity_providers:
+  oidc:
+    clients:
+      - client_name: 'Headscale'
+        client_id: 'authelia-headscale'
+        client_secret: {{ secret "/run/secrets/authelia-headscale-oidc-client-secret" | mindent 10 "|" | msquote }}
+        public: false
+        authorization_policy: 'two_factor'
+        require_pkce: true
+        pkce_challenge_method: 'S256'
+        redirect_uris:
+          - https://headscale.mantannest.com/oidc/callback
+        scopes:
+          - 'openid'
+          - 'email'
+          - 'profile'
+          - 'groups'
+        response_types:
+          - 'code'
+        grant_types:
+          - 'authorization_code'
+        access_token_signed_response_alg: 'none'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
+
+      # https://immich.app/docs/administration/oauth/
+      - client_name: "Immich"
+        client_id: "authelia-immich"
+        client_secret: {{ secret "/run/secrets/authelia-immich-oidc-client-secret" | mindent 10 "|" | msquote }}
+        public: false
+        authorization_policy: "one_factor"
+        redirect_uris:
+            - "app.immich:///oauth-callback"
+            - "https://photos.mantannest.com/auth/login"
+            - "https://photos.mantannest.com/user-settings"
+        scopes:
+            - "openid"
+            - "profile"
+            - "email"
+        token_endpoint_auth_method: "client_secret_post"
+      # https://docs.karakeep.app/configuration/#authentication--signup
+      - client_name: "Karakeep"
+        client_id: "authelia-karakeep"
+        client_secret: {{ secret "/run/secrets/authelia-karakeep-oidc-client-secret" | mindent 10 "|" | msquote }}
+        public: false
+        authorization_policy: "one_factor"
+        claims_policy: "karakeep"
+        redirect_uris:
+          - "https://bookmarks.mantannest.com/api/auth/callback/custom"
+        scopes:
+          - "openid"
+          - "profile"
+          - "email"
+        userinfo_signed_response_alg: "none"
+        token_endpoint_auth_method: "client_secret_basic"
