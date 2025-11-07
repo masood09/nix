@@ -20,7 +20,9 @@
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
 
+    # ./services/authelia.nix
     ./services/nginx.nix
+    # ./services/redis.nix
     ./services/authentik.nix
   ];
 
