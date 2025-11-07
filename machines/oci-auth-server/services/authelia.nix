@@ -102,9 +102,21 @@
 
         identity_providers.oidc = {
           claims_policies = {
+            headscale.id_token = [
+              "email"
+              "groups"
+              "preferred_username"
+            ];
             karakeep.id_token = [ "email" ];
             opkssh.id_token = [ "email" ];
           };
+
+          clients = [
+            {
+              client_id = "authelia-headscale";
+              claims_policy = "headscale";
+            }
+          ];
 
           cors = {
             endpoints = [ "token" ];

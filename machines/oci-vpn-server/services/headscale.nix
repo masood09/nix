@@ -6,7 +6,7 @@
 }: let
   domain = "mantannest.com";
   headscaleDomain = "headscale.${domain}";
-  authDomain = "auth.${domain}";
+  # authDomain = "auth.${domain}";
 in {
   options.services.headscale = {
     adminUser = lib.mkOption {
@@ -63,9 +63,13 @@ in {
     aclFile = pkgs.writeText "acl-policy.hujson" aclHuJson;
   in {
     sops.secrets = {
-      "headscale-authentik-client-secret" = {
+      # "headscale-authentik-client-secret" = {
+      #   owner = "headscale";
+      #   sopsFile = ./../../../secrets/oci-vpn-server.yaml;
+      # };
+
+      "headscale-authelia-client-secret" = {
         owner = "headscale";
-        mode = "0400";
         sopsFile = ./../../../secrets/oci-vpn-server.yaml;
       };
 
@@ -117,15 +121,15 @@ in {
 
           oidc = {
             only_start_if_oidc_is_available = true;
-            issuer = "https://${authDomain}/application/o/headscale/";
-            client_id = "Pjad107mj4JsZRnmbTMzbGiNqIolCMFn2jF3dBeA";
-            client_secret_path = config.sops.secrets."headscale-authentik-client-secret".path;
+            issuer = "https://auth2.mantannest.com";
+            client_id = "authelia-headscale";
+            client_secret_path = config.sops.secrets."headscale-authelia-client-secret".path;
 
             scope = [
               "openid"
               "profile"
               "email"
-              "custom"
+              "groups"
             ];
 
             pkce = {
@@ -133,8 +137,29 @@ in {
               method = "S256";
             };
 
-            strip_email_domain = true;
+            # strip_email_domain = true;
           };
+
+          # oidc = {
+          #   only_start_if_oidc_is_available = true;
+          #   issuer = "https://${authDomain}/application/o/headscale/";
+          #   client_id = "Pjad107mj4JsZRnmbTMzbGiNqIolCMFn2jF3dBeA";
+          #   client_secret_path = config.sops.secrets."headscale-authentik-client-secret".path;
+
+          #   scope = [
+          #     "openid"
+          #     "profile"
+          #     "email"
+          #     "custom"
+          #   ];
+
+          #   pkce = {
+          #     enabled = true;
+          #     method = "S256";
+          #   };
+
+          #   strip_email_domain = true;
+          # };
 
           policy.path = aclFile;
           server_url = "https://${headscaleDomain}";
