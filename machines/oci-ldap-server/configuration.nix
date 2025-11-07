@@ -14,9 +14,14 @@
     ./../../modules/nixos/base.nix
     ./../../modules/nixos/remote-unlock.nix
 
+    ./../../services/_acme.nix
+    ./../../services/_postgresql.nix
     ./../../services/grafana-alloy.nix
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
+
+    ./services/nginx.nix
+    ./services/lldap.nix
   ];
 
   home-manager = {

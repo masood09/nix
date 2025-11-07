@@ -96,6 +96,11 @@ in {
                 value = "100.64.0.8";
               }
               {
+                name = "ldap.internal.mantannest.com";
+                type = "A";
+                value = "100.64.0.9";
+              }
+              {
                 name = "passwords.mantannest.com";
                 type = "A";
                 value = "100.64.0.4";
