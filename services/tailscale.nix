@@ -4,7 +4,7 @@
   };
 
   services.tailscale = {
-    enable = true;
+    enable = false;
     authKeyFile = config.sops.secrets."headscale-preauth-key".path;
     extraUpFlags = [
       "--login-server=https://headscale.mantannest.com"

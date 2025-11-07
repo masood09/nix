@@ -90,6 +90,8 @@ in {
         adminUser = "admin";
         port = 3009;
         settings = {
+          log.level = "debug";
+
           dns = {
             base_domain = "dns.headscale.mantannest.com";
 

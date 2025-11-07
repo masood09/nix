@@ -33,7 +33,7 @@
         database_url = "postgresql:///lldap?host=/run/postgresql";
         force_ldap_user_pass_reset = "always";
         http_host = "127.0.0.1";
-        http_url = "https://ldap.internal.mantannest.com:8443";
+        http_url = "https://ldap.mantannest.com";
         jwt_secret_file = config.sops.secrets."lldap-jwt-secret".path;
         ldap_base_dn = "dc=mantannest,dc=com";
         ldap_host = "0.0.0.0";
