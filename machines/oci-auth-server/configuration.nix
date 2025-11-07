@@ -16,13 +16,14 @@
 
     ./../../services/_acme.nix
     ./../../services/grafana-alloy.nix
-    ./../../services/_postgresql.nix
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
 
-    # ./services/authelia.nix
+    ./services/authelia.nix
     ./services/nginx.nix
-    # ./services/redis.nix
+    ./services/postgresql.nix
+    ./services/redis.nix
+    ./services/restic.nix
     ./services/authentik.nix
   ];
 
