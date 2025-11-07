@@ -49,17 +49,32 @@
 
       settings = {
         theme = "dark";
+        default_2fa_method = "webauthn";
 
         authentication_backend.ldap = {
           address = "ldap://ldap-server.publicsubnet.ocivcn.oraclevcn.com:3890";
+          implementation = "lldap";
+          timeout = "5s";
+          start_tls = false;
           base_dn = "dc=mantannest,dc=com";
+          additional_users_dn = "OU=people";
           users_filter = "(&({username_attribute}={input})(objectClass=person))";
+          additional_groups_dn = "OU=groups";
           groups_filter = "(member={dn})";
-          user = "uid=authelia,ou=people,dc=dc=mantannest,dc=com";
+          user = "uid=authelia,ou=people,dc=mantannest,dc=com";
+
+          attributes = {
+            distinguished_name = "distinguishedName";
+            username = "uid";
+            mail = "mail";
+            member_of = "memberOf";
+            group_name = "cn";
+          };
         };
 
         access_control = {
           default_policy = "deny";
+
           # We want this rule to be low priority so it doesn't override the others
           rules = lib.mkAfter [
             {
@@ -98,15 +113,27 @@
           sender = "auth@mantannest.com";
         };
 
-        log.level = "info";
+        log.level = "debug";
 
         identity_providers.oidc = {
           claims_policies = {
-            headscale.id_token = [
-              "email"
-              "groups"
-              "preferred_username"
-            ];
+            # headscale.id_token = [
+              # "email"
+              # "groups"
+            # ];
+
+            headscale = {
+              id_token = [
+                "email"
+                "email_verified"
+                "preferred_username"
+                "name"
+                "given_name"
+                "family_name"
+                "groups"
+              ];
+            };
+
             karakeep.id_token = [ "email" ];
             opkssh.id_token = [ "email" ];
           };
@@ -134,11 +161,27 @@
           };
         };
 
+        # totp = {
+        #   disable = false;
+        #   issuer = "authelia.com";
+        #   algorithm = "sha1";
+        #   digits = 6;
+        #   period = 30;
+        #   skew = 1;
+        #   secret_size = 32;
+        # };
+
         webauthn = {
           enable_passkey_login = true;
         };
 
         server.address = "tcp://127.0.0.1:9091/";
+
+        regulation = {
+          max_retries = 3;
+          find_time = "2m";
+          ban_time = "5m";
+        };
       };
 
       settingsFiles = [ ./files/authelia_oidc_clients.yaml ];
