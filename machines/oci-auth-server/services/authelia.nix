@@ -52,10 +52,10 @@
 
         authentication_backend.ldap = {
           address = "ldap://ldap-server.publicsubnet.ocivcn.oraclevcn.com:3890";
-          base_dn = "dc=homelab,dc=mantannest,dc=com";
+          base_dn = "dc=mantannest,dc=com";
           users_filter = "(&({username_attribute}={input})(objectClass=person))";
           groups_filter = "(member={dn})";
-          user = "uid=authelia,ou=people,dc=homelab,dc=mantannest,dc=com";
+          user = "uid=authelia,ou=people,dc=dc=mantannest,dc=com";
         };
 
         access_control = {
@@ -63,8 +63,8 @@
           # We want this rule to be low priority so it doesn't override the others
           rules = lib.mkAfter [
             {
-              domain = "*.homelab.mantannest.com";
-              policy = "one_factor";
+              domain = "*.mantannest.com";
+              policy = "two_factor";
             }
           ];
         };

@@ -35,7 +35,7 @@
         http_host = "127.0.0.1";
         http_url = "https://ldap.internal.mantannest.com:8443";
         jwt_secret_file = config.sops.secrets."lldap-jwt-secret".path;
-        ldap_base_dn = "dc=homelab,dc=mantannest,dc=com";
+        ldap_base_dn = "dc=mantannest,dc=com";
         ldap_host = "0.0.0.0";
         ldap_user_dn = "admin";
         ldap_user_email = "admin@ahmedmasood.com";
