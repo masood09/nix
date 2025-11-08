@@ -19,7 +19,6 @@
     ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
 
-    ./services/authelia.nix
     ./services/nginx.nix
     ./services/postgresql.nix
     ./services/redis.nix
