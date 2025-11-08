@@ -97,22 +97,17 @@ in {
               {
                 name = "grafana.mantannest.com";
                 type = "A";
-                value = "100.64.0.8";
-              }
-              {
-                name = "ldap.internal.mantannest.com";
-                type = "A";
-                value = "100.64.0.9";
+                value = "100.64.0.7";
               }
               {
                 name = "passwords.mantannest.com";
                 type = "A";
-                value = "100.64.0.4";
+                value = "100.64.0.3";
               }
               {
                 name = "loki.monitoring.server.mantannest.com";
                 type = "A";
-                value = "100.64.0.8";
+                value = "100.64.0.7";
               }
             ];
           };
