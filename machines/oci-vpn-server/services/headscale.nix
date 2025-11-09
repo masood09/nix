@@ -100,6 +100,11 @@ in {
                 value = "100.64.0.7";
               }
               {
+                name = "photos.mantannest.com";
+                type = "A";
+                value = "100.64.0.3";
+              }
+              {
                 name = "passwords.mantannest.com";
                 type = "A";
                 value = "100.64.0.3";

@@ -1,0 +1,31 @@
+{
+  services.nginx.virtualHosts."photos.mantannest.com" = {
+    forceSSL = true;
+    useACMEHost = "mantannest.com";
+    locations."/" = {
+      proxyPass = "http://immich-host.server.homelab.mantannest.com:2283";
+      proxyWebsockets = true;
+      extraConfig = ''
+        # allow large file uploads
+        client_max_body_size 50000M;
+
+        # Set headers
+        proxy_set_header Host              $host;
+
+        # enable websockets: http://nginx.org/en/docs/http/websocket.html
+        proxy_set_header   Upgrade    $http_upgrade;
+        proxy_set_header   Connection "upgrade";
+        proxy_redirect     off;
+      
+        # set timeout
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+        send_timeout       600s;
+
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      '';
+    };
+  };
+}
