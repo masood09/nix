@@ -20,6 +20,7 @@
 
       paths = [
         "/var/lib/grafana"
+        "/var/lib/prometheus2"
       ];
 
       pruneOpts = [
