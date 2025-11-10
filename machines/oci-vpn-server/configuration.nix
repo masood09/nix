@@ -21,6 +21,7 @@
 
     ./services/nginx.nix
     ./services/headscale.nix
+    ./services/restic.nix
   ];
 
   home-manager = {

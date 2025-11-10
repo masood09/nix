@@ -67,21 +67,6 @@ in {
         owner = "headscale";
         sopsFile = ./../../../secrets/oci-vpn-server.yaml;
       };
-
-      "headscale-authelia-client-secret" = {
-        owner = "headscale";
-        sopsFile = ./../../../secrets/oci-vpn-server.yaml;
-      };
-
-      "restic-env" = {
-        sopsFile = ./../../../secrets/oci-vpn-server.yaml;
-      };
-      "restic-repo" = {
-        sopsFile = ./../../../secrets/oci-vpn-server.yaml;
-      };
-      "restic-password" = {
-        sopsFile = ./../../../secrets/oci-vpn-server.yaml;
-      };
     };
 
     services = {
@@ -142,29 +127,6 @@ in {
 
           policy.path = aclFile;
           server_url = "https://${headscaleDomain}";
-        };
-      };
-
-      restic.backups.localBackup = {
-        initialize = true;
-        environmentFile = config.sops.secrets."restic-env".path;
-        repositoryFile = config.sops.secrets."restic-repo".path;
-        passwordFile = config.sops.secrets."restic-password".path;
-
-        paths = [
-          "/var/lib/headscale"
-        ];
-
-        pruneOpts = [
-          "--keep-daily 24"
-          "--keep-weekly 7"
-          "--keep-monthly 30"
-          "--keep-yearly 12"
-        ];
-
-        timerConfig = {
-          OnCalendar = "*-*-* *:30:00";
-          Persistent = true;
         };
       };
     };
