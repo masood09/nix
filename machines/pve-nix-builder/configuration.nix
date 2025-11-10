@@ -12,10 +12,6 @@
 
     ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
-
-    ./../../services/grafana-alloy.nix
-    ./../../services/systemd-resolved.nix
-    ./../../services/tailscale.nix
   ];
 
   services = {
