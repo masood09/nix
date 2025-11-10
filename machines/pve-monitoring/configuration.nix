@@ -18,6 +18,7 @@
     ./services/nginx.nix
     ./services/grafana.nix
     ./services/grafana-loki.nix
+    ./services/prometheus.nix
     ./services/restic.nix
   ];
 
