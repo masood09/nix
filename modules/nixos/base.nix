@@ -9,6 +9,10 @@
     inputs.sops-nix.nixosModules.sops
 
     ./_packages.nix
+
+    ./../../services/grafana-alloy.nix
+    ./../../services/systemd-resolved.nix
+    ./../../services/tailscale.nix
   ];
 
   boot.loader = {
