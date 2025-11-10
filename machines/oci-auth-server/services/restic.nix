@@ -1,9 +1,5 @@
 {config, ...}: {
   sops.secrets = {
-    "authentik-env" = {
-      sopsFile = ./../../../secrets/oci-auth-server.yaml;
-    };
-
     "restic-env" = {
       sopsFile = ./../../../secrets/oci-auth-server.yaml;
     };
