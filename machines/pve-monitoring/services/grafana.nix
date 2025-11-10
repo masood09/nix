@@ -29,15 +29,17 @@
           }
         ];
 
-        dashboards.settings.providers = [{
-          name = "My Dashboards";
-          disableDeletion = true;
+        dashboards.settings.providers = [
+          {
+            name = "My Dashboards";
+            disableDeletion = true;
 
-          options = {
-            path = "/etc/grafana-dashboards";
-            foldersFromFilesStructure = true;
-          };
-        }];
+            options = {
+              path = "/etc/grafana-dashboards";
+              foldersFromFilesStructure = true;
+            };
+          }
+        ];
       };
 
       settings = {

@@ -48,4 +48,10 @@
       ];
     };
   };
+
+  users.users.alloy = {
+    extraGroups = ["nginx"];
+  };
+
+  environment.etc."alloy/config-nginx.alloy".source = ./../../files/alloy/config-nginx.alloy;
 }

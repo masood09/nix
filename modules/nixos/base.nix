@@ -46,18 +46,29 @@
     secrets."user-password" = {};
   };
 
-  users.mutableUsers = false;
+  users = {
+    mutableUsers = false;
 
-  users.users.${vars.userName} = {
-    isNormalUser = true;
-    description = vars.userName;
-    extraGroups = ["networkmanager" "wheel"];
-    openssh.authorizedKeys.keys = [
-      vars.sshPublicKeyPersonal
-      vars.sshPublicKeyRemoteBuilder
-    ];
-    shell = pkgs.bash;
-    hashedPasswordFile = config.sops.secrets."user-password".path;
+    users = {
+      ${vars.userName} = {
+        isNormalUser = true;
+        description = vars.userName;
+        extraGroups = ["networkmanager" "wheel"];
+        openssh.authorizedKeys.keys = [
+          vars.sshPublicKeyPersonal
+          vars.sshPublicKeyRemoteBuilder
+        ];
+        shell = pkgs.bash;
+        hashedPasswordFile = config.sops.secrets."user-password".path;
+      };
+
+      alloy = {
+        isSystemUser = true;
+        group = "alloy";
+      };
+    };
+
+    groups.alloy = {};
   };
 
   services = {
