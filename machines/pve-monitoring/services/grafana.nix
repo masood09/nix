@@ -21,7 +21,23 @@
             access = "proxy";
             url = "http://127.0.0.1:3100";
           }
+          {
+            name = "Prometheus";
+            type = "prometheus";
+            access = "proxy";
+            url = "http://127.0.0.1:9090";
+          }
         ];
+
+        dashboards.settings.providers = [{
+          name = "My Dashboards";
+          disableDeletion = true;
+
+          options = {
+            path = "/etc/grafana-dashboards";
+            foldersFromFilesStructure = true;
+          };
+        }];
       };
 
       settings = {
@@ -59,4 +75,6 @@
   systemd.tmpfiles.rules = [
     "d /var/lib/grafana 0700 grafana grafana -"
   ];
+
+  environment.etc."grafana-dashboards/node-exporter-full.json".source = ./../../../files/grafana/dashboards/node-exporter-full.json;
 }

@@ -44,7 +44,10 @@
     interfaces.enp0s6.useDHCP = true;
 
     hosts = {
-      "100.64.0.7" = ["loki.monitoring.server.mantannest.com"];
+      "100.64.0.7" = [
+        "loki.monitoring.server.mantannest.com"
+        "prometheus.monitoring.server.mantannest.com"
+      ];
     };
   };
 }

@@ -99,6 +99,11 @@ in {
                 type = "A";
                 value = "100.64.0.7";
               }
+              {
+                name = "prometheus.monitoring.server.mantannest.com";
+                type = "A";
+                value = "100.64.0.7";
+              }
             ];
           };
 
