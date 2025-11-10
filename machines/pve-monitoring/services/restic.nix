@@ -19,6 +19,7 @@
       passwordFile = config.sops.secrets."restic-password".path;
 
       paths = [
+        "/var/lib/grafana"
       ];
 
       pruneOpts = [
