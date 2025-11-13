@@ -6,7 +6,6 @@
 }: let
   pkgs-unstable = import inputs.nixpkgs-unstable {
     inherit (pkgs) system;
-    config.allowUnfree = true;
   };
 in {
   disabledModules = ["services/monitoring/alloy.nix"];

@@ -5,7 +5,18 @@
 }: let
   pkgs-unstable = import inputs.nixpkgs-unstable {
     inherit (pkgs) system;
-    config.allowUnfree = true;
+    config = {
+      allowUnfree = true;
+      dontPatchELF = true;
+
+      packageOverrides = pkgs: {
+        inherit (pkgs) stdenv;
+      };
+
+      documentation.enable = false;
+      man.enable = false;
+      info.enable = false;
+    };
   };
 in {
   imports = [
