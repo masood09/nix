@@ -13,6 +13,11 @@
     ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
     ./../../modules/nixos/remote-unlock.nix
+
+    ./services/_podman.nix
+    ./services/acme.nix
+    ./services/homeassistant.nix
+    ./services/nginx.nix
   ];
 
   home-manager = {
