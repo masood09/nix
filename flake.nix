@@ -103,6 +103,7 @@
     };
 
     nixosConfigurations = {
+      oci-proxy-server = mkNixOSConfig ./machines/oci-proxy-server/configuration.nix;
       oci-auth-server = mkNixOSConfig ./machines/oci-auth-server/configuration.nix;
       oci-vpn-server = mkNixOSConfig ./machines/oci-vpn-server/configuration.nix;
 
