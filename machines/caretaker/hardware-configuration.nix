@@ -65,7 +65,7 @@
   };
 
   networking = {
-    hostName = "arada";
+    hostName = "caretaker";
     dhcpcd.enable = false;
     useDHCP = false;
     useNetworkd = true;
