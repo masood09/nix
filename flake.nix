@@ -103,7 +103,7 @@
     };
 
     nixosConfigurations = {
-      arada = mkNixOSConfig ./machines/arada/configuration.nix;
+      caretaker = mkNixOSConfig ./machines/caretaker/configuration.nix;
 
       oci-proxy-server = mkNixOSConfig ./machines/oci-proxy-server/configuration.nix;
       oci-auth-server = mkNixOSConfig ./machines/oci-auth-server/configuration.nix;

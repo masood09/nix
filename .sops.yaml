@@ -1,14 +1,14 @@
 keys:
   - &murderbot
     age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
+  - &caretaker
+    age1gqvw59226drpwn8942x55jcf5zca5gfupj9eppmeagfevx3pupzs78dfs6
   - &oci-proxy-server
     age12n44qwj28glz06dhzkzxgy7ff85y7yw0kcwn99zycclwm6qmsgnsapws5a
   - &oci-auth-server
     age18lt8cq0zcj468qsd7xzjj2mayl557sf4g8jy6mde429v926g0sjsmj3d53
   - &oci-vpn-server
     age1x3fnwasxkjjsr2c9ygrtu47yugwvvrt87vx86k9dn5z69v5csfpsk2n0j3
-  - &arada
-    age1gqvw59226drpwn8942x55jcf5zca5gfupj9eppmeagfevx3pupzs78dfs6
   - &pve-app-1
     age1vs8ffqtt3hfdtur82tv59z6kfwf27nk4e46nrkrj79jcmuxdsy2sag38sf
   - &pve-database
@@ -25,10 +25,10 @@ creation_rules:
     key_groups:
       - age:
           - *murderbot
+          - *caretaker
           - *oci-proxy-server
           - *oci-auth-server
           - *oci-vpn-server
-          - *arada
           - *pve-app-1
           - *pve-database
           - *pve-monitoring
