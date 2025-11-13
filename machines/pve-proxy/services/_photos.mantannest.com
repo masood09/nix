@@ -1,7 +1,8 @@
 {
   services.nginx.virtualHosts."photos.mantannest.com" = {
     forceSSL = true;
-    useACMEHost = "mantannest.com";
+    useACMEHost = "photos.mantannest.com";
+
     locations."/" = {
       proxyPass = "http://immich-host.server.homelab.mantannest.com:2283";
       proxyWebsockets = true;

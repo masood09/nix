@@ -14,8 +14,7 @@
     ./../../modules/nixos/base.nix
     ./../../modules/nixos/remote-unlock.nix
 
-    ./../../services/_acme.nix
-
+    ./services/acme.nix
     ./services/nginx.nix
     ./services/headscale.nix
     ./services/restic.nix

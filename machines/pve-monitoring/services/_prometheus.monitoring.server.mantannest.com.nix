@@ -8,7 +8,8 @@
 
   services.nginx.virtualHosts."prometheus.monitoring.server.mantannest.com" = {
     forceSSL = true;
-    useACMEHost = "monitoring.server.mantannest.com";
+    useACMEHost = "prometheus.monitoring.server.mantannest.com";
+
     locations = {
       "/" = {
         basicAuthFile = config.sops.secrets."nginx-prometheus-auth".path;
