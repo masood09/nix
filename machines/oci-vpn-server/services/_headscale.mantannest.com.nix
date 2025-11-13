@@ -1,11 +1,12 @@
 {
-  services.nginx.virtualHosts."vpn.mantannest.com" = {
+  services.nginx.virtualHosts."headscale.mantannest.com" = {
     forceSSL = true;
-    useACMEHost = "mantannest.com";
+    useACMEHost = "headscale.mantannest.com";
 
     locations."/" = {
-      proxyPass = "http://127.0.0.1:3009";
+      proxyPass = "http://127.0.0.1:8080";
       proxyWebsockets = true;
+
       extraConfig = ''
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;

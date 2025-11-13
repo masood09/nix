@@ -73,7 +73,7 @@ in {
       headscale = {
         enable = true;
         adminUser = "admin";
-        port = 3009;
+
         settings = {
           dns = {
             base_domain = "dns.headscale.mantannest.com";

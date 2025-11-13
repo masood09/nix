@@ -1,7 +1,8 @@
 {
   services.nginx.virtualHosts."passwords.mantannest.com" = {
     forceSSL = true;
-    useACMEHost = "mantannest.com";
+    useACMEHost = "passwords.mantannest.com";
+
     locations."/" = {
       proxyPass = "http://pve-app-1:8222";
       proxyWebsockets = true;

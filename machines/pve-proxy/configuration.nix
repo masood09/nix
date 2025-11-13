@@ -14,7 +14,7 @@
     ./../../modules/nixos/base.nix
     ./../../modules/nixos/distributed-builds-x86_64_linux.nix
 
-    ./../../services/_acme.nix
+    ./services/acme.nix
     ./services/nginx.nix
   ];
 

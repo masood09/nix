@@ -8,7 +8,8 @@
 
   services.nginx.virtualHosts."loki.monitoring.server.mantannest.com" = {
     forceSSL = true;
-    useACMEHost = "monitoring.server.mantannest.com";
+    useACMEHost = "loki.monitoring.server.mantannest.com";
+
     locations."/" = {
       basicAuthFile = config.sops.secrets."nginx-loki-auth".path;
       proxyPass = "http://127.0.0.1:3100";
