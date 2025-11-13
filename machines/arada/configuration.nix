@@ -13,6 +13,8 @@
     ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
     ./../../modules/nixos/remote-unlock.nix
+
+    ./services/ups.nix
   ];
 
   home-manager = {
