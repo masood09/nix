@@ -11,4 +11,14 @@
       ];
     };
   };
+
+  environment.persistence."/nix/persist" = {
+    directories = [
+      "/var/lib/prometheus2"
+    ];
+  };
+
+  systemd.tmpfiles.rules = [
+    "d /var/lib/prometheus2 0700 prometheus prometheus2 -"
+  ];
 }
