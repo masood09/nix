@@ -44,6 +44,7 @@ in {
       nixfmt-rfc-style
       nixos-rebuild # need for macOS
       oci-cli
+      ollama
       opentofu
       pkgs-unstable.vscode-json-languageserver
       restic
