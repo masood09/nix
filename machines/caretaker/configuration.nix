@@ -17,6 +17,7 @@
     ./services/_podman.nix
     ./services/acme.nix
     ./services/homeassistant.nix
+    ./services/openwebui.nix
     ./services/nginx.nix
   ];
 
