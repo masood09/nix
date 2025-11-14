@@ -19,6 +19,7 @@
     ./services/homeassistant.nix
     ./services/openwebui.nix
     ./services/nginx.nix
+    ./services/unifi-network-mcp.nix
   ];
 
   home-manager = {
