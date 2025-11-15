@@ -50,7 +50,7 @@
     "/" = {
       device = "none";
       fsType = "tmpfs";
-      options = ["defaults" "size=4G" "mode=0755"];
+      options = ["defaults" "size=20G" "mode=0755"];
     };
     "/boot" = {
       device = "/dev/nvme0n1p1";
