@@ -4,15 +4,12 @@
   vars,
   ...
 }: {
-  imports = [
-    inputs.nix-homebrew.darwinModules.nix-homebrew
-  ];
-
   nix-homebrew = {
     enable = true;
     user = vars.userName;
     mutableTaps = false;
     taps = {
+      "acsandmann/homebrew-tap" = inputs.homebrew-acsandmann;
       "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
       "homebrew/homebrew-core" = inputs.homebrew-core;
@@ -30,6 +27,7 @@
       cleanup = "zap";
     };
     brews = [
+      "acsandmann/tap/rift"
     ];
     taps = builtins.attrNames config.nix-homebrew.taps;
     casks = [
