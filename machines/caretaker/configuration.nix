@@ -3,7 +3,8 @@
   outputs,
   vars,
   ...
-}: {
+}:
+{
   imports = [
     inputs.home-manager.nixosModules.home-manager
     inputs.impermanence.nixosModules.impermanence
@@ -16,13 +17,14 @@
 
     ./services/_podman.nix
     ./services/acme.nix
+    ./services/blocky.nix
     ./services/dockge.nix
     ./services/homeassistant.nix
     ./services/nginx.nix
   ];
 
   home-manager = {
-    extraSpecialArgs = {inherit inputs outputs vars;};
+    extraSpecialArgs = { inherit inputs outputs vars; };
     useGlobalPkgs = true;
     useUserPackages = true;
     users = {
