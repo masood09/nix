@@ -43,8 +43,10 @@ in {
       nil
       nixfmt-rfc-style
       nixos-rebuild # need for macOS
+      nodejs
       oci-cli
       ollama
+      pkgs-unstable.opencode
       opentofu
       pkgs-unstable.vscode-json-languageserver
       restic
@@ -55,6 +57,7 @@ in {
       terraform-ls
       yaml-language-server
       yq-go
+      uv
     ];
   };
 }
