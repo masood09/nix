@@ -41,6 +41,7 @@
       "ghostty"
       "hyperkey"
       "lm-studio"
+      "obsidian"
       "opencloud"
       "pgadmin4"
       "raycast"
