@@ -26,6 +26,11 @@
       url = "github:zhaofengli-wip/nix-homebrew";
     };
 
+    homebrew-acsandmann = {
+      url = "github:acsandmann/homebrew-tap";
+      flake = false;
+    };
+
     homebrew-bundle = {
       url = "github:homebrew/homebrew-bundle";
       flake = false;
@@ -87,9 +92,7 @@
       nix-darwin.lib.darwinSystem {
         specialArgs = {inherit inputs outputs vars;};
         modules = [
-          ({config, ...}: {
-            homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
-          })
+          inputs.nix-homebrew.darwinModules.nix-homebrew
           inputs.home-manager.darwinModules.home-manager
           path
         ];
