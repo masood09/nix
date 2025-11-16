@@ -33,6 +33,7 @@
     ];
     taps = builtins.attrNames config.nix-homebrew.taps;
     casks = [
+      "anythingllm"
       "appcleaner"
       "balenaetcher"
       "discord"
