@@ -38,7 +38,6 @@
       "docker-desktop"
       "emacs-app"
       "ghostty"
-      "hyperkey"
       "lm-studio"
       "obsidian"
       "opencloud"
