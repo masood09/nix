@@ -85,6 +85,11 @@ in {
                 value = "100.64.0.7";
               }
               {
+                name = "keep.mantannest.com";
+                type = "A";
+                value = "100.64.0.13";
+              }
+              {
                 name = "homeassistant.mantannest.com";
                 type = "A";
                 value = "100.64.0.13";
