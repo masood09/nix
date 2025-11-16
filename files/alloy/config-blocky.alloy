@@ -1,0 +1,9 @@
+prometheus.scrape "blocy_target" {
+  targets = [
+    {
+      __address__ = "127.0.0.1:4000",
+    },
+  ]
+
+  forward_to = [prometheus.remote_write.metrics_service.receiver]
+}
