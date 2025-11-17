@@ -1,4 +1,6 @@
 keys:
+  - &nastest
+    age1xaxdc27aewz9mpy8fsajlmyz3nfrd44nflgataqsrq0ltnejzuasva38a9
   - &murderbot
     age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
   - &caretaker
@@ -24,6 +26,7 @@ creation_rules:
   - path_regex: secrets/secrets\.yaml$
     key_groups:
       - age:
+          - *nastest
           - *murderbot
           - *caretaker
           - *oci-proxy-server
