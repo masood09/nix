@@ -6,6 +6,7 @@
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     impermanence.url = "github:nix-community/impermanence";
+    disko.url = "github:nix-community/disko";
 
     home-manager = {
       url = "github:nix-community/home-manager/release-25.05";
@@ -111,6 +112,7 @@
 
     nixosConfigurations = {
       caretaker = mkNixOSConfig ./machines/caretaker/configuration.nix;
+      nastest = mkNixOSConfig ./machines/nastest/configuration.nix;
 
       oci-proxy-server = mkNixOSConfig ./machines/oci-proxy-server/configuration.nix;
       oci-auth-server = mkNixOSConfig ./machines/oci-auth-server/configuration.nix;
