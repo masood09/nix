@@ -1,5 +1,4 @@
-{ config, ... }:
-{
+{config, ...}: {
   sops.secrets = {
     "grafana-authentik-client-secret" = {
       owner = "grafana";
@@ -57,8 +56,7 @@
         "auth.generic_oauth".auth_url = "https://auth.mantannest.com/application/o/authorize/";
         "auth.generic_oauth".token_url = "https://auth.mantannest.com/application/o/token/";
         "auth.generic_oauth".api_url = "https://auth.mantannest.com/application/o/userinfo/";
-        "auth.generic_oauth".role_attribute_path =
-          "contains(groups, 'Homelab Admins') && 'Admin' || 'Viewer'";
+        "auth.generic_oauth".role_attribute_path = "contains(groups, 'Homelab Admins') && 'Admin' || 'Viewer'";
 
         analytics.reporting_enabled = false;
 

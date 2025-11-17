@@ -3,8 +3,7 @@
   outputs,
   vars,
   ...
-}:
-{
+}: {
   imports = [
     inputs.home-manager.nixosModules.home-manager
     inputs.impermanence.nixosModules.impermanence
@@ -24,7 +23,7 @@
   ];
 
   home-manager = {
-    extraSpecialArgs = { inherit inputs outputs vars; };
+    extraSpecialArgs = {inherit inputs outputs vars;};
     useGlobalPkgs = true;
     useUserPackages = true;
     users = {

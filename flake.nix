@@ -73,7 +73,11 @@
     inherit (self) outputs;
     vars = import ./vars.nix;
 
-    systems = ["x86_64-linux" "aarch64-darwin" "aarch64-linux"];
+    systems = [
+      "x86_64-linux"
+      "aarch64-darwin"
+      "aarch64-linux"
+    ];
     forAllSystems = nixpkgs.lib.genAttrs systems;
 
     mkNixOSConfig = path:
