@@ -32,6 +32,26 @@
       flake = false;
     };
 
+    homebrew-jackielii-tap = {
+      url = "github:jackielii/homebrew-tap";
+      flake = false;
+    };
+
+    homebrew-sketchybar-tap = {
+      url = "github:FelixKratz/homebrew-formulae";
+      flake = false;
+    };
+
+    homebrew-emacs-plus = {
+      url = "github:d12frosted/homebrew-emacs-plus";
+      flake = false;
+    };
+
+    homebrew-koekeishiya-yabai = {
+      url = "github:koekeishiya/homebrew-formulae";
+      flake = false;
+    };
+
     homebrew-bundle = {
       url = "github:homebrew/homebrew-bundle";
       flake = false;

@@ -10,9 +10,13 @@
     mutableTaps = false;
     taps = {
       "acsandmann/homebrew-tap" = inputs.homebrew-acsandmann;
+      "d12frosted/homebrew-emacs-plus" = inputs.homebrew-emacs-plus;
+      "jackielii/homebrew-tap" = inputs.homebrew-jackielii-tap;
+      "FelixKratz/homebrew-formulae" = inputs.homebrew-sketchybar-tap;
       "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
       "homebrew/homebrew-core" = inputs.homebrew-core;
+      "koekeishiya/homebrew-formulae" = inputs.homebrew-koekeishiya-yabai;
     };
   };
 
@@ -28,6 +32,10 @@
     };
     brews = [
       "acsandmann/tap/rift"
+      "d12frosted/emacs-plus/emacs-plus"
+      "jackielii/tap/skhd-zig"
+      "koekeishiya/formulae/yabai"
+      "sketchybar"
     ];
     taps = builtins.attrNames config.nix-homebrew.taps;
     casks = [
@@ -36,13 +44,13 @@
       "balenaetcher"
       "discord"
       "docker-desktop"
-      "emacs-app"
       "ghostty"
       "lm-studio"
       "obsidian"
       "opencloud"
       "pgadmin4"
       "raycast"
+      "spacelauncher"
       "tailscale-app"
       "zoom"
       "zen"

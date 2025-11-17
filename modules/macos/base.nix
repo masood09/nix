@@ -95,6 +95,7 @@
       WindowManager = {
         StageManagerHideWidgets = true;
         StandardHideWidgets = true;
+        EnableStandardClickToShowDesktop = false;
       };
 
       controlcenter.BatteryShowPercentage = true;
@@ -156,6 +157,8 @@
         Clicking = true;
         TrackpadRightClick = true;
       };
+
+      universalaccess.reduceMotion = true;
     };
 
     keyboard = {
@@ -171,7 +174,7 @@
       entries = [
         {path = "/Applications/Zen.app";}
         {path = "/Applications/Ghostty.app";}
-        {path = "/Applications/Emacs.app";}
+        {path = "/opt/homebrew/Cellar/emacs-plus@30/30.2/Emacs.app";}
         {path = "/Applications/Discord.app";}
         {path = "/System/Applications/Messages.app";}
         {path = "/System/Applications/Reminders.app";}
