@@ -200,11 +200,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1763443774,
-        "narHash": "sha256-TrYLDfH2VSCEH1LRGViT++v1hrtw4IImISv/FP0XwuE=",
+        "lastModified": 1763475399,
+        "narHash": "sha256-loHvKAUCpR7r9CU7SfAetyin/g8iEgkFBsLHmpkvhEo=",
         "owner": "wamserma",
         "repo": "flake-programs-sqlite",
-        "rev": "12b82ceb7eefac23ee1d4d905380a43bf891057f",
+        "rev": "28758b765777bced763a0fa46f38e8b2060c51ca",
         "type": "github"
       },
       "original": {
@@ -234,22 +234,6 @@
         "type": "github"
       }
     },
-    "homebrew-acsandmann": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1763071783,
-        "narHash": "sha256-ce0VbTaLHDV1iDvJDJaWvaS6y4PDoX2coz1bswRJYkA=",
-        "owner": "acsandmann",
-        "repo": "homebrew-tap",
-        "rev": "747cf889fd6c7cce25e5d49e150e80e102022ee9",
-        "type": "github"
-      },
-      "original": {
-        "owner": "acsandmann",
-        "repo": "homebrew-tap",
-        "type": "github"
-      }
-    },
     "homebrew-bundle": {
       "flake": false,
       "locked": {
@@ -269,11 +253,11 @@
     "homebrew-cask": {
       "flake": false,
       "locked": {
-        "lastModified": 1763459405,
-        "narHash": "sha256-MOEqkK7lq2Zj8nZo4pg+QbOgKBedjV0M9QdcAyxq7xI=",
+        "lastModified": 1763476000,
+        "narHash": "sha256-d3Q351WGUryMHmJ6Ux0UMKMId3GsUscNmfGHx+NK0zU=",
         "owner": "homebrew",
         "repo": "homebrew-cask",
-        "rev": "fd9456087eb6bad50b17e5a89dfd970f412a4188",
+        "rev": "663a79d3d94cad9eb463ad3b2051e082852d3ae3",
         "type": "github"
       },
       "original": {
@@ -285,11 +269,11 @@
     "homebrew-core": {
       "flake": false,
       "locked": {
-        "lastModified": 1763456626,
-        "narHash": "sha256-kD3eH5OhDaL5PQ9C1WJLkP5pKzQW5uM9LYdcBrFMjrc=",
+        "lastModified": 1763477459,
+        "narHash": "sha256-wWd1EUxMLGBQ3CvapvfZFoOoO1xamKuxr6kLMG2OwU8=",
         "owner": "homebrew",
         "repo": "homebrew-core",
-        "rev": "a9c8680538e33895ca1b5b3d2464837e588ef404",
+        "rev": "a7de5bf6ad4e6da8177b2a8ffcf140361ed0e159",
         "type": "github"
       },
       "original": {
@@ -311,22 +295,6 @@
       "original": {
         "owner": "d12frosted",
         "repo": "homebrew-emacs-plus",
-        "type": "github"
-      }
-    },
-    "homebrew-jackielii-tap": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1760860123,
-        "narHash": "sha256-6eSSUN6GeuxUTGbPTRA0uEq6Wd1/tE5Uxc2viGwqTcs=",
-        "owner": "jackielii",
-        "repo": "homebrew-tap",
-        "rev": "320275797a3c8b90904d4a951cd74661840cde1c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "jackielii",
-        "repo": "homebrew-tap",
         "type": "github"
       }
     },
@@ -617,12 +585,10 @@
         "disko": "disko",
         "fps": "fps",
         "home-manager": "home-manager",
-        "homebrew-acsandmann": "homebrew-acsandmann",
         "homebrew-bundle": "homebrew-bundle",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
         "homebrew-emacs-plus": "homebrew-emacs-plus",
-        "homebrew-jackielii-tap": "homebrew-jackielii-tap",
         "homebrew-koekeishiya-yabai": "homebrew-koekeishiya-yabai",
         "homebrew-sketchybar-tap": "homebrew-sketchybar-tap",
         "impermanence": "impermanence",
