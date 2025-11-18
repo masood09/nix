@@ -9,9 +9,7 @@
     user = vars.userName;
     mutableTaps = false;
     taps = {
-      "acsandmann/homebrew-tap" = inputs.homebrew-acsandmann;
       "d12frosted/homebrew-emacs-plus" = inputs.homebrew-emacs-plus;
-      "jackielii/homebrew-tap" = inputs.homebrew-jackielii-tap;
       "FelixKratz/homebrew-formulae" = inputs.homebrew-sketchybar-tap;
       "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
@@ -31,9 +29,7 @@
       cleanup = "zap";
     };
     brews = [
-      "acsandmann/tap/rift"
       "d12frosted/emacs-plus/emacs-plus"
-      "jackielii/tap/skhd-zig"
       "koekeishiya/formulae/yabai"
       "sketchybar"
     ];

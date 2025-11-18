@@ -27,16 +27,6 @@
       url = "github:zhaofengli-wip/nix-homebrew";
     };
 
-    homebrew-acsandmann = {
-      url = "github:acsandmann/homebrew-tap";
-      flake = false;
-    };
-
-    homebrew-jackielii-tap = {
-      url = "github:jackielii/homebrew-tap";
-      flake = false;
-    };
-
     homebrew-sketchybar-tap = {
       url = "github:FelixKratz/homebrew-formulae";
       flake = false;

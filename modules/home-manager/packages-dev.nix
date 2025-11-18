@@ -46,7 +46,6 @@ in {
       nodejs
       oci-cli
       ollama
-      pkgs-unstable.opencode
       opentofu
       pkgs-unstable.vscode-json-languageserver
       restic
