@@ -35,18 +35,16 @@
     ];
     taps = builtins.attrNames config.nix-homebrew.taps;
     casks = [
-      "anythingllm"
       "appcleaner"
       "balenaetcher"
       "discord"
       "docker-desktop"
       "ghostty"
-      "lm-studio"
+      "karabiner-elements"
       "obsidian"
       "opencloud"
       "pgadmin4"
       "raycast"
-      "spacelauncher"
       "tailscale-app"
       "zoom"
       "zen"
