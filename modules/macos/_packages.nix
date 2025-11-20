@@ -11,6 +11,7 @@
     taps = {
       "d12frosted/homebrew-emacs-plus" = inputs.homebrew-emacs-plus;
       "FelixKratz/homebrew-formulae" = inputs.homebrew-sketchybar-tap;
+      "jackielii/homebrew-tap" = inputs.homebrew-jackielii-tap;
       "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
       "homebrew/homebrew-core" = inputs.homebrew-core;
@@ -31,6 +32,7 @@
     brews = [
       "d12frosted/emacs-plus/emacs-plus"
       "koekeishiya/formulae/yabai"
+      "jackielii/tap/skhd-zig"
       "sketchybar"
     ];
     taps = builtins.attrNames config.nix-homebrew.taps;
