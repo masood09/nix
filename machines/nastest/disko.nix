@@ -11,7 +11,7 @@ in {
 
         content = {
           type = "gpt";
-          
+
           partitions = {
             efi = {
               size = "256M";
@@ -22,7 +22,7 @@ in {
                 mountpoint = "/boot/efis/${disk1}-part2";
               };
             };
-            
+
             bpool = {
               size = "1G";
               content = {
@@ -30,7 +30,7 @@ in {
                 pool = "bpool";
               };
             };
-            
+
             rpool = {
               end = "-1M";
               content = {
@@ -38,7 +38,7 @@ in {
                 pool = "rpool";
               };
             };
-            
+
             bios = {
               size = "100%";
               type = "EF02";
@@ -46,14 +46,14 @@ in {
           };
         };
       };
-      
+
       mirror = {
         type = "disk";
         device = "/dev/disk/by-id/${disk2}";
-        
+
         content = {
           type = "gpt";
-          
+
           partitions = {
             efi = {
               size = "256M";
@@ -64,7 +64,7 @@ in {
                 mountpoint = "/boot/efis/${disk2}-part2";
               };
             };
-            
+
             bpool = {
               size = "1G";
               content = {
@@ -72,7 +72,7 @@ in {
                 pool = "bpool";
               };
             };
-            
+
             rpool = {
               end = "-1M";
               content = {
@@ -80,7 +80,7 @@ in {
                 pool = "rpool";
               };
             };
-            
+
             bios = {
               size = "100%";
               type = "EF02";
@@ -89,18 +89,18 @@ in {
         };
       };
     };
-    
+
     zpool = {
       bpool = {
         type = "zpool";
         mode = "mirror";
-        
+
         options = {
           ashift = "12";
           autotrim = "on";
           compatibility = "grub2";
         };
-        
+
         rootFsOptions = {
           acltype = "posixacl";
           canmount = "off";
@@ -111,14 +111,14 @@ in {
           xattr = "sa";
           "com.sun:auto-snapshot" = "false";
         };
-        
+
         mountpoint = "/boot";
         datasets = {
           nixos = {
             type = "zfs_fs";
             options.mountpoint = "none";
           };
-          
+
           "nixos/root" = {
             type = "zfs_fs";
             options.mountpoint = "legacy";
@@ -126,7 +126,7 @@ in {
           };
         };
       };
-      
+
       rpool = {
         type = "zpool";
         mode = "mirror";

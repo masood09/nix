@@ -30,11 +30,11 @@
 
         mirroredBoots = [
           {
-            devices = [ "nodev" ];
+            devices = ["nodev"];
             path = "/boot/efis/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0-part2";
           }
           {
-            devices = [ "nodev" ];
+            devices = ["nodev"];
             path = "/boot/efis/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1-part2";
           }
         ];

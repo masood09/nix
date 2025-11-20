@@ -6,12 +6,10 @@
   vars,
   pkgs,
   ...
-}:
-let
+}: let
   userName = "masoodahmed";
   sshPublicKeyPersonal = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfTOXZ6W+DhUQcytGQ1ob+eFPQwbyiTB8wXnRSiYqpK";
-in
-{
+in {
   imports = [
     inputs.nixpkgs.nixosModules.notDetected
     inputs.disko.nixosModules.disko
