@@ -54,6 +54,7 @@ in {
       stylelint
       terraform
       terraform-ls
+      texliveFull
       yaml-language-server
       yq-go
       uv
