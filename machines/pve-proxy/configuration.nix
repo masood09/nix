@@ -2,6 +2,7 @@
   config,
   inputs,
   outputs,
+  lib,
   ...
 }: let
   homelabCfg = config.homelab;
@@ -39,12 +40,13 @@ in {
     };
   };
 
-  networking = {
+  homelab.networking = {
     hostName = "pve-proxy";
-    dhcpcd.enable = false;
-    useNetworkd = true;
-    interfaces.ens18.useDHCP = true;
+    primaryInterface = "ens18";
   };
+
+  systemd.network.networks."tailscale0".dns = lib.mkForce [];
+  systemd.network.networks."tailscale0".domains = lib.mkForce [];
 
   users.users.alloy = {
     extraGroups = ["nginx"];

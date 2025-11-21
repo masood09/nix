@@ -3,6 +3,10 @@
   pkgs,
   ...
 }: {
+  imports = [
+    ./networking
+  ];
+
   options.homelab = {
     impermanence = lib.mkOption {
       default = true;

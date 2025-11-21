@@ -7,6 +7,7 @@
 in {
   imports = [
     ./_dock.nix
+    ./_networking.nix
     ./_packages.nix
   ];
 

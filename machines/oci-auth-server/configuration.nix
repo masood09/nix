@@ -39,17 +39,15 @@ in {
     };
   };
 
-  networking = {
-    hostName = "oci-auth-server";
-    dhcpcd.enable = false;
-    useNetworkd = true;
-    interfaces.enp0s6.useDHCP = true;
+  homelab = {
+    networking = {
+      hostName = "oci-auth-server";
+      primaryInterface = "enp0s6";
 
-    hosts = {
-      "100.64.0.7" = [
-        "loki.monitoring.server.mantannest.com"
-        "prometheus.monitoring.server.mantannest.com"
-      ];
+      extraHosts = ''
+        100.64.0.7 loki.monitoring.server.mantannest.com
+        100.64.0.7 prometheus.monitoring.server.mantannest.com
+      '';
     };
   };
 

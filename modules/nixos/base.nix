@@ -2,6 +2,7 @@
   homelabCfg = config.homelab;
 in {
   imports = [
+    ./_networking.nix
     ./_packages.nix
 
     ./../../services/grafana-alloy.nix

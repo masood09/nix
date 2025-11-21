@@ -4,7 +4,7 @@
     useACMEHost = "passwords.mantannest.com";
 
     locations."/" = {
-      proxyPass = "http://pve-app-1:8222";
+      proxyPass = "http://pve-app-1.server.homelab.mantannest.com:8222";
       proxyWebsockets = true;
       extraConfig = ''
         proxy_set_header X-Real-IP $remote_addr;

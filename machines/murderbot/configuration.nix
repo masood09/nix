@@ -14,6 +14,14 @@ in {
     ./../../modules/macos/base.nix
   ];
 
+  homelab = {
+    networking = {
+      hostName = "murderbot";
+      computerName = "murderbot";
+      localHostName = "murderbot";
+    };
+  };
+
   home-manager = {
     extraSpecialArgs = {
       inherit inputs outputs homelabCfg;
@@ -32,11 +40,5 @@ in {
         ];
       };
     };
-  };
-
-  networking = {
-    hostName = "murderbot";
-    computerName = "murderbot";
-    localHostName = "murderbot";
   };
 }

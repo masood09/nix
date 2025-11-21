@@ -8,7 +8,6 @@
 in {
   imports = [
     ./../../modules/nixos/oci-hardware-configuration.nix
-    ./../../modules/nixos/oci-network-configuration.nix
 
     ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
@@ -36,7 +35,17 @@ in {
     };
   };
 
-  networking.hostName = "oci-proxy-server";
+  homelab = {
+    networking = {
+      hostName = "oci-proxy-server";
+      primaryInterface = "enp0s6";
+
+      extraHosts = ''
+        100.64.0.7 loki.monitoring.server.mantannest.com
+        100.64.0.7 prometheus.monitoring.server.mantannest.com
+      '';
+    };
+  };
 
   users.users.alloy = {
     extraGroups = ["nginx"];
