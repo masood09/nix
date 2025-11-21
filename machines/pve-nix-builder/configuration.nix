@@ -54,10 +54,8 @@ in {
 
   nix.settings.trusted-users = ["remotebuild"];
 
-  networking = {
+  homelab.networking = {
     hostName = "pve-nix-builder";
-    dhcpcd.enable = false;
-    useNetworkd = true;
-    interfaces.ens18.useDHCP = true;
+    primaryInterface = "ens18";
   };
 }

@@ -28,6 +28,7 @@ in {
 
     useGlobalPkgs = true;
     useUserPackages = true;
+
     users = {
       ${homelabCfg.primaryUser.userName} = {
         imports = [
@@ -35,6 +36,13 @@ in {
           ./../../modules/home-manager/packages-server.nix
         ];
       };
+    };
+  };
+
+  homelab = {
+    networking = {
+      hostName = "caretaker";
+      primaryInterface = "enp1s0";
     };
   };
 }

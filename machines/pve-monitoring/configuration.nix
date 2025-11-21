@@ -43,11 +43,9 @@ in {
     };
   };
 
-  networking = {
+  homelab.networking = {
     hostName = "pve-monitoring";
-    dhcpcd.enable = false;
-    useNetworkd = true;
-    interfaces.ens18.useDHCP = true;
+    primaryInterface = "ens18";
   };
 
   users.users.alloy = {

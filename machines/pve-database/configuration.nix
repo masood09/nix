@@ -39,10 +39,8 @@ in {
     };
   };
 
-  networking = {
+  homelab.networking = {
     hostName = "pve-database";
-    dhcpcd.enable = false;
-    useNetworkd = true;
-    interfaces.ens18.useDHCP = true;
+    primaryInterface = "ens18";
   };
 }

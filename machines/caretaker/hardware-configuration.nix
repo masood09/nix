@@ -64,15 +64,6 @@
     };
   };
 
-  networking = {
-    hostName = "caretaker";
-    dhcpcd.enable = false;
-    useDHCP = false;
-    useNetworkd = true;
-    wireless.enable = false;
-    enableIPv6 = false;
-  };
-
   systemd.network = {
     enable = true;
 
