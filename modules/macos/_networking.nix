@@ -2,9 +2,11 @@
   config,
   ...
 }: let
-  homelabCfg = config.homelab;
+  cfg = config.homelab.networking;
 in {
   networking = {
-    inherit (homelabCfg.networking) hostName computerName localHostName;
+    inherit (cfg) hostName;
+    computerName = cfg.hostName;
+    localHostName = cfg.hostName;
   };
 }

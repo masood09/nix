@@ -10,22 +10,6 @@
       '';
     };
 
-    computerName = lib.mkOption {
-      default = "";
-      type = lib.types.str;
-      description = ''
-        The hostname of the machine.
-      '';
-    };
-
-    localHostName = lib.mkOption {
-      default = "";
-      type = lib.types.str;
-      description = ''
-        The hostname of the machine.
-      '';
-    };
-
     dhcpcd_enable = lib.mkOption {
       default = false;
       type = lib.types.bool;
