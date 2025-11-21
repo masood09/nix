@@ -101,6 +101,7 @@
         specialArgs = {inherit inputs outputs vars;};
 
         modules = [
+          inputs.sops-nix.nixosModules.sops
           inputs.fps.nixosModules.programs-sqlite
           inputs.home-manager.nixosModules.home-manager
           inputs.authentik-nix.nixosModules.default
