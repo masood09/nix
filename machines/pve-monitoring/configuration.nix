@@ -5,9 +5,6 @@
   ...
 }: {
   imports = [
-    inputs.home-manager.nixosModules.home-manager
-    inputs.impermanence.nixosModules.impermanence
-
     ./../../modules/nixos/pve-hardware-configuration.nix
 
     ./../../modules/nixos/auto-update.nix
