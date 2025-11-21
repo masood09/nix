@@ -5,8 +5,6 @@ keys:
     age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
   - &caretaker
     age1gqvw59226drpwn8942x55jcf5zca5gfupj9eppmeagfevx3pupzs78dfs6
-  - &oci-proxy-server
-    age12n44qwj28glz06dhzkzxgy7ff85y7yw0kcwn99zycclwm6qmsgnsapws5a
   - &oci-auth-server
     age18lt8cq0zcj468qsd7xzjj2mayl557sf4g8jy6mde429v926g0sjsmj3d53
   - &oci-vpn-server
@@ -29,7 +27,6 @@ creation_rules:
           - *nastest
           - *murderbot
           - *caretaker
-          - *oci-proxy-server
           - *oci-auth-server
           - *oci-vpn-server
           - *pve-app-1
