@@ -1,9 +1,6 @@
 {
   config,
   inputs,
-  lib,
-  outputs,
-  vars,
   pkgs,
   ...
 }: let

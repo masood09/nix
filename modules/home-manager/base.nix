@@ -1,8 +1,8 @@
 {
   lib,
   pkgs,
-  vars,
   inputs,
+  homelabCfg,
   ...
 }: {
   imports = [
@@ -14,11 +14,11 @@
   ];
 
   home = {
-    username = vars.userName;
+    username = homelabCfg.primaryUser.userName;
 
     homeDirectory = lib.mkMerge [
-      (lib.mkIf pkgs.stdenv.isLinux "/home/${vars.userName}")
-      (lib.mkIf pkgs.stdenv.isDarwin "/Users/${vars.userName}")
+      (lib.mkIf pkgs.stdenv.isLinux "/home/${homelabCfg.primaryUser.userName}")
+      (lib.mkIf pkgs.stdenv.isDarwin "/Users/${homelabCfg.primaryUser.userName}")
     ];
 
     stateVersion = "25.05";

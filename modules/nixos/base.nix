@@ -1,10 +1,6 @@
-{
-  inputs,
-  config,
-  pkgs,
-  vars,
-  ...
-}: {
+{config, ...}: let
+  homelabCfg = config.homelab;
+in {
   imports = [
     ./_packages.nix
 
@@ -59,15 +55,20 @@
     mutableUsers = false;
 
     users = {
-      ${vars.userName} = {
+      ${homelabCfg.primaryUser.userName} = {
         isNormalUser = true;
-        description = vars.userName;
-        extraGroups = ["networkmanager" "wheel"];
-        openssh.authorizedKeys.keys = [
-          vars.sshPublicKeyPersonal
-          vars.sshPublicKeyRemoteBuilder
+        description = homelabCfg.primaryUser.userName;
+
+        extraGroups = [
+          "networkmanager"
+          "wheel"
         ];
-        shell = pkgs.bash;
+
+        openssh.authorizedKeys.keys = [
+          homelabCfg.primaryUser.sshPublicKey
+        ];
+
+        inherit (homelabCfg.primaryUser) shell;
         hashedPasswordFile = config.sops.secrets."user-password".path;
       };
 

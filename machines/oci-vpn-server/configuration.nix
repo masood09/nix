@@ -1,9 +1,11 @@
 {
+  config,
   inputs,
   outputs,
-  vars,
   ...
-}: {
+}: let
+  homelabCfg = config.homelab;
+in {
   imports = [
     ./../../modules/nixos/oci-hardware-configuration.nix
 
@@ -18,11 +20,15 @@
   ];
 
   home-manager = {
-    extraSpecialArgs = {inherit inputs outputs vars;};
+    extraSpecialArgs = {
+      inherit inputs outputs homelabCfg;
+    };
+
     useGlobalPkgs = true;
     useUserPackages = true;
+
     users = {
-      ${vars.userName} = {
+      ${homelabCfg.primaryUser.userName} = {
         imports = [
           ./../../modules/home-manager/base.nix
           ./../../modules/home-manager/packages-server.nix
