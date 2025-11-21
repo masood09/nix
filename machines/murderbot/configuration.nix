@@ -17,8 +17,6 @@ in {
   homelab = {
     networking = {
       hostName = "murderbot";
-      computerName = "murderbot";
-      localHostName = "murderbot";
     };
   };
 
