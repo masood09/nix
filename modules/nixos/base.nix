@@ -6,8 +6,6 @@
   ...
 }: {
   imports = [
-    inputs.sops-nix.nixosModules.sops
-
     ./_packages.nix
 
     ./../../services/grafana-alloy.nix
