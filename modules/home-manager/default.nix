@@ -1,16 +1,11 @@
 {
   lib,
   pkgs,
-  inputs,
   homelabCfg,
   ...
 }: {
   imports = [
-    inputs.catppuccin.homeModules.catppuccin
-    inputs.nvf.homeManagerModules.default
-
-    ./_packages.nix
-    ./fish.nix
+    ./programs
   ];
 
   home = {
@@ -31,34 +26,6 @@
       // lib.mkIf pkgs.stdenv.isDarwin {
         SOPS_AGE_KEY_FILE = "$HOME/.config/sops/age/keys.txt";
       };
-  };
-
-  programs = {
-    fzf = {
-      enable = true;
-      enableFishIntegration = true;
-    };
-
-    direnv = {
-      enable = true;
-      nix-direnv.enable = true;
-    };
-
-    zoxide = {
-      enable = true;
-      enableFishIntegration = true;
-    };
-
-    bat.enable = true;
-    btop.enable = true;
-    eza.enable = true;
-    fastfetch.enable = true;
-    htop.enable = true;
-    nh.enable = true;
-  };
-
-  catppuccin = {
-    enable = true;
   };
 
   # Nicely reload system units when changing configs

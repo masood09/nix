@@ -17,6 +17,14 @@
       '';
     };
 
+    role = lib.mkOption {
+      default = "server";
+      type = lib.types.enum ["desktop" "server"];
+      description = ''
+        The role of this machine. Could be server or desktop.
+      '';
+    };
+
     primaryUser = {
       userId = lib.mkOption {
         default = 1000;
