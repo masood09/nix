@@ -30,8 +30,7 @@ in {
     users = {
       ${homelabCfg.primaryUser.userName} = {
         imports = [
-          ./../../modules/home-manager/base.nix
-          ./../../modules/home-manager/packages-server.nix
+          ./../../modules/home-manager
         ];
       };
     };

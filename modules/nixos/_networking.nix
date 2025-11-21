@@ -1,6 +1,4 @@
-{ config,
-  ...
-}: let
+{config, ...}: let
   networkingCfg = config.homelab.networking;
 in {
   networking = {
@@ -11,6 +9,6 @@ in {
     wireless.enable = networkingCfg.wireless_enable;
     enableIPv6 = false;
 
-    extraHosts = networkingCfg.extraHosts;
+    inherit (networkingCfg) extraHosts;
   };
 }

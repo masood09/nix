@@ -1,7 +1,4 @@
-{
-  lib,
-  ...
-}: {
+{lib, ...}: {
   options.homelab.networking = {
     hostName = lib.mkOption {
       type = lib.types.str;

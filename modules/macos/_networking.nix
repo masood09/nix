@@ -1,7 +1,4 @@
-{
-  config,
-  ...
-}: let
+{config, ...}: let
   cfg = config.homelab.networking;
 in {
   networking = {

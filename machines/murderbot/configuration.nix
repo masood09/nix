@@ -18,6 +18,12 @@ in {
     networking = {
       hostName = "murderbot";
     };
+
+    programs = {
+      emacs.enable = true;
+    };
+
+    role = "desktop";
   };
 
   home-manager = {
@@ -31,10 +37,7 @@ in {
     users = {
       ${homelabCfg.primaryUser.userName} = {
         imports = [
-          ./../../modules/home-manager/base.nix
-          ./../../modules/home-manager/packages-dev.nix
-          ./../../modules/home-manager/fonts.nix
-          ./../../modules/home-manager/git.nix
+          ./../../modules/home-manager
         ];
       };
     };
