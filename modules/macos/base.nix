@@ -1,8 +1,10 @@
 {
+  config,
   pkgs,
-  vars,
   ...
-}: {
+}: let
+  homelabCfg = config.homelab;
+in {
   imports = [
     ./_dock.nix
     ./_packages.nix
@@ -41,13 +43,13 @@
     reattach = true;
   };
 
-  users.users.${vars.userName} = {
-    home = "/Users/${vars.userName}";
+  users.users.${homelabCfg.primaryUser.userName} = {
+    home = "/Users/${homelabCfg.primaryUser.userName}";
     shell = pkgs.bash;
   };
 
   system = {
-    primaryUser = vars.userName;
+    primaryUser = homelabCfg.primaryUser.userName;
     startup.chime = false;
 
     defaults = {
@@ -134,7 +136,6 @@
 
       loginwindow = {
         GuestEnabled = false;
-        LoginwindowText = "If lost, contact ${vars.userEmail}";
       };
 
       magicmouse.MouseButtonMode = "TwoButton";
@@ -170,7 +171,7 @@
   local = {
     dock = {
       enable = true;
-      username = vars.userName;
+      username = homelabCfg.primaryUser.userName;
       entries = [
         {path = "/Applications/Zen.app";}
         {path = "/Applications/Ghostty.app";}

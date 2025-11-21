@@ -1,12 +1,13 @@
 {
   config,
   inputs,
-  vars,
   ...
-}: {
+}: let
+  homelabCfg = config.homelab;
+in {
   nix-homebrew = {
     enable = true;
-    user = vars.userName;
+    user = homelabCfg.primaryUser.userName;
     mutableTaps = false;
     taps = {
       "d12frosted/homebrew-emacs-plus" = inputs.homebrew-emacs-plus;

@@ -1,4 +1,6 @@
-{vars, ...}: {
+{config, ...}: let
+  homelabCfg = config.homelab;
+in {
   imports = [
     ./_packages.nix
   ];
@@ -7,7 +9,7 @@
     isNormalUser = true;
     extraGroups = ["wheel"];
     openssh.authorizedKeys.keys = [
-      vars.sshPublicKeyPersonal
+      homelabCfg.primaryUser.sshPublicKey
     ];
   };
 

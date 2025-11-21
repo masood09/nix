@@ -1,29 +1,33 @@
-{vars, ...}: {
+{homelabCfg, ...}: let
+  gitCfg = homelabCfg.programs.git;
+in {
   home = {
-    # inspo: https://jeppesen.io/git-commit-sign-nix-home-manager-ssh/
-    file.".ssh/allowed_signers".text = "* ${vars.sshPublicKeyPersonal}";
+    file.".ssh/allowed_signers".text = "* ${homelabCfg.primaryUser.sshPublicKey}";
   };
 
   programs.git = {
-    enable = true;
-    inherit (vars) userEmail;
-    userName = vars.fullName;
+    inherit (gitCfg) enable userEmail userName;
     delta.enable = true;
     lfs.enable = true;
+
     extraConfig = {
       delta = {
         navigate = true;
         side-by-side = true;
       };
+
       diff = {
         colorMoved = "default";
       };
+
       init = {
         defaultBranch = "main";
       };
+
       merge = {
         conflictStyle = "diff3";
       };
+
       pull = {
         rebase = true;
       };

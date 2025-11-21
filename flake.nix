@@ -87,18 +87,18 @@
     ...
   } @ inputs: let
     inherit (self) outputs;
-    vars = import ./vars.nix;
 
     systems = [
       "x86_64-linux"
       "aarch64-darwin"
       "aarch64-linux"
     ];
+
     forAllSystems = nixpkgs.lib.genAttrs systems;
 
     mkNixOSConfig = path:
       nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs vars;};
+        specialArgs = {inherit inputs outputs;};
 
         modules = [
           inputs.sops-nix.nixosModules.sops
@@ -106,16 +106,22 @@
           inputs.home-manager.nixosModules.home-manager
           inputs.authentik-nix.nixosModules.default
           inputs.impermanence.nixosModules.impermanence
+
+          ./modules/homelab
+
           path
         ];
       };
 
     mkDarwinConfig = path:
       nix-darwin.lib.darwinSystem {
-        specialArgs = {inherit inputs outputs vars;};
+        specialArgs = {inherit inputs outputs;};
         modules = [
           inputs.nix-homebrew.darwinModules.nix-homebrew
           inputs.home-manager.darwinModules.home-manager
+
+          ./modules/homelab
+
           path
         ];
       };
@@ -145,7 +151,7 @@
       pve-server-monitoring = mkNixOSConfig ./machines/pve-server-monitoring/configuration.nix;
       nixiso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = {inherit inputs outputs vars;};
+        specialArgs = {inherit inputs outputs;};
         modules = [
           (nixpkgs + "/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix")
           ./machines/nixiso/configuration.nix
