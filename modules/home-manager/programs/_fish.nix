@@ -5,6 +5,10 @@
   ...
 }: let
   fishEnabled = homelabCfg.programs.fish.enable or false;
+  defaultEditor =
+    if homelabCfg.programs.neovim.enable == true
+    then "nvim"
+    else "vim";
 in {
   programs = {
     bash = lib.mkIf fishEnabled {
@@ -39,8 +43,8 @@ in {
         # Disable greeting
         set fish_greeting
 
-        set -x EDITOR vi
-        set -x VISUAL vi
+        set -x EDITOR ${defaultEditor}
+        set -x VISUAL ${defaultEditor}
       '';
 
       plugins = [

@@ -12,6 +12,7 @@
     ./_fish.nix
     ./_fzf.nix
     ./_git.nix
+    ./_neovim.nix
     ./_ripgrep.nix
     ./_zoxide.nix
     ./_zsh.nix

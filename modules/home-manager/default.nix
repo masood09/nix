@@ -3,7 +3,12 @@
   pkgs,
   homelabCfg,
   ...
-}: {
+}: let
+  defaultEditor =
+    if homelabCfg.programs.neovim.enable
+    then "nvim"
+    else "vim";
+in {
   imports = [
     ./programs
   ];
@@ -20,8 +25,8 @@
 
     sessionVariables =
       {
-        EDITOR = "vim";
-        VISUAL = "vim";
+        EDITOR = defaultEditor;
+        VISUAL = defaultEditor;
       }
       // lib.mkIf pkgs.stdenv.isDarwin {
         SOPS_AGE_KEY_FILE = "$HOME/.config/sops/age/keys.txt";
