@@ -21,6 +21,19 @@ in {
     ./services/nginx.nix
   ];
 
+  homelab = {
+    networking = {
+      hostName = "caretaker";
+      primaryInterface = "enp1s0";
+    };
+
+    programs = {
+      emacs.enable = false;
+      neovim.enable = false;
+      zsh.enable = false;
+    };
+  };
+
   home-manager = {
     extraSpecialArgs = {
       inherit inputs outputs homelabCfg;
@@ -35,13 +48,6 @@ in {
           ./../../modules/home-manager
         ];
       };
-    };
-  };
-
-  homelab = {
-    networking = {
-      hostName = "caretaker";
-      primaryInterface = "enp1s0";
     };
   };
 }

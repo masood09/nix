@@ -4,14 +4,19 @@
   lib,
   ...
 }: let
+  bashEnabled = homelabCfg.programs.bash.enable or false;
   fishEnabled = homelabCfg.programs.fish.enable or false;
+  zshEnabled = homelabCfg.programs.zsh.enable or false;
+
+  neovimEnabled = homelabCfg.programs.neovim.enable or false;
+
   defaultEditor =
-    if homelabCfg.programs.neovim.enable == true
+    if neovimEnabled
     then "nvim"
     else "vim";
 in {
   programs = {
-    bash = lib.mkIf fishEnabled {
+    bash = lib.mkIf (fishEnabled && bashEnabled) {
       bashrcExtra = ''
         if [[ $(${pkgs.procps}/bin/ps h -p $PPID -o comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
         then
@@ -21,7 +26,7 @@ in {
       '';
     };
 
-    zsh = lib.mkIf fishEnabled {
+    zsh = lib.mkIf (fishEnabled && zshEnabled) {
       initContent = lib.mkOrder 500 ''
         if [[ $(${pkgs.procps}/bin/ps -p $PPID -o comm=) != "fish" ]]; then
           # Check if this is a login shell
