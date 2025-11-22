@@ -102,7 +102,7 @@
           inputs.authentik-nix.nixosModules.default
           inputs.impermanence.nixosModules.impermanence
 
-          ./modules/homelab
+          ./config/homelab
 
           path
         ];
@@ -115,7 +115,7 @@
           inputs.nix-homebrew.darwinModules.nix-homebrew
           inputs.home-manager.darwinModules.home-manager
 
-          ./modules/homelab
+          ./config/homelab
 
           path
         ];
