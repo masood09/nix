@@ -21,6 +21,7 @@ in {
 
     programs = {
       emacs.enable = true;
+      zsh.enable = true;
     };
 
     role = "desktop";

@@ -1,5 +1,5 @@
-{
+{homelabCfg, ...}: {
   programs.fastfetch = {
-    enable = true;
+    inherit (homelabCfg.programs.fastfetch) enable;
   };
 }

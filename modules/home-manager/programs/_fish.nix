@@ -1,11 +1,13 @@
 {
+  homelabCfg,
   pkgs,
   lib,
   ...
-}: {
+}: let
+  fishEnabled = homelabCfg.programs.fish.enable or false;
+in {
   programs = {
-    bash = {
-      enable = true;
+    bash = lib.mkIf fishEnabled {
       bashrcExtra = ''
         if [[ $(${pkgs.procps}/bin/ps h -p $PPID -o comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
         then
@@ -15,8 +17,7 @@
       '';
     };
 
-    zsh = {
-      enable = true;
+    zsh = lib.mkIf fishEnabled {
       initContent = lib.mkOrder 500 ''
         if [[ $(${pkgs.procps}/bin/ps -p $PPID -o comm=) != "fish" ]]; then
           # Check if this is a login shell
@@ -32,14 +33,7 @@
     };
 
     fish = {
-      enable = true;
-
-      shellAliases = {
-        cat = "bat";
-        cd = "z";
-        em = "emacsclient -c -n -a ''";
-        ls = "eza --color=always --git --icons=always";
-      };
+      inherit (homelabCfg.programs.fish) enable;
 
       interactiveShellInit = ''
         # Disable greeting
@@ -62,19 +56,22 @@
     };
   };
 
-  home.activation.configure-tide = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    ${pkgs.fish}/bin/fish -c "tide configure --auto \
-      --style=Rainbow \
-      --prompt_colors='True color' \
-      --show_time=No \
-      --rainbow_prompt_separators=Round \
-      --powerline_prompt_heads=Sharp \
-      --powerline_prompt_tails=Flat \
-      --powerline_prompt_style='Two lines, character' \
-      --prompt_connection=Disconnected \
-      --powerline_right_prompt_frame=No \
-      --prompt_spacing=Sparse \
-      --icons='Many icons' \
-      --transient=Yes" 2> /dev/null || true
-  '';
+  # This should be only if fishEnabled is true
+  home.activation.configure-tide =
+    lib.mkIf fishEnabled
+    (lib.hm.dag.entryAfter ["writeBoundary"] ''
+      ${pkgs.fish}/bin/fish -c "tide configure --auto \
+        --style=Rainbow \
+        --prompt_colors='True color' \
+        --show_time=No \
+        --rainbow_prompt_separators=Round \
+        --powerline_prompt_heads=Sharp \
+        --powerline_prompt_tails=Flat \
+        --powerline_prompt_style='Two lines, character' \
+        --prompt_connection=Disconnected \
+        --powerline_right_prompt_frame=No \
+        --prompt_spacing=Sparse \
+        --icons='Many icons' \
+        --transient=Yes" 2> /dev/null || true
+    '');
 }

@@ -1,6 +1,6 @@
-{
+{homelabCfg, ...}: {
   programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
+    inherit (homelabCfg.programs.direnv) enable;
+    nix-direnv.enable = homelabCfg.programs.direnv.enable;
   };
 }
