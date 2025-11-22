@@ -20,15 +20,15 @@ in {
       enableZshIntegration = zshEnabled;
     };
 
-    bash = lib.mkIf ezaEnabled {
+    bash = lib.mkIf (ezaEnabled && bashEnabled) {
       inherit shellAliases;
     };
 
-    fish = lib.mkIf ezaEnabled {
+    fish = lib.mkIf (ezaEnabled && fishEnabled) {
       inherit shellAliases;
     };
 
-    zsh = lib.mkIf ezaEnabled {
+    zsh = lib.mkIf (ezaEnabled && zshEnabled) {
       inherit shellAliases;
     };
   };

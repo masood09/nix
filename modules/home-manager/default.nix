@@ -4,8 +4,10 @@
   homelabCfg,
   ...
 }: let
+  neovimEnabled = homelabCfg.programs.neovim.enable or false;
+
   defaultEditor =
-    if homelabCfg.programs.neovim.enable
+    if neovimEnabled
     then "nvim"
     else "vim";
 in {
