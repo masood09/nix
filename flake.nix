@@ -140,8 +140,6 @@
       pve-monitoring = mkNixOSConfig ./machines/pve-monitoring/configuration.nix;
       pve-proxy = mkNixOSConfig ./machines/pve-proxy/configuration.nix;
 
-      pve-server-1 = mkNixOSConfig ./machines/pve-server-1/configuration.nix;
-      pve-server-monitoring = mkNixOSConfig ./machines/pve-server-monitoring/configuration.nix;
       nixiso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {inherit inputs outputs;};
