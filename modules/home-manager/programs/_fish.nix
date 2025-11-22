@@ -39,8 +39,8 @@ in {
         # Disable greeting
         set fish_greeting
 
-        set -x EDITOR nvim
-        set -x VISUAL nvim
+        set -x EDITOR vi
+        set -x VISUAL vi
       '';
 
       plugins = [
