@@ -53,12 +53,12 @@ in {
       inherit shellAliases;
     };
 
-    # fish = lib.mkIf (emacsEnabled && fishEnabled) {
-    #   inherit shellAliases;
-    # };
+    fish = lib.mkIf (emacsEnabled && fishEnabled) {
+      inherit shellAliases;
+    };
 
-    # zsh = lib.mkIf (emacsEnabled && zshEnabled) {
-    #   inherit shellAliases;
-    # };
+    zsh = lib.mkIf (emacsEnabled && zshEnabled) {
+      inherit shellAliases;
+    };
   };
 }
