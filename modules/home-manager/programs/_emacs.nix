@@ -13,20 +13,14 @@
     };
   };
 
-  enableEmacs = homelabCfg.programs.emacs.enable or false;
-in {
-  programs = {
-    fd = {
-      enable = enableEmacs;
-    };
+  emacsEnabled = homelabCfg.programs.emacs.enable or false;
 
-    ripgrep = {
-      enable = enableEmacs;
-    };
+  shellAliases = {
+    em = "emacsclient -c -n -a ''";
   };
-
+in {
   home = {
-    packages = lib.optionals enableEmacs (with pkgs; [
+    packages = lib.optionals emacsEnabled (with pkgs; [
       cmake
       coreutils
       gomodifytags
@@ -49,5 +43,19 @@ in {
       yaml-language-server
       yq-go
     ]);
+  };
+
+  programs = {
+    bash = lib.mkIf emacsEnabled {
+      inherit shellAliases;
+    };
+
+    fish = lib.mkIf emacsEnabled {
+      inherit shellAliases;
+    };
+
+    zsh = lib.mkIf emacsEnabled {
+      inherit shellAliases;
+    };
   };
 }
