@@ -19,16 +19,11 @@
         "sdhci_pci"
         "r8169"
       ];
+
       kernelModules = [
         "nvme"
         "r8169"
       ];
-
-      preLVMCommands = ''
-        echo "Waiting for NVMe devices..."
-        udevadm settle
-        sleep 5
-      '';
 
       luks.devices."cryptroot" = {
         device = "/dev/nvme0n1p2";
@@ -61,31 +56,6 @@
     "/nix" = {
       device = "/dev/mapper/cryptroot";
       fsType = "ext4";
-    };
-  };
-
-  systemd.network = {
-    enable = true;
-
-    networks = {
-      "10-enp1s0" = {
-        matchConfig.MACAddress = "84:47:09:46:ed:7d";
-        networkConfig.DHCP = "yes";
-
-        dhcpV4Config = {
-          UseRoutes = true;
-          UseDNS = true;
-        };
-      };
-      "20-enp2s0" = {
-        matchConfig.MACAddress = "84:47:09:46:ed:7f";
-        networkConfig.DHCP = "yes";
-
-        dhcpV4Config = {
-          UseRoutes = false;
-          UseDNS = false;
-        };
-      };
     };
   };
 

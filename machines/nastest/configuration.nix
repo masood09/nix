@@ -48,6 +48,7 @@ in {
     age.sshKeyPaths = ["/nix/secret/age/ssh_ed25519_key"];
     secrets."user-password".neededForUsers = true;
     secrets."user-password" = {};
+    secrets."headscale-preauth-key" = {};
   };
 
   users = {
@@ -80,12 +81,22 @@ in {
     };
 
     fstrim.enable = true;
+
+    tailscale = {
+      enable = true;
+      authKeyFile = config.sops.secrets."headscale-preauth-key".path;
+
+      extraUpFlags = [
+        "--login-server=https://headscale.mantannest.com"
+      ];
+    };
   };
 
   networking = {
     firewall.enable = true;
     hostId = "64afc685";
-    networkmanager.enable = false;
+    hostName = "nastest";
+    # networkmanager.enable = false;
   };
 
   time.timeZone = "America/Toronto";

@@ -41,12 +41,6 @@ in {
   homelab = {
     networking = {
       hostName = "oci-auth-server";
-      primaryInterface = "enp0s6";
-
-      extraHosts = ''
-        100.64.0.7 loki.monitoring.server.mantannest.com
-        100.64.0.7 prometheus.monitoring.server.mantannest.com
-      '';
     };
   };
 

@@ -10,7 +10,6 @@ in {
     ./_packages.nix
 
     ./../../services/grafana-alloy.nix
-    ./../../services/systemd-resolved.nix
     ./../../services/tailscale.nix
   ];
 
@@ -104,7 +103,6 @@ in {
 
   networking = {
     firewall.enable = true;
-    networkmanager.enable = false;
   };
 
   time.timeZone = "America/Toronto";

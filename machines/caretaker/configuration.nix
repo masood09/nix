@@ -24,7 +24,6 @@ in {
   homelab = {
     networking = {
       hostName = "caretaker";
-      primaryInterface = "enp1s0";
     };
   };
 
