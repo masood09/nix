@@ -61,7 +61,7 @@ in {
       if homelabCfg.programs.zsh.enable or false
       then pkgs.zsh
       else pkgs.bash;
-    
+
     mutableUsers = false;
 
     users = {
