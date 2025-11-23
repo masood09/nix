@@ -5,16 +5,6 @@
 
   options.homelab = {
     programs = {
-      bash = {
-        enable = lib.mkOption {
-          default = true;
-          type = lib.types.bool;
-          description = ''
-            Whether to enable bat.
-          '';
-        };
-      };
-
       bat = {
         enable = lib.mkOption {
           default = true;
@@ -97,7 +87,7 @@
 
       fish = {
         enable = lib.mkOption {
-          default = true;
+          default = false;
           type = lib.types.bool;
           description = ''
             Whether to enable fish shell.
@@ -147,7 +137,7 @@
 
       zsh = {
         enable = lib.mkOption {
-          default = false;
+          default = true;
           type = lib.types.bool;
           description = ''
             Whether to enable bat.

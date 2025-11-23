@@ -3,14 +3,7 @@
   pkgs,
   homelabCfg,
   ...
-}: let
-  neovimEnabled = homelabCfg.programs.neovim.enable or false;
-
-  defaultEditor =
-    if neovimEnabled
-    then "nvim"
-    else "vim";
-in {
+}: {
   imports = [
     ./programs
   ];
@@ -25,14 +18,9 @@ in {
 
     stateVersion = "25.05";
 
-    sessionVariables =
-      {
-        EDITOR = defaultEditor;
-        VISUAL = defaultEditor;
-      }
-      // lib.mkIf pkgs.stdenv.isDarwin {
-        SOPS_AGE_KEY_FILE = "$HOME/.config/sops/age/keys.txt";
-      };
+    sessionVariables = lib.mkIf pkgs.stdenv.isDarwin {
+      SOPS_AGE_KEY_FILE = "$HOME/.config/sops/age/keys.txt";
+    };
   };
 
   # Nicely reload system units when changing configs

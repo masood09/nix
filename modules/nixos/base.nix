@@ -1,4 +1,8 @@
-{config, ...}: let
+{
+  config,
+  pkgs,
+  ...
+}: let
   homelabCfg = config.homelab;
 in {
   imports = [
@@ -53,6 +57,11 @@ in {
   };
 
   users = {
+    defaultUserShell =
+      if homelabCfg.programs.zsh.enable or false
+      then pkgs.zsh
+      else pkgs.bash;
+    
     mutableUsers = false;
 
     users = {
@@ -69,7 +78,6 @@ in {
           homelabCfg.primaryUser.sshPublicKey
         ];
 
-        inherit (homelabCfg.primaryUser) shell;
         hashedPasswordFile = config.sops.secrets."user-password".path;
       };
 

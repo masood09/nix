@@ -4,7 +4,6 @@
   ...
 }: let
   batEnabled = homelabCfg.programs.bat.enable or false;
-  bashEnabled = homelabCfg.programs.bash.enable or false;
   fishEnabled = homelabCfg.programs.fish.enable or false;
   zshEnabled = homelabCfg.programs.zsh.enable or false;
 
@@ -17,7 +16,7 @@ in {
       inherit (homelabCfg.programs.bat) enable;
     };
 
-    bash = lib.mkIf (batEnabled && bashEnabled) {
+    bash = lib.mkIf batEnabled {
       inherit shellAliases;
     };
 

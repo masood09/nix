@@ -20,7 +20,6 @@ in {
     programs = {
       emacs.enable = true;
       neovim.enable = true;
-      zsh.enable = true;
     };
 
     role = "desktop";
