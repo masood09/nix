@@ -14,7 +14,6 @@
   };
 
   emacsEnabled = homelabCfg.programs.emacs.enable or false;
-  bashEnabled = homelabCfg.programs.bash.enable or false;
   fishEnabled = homelabCfg.programs.fish.enable or false;
   zshEnabled = homelabCfg.programs.zsh.enable or false;
 
@@ -49,7 +48,7 @@ in {
   };
 
   programs = {
-    bash = lib.mkIf (emacsEnabled && bashEnabled) {
+    bash = lib.mkIf emacsEnabled {
       inherit shellAliases;
     };
 

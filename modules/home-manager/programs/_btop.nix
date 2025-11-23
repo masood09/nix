@@ -4,7 +4,6 @@
   ...
 }: let
   btopEnabled = homelabCfg.programs.btop.enable or false;
-  bashEnabled = homelabCfg.programs.bash.enable or false;
   fishEnabled = homelabCfg.programs.fish.enable or false;
   zshEnabled = homelabCfg.programs.zsh.enable or false;
 
@@ -18,7 +17,7 @@ in {
       inherit (homelabCfg.programs.btop) enable;
     };
 
-    bash = lib.mkIf (btopEnabled && bashEnabled) {
+    bash = lib.mkIf btopEnabled {
       inherit shellAliases;
     };
 

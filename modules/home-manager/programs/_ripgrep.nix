@@ -4,7 +4,6 @@
   ...
 }: let
   ripgrepEnabled = homelabCfg.programs.ripgrep.enable or false;
-  bashEnabled = homelabCfg.programs.bash.enable or false;
   fishEnabled = homelabCfg.programs.fish.enable or false;
   zshEnabled = homelabCfg.programs.zsh.enable or false;
 
@@ -17,7 +16,7 @@ in {
       inherit (homelabCfg.programs.ripgrep) enable;
     };
 
-    bash = lib.mkIf (ripgrepEnabled && bashEnabled) {
+    bash = lib.mkIf ripgrepEnabled {
       inherit shellAliases;
     };
 

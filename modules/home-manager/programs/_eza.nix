@@ -4,7 +4,6 @@
   ...
 }: let
   ezaEnabled = homelabCfg.programs.eza.enable or false;
-  bashEnabled = homelabCfg.programs.bash.enable or false;
   fishEnabled = homelabCfg.programs.fish.enable or false;
   zshEnabled = homelabCfg.programs.zsh.enable or false;
 
@@ -15,12 +14,12 @@ in {
   programs = {
     eza = {
       inherit (homelabCfg.programs.eza) enable;
-      enableBashIntegration = bashEnabled;
+      enableBashIntegration = true;
       enableFishIntegration = fishEnabled;
       enableZshIntegration = zshEnabled;
     };
 
-    bash = lib.mkIf (ezaEnabled && bashEnabled) {
+    bash = lib.mkIf ezaEnabled {
       inherit shellAliases;
     };
 

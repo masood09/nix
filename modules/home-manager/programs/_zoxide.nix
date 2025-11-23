@@ -4,7 +4,6 @@
   ...
 }: let
   zoxideEnabled = homelabCfg.programs.zoxide.enable or false;
-  bashEnabled = homelabCfg.programs.bash.enable or false;
   fishEnabled = homelabCfg.programs.fish.enable or false;
   zshEnabled = homelabCfg.programs.zsh.enable or false;
 
@@ -15,12 +14,12 @@ in {
   programs = {
     zoxide = {
       inherit (homelabCfg.programs.zoxide) enable;
-      enableBashIntegration = bashEnabled;
+      enableBashIntegration = true;
       enableFishIntegration = fishEnabled;
       enableZshIntegration = zshEnabled;
     };
 
-    bash = lib.mkIf (zoxideEnabled && bashEnabled) {
+    bash = lib.mkIf zoxideEnabled {
       inherit shellAliases;
     };
 

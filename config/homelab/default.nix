@@ -1,8 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}: {
+{lib, ...}: {
   imports = [
     ./networking
     ./programs
@@ -49,8 +45,6 @@
           Public SSH key to be added to authrorized keys
         '';
       };
-
-      shell = lib.mkPackageOption pkgs "bash" {};
     };
   };
 }
