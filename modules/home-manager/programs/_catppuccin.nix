@@ -1,9 +1,13 @@
-{inputs, ...}: {
+{
+  homelabCfg,
+  inputs,
+  ...
+}: {
   imports = [
     inputs.catppuccin.homeModules.catppuccin
   ];
 
   catppuccin = {
-    enable = true;
+    inherit (homelabCfg.programs.catppuccin) enable;
   };
 }
