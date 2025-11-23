@@ -125,6 +125,16 @@
         };
       };
 
+      starship = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable starship prompt.
+          '';
+        };
+      };
+
       zoxide = {
         enable = lib.mkOption {
           default = true;
