@@ -40,7 +40,6 @@ in {
 
   homelab.networking = {
     hostName = "pve-proxy";
-    primaryInterface = "ens18";
   };
 
   systemd.network.networks."tailscale0".dns = lib.mkForce [];

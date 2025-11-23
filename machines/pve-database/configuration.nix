@@ -39,6 +39,5 @@ in {
 
   homelab.networking = {
     hostName = "pve-database";
-    primaryInterface = "ens18";
   };
 }

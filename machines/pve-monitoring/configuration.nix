@@ -43,7 +43,6 @@ in {
 
   homelab.networking = {
     hostName = "pve-monitoring";
-    primaryInterface = "ens18";
   };
 
   users.users.alloy = {
