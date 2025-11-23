@@ -7,8 +7,6 @@
   homelabCfg = config.homelab;
 in {
   imports = [
-    inputs.home-manager.darwinModules.home-manager
-
     ./hardware-configuration.nix
 
     ./../../modules/macos/base.nix
