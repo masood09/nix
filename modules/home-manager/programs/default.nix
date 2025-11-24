@@ -15,6 +15,7 @@
     ./_neovim.nix
     ./_ripgrep.nix
     ./_starship.nix
+    ./_tmux.nix
     ./_zoxide.nix
     ./_zsh.nix
 
