@@ -96,6 +96,7 @@
         specialArgs = {inherit inputs outputs;};
 
         modules = [
+          inputs.disko.nixosModules.disko
           inputs.sops-nix.nixosModules.sops
           inputs.fps.nixosModules.programs-sqlite
           inputs.home-manager.nixosModules.home-manager
@@ -130,6 +131,7 @@
 
     nixosConfigurations = {
       caretaker = mkNixOSConfig ./machines/caretaker/configuration.nix;
+      failsafeunit = mkNixOSConfig ./machines/failsafeunit;
       nastest = mkNixOSConfig ./machines/nastest/configuration.nix;
 
       oci-auth-server = mkNixOSConfig ./machines/oci-auth-server/configuration.nix;
