@@ -7,7 +7,7 @@
   homelabCfg = config.homelab;
 in {
   imports = [
-    ./disko.nix
+    ./disko
     ./hardware-configuration.nix
 
     ./../../modules/nixos/auto-update.nix
@@ -36,5 +36,14 @@ in {
         ];
       };
     };
+  };
+
+  # For systemd services (like nix-daemon)
+  systemd = {
+    extraConfig = ''
+      DefaultLimitNOFILE=65536
+      DefaultTimeoutStartSec=20s
+      DefaultTimeoutStopSec=10s
+    '';
   };
 }
