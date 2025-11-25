@@ -7,6 +7,8 @@
   domain = "mantannest.com";
   headscaleDomain = "headscale.${domain}";
   authDomain = "auth.${domain}";
+
+  homelabCfg = config.homelab;
 in {
   options.services.headscale = {
     adminUser = lib.mkOption {
@@ -146,7 +148,7 @@ in {
       };
     };
 
-    environment.persistence."/nix/persist" = {
+    environment.persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS) {
       directories = [
         "/var/lib/headscale/"
       ];

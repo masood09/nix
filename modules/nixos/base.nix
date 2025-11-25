@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }: let
@@ -112,7 +113,7 @@ in {
     # Hide these mounts from the sidebar of file managers
     hideMounts = true;
 
-    directories = [
+    directories = lib.mkIf (!homelabCfg.isRootZFS) [
       "/var/log"
       # inspo: https://github.com/nix-community/impermanence/issues/178
       "/var/lib/nixos"

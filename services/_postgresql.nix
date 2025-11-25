@@ -1,4 +1,11 @@
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}: let
+  homelabCfg = config.homelab;
+in {
   services = {
     postgresql = {
       enable = true;
@@ -12,7 +19,7 @@
     };
   };
 
-  environment.persistence."/nix/persist" = {
+  environment.persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS) {
     directories = [
       "/var/lib/postgresql"
     ];

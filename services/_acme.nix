@@ -1,4 +1,9 @@
-{config, ...}: {
+{
+  config,
+  lib,
+...}: let
+  homelabCfg = config.homelab;
+in {
   sops.secrets = {
     "cloudflare-api-key" = {};
   };
@@ -19,7 +24,7 @@
 
   users.users.nginx.extraGroups = ["acme"];
 
-  environment.persistence."/nix/persist" = {
+  environment.persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS) {
     directories = [
       "/var/lib/acme"
     ];

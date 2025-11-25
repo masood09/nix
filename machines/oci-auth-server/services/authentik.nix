@@ -1,4 +1,10 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: let
+  homelabCfg = config.homelab;
+in {
   sops.secrets = {
     "authentik-env" = {
       sopsFile = ./../../../secrets/oci-auth-server.yaml;
@@ -17,7 +23,7 @@
     };
   };
 
-  environment.persistence."/nix/persist" = {
+  environment.persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS) {
     directories = [
       "/var/lib/authentik"
     ];
