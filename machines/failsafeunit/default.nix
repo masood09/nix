@@ -18,6 +18,7 @@ in {
   ];
 
   sops.secrets = {
+    "cloudflare-api-key" = {};
     "MiniIORootCreds" = {
       owner = "minio";
       sopsFile = ./../../secrets/failsafeunit.yaml;
@@ -31,6 +32,11 @@ in {
     };
 
     services = {
+      acme = {
+        enable = true;
+        cloudflareAPIKeyPath = config.sops.secrets."cloudflare-api-key".path;
+      };
+
       minio = {
         enable = true;
         browser = true;
