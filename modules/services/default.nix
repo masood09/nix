@@ -1,6 +1,7 @@
 {
   imports = [
     ./acme
+    ./caddy
     ./minio
   ];
 }
