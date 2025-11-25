@@ -37,6 +37,10 @@ in {
         cloudflareAPIKeyPath = config.sops.secrets."cloudflare-api-key".path;
       };
 
+      caddy = {
+        enable = true;
+      };
+
       minio = {
         enable = true;
         browser = true;
