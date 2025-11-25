@@ -1,4 +1,10 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: let
+  homelabCfg = config.homelab;
+in {
   virtualisation.oci-containers.containers.homeassistant = {
     image = "homeassistant/home-assistant:stable";
     autoStart = true;
@@ -33,7 +39,7 @@
     groups.homeassistant = {};
   };
 
-  environment.persistence."/nix/persist" = {
+  environment.persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS) {
     directories = [
       "/var/lib/homeassistant"
     ];

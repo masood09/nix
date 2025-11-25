@@ -1,4 +1,10 @@
 {
+  config,
+  lib,
+  ...
+}: let
+  homelabCfg = config.homelab;
+in {
   virtualisation.oci-containers.containers.dockge = {
     image = "louislam/dockge:1";
     autoStart = true;
@@ -22,7 +28,7 @@
     };
   };
 
-  environment.persistence."/nix/persist" = {
+  environment.persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS) {
     directories = [
       "/var/lib/dockge"
     ];

@@ -1,4 +1,10 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: let
+  homelabCfg = config.homelab;
+in {
   sops.secrets = {
     "loki-config" = {
       owner = "loki";
@@ -14,7 +20,7 @@
     };
   };
 
-  environment.persistence."/nix/persist" = {
+  environment.persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS) {
     directories = [
       "/var/lib/loki"
     ];

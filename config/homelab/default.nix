@@ -14,6 +14,8 @@
       '';
     };
 
+    isRootZFS = lib.mkEnableOption "Whether the root drive is ZFS.";
+
     role = lib.mkOption {
       default = "server";
       type = lib.types.enum ["desktop" "server"];

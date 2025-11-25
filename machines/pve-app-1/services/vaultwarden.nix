@@ -1,8 +1,14 @@
-{config, ...}: let
+{
+  config,
+  lib,
+  ...
+}: let
   domain = "mantannest.com";
   vaultwardenDomain = "https://passwords.${domain}";
   listenAddress = "0.0.0.0";
   listenPort = 8222;
+
+  homelabCfg = config.homelab;
 in {
   sops.secrets = {
     "vaultwarden-env" = {
@@ -27,7 +33,7 @@ in {
 
   networking.firewall.allowedTCPPorts = [listenPort];
 
-  environment.persistence."/nix/persist" = {
+  environment.persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS) {
     directories = [
       "/var/lib/vaultwarden"
     ];

@@ -20,7 +20,7 @@ in {
   };
 
   environment.persistence."/nix/persist" =
-    lib.mkIf (acmeCfg.enable && homelabCfg.impermanence) {
+    lib.mkIf (acmeCfg.enable && homelabCfg.impermanence && !homelabCfg.isRootZFS) {
       directories = [
         "/var/lib/acme"
       ];

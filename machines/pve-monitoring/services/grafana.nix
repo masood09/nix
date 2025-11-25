@@ -1,4 +1,10 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: let
+  homelabCfg = config.homelab;
+in {
   sops.secrets = {
     "grafana-authentik-client-secret" = {
       owner = "grafana";
@@ -70,7 +76,7 @@
     };
   };
 
-  environment.persistence."/nix/persist" = {
+  environment.persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS) {
     directories = [
       "/var/lib/grafana"
     ];
