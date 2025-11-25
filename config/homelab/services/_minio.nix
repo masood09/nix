@@ -69,7 +69,7 @@
     };
 
     s3Host = lib.mkOption {
-      default = "s3.homelab.com";
+      default = "s3.mantannest.com";
       type = lib.types.str;
     };
 

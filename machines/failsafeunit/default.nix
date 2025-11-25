@@ -33,7 +33,6 @@ in {
 
     services = {
       acme = {
-        enable = true;
         cloudflareAPIKeyPath = config.sops.secrets."cloudflare-api-key".path;
       };
 
