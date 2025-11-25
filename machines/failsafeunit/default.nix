@@ -13,11 +13,36 @@ in {
     ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
     ./../../modules/nixos/remote-unlock.nix
+
+    ./../../modules/services
   ];
+
+  sops.secrets = {
+    "MiniIORootCreds" = {
+      owner = "minio";
+      sopsFile = ./../../secrets/failsafeunit.yaml;
+    };
+  };
+
 
   homelab = {
     networking = {
       hostName = "failsafeunit";
+    };
+
+    services = {
+      minio = {
+        enable = true;
+        browser = true;
+        consoleAddress = "0.0.0.0";
+        listenAddress = "0.0.0.0";
+        openFirewall = true;
+        rootCredentialsFile = config.sops.secrets."MiniIORootCreds".path;
+
+        dataDir = [
+          "/mnt/DataStore/Apps/MinIO/"
+        ];
+      };
     };
   };
 
