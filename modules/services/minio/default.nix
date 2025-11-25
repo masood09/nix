@@ -50,8 +50,8 @@ in {
       [
         minioCfg.listenPort
       ]
-        ++ lib.mkIf minioCfg.browser [
-          minioCfg.consolePort
-        ]
+      ++ lib.optionals minioCfg.browser [
+        minioCfg.consolePort
+      ]
     );
 }
