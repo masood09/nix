@@ -2,6 +2,7 @@
   imports = [
     ./networking
     ./programs
+    ./services
   ];
 
   options.homelab = {
