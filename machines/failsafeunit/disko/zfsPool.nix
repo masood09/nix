@@ -53,6 +53,7 @@
               keyformat = "passphrase";
               keylocation = "file:///nix/secret/DataStore.key";
               canmount = "on";
+              mountpoint = "legacy";
               "com.sun:auto-snapshot" = "true";
             };
           };
@@ -63,6 +64,7 @@
 
             options = {
               canmount = "on";
+              mountpoint = "legacy";
               "com.sun:auto-snapshot" = "true";
             };
           };
@@ -74,6 +76,7 @@
             options = {
               canmount = "on";
               recordsize = "1M";
+              mountpoint = "legacy";
               "com.sun:auto-snapshot" = "true";
             };
           };
@@ -85,6 +88,7 @@
             options = {
               canmount = "on";
               recordsize = "16K";
+              mountpoint = "legacy";
               "com.sun:auto-snapshot" = "true";
             };
           };
@@ -96,6 +100,7 @@
             options = {
               canmount = "on";
               recordsize = "1M";
+              mountpoint = "legacy";
               "com.sun:auto-snapshot" = "true";
             };
           };
@@ -106,6 +111,7 @@
 
             options = {
               canmount = "on";
+              mountpoint = "legacy";
               "com.sun:auto-snapshot" = "true";
             };
           };
@@ -116,6 +122,7 @@
 
             options = {
               canmount = "on";
+              mountpoint = "legacy";
               "com.sun:auto-snapshot" = "true";
             };
           };
@@ -126,6 +133,7 @@
 
             options = {
               canmount = "on";
+              mountpoint = "legacy";
               "com.sun:auto-snapshot" = "true";
             };
           };
@@ -137,6 +145,7 @@
             options = {
               canmount = "on";
               recordsize = "1M";
+              mountpoint = "legacy";
               "com.sun:auto-snapshot" = "true";
             };
           };
@@ -147,6 +156,7 @@
 
             options = {
               canmount = "on";
+              mountpoint = "legacy";
               "com.sun:auto-snapshot" = "true";
             };
           };
@@ -158,6 +168,7 @@
             options = {
               canmount = "on";
               recordsize = "1M";
+              mountpoint = "legacy";
               "com.sun:auto-snapshot" = "true";
             };
           };
