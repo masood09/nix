@@ -45,5 +45,7 @@ in {
       DefaultTimeoutStartSec=20s
       DefaultTimeoutStopSec=10s
     '';
+
+    services.zfs-mount.enable = false;
   };
 }
