@@ -67,5 +67,15 @@
         The physical location of the server. By default it is set to us-east-1, which is same as AWS S3's and Minio's default region.
       '';
     };
+
+    s3Host = lib.mkOption {
+      default = "s3.homelab.com";
+      type = lib.types.str;
+    };
+
+    adminHost = lib.mkOption {
+      default = "s3.mgmt.mantannest.com";
+      type = lib.types.str;
+    };
   };
 }

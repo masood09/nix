@@ -10,6 +10,7 @@
   };
 
   minioCfg = config.homelab.services.minio;
+  caddyEnabled = config.homelab.services.caddy.enable;
 in {
   disabledModules = ["services/web-servers/minio.nix"];
 
@@ -17,7 +18,7 @@ in {
     "${inputs.nixpkgs-unstable}/nixos/modules/services/web-servers/minio.nix"
   ];
 
-  services = {
+  services = lib.mkIf minioCfg.enable {
     minio = {
       inherit (minioCfg) enable browser certificatesDir configDir dataDir rootCredentialsFile region;
 
@@ -26,14 +27,30 @@ in {
 
       package = pkgs-unstable.minio;
     };
+
+    caddy = lib.mkIf caddyEnabled {
+      virtualHosts = {
+        "${minioCfg.s3Host}" = {
+          extraConfig = ''
+            reverse_proxy http://127.0.0.1:${toString minioCfg.listenPort}
+          '';
+        };
+
+        "${minioCfg.adminHost}" = lib.mkIf minioCfg.browser {
+          extraConfig = ''
+            reverse_proxy http://127.0.0.1:${toString minioCfg.consolePort}
+          '';
+        };
+      };
+    };
   };
 
   networking.firewall.allowedTCPPorts =
-    lib.optionals minioCfg.openFirewall (
+    lib.mkIf minioCfg.openFirewall (
       [
         minioCfg.listenPort
       ]
-        ++ lib.optionals minioCfg.browser [
+        ++ lib.mkIf minioCfg.browser [
           minioCfg.consolePort
         ]
     );
