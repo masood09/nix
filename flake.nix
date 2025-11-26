@@ -64,11 +64,6 @@
 
     catppuccin.url = "github:catppuccin/nix/release-25.05";
 
-    fps = {
-      url = "github:wamserma/flake-programs-sqlite";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     authentik-nix = {
       url = "github:nix-community/authentik-nix";
       inputs.nixpkgs.follows = "nixpkgs";
