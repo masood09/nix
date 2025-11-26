@@ -40,6 +40,11 @@ in {
         enable = true;
       };
 
+      immich = {
+        enable = true;
+        mediaLocation = "/mnt/DataStore/Apps/Immich";
+      };
+
       minio = {
         enable = true;
         browser = true;
