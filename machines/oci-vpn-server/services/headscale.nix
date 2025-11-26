@@ -99,7 +99,7 @@ in {
               {
                 name = "photos.mantannest.com";
                 type = "A";
-                value = "100.64.0.3";
+                value = "100.64.0.16";
               }
               {
                 name = "passwords.mantannest.com";
