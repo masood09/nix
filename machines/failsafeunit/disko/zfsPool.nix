@@ -100,6 +100,19 @@
             };
           };
 
+          "DataStore/Apps/PostgreSQL_16" = {
+            type = "zfs_fs";
+
+            options = {
+              canmount = "on";
+              recordsize = "8K";
+              logbias = "latency";
+              redundant_metadata = "most";
+              mountpoint = "/mnt/DataStore/Apps/PostgreSQL_16";
+              "com.sun:auto-snapshot" = "true";
+            };
+          };
+
           "DataStore/Users" = {
             type = "zfs_fs";
 

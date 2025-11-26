@@ -3,5 +3,6 @@
     ./alloy
     ./caddy
     ./minio
+    ./postgresql
   ];
 }
