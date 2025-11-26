@@ -35,6 +35,14 @@ in {
     };
   };
 
+  systemd.services = lib.mkIf alloyCfg.enable {
+    alloy = {
+      environment = {
+        ALLOY_HOSTNAME = config.homelab.networking.hostName;
+      };
+    };
+  };
+
   environment.etc."alloy/config.alloy" = lib.mkIf alloyCfg.enable {
     source = ./config.alloy;
   };
