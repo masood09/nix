@@ -52,6 +52,11 @@ in {
           "/mnt/DataStore/Apps/MinIO/"
         ];
       };
+
+      postgresql = {
+        enable = true;
+        dataDir = "/mnt/DataStore/Apps/PostgreSQL_16";
+      };
     };
   };
 
