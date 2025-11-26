@@ -1,5 +1,6 @@
 {
   imports = [
+    ./alloy
     ./caddy
     ./minio
   ];
