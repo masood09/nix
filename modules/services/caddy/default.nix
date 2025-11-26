@@ -6,6 +6,10 @@
   homelabCfg = config.homelab;
   caddyEnabled = homelabCfg.services.caddy.enable;
 in {
+  imports = [
+    ./alloy.nix
+  ];
+
   services = lib.mkIf caddyEnabled {
     caddy = {
       enable = caddyEnabled;
