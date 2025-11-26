@@ -2,6 +2,7 @@ prometheus.scrape "postgresql_target" {
   targets = [
     {
       __address__ = "127.0.0.1:9187",
+      instance = sys.env("ALLOY_HOSTNAME"),
     },
   ]
 
