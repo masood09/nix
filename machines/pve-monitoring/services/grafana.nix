@@ -90,4 +90,6 @@ in {
     ./../../../files/grafana/dashboards/node-exporter-full.json;
   environment.etc."grafana-dashboards/blocky-grafana.json".source =
     ./../../../files/grafana/dashboards/blocky-grafana.json;
+  environment.etc."grafana-dashboards/postgresql-dashboard.json".source =
+    ./../../../files/grafana/dashboards/postgresql-dashboard.json;
 }
