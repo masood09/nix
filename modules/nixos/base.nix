@@ -10,7 +10,8 @@ in {
     ./_networking.nix
     ./_packages.nix
 
-    ./../../services/grafana-alloy.nix
+    ./../services/alloy
+
     ./../../services/tailscale.nix
   ];
 
