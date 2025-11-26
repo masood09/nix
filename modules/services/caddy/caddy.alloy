@@ -7,3 +7,24 @@ prometheus.scrape "caddy_target" {
 
   forward_to = [prometheus.remote_write.metrics_service.receiver]
 }
+
+local.file_match "caddy_log_targets" {
+  path_targets = [
+    {
+      __path__ = "/var/log/caddy/*.log",
+      service_name = "caddy-logs",
+    },
+  ]
+
+  sync_period = "5s"
+}
+
+loki.source.file "caddy_log_scape" {
+  targets        = local.file_match.caddy_log_targets.targets
+  tail_from_end  = false
+  forward_to     = [loki.process.caddy_filter_logs.receiver]
+}
+
+loki.process "caddy_filter_logs" {
+  forward_to = [loki.write.grafana_loki.receiver]
+}
