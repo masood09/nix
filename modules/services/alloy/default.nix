@@ -1,6 +1,7 @@
 {
   config,
   inputs,
+  lib,
   pkgs,
   ...
 }: let
@@ -35,6 +36,6 @@ in {
   };
 
   environment.etc."alloy/config.alloy" = lib.mkIf alloyCfg.enable {
-    source = ../files/alloy/config.alloy;
+    source = ./config.alloy;
   };
 }
