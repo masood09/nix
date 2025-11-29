@@ -26,6 +26,7 @@ in {
           "$git_branch"
           "$git_status"
           "[](fg:yellow bg:green)"
+          "$hostname"
           "$c"
           "$rust"
           "$golang"
@@ -95,6 +96,12 @@ in {
             "Pictures" = " ";
             "Developer" = "󰲋 ";
           };
+        };
+
+        hostname = {
+          ssh_symbol = "󰣀";
+          style = "bg:sapphire";
+          format = "[[$ssh_symbol( $hostname )](fg: crust bg:sapphire)]($style)";
         };
 
         git_branch = {
