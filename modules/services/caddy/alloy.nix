@@ -10,7 +10,7 @@ in {
     source = ./caddy.alloy;
   };
 
-  users = lib.mkIf(caddyEnabled && alloyEnabled) {
+  users = lib.mkIf (caddyEnabled && alloyEnabled) {
     users.alloy = {
       extraGroups = [config.services.caddy.group];
     };

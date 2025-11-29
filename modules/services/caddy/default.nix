@@ -32,12 +32,11 @@ in {
     };
   };
 
-  environment.persistence."/nix/persist" =
-    lib.mkIf (caddyEnabled && homelabCfg.impermanence && !homelabCfg.isRootZFS) {
-      directories = [
-        "/var/lib/acme"
-      ];
-    };
+  environment.persistence."/nix/persist" = lib.mkIf (caddyEnabled && homelabCfg.impermanence && !homelabCfg.isRootZFS) {
+    directories = [
+      "/var/lib/acme"
+    ];
+  };
 
   networking.firewall.allowedTCPPorts = lib.mkIf caddyEnabled [
     80
