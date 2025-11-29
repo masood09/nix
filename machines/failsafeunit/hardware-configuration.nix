@@ -4,10 +4,9 @@
   modulesPath,
   ...
 }: {
-  imports =
-    [
-      (modulesPath + "/installer/scan/not-detected.nix")
-    ];
+  imports = [
+    (modulesPath + "/installer/scan/not-detected.nix")
+  ];
 
   boot = {
     initrd = {
@@ -20,11 +19,11 @@
         "ixgbe"
       ];
 
-      kernelModules = [ ];
+      kernelModules = [];
     };
-    
-    kernelModules = [ "kvm-intel" ];
-    extraModulePackages = [ ];
+
+    kernelModules = ["kvm-intel"];
+    extraModulePackages = [];
     supportedFilesystems = ["zfs"];
     zfs.extraPools = ["dpool"];
 

@@ -25,7 +25,6 @@ in {
     };
   };
 
-
   homelab = {
     networking = {
       hostName = "failsafeunit";

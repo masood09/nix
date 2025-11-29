@@ -45,13 +45,12 @@ in {
     };
   };
 
-  networking.firewall.allowedTCPPorts =
-    lib.mkIf minioCfg.openFirewall (
-      [
-        minioCfg.listenPort
-      ]
-      ++ lib.optionals minioCfg.browser [
-        minioCfg.consolePort
-      ]
-    );
+  networking.firewall.allowedTCPPorts = lib.mkIf minioCfg.openFirewall (
+    [
+      minioCfg.listenPort
+    ]
+    ++ lib.optionals minioCfg.browser [
+      minioCfg.consolePort
+    ]
+  );
 }

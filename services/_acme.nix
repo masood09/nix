@@ -1,7 +1,8 @@
 {
   config,
   lib,
-...}: let
+  ...
+}: let
   homelabCfg = config.homelab;
 in {
   sops.secrets = {

@@ -28,7 +28,7 @@
     };
 
     dataDir = lib.mkOption {
-      default = [ "/var/lib/minio/data" ];
+      default = ["/var/lib/minio/data"];
       type = lib.types.listOf (lib.types.either lib.types.path lib.types.str);
       description = ''
         The list of data directories or nodes for storing the objects. Use one path for regular operation and the minimum of 4 endpoints for Erasure Code mode.
