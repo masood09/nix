@@ -20,13 +20,13 @@ in {
           "[](red)"
           "$os"
           "$username"
+          "$hostname"
           "[](bg:peach fg:red)"
           "$directory"
           "[](bg:yellow fg:peach)"
           "$git_branch"
           "$git_status"
           "[](fg:yellow bg:green)"
-          "$hostname"
           "$c"
           "$rust"
           "$golang"
@@ -53,26 +53,26 @@ in {
           style = "bg:red fg:crust";
 
           symbols = {
-            Windows = "";
-            Ubuntu = "󰕈";
-            SUSE = "";
-            Raspbian = "󰐿";
-            Mint = "󰣭";
-            Macos = "󰀵";
-            Manjaro = "";
-            Linux = "󰌽";
-            Gentoo = "󰣨";
-            Fedora = "󰣛";
-            Alpine = "";
-            Amazon = "";
-            Android = "";
-            Arch = "󰣇";
-            Artix = "󰣇";
-            CentOS = "";
-            Debian = "󰣚";
-            Redhat = "󱄛";
-            RedHatEnterprise = "󱄛";
-            NixOS = "";
+            Windows = " ";
+            Ubuntu = "󰕈 ";
+            SUSE = " ";
+            Raspbian = "󰐿 ";
+            Mint = "󰣭 ";
+            Macos = "󰀵 ";
+            Manjaro = " ";
+            Linux = "󰌽 ";
+            Gentoo = "󰣨 ";
+            Fedora = "󰣛 ";
+            Alpine = " ";
+            Amazon = " ";
+            Android = " ";
+            Arch = "󰣇 ";
+            Artix = "󰣇 ";
+            CentOS = " ";
+            Debian = "󰣚 ";
+            Redhat = "󱄛 ";
+            RedHatEnterprise = "󱄛 ";
+            NixOS = " ";
           };
         };
 
@@ -83,26 +83,20 @@ in {
           format = "[ $user]($style)";
         };
 
+        hostname = {
+          ssh_only = true;
+          ssh_symbol = "󰢹";
+          style = "bg:red fg:crust";
+          format = "[[ $ssh_symbol in $hostname](fg:crust bg:red)]($style)";
+        };
+
         directory = {
           style = "bg:peach fg:crust";
           format = "[ $path ]($style)";
           truncation_length = 3;
           truncation_symbol = "…/";
-
-          substitutions = {
-            "Documents" = "󰈙 ";
-            "Downloads" = " ";
-            "Music" = "󰝚 ";
-            "Pictures" = " ";
-            "Developer" = "󰲋 ";
-          };
         };
 
-        hostname = {
-          ssh_symbol = "󰣀";
-          style = "bg:sapphire";
-          format = "[[$ssh_symbol( $hostname )](fg: crust bg:sapphire)]($style)";
-        };
 
         git_branch = {
           symbol = "";
@@ -116,7 +110,7 @@ in {
         };
 
         nodejs = {
-          symbol = "";
+          symbol = " ";
           style = "bg:green";
           format = "[[ $symbol( $version) ](fg:crust bg:green)]($style)";
         };
@@ -140,19 +134,19 @@ in {
         };
 
         rust = {
-          symbol = "";
+          symbol = " ";
           style = "bg:green";
           format = "[[ $symbol( $version) ](fg:crust bg:green)]($style)";
         };
 
         golang = {
-          symbol = "";
+          symbol = " ";
           style = "bg:green";
           format = "[[ $symbol( $version) ](fg:crust bg:green)]($style)";
         };
 
         php = {
-          symbol = "";
+          symbol = " ";
           style = "bg:green";
           format = "[[ $symbol( $version) ](fg:crust bg:green)]($style)";
         };
@@ -164,25 +158,25 @@ in {
         };
 
         kotlin = {
-          symbol = "";
+          symbol = " ";
           style = "bg:green";
           format = "[[ $symbol( $version) ](fg:crust bg:green)]($style)";
         };
 
         haskell = {
-          symbol = "";
+          symbol = " ";
           style = "bg:green";
           format = "[[ $symbol( $version) ](fg:crust bg:green)]($style)";
         };
 
         python = {
-          symbol = "";
+          symbol = " ";
           style = "bg:green";
           format = "[[ $symbol( $version)(\(#$virtualenv\)) ](fg:crust bg:green)]($style)";
         };
 
         docker_context = {
-          symbol = "";
+          symbol = " ";
           style = "bg:sapphire";
           format = "[[ $symbol( $context) ](fg:crust bg:sapphire)]($style)";
         };
