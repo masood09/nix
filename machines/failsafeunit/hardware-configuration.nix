@@ -17,6 +17,7 @@
         "usb_storage"
         "sd_mod"
         "ixgbe"
+        "i40e"
       ];
 
       kernelModules = [];
