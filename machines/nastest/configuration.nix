@@ -96,7 +96,6 @@ in {
     firewall.enable = true;
     hostId = "64afc685";
     hostName = "nastest";
-    # networkmanager.enable = false;
   };
 
   time.timeZone = "America/Toronto";
