@@ -8,21 +8,10 @@
   immichCfg = config.homelab.services.immich;
   postgresqlEnabled = config.homelab.services.postgresql.enable;
   caddyEnabled = config.homelab.services.caddy.enable;
-
-  pkgs-unstable = import inputs.nixpkgs-unstable {
-    inherit (pkgs) system;
-  };
 in {
-  disabledModules = ["services/web-apps/immich.nix"];
-
-  imports = [
-    ./immich-services.nix
-  ];
-
   services = lib.mkIf immichCfg.enable {
     immich = {
       inherit (immichCfg) enable mediaLocation;
-      package = pkgs-unstable.immich;
 
       database = {
         enable = postgresqlEnabled;

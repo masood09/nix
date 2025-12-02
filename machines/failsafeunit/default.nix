@@ -80,13 +80,4 @@ in {
       };
     };
   };
-
-  # For systemd services (like nix-daemon)
-  systemd = {
-    extraConfig = ''
-      DefaultLimitNOFILE=65536
-      DefaultTimeoutStartSec=20s
-      DefaultTimeoutStopSec=10s
-    '';
-  };
 }

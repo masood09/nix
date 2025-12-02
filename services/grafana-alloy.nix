@@ -3,17 +3,7 @@
   inputs,
   pkgs,
   ...
-}: let
-  pkgs-unstable = import inputs.nixpkgs-unstable {
-    inherit (pkgs) system;
-  };
-in {
-  disabledModules = ["services/monitoring/alloy.nix"];
-
-  imports = [
-    "${inputs.nixpkgs-unstable}/nixos/modules/services/monitoring/alloy.nix"
-  ];
-
+}: {
   sops.secrets = {
     "grafana-alloy-env" = {};
   };
@@ -27,8 +17,6 @@ in {
       extraFlags = [
         "--disable-reporting"
       ];
-
-      package = pkgs-unstable.grafana-alloy;
     };
   };
 
