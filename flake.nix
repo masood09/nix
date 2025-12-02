@@ -141,7 +141,7 @@
         specialArgs = {inherit inputs outputs;};
         modules = [
           (nixpkgs + "/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix")
-          ./machines/nixiso/configuration.nix
+          ./machines/nixiso
         ];
       };
     };

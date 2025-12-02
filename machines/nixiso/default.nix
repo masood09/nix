@@ -1,15 +1,16 @@
-{config, ...}: let
-  homelabCfg = config.homelab;
-in {
-  imports = [
-    ./_packages.nix
+{pkgs, ...}: {
+  environment.systemPackages = with pkgs; [
+    efibootmgr
+    git
+    gptfdisk
+    parted
   ];
 
   users.users.nixos = {
     isNormalUser = true;
     extraGroups = ["wheel"];
     openssh.authorizedKeys.keys = [
-      homelabCfg.primaryUser.sshPublicKey
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfTOXZ6W+DhUQcytGQ1ob+eFPQwbyiTB8wXnRSiYqpK"
     ];
   };
 
@@ -29,6 +30,8 @@ in {
   services.openssh = {
     enable = true;
   };
+
+  networking.hostName = "nixiso";
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "25.11";
