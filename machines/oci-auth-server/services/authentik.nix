@@ -13,7 +13,7 @@ in {
 
   services = {
     authentik = {
-      enable = true;
+      enable = false;
       environmentFile = config.sops.secrets."authentik-env".path;
 
       settings = {
@@ -23,9 +23,9 @@ in {
     };
   };
 
-  environment.persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS) {
-    directories = [
-      "/var/lib/authentik"
-    ];
-  };
+  # environment.persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS) {
+    # directories = [
+      # "/var/lib/authentik"
+    # ];
+  # };
 }
