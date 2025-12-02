@@ -6,11 +6,15 @@ in {
   };
 
   programs.git = {
-    inherit (gitCfg) enable userEmail userName;
-    delta.enable = true;
+    inherit (gitCfg) enable;
     lfs.enable = true;
 
-    extraConfig = {
+    settings = {
+      user = {
+        email = gitCfg.userEmail;
+        name = gitCfg.userName;
+      };
+
       delta = {
         navigate = true;
         side-by-side = true;

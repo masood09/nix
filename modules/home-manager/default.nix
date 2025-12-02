@@ -16,7 +16,7 @@
       (lib.mkIf pkgs.stdenv.isDarwin "/Users/${homelabCfg.primaryUser.userName}")
     ];
 
-    stateVersion = "25.05";
+    stateVersion = "25.11";
 
     sessionVariables = lib.mkIf pkgs.stdenv.isDarwin {
       SOPS_AGE_KEY_FILE = "$HOME/.config/sops/age/keys.txt";

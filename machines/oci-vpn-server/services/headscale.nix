@@ -13,7 +13,7 @@ in {
   options.services.headscale = {
     adminUser = lib.mkOption {
       type = lib.types.str;
-      default = "admin";
+      default = "admin@ahmedmasood.com";
       description = "Username for the headscale admin user";
     };
   };
@@ -41,17 +41,6 @@ in {
           dst = ["${adminUser}:*"];
         }
       ];
-
-      # Auto-approvers section for routes
-      autoApprovers = {
-        routes = {
-          "0.0.0.0/0" = [adminUser];
-          "10.0.0.0/16" = [adminUser];
-          "172.16.0.0/24" = [adminUser];
-        };
-
-        exitNode = [adminUser];
-      };
     };
 
     # Convert to HuJSON format with comments
@@ -74,10 +63,11 @@ in {
     services = {
       headscale = {
         enable = true;
-        adminUser = "admin";
 
         settings = {
           dns = {
+            override_local_dns = false;
+
             base_domain = "dns.headscale.mantannest.com";
 
             extra_records = [
@@ -138,8 +128,6 @@ in {
               enabled = true;
               method = "S256";
             };
-
-            strip_email_domain = true;
           };
 
           policy.path = aclFile;

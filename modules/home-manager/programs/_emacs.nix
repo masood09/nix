@@ -5,14 +5,6 @@
   pkgs,
   ...
 }: let
-  pkgs-unstable = import inputs.nixpkgs-unstable {
-    inherit (pkgs) system;
-
-    config = {
-      allowUnfree = true;
-    };
-  };
-
   emacsEnabled = homelabCfg.programs.emacs.enable or false;
   fishEnabled = homelabCfg.programs.fish.enable or false;
   zshEnabled = homelabCfg.programs.zsh.enable or false;
@@ -41,7 +33,7 @@ in {
       texliveFull
       terraform
       terraform-ls
-      pkgs-unstable.vscode-json-languageserver
+      vscode-json-languageserver
       yaml-language-server
       yq-go
     ]);
