@@ -37,5 +37,7 @@
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-  networking.hostId = "cadd42b4";
+
+  # TODO: Remove the hardcoded value once we are ready to re-install.
+  networking.hostId = lib.mkForce "cadd42b4";
 }
