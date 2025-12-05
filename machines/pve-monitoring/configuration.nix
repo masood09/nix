@@ -9,7 +9,6 @@ in {
   imports = [
     ./../../modules/nixos/pve-hardware-configuration.nix
 
-    ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
 
     ./services/acme.nix
@@ -41,8 +40,12 @@ in {
     };
   };
 
-  homelab.networking = {
-    hostName = "pve-monitoring";
+  homelab = {
+    isEncrypedRoot = false;
+
+    networking = {
+      hostName = "pve-monitoring";
+    };
   };
 
   users.users.alloy = {

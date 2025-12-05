@@ -9,7 +9,6 @@ in {
   imports = [
     ./../../modules/nixos/pve-hardware-configuration.nix
 
-    ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
 
     ./services/postgresql.nix
@@ -37,7 +36,11 @@ in {
     };
   };
 
-  homelab.networking = {
-    hostName = "pve-database";
+  homelab = {
+    isEncrypedRoot = false;
+
+    networking = {
+      hostName = "pve-database";
+    };
   };
 }

@@ -23,6 +23,7 @@ in {
     };
 
     role = "desktop";
+    isEncrypedRoot = false;
   };
 
   home-manager = {
