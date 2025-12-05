@@ -7,8 +7,10 @@
   homelabCfg = config.homelab;
 in {
   imports = [
+    ./_auto-update.nix
     ./_networking.nix
     ./_packages.nix
+    ./_remote-unlock.nix
 
     ./../services/alloy
 
@@ -17,10 +19,10 @@ in {
 
   boot.loader = {
     systemd-boot = {
-      enable = true;
+      enable = !homelabCfg.isRootZFS;
       configurationLimit = 5;
     };
-    efi.canTouchEfiVariables = true;
+
     timeout = 10;
   };
 
@@ -147,6 +149,11 @@ in {
         value = "65536";
       }
     ];
+  };
+
+  systemd.settings.Manager = {
+    DefaultTimeoutStartSec = "20s";
+    DefaultTimeoutStopSec = "10s";
   };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion

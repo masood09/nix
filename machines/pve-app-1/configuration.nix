@@ -9,7 +9,6 @@ in {
   imports = [
     ./../../modules/nixos/pve-hardware-configuration.nix
 
-    ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
 
     ./services/vaultwarden.nix
@@ -38,7 +37,11 @@ in {
     };
   };
 
-  homelab.networking = {
-    hostName = "pve-app-1";
+  homelab = {
+    isEncrypedRoot = false;
+
+    networking = {
+      hostName = "pve-app-1";
+    };
   };
 }

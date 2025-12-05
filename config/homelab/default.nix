@@ -16,6 +16,11 @@
 
     isRootZFS = lib.mkEnableOption "Whether the root drive is ZFS.";
 
+    isEncryptedRoot = lib.mkOption {
+      default = true;
+      type = lib.types.bool;
+    };
+
     role = lib.mkOption {
       default = "server";
       type = lib.types.enum ["desktop" "server"];

@@ -10,7 +10,6 @@ in {
   imports = [
     ./../../modules/nixos/pve-hardware-configuration.nix
 
-    ./../../modules/nixos/auto-update.nix
     ./../../modules/nixos/base.nix
 
     ./services/acme.nix
@@ -38,8 +37,12 @@ in {
     };
   };
 
-  homelab.networking = {
-    hostName = "pve-proxy";
+  homelab = {
+    isEncrypedRoot = false;
+
+    networking = {
+      hostName = "pve-proxy";
+    };
   };
 
   systemd.network.networks."tailscale0".dns = lib.mkForce [];
