@@ -41,7 +41,7 @@ in {
   };
 
   homelab = {
-    isEncrypedRoot = false;
+    isEncryptedRoot = false;
 
     networking = {
       hostName = "pve-monitoring";
