@@ -126,7 +126,7 @@
     nixosConfigurations = {
       caretaker = mkNixOSConfig ./machines/caretaker/configuration.nix;
       failsafeunit = mkNixOSConfig ./machines/failsafeunit;
-      nastest = mkNixOSConfig ./machines/nastest/configuration.nix;
+      nastest = mkNixOSConfig ./machines/nastest;
 
       oci-auth-server = mkNixOSConfig ./machines/oci-auth-server/configuration.nix;
       oci-vpn-server = mkNixOSConfig ./machines/oci-vpn-server/configuration.nix;
