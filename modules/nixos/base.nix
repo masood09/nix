@@ -8,23 +8,16 @@
 in {
   imports = [
     ./_auto-update.nix
+    ./_boot.nix
     ./_networking.nix
     ./_packages.nix
     ./_remote-unlock.nix
+    ./_users.nix
 
     ./../services/alloy
 
     ./../../services/tailscale.nix
   ];
-
-  boot.loader = {
-    systemd-boot = {
-      enable = !homelabCfg.isRootZFS;
-      configurationLimit = 5;
-    };
-
-    timeout = 10;
-  };
 
   nixpkgs.config = {
     allowUnfree = true;
@@ -59,59 +52,26 @@ in {
     secrets."user-password" = {};
   };
 
-  users = {
-    defaultUserShell =
-      if homelabCfg.programs.zsh.enable or false
-      then pkgs.zsh
-      else pkgs.bash;
-
-    mutableUsers = false;
-
-    users = {
-      ${homelabCfg.primaryUser.userName} = {
-        isNormalUser = true;
-        description = homelabCfg.primaryUser.userName;
-
-        extraGroups = [
-          "networkmanager"
-          "wheel"
-        ];
-
-        openssh.authorizedKeys.keys = [
-          homelabCfg.primaryUser.sshPublicKey
-        ];
-
-        hashedPasswordFile = config.sops.secrets."user-password".path;
-      };
-
-      alloy = {
-        isSystemUser = true;
-        group = "alloy";
-      };
-    };
-
-    groups.alloy = {};
-  };
-
+  # TODO: Move these to modules/services section.
   services = {
     openssh = {
       enable = true;
+    
       settings = {
         PermitRootLogin = "no";
         PasswordAuthentication = false;
       };
+
       openFirewall = true;
     };
-    fstrim.enable = true;
-  };
 
-  networking = {
-    firewall.enable = true;
+    fstrim.enable = true;
   };
 
   time.timeZone = "America/Toronto";
   zramSwap.enable = true;
 
+  # TODO: Move this to impermanence file.
   environment.persistence."/nix/persist" = {
     # Hide these mounts from the sidebar of file managers
     hideMounts = true;
@@ -131,6 +91,7 @@ in {
     ];
   };
 
+  # TODO: Move this to _security.nix file.
   security = {
     sudo.wheelNeedsPassword = false;
 

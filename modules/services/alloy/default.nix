@@ -31,6 +31,22 @@ in {
     };
   };
 
+  users = {
+    users = lib.optionalAttrs (alloyCfg.enable) {
+      alloy = {
+        isSystemUser = true;
+        group = "alloy";
+        uid = alloyCfg.userId;
+      };
+    };
+
+    groups = lib.optionalAttrs (alloyCfg.enable) {
+      alloy = {
+        gid = alloyCfg.groupId;
+      };
+    };
+  };
+
   environment.etc."alloy/config.alloy" = lib.mkIf alloyCfg.enable {
     source = ./config.alloy;
   };
