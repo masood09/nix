@@ -23,7 +23,7 @@ in {
     };
 
     role = "desktop";
-    isEncrypedRoot = false;
+    isEncryptedRoot = false;
   };
 
   home-manager = {
