@@ -41,4 +41,13 @@ in {
       };
     };
   };
+
+  services.tailscale = {
+    useRoutingFeatures = "both";
+
+    extraUpFlags = [
+      "--advertise-exit-node"
+      "--advertise-routes=10.0.0.0/16"
+    ];
+  };
 }
