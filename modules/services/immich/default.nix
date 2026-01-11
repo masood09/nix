@@ -1,8 +1,6 @@
 {
   config,
-  inputs,
   lib,
-  pkgs,
   ...
 }: let
   immichCfg = config.homelab.services.immich;
