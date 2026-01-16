@@ -23,6 +23,13 @@ in {
     networking = {
       hostName = "caretaker";
     };
+
+    services = {
+      ssh = {
+        listenPort = 22;
+        listenPortBoot = 2222;
+      };
+    };
   };
 
   home-manager = {

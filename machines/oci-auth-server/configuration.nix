@@ -40,6 +40,13 @@ in {
     networking = {
       hostName = "oci-auth-server";
     };
+
+    services = {
+      ssh = {
+        listenPort = 22;
+        listenPortBoot = 22;
+      };
+    };
   };
 
   users.users.alloy = {

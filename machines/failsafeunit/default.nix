@@ -59,6 +59,11 @@ in {
         enable = true;
         dataDir = "/mnt/DataStore/Apps/PostgreSQL_16";
       };
+
+      ssh = {
+        listenPort = 22;
+        listenPortBoot = 22;
+      };
     };
   };
 

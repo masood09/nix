@@ -43,6 +43,12 @@ in {
     networking = {
       hostName = "pve-proxy";
     };
+
+    services = {
+      ssh = {
+        listenPort = 22;
+      };
+    };
   };
 
   systemd.network.networks."tailscale0".dns = lib.mkForce [];

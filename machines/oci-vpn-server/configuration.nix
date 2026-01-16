@@ -38,6 +38,13 @@ in {
     networking = {
       hostName = "oci-vpn-server";
     };
+
+    services = {
+      ssh = {
+        listenPort = 22;
+        listenPortBoot = 2222;
+      };
+    };
   };
 
   users.users.alloy = {

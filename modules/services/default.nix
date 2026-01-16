@@ -5,5 +5,10 @@
     ./immich
     ./minio
     ./postgresql
+    ./ssh
   ];
+
+  services = {
+    fstrim.enable = true;
+  };
 }
