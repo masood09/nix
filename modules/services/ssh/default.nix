@@ -1,11 +1,10 @@
 {
   config,
-  lib,
   ...
 }: let
   sshCfg = config.homelab.services.ssh;
 in {
-  services = lib.mkIf sshCfg.enable {
+  services = {
     openssh = {
       enable = true;
 
