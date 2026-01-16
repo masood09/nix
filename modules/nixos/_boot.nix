@@ -27,7 +27,15 @@ in {
         efiSupport = true;
         zfsSupport = true;
 
-        mirroredBoots = [
+        devices = lib.mkIf (!homelabCfg.isMirroredBoot) [ "nodev" ];
+
+        gfxmodeEfi = "text";
+        
+        extraConfig = ''
+          terminal_output console
+        '';
+
+        mirroredBoots = lib.mkIf homelabCfg.isMirroredBoot [
           {
             devices = ["nodev"];
             path = "/boot";

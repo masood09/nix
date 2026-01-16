@@ -14,6 +14,7 @@ in {
     ./_users.nix
 
     ./../services/alloy
+    ./../services/ssh
 
     ./../../services/tailscale.nix
   ];

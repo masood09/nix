@@ -1,4 +1,6 @@
 keys:
+  - &watchfulsystem
+    age1sh9wz07py8qysc3dvf228r85pfafaraf0a23244stpxanmq68slq06cxx6
   - &nastest
     age1m24xcey4jcvyjncz4krmzwy9m6efqvr0jrzdjxfxg8fsalt83cqqpwnz3j
   - &murderbot
@@ -24,6 +26,7 @@ creation_rules:
   - path_regex: secrets/secrets\.yaml$
     key_groups:
       - age:
+          - *watchfulsystem
           - *nastest
           - *murderbot
           - *caretaker
