@@ -33,11 +33,11 @@ in {
     acme.certs."${immichCfg.webDomain}".domain = "${immichCfg.webDomain}";
   };
 
-  users.users = lib.optionalAttrs (immichCfg.enable) {
+  users.users = lib.optionalAttrs immichCfg.enable {
     immich.uid = immichCfg.userId;
   };
 
-  users.groups = lib.optionalAttrs (immichCfg.enable) {
+  users.groups = lib.optionalAttrs immichCfg.enable {
     immich.gid = immichCfg.groupId;
   };
 }

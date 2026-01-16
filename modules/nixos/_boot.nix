@@ -12,15 +12,15 @@ in {
         configurationLimit = 5;
       };
 
-      efi = lib.mkIf (homelabCfg.isRootZFS) {
+      efi = lib.mkIf homelabCfg.isRootZFS {
         efiSysMountPoint = "/boot";
       };
 
-      generationsDir = lib.mkIf (homelabCfg.isRootZFS) {
+      generationsDir = lib.mkIf homelabCfg.isRootZFS {
         copyKernels = true;
       };
 
-      grub = lib.mkIf (homelabCfg.isRootZFS) {
+      grub = lib.mkIf homelabCfg.isRootZFS {
         enable = true;
         efiInstallAsRemovable = true;
         copyKernels = true;
@@ -58,6 +58,6 @@ in {
       '');
     };
 
-    supportedFilesystems = lib.mkIf (homelabCfg.isRootZFS) ["zfs"];
+    supportedFilesystems = lib.mkIf homelabCfg.isRootZFS ["zfs"];
   };
 }

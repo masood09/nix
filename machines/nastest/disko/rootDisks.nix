@@ -112,7 +112,6 @@ in {
             };
           };
 
-
           "root/empty" = {
             type = "zfs_fs";
             mountpoint = "/";

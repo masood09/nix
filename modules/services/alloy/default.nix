@@ -1,8 +1,6 @@
 {
   config,
-  inputs,
   lib,
-  pkgs,
   ...
 }: let
   alloyCfg = config.homelab.services.alloy;
@@ -32,7 +30,7 @@ in {
   };
 
   users = {
-    users = lib.optionalAttrs (alloyCfg.enable) {
+    users = lib.optionalAttrs alloyCfg.enable {
       alloy = {
         isSystemUser = true;
         group = "alloy";
@@ -40,7 +38,7 @@ in {
       };
     };
 
-    groups = lib.optionalAttrs (alloyCfg.enable) {
+    groups = lib.optionalAttrs alloyCfg.enable {
       alloy = {
         gid = alloyCfg.groupId;
       };
