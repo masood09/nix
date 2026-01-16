@@ -51,22 +51,6 @@ in {
     secrets."user-password" = {};
   };
 
-  # TODO: Move these to modules/services section.
-  services = {
-    openssh = {
-      enable = true;
-
-      settings = {
-        PermitRootLogin = "no";
-        PasswordAuthentication = false;
-      };
-
-      openFirewall = true;
-    };
-
-    fstrim.enable = true;
-  };
-
   time.timeZone = "America/Toronto";
   zramSwap.enable = true;
 

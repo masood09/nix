@@ -42,5 +42,11 @@ in {
     networking = {
       hostName = "pve-database";
     };
+
+    services = {
+      ssh = {
+        listenPort = 22;
+      };
+    };
   };
 }

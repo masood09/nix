@@ -46,6 +46,12 @@ in {
     networking = {
       hostName = "pve-monitoring";
     };
+
+    services = {
+      ssh = {
+        listenPort = 22;
+      };
+    };
   };
 
   users.users.alloy = {

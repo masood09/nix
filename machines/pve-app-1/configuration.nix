@@ -43,5 +43,11 @@ in {
     networking = {
       hostName = "pve-app-1";
     };
+
+    services = {
+      ssh = {
+        listenPort = 22;
+      };
+    };
   };
 }

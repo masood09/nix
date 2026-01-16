@@ -22,6 +22,13 @@ in {
     networking = {
       hostName = "nastest";
     };
+
+    services = {
+      ssh = {
+        listenPort = 22;
+        listenPortBoot = 22;
+      };
+    };
   };
 
   fileSystems = {
