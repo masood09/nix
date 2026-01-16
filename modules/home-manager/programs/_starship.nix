@@ -97,7 +97,6 @@ in {
           truncation_symbol = "…/";
         };
 
-
         git_branch = {
           symbol = "";
           style = "bg:yellow";

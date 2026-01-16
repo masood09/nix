@@ -76,20 +76,21 @@ in {
     };
   };
 
-  environment.persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS) {
-    directories = [
-      "/var/lib/grafana"
-    ];
+  environment = {
+    etc = {
+      "grafana-dashboards/node-exporter-full.json".source = ./../../../files/grafana/dashboards/node-exporter-full.json;
+      "grafana-dashboards/blocky-grafana.json".source = ./../../../files/grafana/dashboards/blocky-grafana.json;
+      "grafana-dashboards/postgresql-dashboard.json".source = ./../../../files/grafana/dashboards/postgresql-dashboard.json;
+    };
+
+    persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS) {
+      directories = [
+        "/var/lib/grafana"
+      ];
+    };
   };
 
   systemd.tmpfiles.rules = [
     "d /var/lib/grafana 0700 grafana grafana -"
   ];
-
-  environment.etc."grafana-dashboards/node-exporter-full.json".source =
-    ./../../../files/grafana/dashboards/node-exporter-full.json;
-  environment.etc."grafana-dashboards/blocky-grafana.json".source =
-    ./../../../files/grafana/dashboards/blocky-grafana.json;
-  environment.etc."grafana-dashboards/postgresql-dashboard.json".source =
-    ./../../../files/grafana/dashboards/postgresql-dashboard.json;
 }

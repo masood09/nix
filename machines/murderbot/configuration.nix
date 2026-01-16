@@ -42,7 +42,6 @@ in {
     isEncryptedRoot = false;
   };
 
-
   home-manager = {
     extraSpecialArgs = {
       inherit inputs outputs homelabCfg;

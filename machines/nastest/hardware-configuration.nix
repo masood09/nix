@@ -29,7 +29,7 @@
     zfs.extraPools = [
       "dpool"
     ];
-    
+
     kernelModules = [];
     extraModulePackages = [];
   };
