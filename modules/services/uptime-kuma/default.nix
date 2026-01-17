@@ -102,12 +102,17 @@ in {
     # Service hardening + mount ordering
     systemd.services.uptime-kuma = lib.mkMerge [
       {
+        # Unit-level ordering / mount requirements
+        unitConfig = {
+          RequiresMountsFor = [uptimeKumaCfg.dataDir];
+        };
+
         serviceConfig = {
           DynamicUser = lib.mkForce false;
 
           # stop systemd from trying to manage /var/lib/private + bind-mount behavior
-          StateDirectory = lib.mkForce "";
-          StateDirectoryMode = lib.mkForce "";
+          StateDirectory = lib.mkForce null;
+          StateDirectoryMode = lib.mkForce null;
 
           User = "uptime-kuma";
           Group = "uptime-kuma";
@@ -118,10 +123,18 @@ in {
       }
 
       (lib.mkIf (uptimeKumaCfg.enable && uptimeKumaCfg.zfs.enable) {
-        serviceConfig.RequiresMountsFor = [uptimeKumaCfg.dataDir];
         requires = ["zfs-dataset-uptime-kuma.service"];
         after = ["zfs-dataset-uptime-kuma.service"];
       })
+    ];
+
+    systemd.tmpfiles.rules = lib.mkIf uptimeKumaCfg.enable [
+      # Ensure base dir exists and is owned correctly
+      "d ${uptimeKumaCfg.dataDir} 0750 uptime-kuma uptime-kuma -"
+
+      # Pre-create subdirs Kuma expects
+      "d ${uptimeKumaCfg.dataDir}/upload 0750 uptime-kuma uptime-kuma -"
+      "d ${uptimeKumaCfg.dataDir}/data 0750 uptime-kuma uptime-kuma -"
     ];
   };
 }
