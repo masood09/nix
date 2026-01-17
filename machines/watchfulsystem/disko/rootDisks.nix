@@ -107,15 +107,6 @@ in {
             };
           };
 
-          "root/var/lib/tailscale" = {
-            type = "zfs_fs";
-            mountpoint = "/var/lib/tailscale";
-
-            options = {
-              mountpoint = "legacy";
-            };
-          };
-
           "root/var/log" = {
             type = "zfs_fs";
             mountpoint = "/var/log";

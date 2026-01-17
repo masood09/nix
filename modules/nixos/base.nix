@@ -15,8 +15,6 @@ in {
 
     ./../services/alloy
     ./../services/ssh
-
-    ./../../services/tailscale.nix
   ];
 
   nixpkgs.config = {
