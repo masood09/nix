@@ -10,7 +10,6 @@ in {
     ./disko
     ./hardware-configuration.nix
     ./_networking.nix
-    ./_restic.nix
 
     ./../../modules/nixos/base.nix
     ./../../modules/services
