@@ -18,6 +18,7 @@ in {
 
   sops.secrets = {
     "cloudflare-api-key" = {};
+    "headscale-preauth-key" = {};
     "restic-env" = {
       sopsFile = ./../../secrets/watchfulsystem-server.yaml;
     };
@@ -44,6 +45,18 @@ in {
 
       caddy = {
         enable = false;
+      };
+
+      tailscale = {
+        enable = true;
+
+        zfs = {
+          enable = true;
+          dataset = "rpool/root/var/lib/tailscale";
+          properties = {
+            recordsize = "16K";
+          };
+        };
       };
 
       uptime-kuma = {

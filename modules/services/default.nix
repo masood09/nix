@@ -6,6 +6,7 @@
     ./minio
     ./postgresql
     ./ssh
+    ./tailscale
     ./uptime-kuma
     ./zfs
   ];
