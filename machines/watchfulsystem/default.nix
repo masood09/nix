@@ -40,11 +40,17 @@ in {
 
     services = {
       acme = {
-        cloudflareAPIKeyPath = config.sops.secrets."cloudflare-api-key".path;
+        zfs = {
+          enable = true;
+          dataset = "rpool/root/var/lib/acme";
+          properties = {
+            recordsize = "16K";
+          };
+        };
       };
 
       caddy = {
-        enable = false;
+        enable = true;
       };
 
       tailscale = {
