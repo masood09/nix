@@ -67,6 +67,14 @@ in {
 
       uptime-kuma = {
         enable = false;
+
+        zfs = {
+          enable = true;
+          dataset = "rpool/root/var/lib/uptime-kuma";
+          properties = {
+            recordsize = "16K";
+          };
+        };
       };
     };
   };
