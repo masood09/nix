@@ -27,10 +27,10 @@ in {
         efiSupport = true;
         zfsSupport = true;
 
-        devices = lib.mkIf (!homelabCfg.isMirroredBoot) [ "nodev" ];
+        devices = lib.mkIf (!homelabCfg.isMirroredBoot) ["nodev"];
 
         gfxmodeEfi = "text";
-        
+
         extraConfig = ''
           terminal_output console
         '';

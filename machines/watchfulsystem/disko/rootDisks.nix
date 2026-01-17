@@ -136,7 +136,6 @@ in {
             };
           };
 
-
           "root/var/log" = {
             type = "zfs_fs";
             mountpoint = "/var/log";

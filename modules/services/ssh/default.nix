@@ -1,7 +1,4 @@
-{
-  config,
-  ...
-}: let
+{config, ...}: let
   sshCfg = config.homelab.services.ssh;
 in {
   services = {
