@@ -5,41 +5,103 @@
 }: let
   homelabCfg = config.homelab;
   caddyEnabled = homelabCfg.services.caddy.enable;
+  acmeCfg = homelabCfg.services.acme;
 in {
   imports = [
     ./alloy.nix
   ];
 
-  services = lib.mkIf caddyEnabled {
-    caddy = {
-      enable = caddyEnabled;
-    };
-  };
-
-  security = lib.mkIf caddyEnabled {
+  options.homelab.services = {
     acme = {
-      acceptTerms = true;
+      cloudflareAPIKeyPath = lib.mkOption {
+        type = lib.types.path;
+        default = config.sops.secrets."cloudflare-api-key".path;
+        description = "File containing the Cloudflare API Token.";
+      };
 
-      defaults = {
-        email = "letsencrypt@mantannest.com";
-        dnsProvider = "cloudflare";
-        dnsPropagationCheck = true;
-        dnsResolver = "1.1.1.1:53";
-        credentialFiles = {
-          "CLOUDFLARE_DNS_API_TOKEN_FILE" = homelabCfg.services.acme.cloudflareAPIKeyPath;
+      zfs = {
+        enable = lib.mkEnableOption "Store /var/lib/acme on a ZFS dataset.";
+
+        dataset = lib.mkOption {
+          type = lib.types.str;
+          example = "rpool/root/var/lib/acme";
+          description = "ZFS dataset to create and mount at /var/lib/acme.";
+        };
+
+        properties = lib.mkOption {
+          type = lib.types.attrsOf lib.types.str;
+          default = {};
+          description = "ZFS properties for the ACME dataset.";
         };
       };
     };
+
+    caddy = {
+      enable = lib.mkEnableOption "Whether to enable Caddy web server.";
+    };
   };
 
-  environment.persistence."/nix/persist" = lib.mkIf (caddyEnabled && homelabCfg.impermanence && !homelabCfg.isRootZFS) {
-    directories = [
-      "/var/lib/acme"
+  config = {
+    services = lib.mkIf caddyEnabled {
+      caddy = {
+        enable = caddyEnabled;
+      };
+    };
+
+    security = lib.mkIf caddyEnabled {
+      acme = {
+        acceptTerms = true;
+
+        defaults = {
+          email = "letsencrypt@mantannest.com";
+          dnsProvider = "cloudflare";
+          dnsPropagationCheck = true;
+          dnsResolver = "1.1.1.1:53";
+          credentialFiles = {
+            "CLOUDFLARE_DNS_API_TOKEN_FILE" = homelabCfg.services.acme.cloudflareAPIKeyPath;
+          };
+        };
+      };
+    };
+
+    # ZFS-managed ACME state dir
+    homelab.zfs.datasets.acme = lib.mkIf (caddyEnabled && acmeCfg.zfs.enable) {
+      inherit (acmeCfg.zfs) dataset properties;
+
+      enable = true;
+      mountpoint = "/var/lib/acme";
+
+      # Ensure it exists before units that might touch ACME state
+      requiredBy = [
+        "caddy.service"
+        "acme.service"
+      ];
+    };
+
+    # Make systemd enforce the mount is present
+    systemd.services = lib.mkIf (caddyEnabled && acmeCfg.zfs.enable) {
+      caddy = {
+        serviceConfig.RequiresMountsFor = ["/var/lib/acme"];
+        requires = ["zfs-dataset-acme.service"];
+        after = ["zfs-dataset-acme.service"];
+      };
+
+      acme = {
+        serviceConfig.RequiresMountsFor = ["/var/lib/acme"];
+        requires = ["zfs-dataset-acme.service"];
+        after = ["zfs-dataset-acme.service"];
+      };
+    };
+
+    environment.persistence."/nix/persist" = lib.mkIf (caddyEnabled && homelabCfg.impermanence && !homelabCfg.isRootZFS) {
+      directories = [
+        "/var/lib/acme"
+      ];
+    };
+
+    networking.firewall.allowedTCPPorts = lib.mkIf caddyEnabled [
+      80
+      443
     ];
   };
-
-  networking.firewall.allowedTCPPorts = lib.mkIf caddyEnabled [
-    80
-    443
-  ];
 }
