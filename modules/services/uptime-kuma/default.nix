@@ -59,7 +59,7 @@ in {
       Group = "uptime-kuma";
 
       # with ProtectSystem=strict, you must explicitly allow writes here
-      ReadWritePaths = [ "/var/lib/uptime-kuma" ];
+      ReadWritePaths = ["/var/lib/uptime-kuma"];
     };
   };
 }
