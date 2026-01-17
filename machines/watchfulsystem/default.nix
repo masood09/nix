@@ -43,7 +43,7 @@ in {
       };
 
       caddy = {
-        enable = true;
+        enable = false;
       };
 
       uptime-kuma = {
