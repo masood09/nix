@@ -98,15 +98,6 @@ in {
             };
           };
 
-          "root/var/lib/acme" = {
-            type = "zfs_fs";
-            mountpoint = "/var/lib/acme";
-
-            options = {
-              mountpoint = "legacy";
-            };
-          };
-
           "root/var/lib/nixos" = {
             type = "zfs_fs";
             mountpoint = "/var/lib/nixos";
