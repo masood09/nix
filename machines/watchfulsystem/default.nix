@@ -47,7 +47,7 @@ in {
       };
 
       uptime-kuma = {
-        enable = true;
+        enable = false;
       };
     };
   };
