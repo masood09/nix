@@ -67,7 +67,10 @@ in {
 
     # Make systemd enforce the mount is present
     systemd.services.tailscaled = lib.mkIf (cfg.enable && cfg.zfs.enable) {
-      serviceConfig.RequiresMountsFor = [cfg.dataDir];
+      unitConfig = {
+        RequiresMountsFor = [cfg.dataDir];
+      };
+
       requires = ["zfs-dataset-tailscale.service"];
       after = ["zfs-dataset-tailscale.service"];
     };
