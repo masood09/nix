@@ -66,7 +66,7 @@ in {
       };
 
       uptime-kuma = {
-        enable = false;
+        enable = true;
 
         zfs = {
           enable = true;
