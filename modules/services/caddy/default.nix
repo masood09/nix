@@ -81,13 +81,21 @@ in {
     # Make systemd enforce the mount is present
     systemd.services = lib.mkIf (caddyEnabled && acmeCfg.zfs.enable) {
       caddy = {
-        serviceConfig.RequiresMountsFor = ["/var/lib/acme"];
+        # Unit-level ordering / mount requirements
+        unitConfig = {
+          RequiresMountsFor = ["/var/lib/acme"];
+        };
+
         requires = ["zfs-dataset-acme.service"];
         after = ["zfs-dataset-acme.service"];
       };
 
       acme-setup = {
-        serviceConfig.RequiresMountsFor = ["/var/lib/acme"];
+        # Unit-level ordering / mount requirements
+        unitConfig = {
+          RequiresMountsFor = ["/var/lib/acme"];
+        };
+
         requires = ["zfs-dataset-acme.service"];
         after = ["zfs-dataset-acme.service"];
       };
