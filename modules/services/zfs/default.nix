@@ -84,12 +84,11 @@
     mp = lib.escapeShellArg (toString dsCfg.mountpoint);
   in {
     "${unitName}" = {
+      inherit (dsCfg) requiredBy after wants;
+
       description = "Ensure ZFS dataset exists and is mounted (${dsCfg.dataset})";
       wantedBy = ["multi-user.target"];
-      requiredBy = dsCfg.requiredBy;
       before = dsCfg.before ++ dsCfg.requiredBy;
-      after = dsCfg.after;
-      wants = dsCfg.wants;
 
       serviceConfig = {
         Type = "oneshot";
