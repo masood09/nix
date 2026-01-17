@@ -38,6 +38,12 @@ creation_rules:
           - *pve-monitoring
           - *pve-proxy
 
+  - path_regex: secrets/watchfulsystem-server\.yaml$
+    key_groups:
+      - age:
+        - *murderbot
+        - *watchfulsystem
+
   - path_regex: secrets/oci-auth-server\.yaml$
     key_groups:
       - age:
