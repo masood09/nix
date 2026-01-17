@@ -86,7 +86,7 @@ in {
         after = ["zfs-dataset-acme.service"];
       };
 
-      acme = {
+      acme-setup = {
         serviceConfig.RequiresMountsFor = ["/var/lib/acme"];
         requires = ["zfs-dataset-acme.service"];
         after = ["zfs-dataset-acme.service"];
