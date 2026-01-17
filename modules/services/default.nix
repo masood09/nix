@@ -7,6 +7,7 @@
     ./postgresql
     ./ssh
     ./uptime-kuma
+    ./zfs
   ];
 
   services = {
