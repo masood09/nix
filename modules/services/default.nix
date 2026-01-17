@@ -6,6 +6,7 @@
     ./minio
     ./postgresql
     ./ssh
+    ./uptime-kuma
   ];
 
   services = {
