@@ -98,6 +98,15 @@ in {
             };
           };
 
+          "root/var/lib/acme" = {
+            type = "zfs_fs";
+            mountpoint = "/var/lib/acme";
+
+            options = {
+              mountpoint = "legacy";
+            };
+          };
+
           "root/var/lib/nixos" = {
             type = "zfs_fs";
             mountpoint = "/var/lib/nixos";
@@ -115,6 +124,18 @@ in {
               mountpoint = "legacy";
             };
           };
+
+          "root/var/lib/uptime-kuma" = {
+            type = "zfs_fs";
+            mountpoint = "/var/lib/uptime-kuma";
+
+            options = {
+              mountpoint = "legacy";
+              recordsize = "16K";
+              "com.sun:auto-snapshot" = "false";
+            };
+          };
+
 
           "root/var/log" = {
             type = "zfs_fs";

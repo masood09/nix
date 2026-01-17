@@ -7,5 +7,6 @@
     ./_minio.nix
     ./_postgresql.nix
     ./_ssh.nix
+    ./_uptime-kuma.nix
   ];
 }

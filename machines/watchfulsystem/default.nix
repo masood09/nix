@@ -15,12 +15,30 @@ in {
     ./../../modules/services
   ];
 
+  sops.secrets = {
+    "cloudflare-api-key" = {};
+  };
+
   homelab = {
     isRootZFS = true;
     isEncryptedRoot = true;
 
     networking = {
       hostName = "watchfulsystem";
+    };
+
+    services = {
+      acme = {
+        cloudflareAPIKeyPath = config.sops.secrets."cloudflare-api-key".path;
+      };
+
+      caddy = {
+        enable = true;
+      };
+
+      uptime-kuma = {
+        enable = true;
+      };
     };
   };
 
