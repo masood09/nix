@@ -30,9 +30,34 @@ in {
       type = lib.types.ints.u16;
       description = "Group ID of Alloy group";
     };
+
+    zfs = {
+      enable = lib.mkEnableOption "Store Uptime Kuma dataDir on a ZFS dataset.";
+
+      dataset = lib.mkOption {
+        type = lib.types.str;
+        example = "rpool/root/var/lib/uptime-kuma";
+        description = "ZFS dataset to create and mount at dataDir.";
+      };
+
+      properties = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = {};
+        description = "ZFS properties for the dataset.";
+      };
+    };
   };
 
   config = {
+    # ZFS dataset for dataDir
+    homelab.zfs.datasets.uptime-kuma = lib.mkIf (uptimeKumaCfg.enable && uptimeKumaCfg.zfs.enable) {
+      inherit (uptimeKumaCfg.zfs) dataset properties;
+
+      enable = true;
+      mountpoint = uptimeKumaCfg.dataDir;
+      requiredBy = ["uptime-kuma.service"];
+    };
+
     services = lib.mkIf uptimeKumaCfg.enable {
       uptime-kuma = {
         inherit (uptimeKumaCfg) enable;
@@ -74,20 +99,29 @@ in {
       };
     };
 
-    systemd.services.uptime-kuma = {
-      serviceConfig = {
-        DynamicUser = lib.mkForce false;
+    # Service hardening + mount ordering
+    systemd.services.uptime-kuma = lib.mkMerge [
+      {
+        serviceConfig = {
+          DynamicUser = lib.mkForce false;
 
-        # stop systemd from trying to manage /var/lib/private + bind-mount behavior
-        StateDirectory = lib.mkForce "";
-        StateDirectoryMode = lib.mkForce "";
+          # stop systemd from trying to manage /var/lib/private + bind-mount behavior
+          StateDirectory = lib.mkForce "";
+          StateDirectoryMode = lib.mkForce "";
 
-        User = "uptime-kuma";
-        Group = "uptime-kuma";
+          User = "uptime-kuma";
+          Group = "uptime-kuma";
 
-        # with ProtectSystem=strict, you must explicitly allow writes here
-        ReadWritePaths = ["/var/lib/uptime-kuma"];
-      };
-    };
+          # with ProtectSystem=strict, you must explicitly allow writes here
+          ReadWritePaths = [uptimeKumaCfg.dataDir];
+        };
+      }
+
+      (lib.mkIf (uptimeKumaCfg.enable && uptimeKumaCfg.zfs.enable) {
+        serviceConfig.RequiresMountsFor = [uptimeKumaCfg.dataDir];
+        requires = ["zfs-dataset-uptime-kuma.service"];
+        after = ["zfs-dataset-uptime-kuma.service"];
+      })
+    ];
   };
 }
