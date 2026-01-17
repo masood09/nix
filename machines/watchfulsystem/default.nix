@@ -10,6 +10,7 @@ in {
     ./disko
     ./hardware-configuration.nix
     ./_networking.nix
+    ./_restic.nix
 
     ./../../modules/nixos/base.nix
     ./../../modules/services
@@ -17,6 +18,15 @@ in {
 
   sops.secrets = {
     "cloudflare-api-key" = {};
+    "restic-env" = {
+      sopsFile = ./../../secrets/watchfulsystem-server.yaml;
+    };
+    "restic-repo" = {
+      sopsFile = ./../../secrets/watchfulsystem-server.yaml;
+    };
+    "restic-password" = {
+      sopsFile = ./../../secrets/watchfulsystem-server.yaml;
+    };
   };
 
   homelab = {
