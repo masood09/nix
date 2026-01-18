@@ -1,20 +1,34 @@
-{config, ...}: let
+{
+  config,
+  lib,
+  ...
+}: let
   sshCfg = config.homelab.services.ssh;
 in {
-  services = {
-    openssh = {
-      enable = true;
+  options.homelab.services.ssh = {
+    listenPort = lib.mkOption {
+      default = 22222;
+      type = lib.types.port;
+      description = "The port of the SSH server.";
+    };
+  };
 
-      ports = [
-        sshCfg.listenPort
-      ];
+  config = {
+    services = {
+      openssh = {
+        enable = true;
 
-      settings = {
-        PermitRootLogin = "no";
-        PasswordAuthentication = false;
+        ports = [
+          sshCfg.listenPort
+        ];
+
+        settings = {
+          PermitRootLogin = "no";
+          PasswordAuthentication = false;
+        };
+
+        openFirewall = true;
       };
-
-      openFirewall = true;
     };
   };
 }
