@@ -4,6 +4,7 @@
     ./authentik
     ./caddy
     ./immich
+    ./headscale
     ./minio
     ./postgresql
     ./restic
