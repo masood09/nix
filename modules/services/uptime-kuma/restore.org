@@ -1,0 +1,110 @@
+#+TITLE: Restoring Uptime Kuma from Restic Backup
+#+AUTHOR: Masood Ahmed
+#+OPTIONS: toc:nil num:nil
+
+This document describes a *safe, repeatable process* for restoring the
+Uptime Kuma data directory from a Restic S3 backup staged via
+=/mnt/nightly_backup=.
+
+The procedure:
+- Restores the latest snapshot
+- Stops the service before modifying data
+- Replaces the data directory atomically
+- Ensures correct ownership
+- Cleans up temporary restore artifacts
+
+* Prerequisites
+
+- Restic repository configured (=restic-s3-backup=)
+- Sufficient disk space in =/tmp=
+- =uptime-kuma= system user and group exist
+- Service managed via systemd
+
+* 1. Verify Available Snapshots
+
+Confirm the snapshot you intend to restore:
+
+#+begin_src bash
+sudo restic-s3-backup snapshots
+#+end_src
+
+* 2. Restore the Latest Snapshot to a Temporary Location
+
+Restore only the Uptime Kuma dataset into =/tmp=:
+
+#+begin_src bash
+sudo restic-s3-backup restore latest \
+  --include /mnt/nightly_backup/uptime-kuma \
+  --target /tmp
+#+end_src
+
+This will create the following directory structure:
+
+#+begin_example
+/tmp/mnt/nightly_backup/uptime-kuma/
+#+end_example
+
+* 3. Stop the Uptime Kuma Service
+
+Ensure the service is fully stopped before modifying its data directory:
+
+#+begin_src bash
+sudo systemctl stop uptime-kuma.service
+#+end_src
+
+* 4. Clear the Existing Data Directory
+
+Remove all existing contents while preserving the directory itself:
+
+#+begin_src bash
+sudo find /var/lib/uptime-kuma -mindepth 1 -delete
+#+end_src
+
+This approach is:
+- Shell-agnostic (bash/zsh)
+- Safe even if the directory is already empty
+
+* 5. Promote Restored Data into Place
+
+Copy the restored contents into the live data directory:
+
+#+begin_src bash
+sudo rsync -a --delete \
+  /tmp/mnt/nightly_backup/uptime-kuma/ \
+  /var/lib/uptime-kuma/
+#+end_src
+
+Fix ownership so the service can read and write all files:
+
+#+begin_src bash
+sudo chown -R uptime-kuma:uptime-kuma /var/lib/uptime-kuma
+#+end_src
+
+* 6. Start the Uptime Kuma Service
+
+Bring the service back online:
+
+#+begin_src bash
+sudo systemctl start uptime-kuma.service
+#+end_src
+
+Verify service status:
+
+#+begin_src bash
+sudo systemctl status uptime-kuma.service
+#+end_src
+
+* 7. Clean Up Temporary Restore Files
+
+Remove the temporary restore directory:
+
+#+begin_src bash
+sudo rm -rf /tmp/mnt/nightly_backup/uptime-kuma
+#+end_src
+
+* Notes & Best Practices
+
+- Always stop the service before restoring data to avoid corruption.
+- =rsync --delete= ensures the restored state exactly matches the backup.
+- Consider taking a *ZFS snapshot* of =/var/lib/uptime-kuma= before restoring
+  for quick rollback.
