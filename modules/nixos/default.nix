@@ -1,10 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: let
-  homelabCfg = config.homelab;
-in {
+{lib, ...}: {
   imports = [
     ./_auto-update.nix
     ./_boot.nix
@@ -22,27 +16,39 @@ in {
     ./../services
   ];
 
-  nix = {
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 7d";
-    };
-
-    settings = {
-      experimental-features = "nix-command flakes";
-      auto-optimise-store = true;
+  options.homelab = {
+    role = lib.mkOption {
+      default = "server";
+      type = lib.types.enum ["desktop" "server"];
+      description = ''
+        The role of this machine. Could be server or desktop.
+      '';
     };
   };
 
-  time.timeZone = "America/Toronto";
-  zramSwap.enable = true;
+  config = {
+    nix = {
+      gc = {
+        automatic = true;
+        dates = "weekly";
+        options = "--delete-older-than 7d";
+      };
 
-  systemd.settings.Manager = {
-    DefaultTimeoutStartSec = "20s";
-    DefaultTimeoutStopSec = "10s";
+      settings = {
+        experimental-features = "nix-command flakes";
+        auto-optimise-store = true;
+      };
+    };
+
+    time.timeZone = "America/Toronto";
+    zramSwap.enable = true;
+
+    systemd.settings.Manager = {
+      DefaultTimeoutStartSec = "20s";
+      DefaultTimeoutStopSec = "10s";
+    };
+
+    # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
+    system.stateVersion = "25.11";
   };
-
-  # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  system.stateVersion = "25.11";
 }
