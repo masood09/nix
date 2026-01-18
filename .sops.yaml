@@ -13,8 +13,6 @@ keys:
     age1gqvw59226drpwn8942x55jcf5zca5gfupj9eppmeagfevx3pupzs78dfs6
   - &failsafeunit
     age14vkyvuykxaceu3hwmwf5uscs54prr507vvgejwjcmp4taq0klcsqzkdsuu
-  - &oci-vpn-server
-    age1x3fnwasxkjjsr2c9ygrtu47yugwvvrt87vx86k9dn5z69v5csfpsk2n0j3
   - &pve-app-1
     age1vs8ffqtt3hfdtur82tv59z6kfwf27nk4e46nrkrj79jcmuxdsy2sag38sf
   - &pve-database
@@ -35,7 +33,6 @@ creation_rules:
           - *murderbot
           - *caretaker
           - *failsafeunit
-          - *oci-vpn-server
           - *pve-app-1
           - *pve-database
           - *pve-monitoring
@@ -58,12 +55,6 @@ creation_rules:
       - age:
         - *murderbot
         - *watchfulsystem
-
-  - path_regex: secrets/oci-vpn-server\.yaml$
-    key_groups:
-      - age:
-        - *murderbot
-        - *oci-vpn-server
 
   - path_regex: secrets/caretaker\.yaml$
     key_groups:
