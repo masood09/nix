@@ -5,6 +5,7 @@
     ./immich
     ./minio
     ./postgresql
+    ./restic
     ./ssh
     ./tailscale
     ./uptime-kuma
