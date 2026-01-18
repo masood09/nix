@@ -1,0 +1,225 @@
+#+TITLE: Restoring Authentik Database and Media from Restic Backup
+#+AUTHOR: Masood Ahmed
+#+OPTIONS: toc:nil num:nil
+
+This document describes a *safe, repeatable procedure* for restoring the
+Authentik PostgreSQL database and media files from Restic backups staged
+via =/mnt/nightly_backup=.
+
+The workflow:
+- Verifies available backups
+- Restores database dump and media to a temporary location
+- Stops all Authentik services
+- Drops and restores the PostgreSQL database
+- Fixes ownership of database objects
+- Restores media files with correct permissions
+- Restarts services cleanly
+
+* Backup Information
+
+- Database: =authentik=
+- Database owner: =authentik=
+- Database engine: PostgreSQL
+- Media path: =/var/lib/private/authentik/media=
+
+* 1. Verify Available Snapshots
+
+Confirm the snapshot you intend to restore:
+
+#+begin_src bash
+sudo restic-s3-backup snapshots
+#+end_src
+
+* 2. Restore the Latest Snapshot to a Temporary Location
+
+Restore the PostgreSQL backup and Authentik media into =/tmp=:
+
+#+begin_src bash
+sudo restic-s3-backup restore latest \
+  --include /mnt/nightly_backup/postgresql-backup \
+  --target /tmp
+
+sudo restic-s3-backup restore latest \
+  --include /var/lib/private/authentik/media \
+  --target /tmp
+#+end_src
+
+This will create the following directory structure:
+
+#+begin_example
+/tmp/mnt/nightly_backup/postgresql-backup/
+/tmp/var/lib/private/authentik/media/
+#+end_example
+
+* 3. Stop Authentik Services
+
+Stop all Authentik-related services before restoring the database:
+
+#+begin_src bash
+sudo systemctl stop authentik.service
+sudo systemctl stop authentik-worker.service
+sudo systemctl stop authentik-migrate.service
+#+end_src
+
+* 4. Drop the Existing Database
+
+Remove the existing database before restoring from backup:
+
+#+begin_src bash
+sudo -u postgres psql -d postgres -c "DROP DATABASE authentik;"
+sudo systemctl restart postgresql
+#+end_src
+
+* 5. Restore the Database
+
+Restore the database from the compressed SQL backup:
+
+#+begin_src bash
+sudo cp /tmp/mnt/nightly_backup/postgresql-backup/authentik.sql.gz /tmp/authentik.sql.gz
+sudo chmod 644 /tmp/authentik.sql.gz
+
+sudo -u postgres bash -lc \
+  'gunzip -c /tmp/authentik.sql.gz | psql -v ON_ERROR_STOP=1 -d authentik'
+
+sudo -u postgres psql -d postgres \
+  -c "ALTER DATABASE authentik OWNER TO authentik;"
+#+end_src
+
+* 6. Fix Ownership of Tables, Views, and Foreign Tables
+
+Reassign ownership of all non-system relations owned by =postgres= to
+=authentik=:
+
+#+begin_src bash
+sudo -u postgres psql -d authentik <<'SQL'
+DO $$
+DECLARE r record;
+BEGIN
+  FOR r IN
+    SELECT n.nspname, c.relname, c.relkind
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE c.relowner = (SELECT oid FROM pg_roles WHERE rolname='postgres')
+      AND n.nspname NOT IN ('pg_catalog','information_schema','pg_toast')
+      AND n.nspname NOT LIKE 'pg_temp_%'
+      AND n.nspname NOT LIKE 'pg_toast_temp_%'
+      AND c.relkind IN ('r','p','v','m','f')
+  LOOP
+    EXECUTE format(
+      'ALTER %s %I.%I OWNER TO authentik;',
+      CASE r.relkind
+        WHEN 'v' THEN 'VIEW'
+        WHEN 'm' THEN 'MATERIALIZED VIEW'
+        ELSE 'TABLE'
+      END,
+      r.nspname, r.relname
+    );
+  END LOOP;
+END $$;
+SQL
+#+end_src
+
+* 7. Fix Ownership of Sequences
+
+Update ownership of sequences not auto-managed by table identity rules:
+
+#+begin_src bash
+sudo -u postgres psql -d authentik <<'SQL'
+DO $$
+DECLARE r record;
+BEGIN
+  FOR r IN
+    SELECT n.nspname, c.relname
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE c.relkind = 'S'
+      AND c.relowner = (SELECT oid FROM pg_roles WHERE rolname='postgres')
+      AND n.nspname NOT IN ('pg_catalog','information_schema','pg_toast')
+      AND NOT EXISTS (
+        SELECT 1
+        FROM pg_depend d
+        WHERE d.objid = c.oid
+          AND d.deptype IN ('a','i')
+      )
+  LOOP
+    EXECUTE format(
+      'ALTER SEQUENCE %I.%I OWNER TO authentik;',
+      r.nspname, r.relname
+    );
+  END LOOP;
+END $$;
+SQL
+#+end_src
+
+* 8. Fix Ownership of Functions
+
+Reassign ownership of user-defined functions back to =authentik=:
+
+#+begin_src bash
+sudo -u postgres psql -d authentik <<'SQL'
+DO $$
+DECLARE r record;
+BEGIN
+  FOR r IN
+    SELECT n.nspname, p.proname,
+           pg_get_function_identity_arguments(p.oid) AS args
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE p.proowner = (SELECT oid FROM pg_roles WHERE rolname='postgres')
+      AND n.nspname NOT IN ('pg_catalog','information_schema')
+      AND n.nspname NOT LIKE 'pg_toast%'
+      AND n.nspname NOT LIKE 'pg_temp_%'
+  LOOP
+    EXECUTE format(
+      'ALTER FUNCTION %I.%I(%s) OWNER TO authentik;',
+      r.nspname, r.proname, r.args
+    );
+  END LOOP;
+END $$;
+SQL
+#+end_src
+
+* 9. Clear the Existing Media Directory
+
+Remove all existing contents while preserving the directory itself:
+
+#+begin_src bash
+sudo find /var/lib/private/authentik/media -mindepth 1 -delete
+#+end_src
+
+This approach is:
+- Shell-agnostic (bash/zsh)
+- Safe even if the directory is already empty
+
+* 10. Restore Media Files
+
+Copy the restored media into the live directory:
+
+#+begin_src bash
+sudo rsync -a --delete \
+  /tmp/var/lib/private/authentik/media/ \
+  /var/lib/private/authentik/media/
+#+end_src
+
+Fix ownership so the service can read and write all files:
+
+#+begin_src bash
+sudo chown -R nobody:nogroup /var/lib/private/authentik/media
+#+end_src
+
+* 11. Start Authentik Services
+
+Restart the Authentik services:
+
+#+begin_src bash
+sudo systemctl start authentik.service
+#+end_src
+
+* Notes & Best Practices
+
+- Always stop all Authentik services before restoring the database.
+- Use =ON_ERROR_STOP= to ensure restore failures abort immediately.
+- Ownership fixes are required because dumps restored by =postgres=
+  default ownership to the restoring role.
+- Consider taking a *ZFS snapshot* of the PostgreSQL data directory and
+  media directory before restoring for quick rollback.
