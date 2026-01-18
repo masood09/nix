@@ -11,7 +11,6 @@
     ./ssh
     ./tailscale
     ./uptime-kuma
-    ./zfs
   ];
 
   services = {
