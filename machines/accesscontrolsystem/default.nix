@@ -9,56 +9,21 @@ in {
   imports = [
     ./disko
     ./hardware-configuration.nix
+    ./_config.nix
     ./_networking.nix
+    ./_secrets.nix
 
     ./../../modules/nixos/base.nix
   ];
 
-  sops.secrets = {
-    "cloudflare-api-key" = {};
-    "headscale-preauth-key" = {};
-    "discord-zfs-webhook" = {};
-
-    "restic-env" = {
-      sopsFile = ./../../secrets/accesscontrolsystem-server.yaml;
-    };
-    "restic-repo" = {
-      sopsFile = ./../../secrets/accesscontrolsystem-server.yaml;
-    };
-    "restic-password" = {
-      sopsFile = ./../../secrets/accesscontrolsystem-server.yaml;
-    };
-  };
-
-  homelab = {
-    isRootZFS = true;
-    isEncryptedRoot = true;
-
-    networking = {
-      hostName = "accesscontrolsystem";
-    };
-
-    services = {
-      tailscale = {
-        enable = true;
-
-        zfs = {
-          enable = true;
-          dataset = "rpool/root/var/lib/tailscale";
-          properties = {
-            recordsize = "16K";
-          };
-        };
-      };
-    };
-  };
-
   fileSystems = {
     "/".neededForBoot = true;
-    "/var/log".neededForBoot = true;
-    "/var/lib/nixos".neededForBoot = true;
     "/nix".neededForBoot = true;
     "/nix/persist".neededForBoot = true;
+    "/var/backup".neededForBoot = true;
+    "/var/lib/nixos".neededForBoot = true;
+    "/var/lib/postgresql".neededForBoot = true;
+    "/var/log".neededForBoot = true;
   };
 
   home-manager = {
