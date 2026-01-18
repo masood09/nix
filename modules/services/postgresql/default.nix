@@ -4,7 +4,8 @@
   pkgs,
   ...
 }: let
-  postgresqlCfg = config.homelab.services.postgresql;
+  homelabCfg = config.homelab;
+  postgresqlCfg = homelabCfg.services.postgresql;
   backupCfg = postgresqlCfg.backup;
 in {
   imports = [
@@ -70,9 +71,9 @@ in {
     };
   };
 
-  config = {
+  config = lib.mkIf postgresqlCfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.postgresql = lib.mkIf (postgresqlCfg.enable && postgresqlCfg.zfs.enable) {
+    homelab.zfs.datasets.postgresql = lib.mkIf postgresqlCfg.zfs.enable {
       inherit (postgresqlCfg.zfs) dataset properties;
 
       enable = true;
@@ -81,19 +82,25 @@ in {
     };
 
     # ZFS dataset for backup dataDir
-    homelab.zfs.datasets.postgresql-backup = lib.mkIf (postgresqlCfg.enable && postgresqlCfg.zfs.enable && backupCfg.enable && backupCfg.zfs.enable) {
-      inherit (backupCfg.zfs) dataset properties;
+    homelab.zfs.datasets.postgresql-backup =
+      lib.mkIf (
+        postgresqlCfg.zfs.enable
+        && backupCfg.enable
+        && backupCfg.zfs.enable
+      )
+      {
+        inherit (backupCfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = backupCfg.dataDir;
-      requiredBy = ["postgresql.service"];
-
-      restic = {
         enable = true;
-      };
-    };
+        mountpoint = backupCfg.dataDir;
+        requiredBy = ["postgresql.service"];
 
-    services = lib.mkIf postgresqlCfg.enable {
+        restic = {
+          enable = true;
+        };
+      };
+
+    services = {
       postgresql = {
         inherit (postgresqlCfg) enable package dataDir;
       };
@@ -122,7 +129,7 @@ in {
         };
       }
 
-      (lib.mkIf (postgresqlCfg.enable && postgresqlCfg.zfs.enable) {
+      (lib.mkIf postgresqlCfg.zfs.enable {
         requires = ["zfs-dataset-postgresql.service"];
         after = ["zfs-dataset-postgresql.service"];
       })
@@ -132,5 +139,17 @@ in {
         after = ["zfs-dataset-postgresql-backup.service"];
       })
     ];
+
+    environment =
+      lib.mkIf (
+        homelabCfg.impermanence
+        && !homelabCfg.isRootZFS
+        && !postgresqlCfg.zfs.enable
+      )
+      {
+        persistence."/nix/persist".directories = [
+          postgresqlCfg.dataDir
+        ];
+      };
   };
 }

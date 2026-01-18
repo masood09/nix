@@ -41,14 +41,14 @@ in {
     };
   };
 
-  config = {
-    services = lib.mkIf caddyEnabled {
+  config = lib.mkIf caddyEnabled {
+    services = {
       caddy = {
-        enable = caddyEnabled;
+        enable = true;
       };
     };
 
-    security = lib.mkIf caddyEnabled {
+    security = {
       acme = {
         acceptTerms = true;
 
@@ -65,7 +65,7 @@ in {
     };
 
     # ZFS-managed ACME state dir
-    homelab.zfs.datasets.acme = lib.mkIf (caddyEnabled && acmeCfg.zfs.enable) {
+    homelab.zfs.datasets.acme = lib.mkIf acmeCfg.zfs.enable {
       inherit (acmeCfg.zfs) dataset properties;
 
       enable = true;
@@ -79,7 +79,7 @@ in {
     };
 
     # Make systemd enforce the mount is present
-    systemd.services = lib.mkIf (caddyEnabled && acmeCfg.zfs.enable) {
+    systemd.services = lib.mkIf acmeCfg.zfs.enable {
       caddy = {
         # Unit-level ordering / mount requirements
         unitConfig = {
@@ -101,13 +101,18 @@ in {
       };
     };
 
-    environment.persistence."/nix/persist" = lib.mkIf (caddyEnabled && homelabCfg.impermanence && !homelabCfg.isRootZFS) {
-      directories = [
-        "/var/lib/acme"
-      ];
-    };
+    environment =
+      lib.mkIf (
+        homelabCfg.impermanence
+        && !homelabCfg.isRootZFS
+        && !acmeCfg.zfs.enable
+      ) {
+        persistence."/nix/persist".directories = [
+          "/var/lib/acme"
+        ];
+      };
 
-    networking.firewall.allowedTCPPorts = lib.mkIf caddyEnabled [
+    networking.firewall.allowedTCPPorts = [
       80
       443
     ];
