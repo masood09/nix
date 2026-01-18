@@ -10,6 +10,10 @@
     options = {
       enable = lib.mkEnableOption "Ensure this ZFS dataset exists and is mounted.";
 
+      restic = {
+        enable = lib.mkEnableOption "Enable restic backup";
+      };
+
       dataset = lib.mkOption {
         type = lib.types.str;
         example = "rpool/root/var/lib/uptime-kuma";

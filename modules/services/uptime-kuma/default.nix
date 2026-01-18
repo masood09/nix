@@ -34,6 +34,10 @@ in {
     zfs = {
       enable = lib.mkEnableOption "Store Uptime Kuma dataDir on a ZFS dataset.";
 
+      restic = {
+        enable = lib.mkEnableOption "Enable restic backup";
+      };
+
       dataset = lib.mkOption {
         type = lib.types.str;
         example = "rpool/root/var/lib/uptime-kuma";
@@ -56,6 +60,10 @@ in {
       enable = true;
       mountpoint = uptimeKumaCfg.dataDir;
       requiredBy = ["uptime-kuma.service"];
+
+      restic = {
+        enable = true;
+      };
     };
 
     services = lib.mkIf uptimeKumaCfg.enable {
