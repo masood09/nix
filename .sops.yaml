@@ -1,4 +1,6 @@
 keys:
+  - &accesscontrolsystem
+    age1rx9mw350ymp2xwua05peyg0f8s354ad8lxl9kkzwkg7pmwnh2q3qvg3z8e
   - &watchfulsystem
     age1sh9wz07py8qysc3dvf228r85pfafaraf0a23244stpxanmq68slq06cxx6
   - &nastest
@@ -26,6 +28,7 @@ creation_rules:
   - path_regex: secrets/secrets\.yaml$
     key_groups:
       - age:
+          - *accesscontrolsystem
           - *watchfulsystem
           - *nastest
           - *murderbot
@@ -37,6 +40,12 @@ creation_rules:
           - *pve-database
           - *pve-monitoring
           - *pve-proxy
+
+  - path_regex: secrets/accesscontrolsystem-server\.yaml$
+    key_groups:
+      - age:
+        - *accesscontrolsystem
+        - *murderbot
 
   - path_regex: secrets/watchfulsystem-server\.yaml$
     key_groups:
