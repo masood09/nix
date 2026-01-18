@@ -1,0 +1,216 @@
+#+TITLE: Installing NixOS on an OCI VM (Netboot + Disko)
+#+AUTHOR: Masood Ahmed
+#+OPTIONS: toc:nil num:nil
+
+This document describes the *manual, repeatable procedure* for installing
+NixOS on an Oracle Cloud Infrastructure (OCI) VM using =netboot.xyz=,
+UEFI shell boot, and =disko= with a pre-built NixOS system closure.
+
+⚠️ *Important:*  
+Several steps below use *hard-coded store paths and hostnames*. These must
+be updated when re-running the procedure for a different host or after
+rebuilding the system.
+
+* Overview
+
+The installation flow:
+- Boot OCI VM into UEFI shell using =netboot.xyz=
+- Launch NixOS installer environment
+- Partition and mount disks using =disko=
+- Generate and install SSH + age keys
+- Build system on a remote builder
+- Copy system closure to target
+- Install NixOS using =nixos-install=
+
+* Prerequisites
+
+- OCI VM with UEFI enabled
+- SSH access to the VM
+- Oracle Cloud Console access
+- Remote Nix builder available
+- GitHub repo with NixOS flake (=github:masood09/nix=)
+
+* 1. Initial Access to the OCI VM
+
+SSH into the Ubuntu-based OCI image and switch to root:
+
+#+begin_src bash
+ssh ubuntu@meshcontrol.oci.mantannest.com
+sudo su - root
+#+end_src
+
+* 2. Install netboot.xyz EFI Binary
+
+Download and install the netboot.xyz EFI image:
+
+#+begin_src bash
+wget https://boot.netboot.xyz/ipxe/netboot.xyz-arm64.efi
+install --owner=root --group=root --mode=664 \
+    netboot.xyz-arm64.efi /boot/efi/netboot.efi
+#+end_src
+
+* 3. Reboot into UEFI Shell via OCI Console
+
+1. Log in to the *Oracle Cloud Console*
+2. Navigate to:
+   - Instance → OS Management → Remote Cloud Connection
+3. Reboot the instance
+
+During boot (in Remote Cloud Connection):
+- Press =ESC= repeatedly
+- Select *Boot Manager*
+- Select *UEFI Shell*
+
+At the UEFI shell prompt:
+
+#+begin_example
+fs0:netboot.efi
+#+end_example
+
+* 4. Boot into NixOS Installer
+
+From the netboot menu:
+- Select *NixOS*
+
+Once booted into the NixOS live environment, enable SSH access:
+
+#+begin_src bash
+mkdir -p ~/.ssh
+curl "https://github.com/masood09.keys" > ~/.ssh/authorized_keys
+#+end_src
+
+* 5. SSH into the NixOS Installer Environment
+
+From your local machine:
+
+#+begin_src bash
+ssh-keygen -R meshcontrol.oci.mantannest.com
+ssh nixos@meshcontrol.oci.mantannest.com
+sudo su - root
+#+end_src
+
+* 6. Partition and Mount Disks Using Disko
+
+Run =disko= using your flake configuration:
+
+#+begin_src bash
+nix --experimental-features "nix-command flakes" \
+  --option tarball-ttl 0 \
+  run --refresh github:nix-community/disko -- \
+  --mode destroy,format,mount \
+  --flake "github:masood09/nix#meshcontrol"
+#+end_src
+
+* 7. Prepare Persistent and Secret Directories
+
+Create required directories for secrets and persistence:
+
+#+begin_src bash
+mkdir -pv /mnt/nix/{secret/{initrd,age},persist/etc/ssh}
+#+end_src
+
+* 8. Generate SSH and age Keys
+
+Generate initrd and age keys:
+
+#+begin_src bash
+ssh-keygen -t ed25519 -N "" -C "" \
+    -f /mnt/nix/secret/initrd/ssh_host_ed25519_key
+
+ssh-keygen -t ed25519 -N "" -C "" \
+    -f /mnt/nix/secret/age/ssh_ed25519_key
+#+end_src
+
+Convert SSH key to age format:
+
+#+begin_src bash
+nix-shell --extra-experimental-features flakes \
+    -p ssh-to-age \
+    --run 'cat /mnt/nix/secret/age/ssh_ed25519_key.pub | ssh-to-age'
+#+end_src
+
+* 9. Generate User SSH Key
+
+Generate a user SSH key (if not already present):
+
+#+begin_src bash
+ssh-keygen -t ed25519 -N "" -C ""
+#+end_src
+
+Copy the contents of:
+
+#+begin_example
+~/.ssh/id_ed25519.pub
+#+end_example
+
+* 10. Configure Remote Builder Access
+
+On the *builder machine*:
+
+#+begin_src bash
+vi ~/.ssh/authorized_keys
+#+end_src
+
+Paste the public key generated in the previous step.
+
+* 11. Build the NixOS System on the Builder
+
+On the builder:
+
+#+begin_src bash
+sudo nix build --refresh \
+  github:masood09/nix#nixosConfigurations.meshcontrol.config.system.build.toplevel
+#+end_src
+
+⚠️ This produces a *hard-coded store path* that must match the next steps.
+
+* 12. Copy the System Closure to the Target
+
+On the target machine:
+
+#+begin_src bash
+nix --extra-experimental-features 'nix-command flakes' \
+  copy \
+  --option require-sigs false \
+  --from 'ssh-ng://masoodahmed@aarm64builder.oci.mantannest.com' \
+  --to 'local?root=/mnt' \
+  /nix/store/817zc9za4lb8m7lf0xvi56lvjl11cx91-nixos-system-meshcontrol-25.11.20260113.2c3e5ec
+#+end_src
+
+⚠️ Replace the store path with the one produced by your build.
+
+* 13. Install NixOS
+
+Run =nixos-install= using the copied system closure:
+
+#+begin_src bash
+NIX_REMOTE='local?root=/mnt' \
+  nixos-install \
+  --no-root-passwd \
+  --root /mnt \
+  --system /nix/store/817zc9za4lb8m7lf0xvi56lvjl11cx91-nixos-system-meshcontrol-25.11.20260113.2c3e5ec
+#+end_src
+
+* 14. Cleanup and Reboot
+
+Unmount all filesystems and export ZFS pools:
+
+#+begin_src bash
+umount -Rl /mnt
+zpool export -a
+reboot
+#+end_src
+
+* Notes & Caveats
+
+- Store paths are *hard-coded* and must be updated per build.
+- This process assumes ZFS + Disko-managed disks.
+- Strongly recommended to automate store path resolution in the future.
+- Suitable for OCI ARM64 VMs using UEFI boot.
+
+* Future Improvements
+
+- Automate system closure discovery
+- Replace manual copy with =nixos-anywhere=
+- Template host-specific steps
+- Wrap in a Makefile or deployment script
