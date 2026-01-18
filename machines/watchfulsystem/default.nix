@@ -9,87 +9,19 @@ in {
   imports = [
     ./disko
     ./hardware-configuration.nix
+    ./_config.nix
     ./_networking.nix
+    ./_secrets.nix
 
     ./../../modules/nixos/base.nix
   ];
 
-  sops.secrets = {
-    "cloudflare-api-key" = {};
-    "headscale-preauth-key" = {};
-    "discord-zfs-webhook" = {};
-
-    "restic-env" = {
-      sopsFile = ./../../secrets/watchfulsystem-server.yaml;
-    };
-    "restic-repo" = {
-      sopsFile = ./../../secrets/watchfulsystem-server.yaml;
-    };
-    "restic-password" = {
-      sopsFile = ./../../secrets/watchfulsystem-server.yaml;
-    };
-  };
-
-  homelab = {
-    isRootZFS = true;
-    isEncryptedRoot = true;
-
-    networking = {
-      hostName = "watchfulsystem";
-    };
-
-    services = {
-      acme = {
-        zfs = {
-          enable = true;
-          dataset = "rpool/root/var/lib/acme";
-          properties = {
-            recordsize = "16K";
-          };
-        };
-      };
-
-      caddy = {
-        enable = true;
-      };
-
-      restic = {
-        enable = true;
-        s3Enable = true;
-      };
-
-      tailscale = {
-        enable = true;
-
-        zfs = {
-          enable = true;
-          dataset = "rpool/root/var/lib/tailscale";
-          properties = {
-            recordsize = "16K";
-          };
-        };
-      };
-
-      uptime-kuma = {
-        enable = true;
-
-        zfs = {
-          enable = true;
-          dataset = "rpool/root/var/lib/uptime-kuma";
-          properties = {
-            recordsize = "16K";
-          };
-        };
-      };
-    };
-  };
-
   fileSystems = {
     "/".neededForBoot = true;
-    "/var/log".neededForBoot = true;
-    "/var/lib/nixos".neededForBoot = true;
     "/nix".neededForBoot = true;
     "/nix/persist".neededForBoot = true;
+    "/var/lib/nixos".neededForBoot = true;
+    "/var/log".neededForBoot = true;
   };
 
   home-manager = {
