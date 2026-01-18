@@ -22,13 +22,13 @@ in {
     userId = lib.mkOption {
       default = 3002;
       type = lib.types.ints.u16;
-      description = "User ID of Alloy user";
+      description = "User ID of Uptime Kuma user";
     };
 
     groupId = lib.mkOption {
       default = 3002;
       type = lib.types.ints.u16;
-      description = "Group ID of Alloy group";
+      description = "Group ID of Uptime Kuma group";
     };
 
     zfs = {
