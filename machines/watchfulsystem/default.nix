@@ -18,6 +18,8 @@ in {
   sops.secrets = {
     "cloudflare-api-key" = {};
     "headscale-preauth-key" = {};
+    "discord-zfs-webhook" = {};
+
     "restic-env" = {
       sopsFile = ./../../secrets/watchfulsystem-server.yaml;
     };
