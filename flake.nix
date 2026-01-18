@@ -125,6 +125,7 @@
 
     nixosConfigurations = {
       accesscontrolsystem = mkNixOSConfig ./machines/accesscontrolsystem;
+      meshcontrol = mkNixOSConfig ./machines/meshcontrol;
       watchfulsystem = mkNixOSConfig ./machines/watchfulsystem;
 
       caretaker = mkNixOSConfig ./machines/caretaker/configuration.nix;
