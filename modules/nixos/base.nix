@@ -13,8 +13,7 @@ in {
     ./_remote-unlock.nix
     ./_users.nix
 
-    ./../services/alloy
-    ./../services/ssh
+    ./../services
   ];
 
   nixpkgs.config = {
