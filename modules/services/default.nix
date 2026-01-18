@@ -1,6 +1,7 @@
 {
   imports = [
     ./alloy
+    ./authentik
     ./caddy
     ./immich
     ./minio
