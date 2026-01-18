@@ -98,9 +98,27 @@ in {
             };
           };
 
+          "root/var/backup" = {
+            type = "zfs_fs";
+            mountpoint = "/var/backup";
+
+            options = {
+              mountpoint = "legacy";
+            };
+          };
+
           "root/var/lib/nixos" = {
             type = "zfs_fs";
             mountpoint = "/var/lib/nixos";
+
+            options = {
+              mountpoint = "legacy";
+            };
+          };
+
+          "root/var/lib/postgresql" = {
+            type = "zfs_fs";
+            mountpoint = "/var/lib/postgresql";
 
             options = {
               mountpoint = "legacy";
