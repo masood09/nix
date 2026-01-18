@@ -1,6 +1,106 @@
 {lib, ...}: {
   options.homelab = {
     programs = {
+      bat = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable bat.
+          '';
+        };
+      };
+
+      btop = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable btop.
+          '';
+        };
+      };
+
+      catppuccin = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable catppuccin.
+          '';
+        };
+      };
+
+      direnv = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable direnv.
+          '';
+        };
+      };
+
+      emacs = {
+        enable = lib.mkOption {
+          default = false;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable emacs.
+          '';
+        };
+      };
+
+      eza = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable eza.
+          '';
+        };
+      };
+
+      fastfetch = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable fastfetch.
+          '';
+        };
+      };
+
+      fd = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable fd.
+          '';
+        };
+      };
+
+      fish = {
+        enable = lib.mkOption {
+          default = false;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable fish shell.
+          '';
+        };
+      };
+
+      fzf = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable fzf.
+          '';
+        };
+      };
+
       git = {
         enable = lib.mkOption {
           default = true;
@@ -23,6 +123,66 @@
           type = lib.types.str;
           description = ''
             The userEmail option for git.
+          '';
+        };
+      };
+
+      neovim = {
+        enable = lib.mkOption {
+          default = false;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable neovim.
+          '';
+        };
+      };
+
+      ripgrep = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable ripgrep.
+          '';
+        };
+      };
+
+      starship = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable starship prompt.
+          '';
+        };
+      };
+
+      tmux = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable tmux.
+          '';
+        };
+      };
+
+      zoxide = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable zoxide.
+          '';
+        };
+      };
+
+      zsh = {
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Whether to enable bat.
           '';
         };
       };
