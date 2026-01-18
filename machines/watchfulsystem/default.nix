@@ -12,7 +12,6 @@ in {
     ./_networking.nix
 
     ./../../modules/nixos/base.nix
-    ./../../modules/services
   ];
 
   sops.secrets = {
