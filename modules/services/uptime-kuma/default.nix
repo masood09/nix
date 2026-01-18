@@ -3,8 +3,9 @@
   lib,
   ...
 }: let
-  uptimeKumaCfg = config.homelab.services.uptime-kuma;
-  caddyEnabled = config.homelab.services.caddy.enable;
+  homelabCfg = config.homelab;
+  uptimeKumaCfg = homelabCfg.services.uptime-kuma;
+  caddyEnabled = homelabCfg.services.caddy.enable;
 in {
   options.homelab.services.uptime-kuma = {
     enable = lib.mkEnableOption "Whether to enable Uptime Kuma.";
@@ -52,9 +53,9 @@ in {
     };
   };
 
-  config = {
+  config = lib.mkIf uptimeKumaCfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.uptime-kuma = lib.mkIf (uptimeKumaCfg.enable && uptimeKumaCfg.zfs.enable) {
+    homelab.zfs.datasets.uptime-kuma = lib.mkIf uptimeKumaCfg.zfs.enable {
       inherit (uptimeKumaCfg.zfs) dataset properties;
 
       enable = true;
@@ -66,7 +67,7 @@ in {
       };
     };
 
-    services = lib.mkIf uptimeKumaCfg.enable {
+    services = {
       uptime-kuma = {
         inherit (uptimeKumaCfg) enable;
 
@@ -87,12 +88,12 @@ in {
       };
     };
 
-    security = lib.mkIf (caddyEnabled && uptimeKumaCfg.enable) {
+    security = lib.mkIf caddyEnabled {
       acme.certs."${uptimeKumaCfg.webDomain}".domain = "${uptimeKumaCfg.webDomain}";
     };
 
     users = {
-      users = lib.optionalAttrs uptimeKumaCfg.enable {
+      users = {
         uptime-kuma = {
           isSystemUser = true;
           group = "uptime-kuma";
@@ -100,7 +101,7 @@ in {
         };
       };
 
-      groups = lib.optionalAttrs uptimeKumaCfg.enable {
+      groups = {
         uptime-kuma = {
           gid = uptimeKumaCfg.groupId;
         };
@@ -130,13 +131,24 @@ in {
         };
       }
 
-      (lib.mkIf (uptimeKumaCfg.enable && uptimeKumaCfg.zfs.enable) {
+      (lib.mkIf uptimeKumaCfg.zfs.enable {
         requires = ["zfs-dataset-uptime-kuma.service"];
         after = ["zfs-dataset-uptime-kuma.service"];
       })
     ];
 
-    systemd.tmpfiles.rules = lib.mkIf uptimeKumaCfg.enable [
+    environment =
+      lib.mkIf (
+        homelabCfg.impermanence
+        && !homelabCfg.isRootZFS
+        && !uptimeKumaCfg.zfs.enable
+      ) {
+        persistence."/nix/persist".directories = [
+          uptimeKumaCfg.dataDir
+        ];
+      };
+
+    systemd.tmpfiles.rules = [
       # Ensure base dir exists and is owned correctly
       "d ${uptimeKumaCfg.dataDir} 0750 uptime-kuma uptime-kuma -"
 

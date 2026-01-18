@@ -71,9 +71,9 @@ in {
     };
   };
 
-  config = {
+  config = lib.mkIf headscaleCfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.headscale = lib.mkIf (headscaleCfg.enable && headscaleCfg.zfs.enable) {
+    homelab.zfs.datasets.headscale = lib.mkIf headscaleCfg.zfs.enable {
       inherit (headscaleCfg.zfs) dataset properties;
 
       enable = true;
@@ -85,7 +85,7 @@ in {
       };
     };
 
-    services = lib.mkIf headscaleCfg.enable {
+    services = {
       headscale = {
         inherit (headscaleCfg) enable;
 
@@ -107,7 +107,7 @@ in {
       };
     };
 
-    security = lib.mkIf (caddyEnabled && headscaleCfg.enable) {
+    security = lib.mkIf caddyEnabled {
       acme.certs."${headscaleCfg.webDomain}".domain = "${headscaleCfg.webDomain}";
     };
 
@@ -120,13 +120,24 @@ in {
         };
       }
 
-      (lib.mkIf (headscaleCfg.enable && headscaleCfg.zfs.enable) {
+      (lib.mkIf headscaleCfg.zfs.enable {
         requires = ["zfs-dataset-uptime-kuma.service"];
         after = ["zfs-dataset-uptime-kuma.service"];
       })
     ];
 
-    systemd.tmpfiles.rules = lib.mkIf headscaleCfg.enable [
+    environment =
+      lib.mkIf (
+        homelabCfg.impermanence
+        && !homelabCfg.isRootZFS
+        && !headscaleCfg.zfs.enable
+      ) {
+        persistence."/nix/persist".directories = [
+          headscaleCfg.dataDir
+        ];
+      };
+
+    systemd.tmpfiles.rules = [
       # Ensure base dir exists and is owned correctly
       "d ${headscaleCfg.dataDir} 0750 headscale headscale -"
     ];

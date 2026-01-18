@@ -6,14 +6,6 @@
   ];
 
   options.homelab = {
-    impermanence = lib.mkOption {
-      default = true;
-      type = lib.types.bool;
-      description = ''
-        Whether impermanence should be enabled.
-      '';
-    };
-
     isRootZFS = lib.mkEnableOption "Whether the root drive is ZFS.";
 
     isEncryptedRoot = lib.mkOption {

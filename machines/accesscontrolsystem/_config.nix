@@ -2,6 +2,7 @@
   config.homelab = {
     isRootZFS = true;
     isEncryptedRoot = true;
+    impermanence = true;
 
     networking = {
       hostName = "accesscontrolsystem";
