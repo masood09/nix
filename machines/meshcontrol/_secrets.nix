@@ -4,6 +4,11 @@
     "headscale-preauth-key" = {};
     "discord-zfs-webhook" = {};
 
+    "headscale-authentik-client-secret" = {
+      owner = "headscale";
+      sopsFile = ./../../secrets/meshcontrol-server.yaml;
+    };
+
     "restic-env" = {
       sopsFile = ./../../secrets/meshcontrol-server.yaml;
     };

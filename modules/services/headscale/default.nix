@@ -1,0 +1,134 @@
+{
+  config,
+  lib,
+  ...
+}: let
+  homelabCfg = config.homelab;
+  headscaleCfg = homelabCfg.services.headscale;
+  caddyEnabled = homelabCfg.services.caddy.enable;
+in {
+  imports = [
+    ./acl.nix
+    ./dns.nix
+    ./oidc.nix
+  ];
+
+  options.homelab.services.headscale = {
+    enable = lib.mkEnableOption "Whether to enable Headscale.";
+
+    dataDir = lib.mkOption {
+      type = lib.types.path;
+      default = "/var/lib/headscale/";
+    };
+
+    webDomain = lib.mkOption {
+      type = lib.types.str;
+      default = "headscale.mantannest.com";
+    };
+
+    adminUser = lib.mkOption {
+      type = lib.types.str;
+      default = "admin@ahmedmasood.com";
+    };
+
+    oidc = {
+      enable = lib.mkEnableOption "Enable OIDC";
+
+      issuer = lib.mkOption {
+        type = lib.types.str;
+        default = "https://auth.mantannest.com/application/o/headscale/";
+      };
+
+      client_id = lib.mkOption {
+        type = lib.types.str;
+        default = "Pjad107mj4JsZRnmbTMzbGiNqIolCMFn2jF3dBeA";
+      };
+
+      client_secret_path = lib.mkOption {
+        type = lib.types.path;
+        default = config.sops.secrets."headscale-authentik-client-secret".path;
+      };
+    };
+
+    zfs = {
+      enable = lib.mkEnableOption "Store Headscale dataDir on a ZFS dataset.";
+
+      restic = {
+        enable = lib.mkEnableOption "Enable restic backup";
+      };
+
+      dataset = lib.mkOption {
+        type = lib.types.str;
+        example = "rpool/root/var/lib/headscale";
+        description = "ZFS dataset to create and mount at dataDir.";
+      };
+
+      properties = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = {};
+        description = "ZFS properties for the dataset.";
+      };
+    };
+  };
+
+  config = {
+    # ZFS dataset for dataDir
+    homelab.zfs.datasets.headscale = lib.mkIf (headscaleCfg.enable && headscaleCfg.zfs.enable) {
+      inherit (headscaleCfg.zfs) dataset properties;
+
+      enable = true;
+      mountpoint = headscaleCfg.dataDir;
+      requiredBy = ["headscale.service"];
+
+      restic = {
+        enable = true;
+      };
+    };
+
+    services = lib.mkIf headscaleCfg.enable {
+      headscale = {
+        inherit (headscaleCfg) enable;
+
+        settings = {
+          logtail.enabled = false;
+          server_url = "https://${headscaleCfg.webDomain}";
+        };
+      };
+
+      caddy = lib.mkIf caddyEnabled {
+        virtualHosts = {
+          "${headscaleCfg.webDomain}" = {
+            useACMEHost = headscaleCfg.webDomain;
+            extraConfig = ''
+              reverse_proxy http://127.0.0.1:${toString config.services.headscale.port}
+            '';
+          };
+        };
+      };
+    };
+
+    security = lib.mkIf (caddyEnabled && headscaleCfg.enable) {
+      acme.certs."${headscaleCfg.webDomain}".domain = "${headscaleCfg.webDomain}";
+    };
+
+    # Service hardening + mount ordering
+    systemd.services.uptime-kuma = lib.mkMerge [
+      {
+        # Unit-level ordering / mount requirements
+        unitConfig = {
+          RequiresMountsFor = [headscaleCfg.dataDir];
+        };
+      }
+
+      (lib.mkIf (headscaleCfg.enable && headscaleCfg.zfs.enable) {
+        requires = ["zfs-dataset-uptime-kuma.service"];
+        after = ["zfs-dataset-uptime-kuma.service"];
+      })
+    ];
+
+    systemd.tmpfiles.rules = lib.mkIf headscaleCfg.enable [
+      # Ensure base dir exists and is owned correctly
+      "d ${headscaleCfg.dataDir} 0750 headscale headscale -"
+    ];
+  };
+}
