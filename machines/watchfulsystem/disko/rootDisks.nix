@@ -98,6 +98,15 @@ in {
             };
           };
 
+          "root/var/backup" = {
+            type = "zfs_fs";
+            mountpoint = "/var/backup";
+
+            options = {
+              mountpoint = "legacy";
+            };
+          };
+
           "root/var/lib/nixos" = {
             type = "zfs_fs";
             mountpoint = "/var/lib/nixos";
