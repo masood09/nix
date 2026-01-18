@@ -78,10 +78,6 @@ in {
       enable = true;
       mountpoint = postgresqlCfg.dataDir;
       requiredBy = ["postgresql.service"];
-
-      restic = {
-        enable = true;
-      };
     };
 
     # ZFS dataset for backup dataDir
