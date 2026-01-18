@@ -26,6 +26,12 @@ in {
   options.homelab.services.restic = {
     enable = lib.mkEnableOption "Enable restic backups";
     s3Enable = lib.mkEnableOption "Enable S3 restic backups";
+
+    extraPaths = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "Extra filesystem paths to include in restic backup (in addition to staged ZFS snapshot views).";
+    };
   };
 
   config = lib.mkIf resticEnabled {
@@ -37,7 +43,7 @@ in {
       passwordFile = config.sops.secrets."restic-password".path;
 
       # Restic backs up *already-mounted* snapshot views
-      paths = resticPaths;
+      paths = resticPaths ++ homelabCfg.services.restic.extraPaths;
 
       pruneOpts = [
         "--keep-daily 1"
