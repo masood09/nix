@@ -13,6 +13,8 @@ in {
     ./_remote-unlock.nix
     ./_users.nix
 
+    ./zfs
+
     ./../services
   ];
 

@@ -13,7 +13,7 @@ in {
     ./_networking.nix
     ./_secrets.nix
 
-    ./../../modules/nixos/base.nix
+    ./../../modules/nixos
   ];
 
   fileSystems = {
