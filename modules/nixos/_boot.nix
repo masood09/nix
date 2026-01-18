@@ -19,7 +19,7 @@ in {
       loader = {
         systemd-boot = lib.mkIf (!homelabCfg.isRootZFS) {
           enable = true;
-          configurationLimit = 5;
+          configurationLimit = 7;
         };
 
         efi = lib.mkIf homelabCfg.isRootZFS {
@@ -32,6 +32,7 @@ in {
 
         grub = lib.mkIf homelabCfg.isRootZFS {
           enable = true;
+          configurationLimit = 7;
           efiInstallAsRemovable = true;
           copyKernels = true;
           efiSupport = true;
