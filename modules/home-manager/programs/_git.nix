@@ -1,39 +1,45 @@
-{homelabCfg, ...}: let
+{
+  homelabCfg,
+  lib,
+  ...
+}: let
   gitCfg = homelabCfg.programs.git;
 in {
-  home = {
-    file.".ssh/allowed_signers".text = "* ${homelabCfg.primaryUser.sshPublicKey}";
-  };
+  config = lib.mkIf gitCfg.enable {
+    home = {
+      file.".ssh/allowed_signers".text = "* ${homelabCfg.primaryUser.sshPublicKey}";
+    };
 
-  programs.git = {
-    inherit (gitCfg) enable;
-    lfs.enable = true;
+    programs.git = {
+      inherit (gitCfg) enable;
+      lfs.enable = true;
 
-    settings = {
-      user = {
-        email = gitCfg.userEmail;
-        name = gitCfg.userName;
-      };
+      settings = {
+        user = {
+          email = gitCfg.userEmail;
+          name = gitCfg.userName;
+        };
 
-      delta = {
-        navigate = true;
-        side-by-side = true;
-      };
+        delta = {
+          navigate = true;
+          side-by-side = true;
+        };
 
-      diff = {
-        colorMoved = "default";
-      };
+        diff = {
+          colorMoved = "default";
+        };
 
-      init = {
-        defaultBranch = "main";
-      };
+        init = {
+          defaultBranch = "main";
+        };
 
-      merge = {
-        conflictStyle = "diff3";
-      };
+        merge = {
+          conflictStyle = "diff3";
+        };
 
-      pull = {
-        rebase = true;
+        pull = {
+          rebase = true;
+        };
       };
     };
   };

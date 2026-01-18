@@ -1,8 +1,4 @@
 {lib, ...}: {
-  imports = [
-    ./_git.nix
-  ];
-
   options.homelab = {
     programs = {
       bat = {
