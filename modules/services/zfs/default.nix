@@ -13,6 +13,7 @@ in {
   imports = [
     ./alloy.nix
     ./dataset.nix
+    ./notification.nix
   ];
 
   config = lib.mkIf enableZFS {
