@@ -1,29 +1,31 @@
 {
-  lib,
-  pkgs,
-  homelabCfg,
+  config,
+  inputs,
+  outputs,
   ...
-}: {
+}: let
+  homelabCfg = config.homelab;
+in {
   imports = [
-    ./programs
+    ./_config.nix
   ];
 
-  home = {
-    username = homelabCfg.primaryUser.userName;
+  config = {
+    home-manager = {
+      extraSpecialArgs = {
+        inherit inputs outputs homelabCfg;
+      };
 
-    homeDirectory = lib.mkMerge [
-      (lib.mkIf pkgs.stdenv.isLinux "/home/${homelabCfg.primaryUser.userName}")
-      (lib.mkIf pkgs.stdenv.isDarwin "/Users/${homelabCfg.primaryUser.userName}")
-    ];
+      useGlobalPkgs = true;
+      useUserPackages = true;
 
-    stateVersion = "25.11";
-
-    sessionVariables = lib.mkIf pkgs.stdenv.isDarwin {
-      SOPS_AGE_KEY_FILE = "$HOME/.config/sops/age/keys.txt";
+      users = {
+        ${homelabCfg.primaryUser.userName} = {
+          imports = [
+            ./home.nix
+          ];
+        };
+      };
     };
   };
-
-  # Nicely reload system units when changing configs
-  # Self-note: nix-darwin seems to luckily ignore this setting
-  systemd.user.startServices = "sd-switch";
 }
