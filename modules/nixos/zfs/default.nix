@@ -16,6 +16,10 @@ in {
     ./notification.nix
   ];
 
+  options.homelab = {
+    isRootZFS = lib.mkEnableOption "Whether the root drive is ZFS.";
+  };
+
   config = lib.mkIf enableZFS {
     services = lib.mkIf (homelabCfg.isRootZFS || anyManagedDatasets) {
       zfs = {
