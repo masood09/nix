@@ -6,6 +6,7 @@
     ./_networking.nix
     ./_nixpkgs.nix
     ./_packages.nix
+    ./_prune-system-generations.nix
     ./_remote-unlock.nix
     ./_security.nix
     ./_sops.nix
@@ -27,19 +28,6 @@
   };
 
   config = {
-    nix = {
-      gc = {
-        automatic = true;
-        dates = "weekly";
-        options = "--delete-older-than 30d";
-      };
-
-      settings = {
-        experimental-features = "nix-command flakes";
-        auto-optimise-store = true;
-      };
-    };
-
     time.timeZone = "America/Toronto";
     zramSwap.enable = true;
 
