@@ -132,8 +132,6 @@
       failsafeunit = mkNixOSConfig ./machines/failsafeunit;
       nastest = mkNixOSConfig ./machines/nastest;
 
-      oci-vpn-server = mkNixOSConfig ./machines/oci-vpn-server/configuration.nix;
-
       pve-app-1 = mkNixOSConfig ./machines/pve-app-1/configuration.nix;
       pve-database = mkNixOSConfig ./machines/pve-database/configuration.nix;
       pve-monitoring = mkNixOSConfig ./machines/pve-monitoring/configuration.nix;
