@@ -3,6 +3,7 @@
     "cloudflare-api-key" = {};
     "headscale-preauth-key" = {};
     "discord-zfs-webhook" = {};
+    "grafana-alloy-env" = {};
 
     "headscale-authentik-client-secret" = {
       owner = "headscale";
