@@ -128,6 +128,8 @@
       meshcontrol = mkNixOSConfig ./machines/meshcontrol;
       watchfulsystem = mkNixOSConfig ./machines/watchfulsystem;
 
+      heartbeat = mkNixOSConfig ./machines/heartbeat;
+
       caretaker = mkNixOSConfig ./machines/caretaker/configuration.nix;
       failsafeunit = mkNixOSConfig ./machines/failsafeunit;
       nastest = mkNixOSConfig ./machines/nastest;

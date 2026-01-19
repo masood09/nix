@@ -1,0 +1,167 @@
+#+TITLE: Installing NixOS on heartbeat
+#+SUBTITLE: OCI VM · Netboot · ZFS · Disko
+#+AUTHOR: Masood Ahmed
+#+OPTIONS: toc:nil num:nil
+#+PROPERTY: header-args:bash :results verbatim :exports both
+
+* Overview
+
+This document describes the end-to-end process for installing NixOS on the
+=heartbeat= host using:
+
+- Netbooted NixOS Live ISO
+- ZFS root with Disko
+- Encrypted ZFS pools
+- Flake-based configuration
+- Impermanence + secrets management
+
+The process assumes the VM is already booted into the NixOS live environment
+via OCI netboot.
+
+* Enable SSH Access in the Live Environment
+
+Once booted into the NixOS live ISO, enable SSH access by installing your
+authorized keys.
+
+#+begin_src bash
+mkdir -p ~/.ssh
+curl "https://github.com/masood09.keys" > ~/.ssh/authorized_keys
+#+end_src
+
+From your local machine, connect and switch to root:
+
+#+begin_src bash
+ssh nixos@IP_ADDRESS
+sudo su - root
+#+end_src
+
+* Create ZFS Encryption Key Material
+
+Create the directory for ZFS encryption keys and generate strong passphrases.
+These keys will later be persisted into the installed system.
+
+#+begin_src bash
+install -d -m 0700 /nix/secret
+tr -dc 'A-Za-z0-9_@%+=:,.~-' </dev/urandom | head -c 64 > /nix/secret/dpool_data.key
+tr -dc 'A-Za-z0-9_@%+=:,.~-' </dev/urandom | head -c 64 > /nix/secret/fpool_fast.key
+chmod 0400 /nix/secret/dpool_data.key
+chmod 0400 /nix/secret/fpool_fast.key
+#+end_src
+
+Verify permissions:
+
+#+begin_src bash
+ls -l /nix/secret/*.key
+#+end_src
+
+Expected output:
+
+#+begin_example
+-rw------- 1 root root 64 dpool_data.key
+-rw------- 1 root root 64 fpool_fast.key
+#+end_example
+
+Verify key lengths (do not print contents):
+
+#+begin_src bash
+wc -c /nix/secret/dpool_data.key
+wc -c /nix/secret/fpool_fast.key
+#+end_src
+
+* Partition and Format Disks with Disko
+
+Run Disko using the flake configuration for =heartbeat=. This will:
+
+- destroy existing partition tables
+- create GPT layouts
+- create and mount ZFS pools and datasets
+
+#+begin_src bash
+nix --experimental-features "nix-command flakes" \
+  --option tarball-ttl 0 \
+  run --refresh github:nix-community/disko -- \
+  --mode destroy,format,mount \
+  --flake "github:masood09/nix#heartbeat"
+#+end_src
+
+At completion, all datasets should be mounted under =/mnt=.
+
+* Prepare Persistent and Secret Directories
+
+Create the directory structure required by impermanence and secret handling
+inside the mounted system.
+
+#+begin_src bash
+mkdir -pv /mnt/nix/{secret/{initrd,age},persist/etc/ssh}
+chmod 0700 /mnt/nix/secret
+#+end_src
+
+Copy the previously generated ZFS encryption keys into the persistent system:
+
+#+begin_src bash
+cp /nix/secret/dpool_data.key /mnt/nix/secret/
+cp /nix/secret/fpool_fast.key /mnt/nix/secret/
+#+end_src
+
+* Generate SSH and age Keys
+
+Generate the SSH host key used in initrd:
+
+#+begin_src bash
+ssh-keygen -t ed25519 -N "" -C "" \
+  -f /mnt/nix/secret/initrd/ssh_host_ed25519_key
+#+end_src
+
+Generate an SSH keypair used for age encryption:
+
+#+begin_src bash
+ssh-keygen -t ed25519 -N "" -C "" \
+  -f /mnt/nix/secret/age/ssh_ed25519_key
+#+end_src
+
+Convert the SSH public key to age format:
+
+#+begin_src bash
+nix-shell --extra-experimental-features flakes \
+  -p ssh-to-age \
+  --run 'cat /mnt/nix/secret/age/ssh_ed25519_key.pub | ssh-to-age'
+#+end_src
+
+Save the resulting age identity for use in =sops-nix=.
+
+* Install NixOS
+
+Install NixOS using the flake configuration for =heartbeat=.
+
+#+begin_src bash
+nixos-install \
+  --no-root-passwd \
+  --root /mnt \
+  --flake github:masood09/nix#heartbeat \
+  --option tarball-ttl 0
+#+end_src
+
+* Cleanup and Reboot
+
+Unmount all filesystems, export ZFS pools, and reboot into the installed system.
+
+#+begin_src bash
+umount -Rl /mnt
+zpool export -a
+reboot
+#+end_src
+
+* Post-Install Notes
+
+After reboot:
+
+- Verify ZFS pools:
+  #+begin_src bash
+  zpool status
+  zfs list
+  #+end_src
+
+- Confirm encrypted pools unlocked correctly.
+- Verify networking, SSH access, and persistence.
+
+This concludes the installation of NixOS on =heartbeat=.
