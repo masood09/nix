@@ -10,6 +10,12 @@
     ./../../modules/home-manager
   ];
 
+  homelab.disks = {
+    root = [
+      "scsi-360426a0eab5646b58549a8cc41c1c1aa"
+    ];
+  };
+
   fileSystems = {
     "/".neededForBoot = true;
     "/nix".neededForBoot = true;
