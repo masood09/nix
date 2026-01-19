@@ -95,7 +95,7 @@ in {
       };
     };
 
-    security = caddyEnabled {
+    security = lib.mkIf caddyEnabled {
       acme.certs."${immichCfg.webDomain}".domain = "${immichCfg.webDomain}";
     };
 
