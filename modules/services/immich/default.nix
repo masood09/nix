@@ -33,7 +33,7 @@ in {
     };
 
     zfs = {
-      enable = lib.mkEnableOption "Store Uptime Kuma dataDir on a ZFS dataset.";
+      enable = lib.mkEnableOption "Store Immich dataDir on a ZFS dataset.";
 
       restic = {
         enable = lib.mkEnableOption "Enable restic backup";
@@ -55,7 +55,7 @@ in {
 
   config = lib.mkIf immichCfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.uptime-kuma = lib.mkIf immichCfg.zfs.enable {
+    homelab.zfs.datasets.immich = lib.mkIf immichCfg.zfs.enable {
       inherit (immichCfg.zfs) dataset properties;
 
       enable = true;
