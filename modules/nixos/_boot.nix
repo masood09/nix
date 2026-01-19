@@ -15,6 +15,10 @@ in {
   };
 
   config = {
+    homelab.isMirroredBoot = lib.mkDefault (
+      (builtins.length (config.homelab.disks.root or [])) > 1
+    );
+
     boot = {
       loader = {
         systemd-boot = lib.mkIf (!homelabCfg.isRootZFS) {

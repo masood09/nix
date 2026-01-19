@@ -2,7 +2,6 @@
   config.homelab = {
     isRootZFS = true;
     isEncryptedRoot = true;
-    isMirroredBoot = true;
     impermanence = true;
 
     networking = {
