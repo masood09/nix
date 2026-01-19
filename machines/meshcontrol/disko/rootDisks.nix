@@ -94,8 +94,6 @@ in {
 
           "root/var/lib/nixos" = mkLegacy "/var/lib/nixos" {};
 
-          "root/var/lib/postgresql" = mkLegacy "/var/lib/postgresql" {};
-
           "root/var/log" = mkLegacy "/var/log" {};
 
           "root/reserved" = {
