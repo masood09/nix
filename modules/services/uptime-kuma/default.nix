@@ -109,33 +109,44 @@ in {
     };
 
     # Service hardening + mount ordering
-    systemd.services.uptime-kuma = lib.mkMerge [
-      {
-        # Unit-level ordering / mount requirements
-        unitConfig = {
-          RequiresMountsFor = [uptimeKumaCfg.dataDir];
-        };
+    systemd = {
+      services.uptime-kuma = lib.mkMerge [
+        {
+          # Unit-level ordering / mount requirements
+          unitConfig = {
+            RequiresMountsFor = [uptimeKumaCfg.dataDir];
+          };
 
-        serviceConfig = {
-          DynamicUser = lib.mkForce false;
+          serviceConfig = {
+            DynamicUser = lib.mkForce false;
 
-          # stop systemd from trying to manage /var/lib/private + bind-mount behavior
-          StateDirectory = lib.mkForce null;
-          StateDirectoryMode = lib.mkForce null;
+            # stop systemd from trying to manage /var/lib/private + bind-mount behavior
+            StateDirectory = lib.mkForce null;
+            StateDirectoryMode = lib.mkForce null;
 
-          User = "uptime-kuma";
-          Group = "uptime-kuma";
+            User = "uptime-kuma";
+            Group = "uptime-kuma";
 
-          # with ProtectSystem=strict, you must explicitly allow writes here
-          ReadWritePaths = [uptimeKumaCfg.dataDir];
-        };
-      }
+            # with ProtectSystem=strict, you must explicitly allow writes here
+            ReadWritePaths = [uptimeKumaCfg.dataDir];
+          };
+        }
 
-      (lib.mkIf uptimeKumaCfg.zfs.enable {
-        requires = ["zfs-dataset-uptime-kuma.service"];
-        after = ["zfs-dataset-uptime-kuma.service"];
-      })
-    ];
+        (lib.mkIf uptimeKumaCfg.zfs.enable {
+          requires = ["zfs-dataset-uptime-kuma.service"];
+          after = ["zfs-dataset-uptime-kuma.service"];
+        })
+      ];
+
+      tmpfiles.rules = [
+        # Ensure base dir exists and is owned correctly
+        "d ${uptimeKumaCfg.dataDir} 0750 uptime-kuma uptime-kuma -"
+
+        # Pre-create subdirs Kuma expects
+        "d ${uptimeKumaCfg.dataDir}/upload 0750 uptime-kuma uptime-kuma -"
+        "d ${uptimeKumaCfg.dataDir}/data 0750 uptime-kuma uptime-kuma -"
+      ];
+    };
 
     environment =
       lib.mkIf (
@@ -147,14 +158,5 @@ in {
           uptimeKumaCfg.dataDir
         ];
       };
-
-    systemd.tmpfiles.rules = [
-      # Ensure base dir exists and is owned correctly
-      "d ${uptimeKumaCfg.dataDir} 0750 uptime-kuma uptime-kuma -"
-
-      # Pre-create subdirs Kuma expects
-      "d ${uptimeKumaCfg.dataDir}/upload 0750 uptime-kuma uptime-kuma -"
-      "d ${uptimeKumaCfg.dataDir}/data 0750 uptime-kuma uptime-kuma -"
-    ];
   };
 }

@@ -112,19 +112,26 @@ in {
     };
 
     # Service hardening + mount ordering
-    systemd.services.uptime-kuma = lib.mkMerge [
-      {
-        # Unit-level ordering / mount requirements
-        unitConfig = {
-          RequiresMountsFor = [headscaleCfg.dataDir];
-        };
-      }
+    systemd = {
+      services.uptime-kuma = lib.mkMerge [
+        {
+          # Unit-level ordering / mount requirements
+          unitConfig = {
+            RequiresMountsFor = [headscaleCfg.dataDir];
+          };
+        }
 
-      (lib.mkIf headscaleCfg.zfs.enable {
-        requires = ["zfs-dataset-uptime-kuma.service"];
-        after = ["zfs-dataset-uptime-kuma.service"];
-      })
-    ];
+        (lib.mkIf headscaleCfg.zfs.enable {
+          requires = ["zfs-dataset-uptime-kuma.service"];
+          after = ["zfs-dataset-uptime-kuma.service"];
+        })
+      ];
+
+      tmpfiles.rules = [
+        # Ensure base dir exists and is owned correctly
+        "d ${headscaleCfg.dataDir} 0750 headscale headscale -"
+      ];
+    };
 
     environment =
       lib.mkIf (
@@ -136,10 +143,5 @@ in {
           headscaleCfg.dataDir
         ];
       };
-
-    systemd.tmpfiles.rules = [
-      # Ensure base dir exists and is owned correctly
-      "d ${headscaleCfg.dataDir} 0750 headscale headscale -"
-    ];
   };
 }
