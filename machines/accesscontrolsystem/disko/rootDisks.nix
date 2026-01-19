@@ -1,5 +1,17 @@
-let
-  rdisk = "scsi-3607e89acda9142e4b05da8dc1205d078";
+{
+  config,
+  lib,
+  ...
+}: let
+  rdisk = lib.elemAt config.homelab.disks.root 0;
+
+  # Helper: dataset with legacy mountpoint
+  mkLegacy = mountpoint: extra: ({
+      type = "zfs_fs";
+      inherit mountpoint;
+      options = {mountpoint = "legacy";} // (extra.options or {});
+    }
+    // (builtins.removeAttrs extra ["options"]));
 in {
   disko.devices = {
     disk = {
@@ -70,73 +82,24 @@ in {
             };
           };
 
-          "root/empty" = {
-            type = "zfs_fs";
-            mountpoint = "/";
+          "root/empty" = mkLegacy "/" {
             postCreateHook = "zfs snapshot rpool/root/empty@start";
-
-            options = {
-              mountpoint = "legacy";
-            };
           };
 
-          "root/nix" = {
-            type = "zfs_fs";
-            mountpoint = "/nix";
+          "root/nix" = mkLegacy "/nix" {};
 
-            options = {
-              mountpoint = "legacy";
-            };
-          };
+          "root/nix/persist" = mkLegacy "/nix/persist" {};
 
-          "root/nix/persist" = {
-            type = "zfs_fs";
-            mountpoint = "/nix/persist";
+          "root/var/backup" = mkLegacy "/var/backup" {};
 
-            options = {
-              mountpoint = "legacy";
-            };
-          };
+          "root/var/lib/nixos" = mkLegacy "/var/lib/nixos" {};
 
-          "root/var/backup" = {
-            type = "zfs_fs";
-            mountpoint = "/var/backup";
+          "root/var/lib/postgresql" = mkLegacy "/var/lib/postgresql" {};
 
-            options = {
-              mountpoint = "legacy";
-            };
-          };
-
-          "root/var/lib/nixos" = {
-            type = "zfs_fs";
-            mountpoint = "/var/lib/nixos";
-
-            options = {
-              mountpoint = "legacy";
-            };
-          };
-
-          "root/var/lib/postgresql" = {
-            type = "zfs_fs";
-            mountpoint = "/var/lib/postgresql";
-
-            options = {
-              mountpoint = "legacy";
-            };
-          };
-
-          "root/var/log" = {
-            type = "zfs_fs";
-            mountpoint = "/var/log";
-
-            options = {
-              mountpoint = "legacy";
-            };
-          };
+          "root/var/log" = mkLegacy "/var/log" {};
 
           "root/reserved" = {
             type = "zfs_fs";
-
             options = {
               canmount = "off";
               mountpoint = "none";

@@ -35,7 +35,7 @@ The installation flow:
 SSH into the Ubuntu-based OCI image and switch to root:
 
 #+begin_src bash
-ssh ubuntu@accesscontrolsystem.oci.mantannest.com
+ssh ubuntu@watchfulsystem.oci.mantannest.com
 sudo su - root
 #+end_src
 
@@ -86,6 +86,9 @@ From your local machine:
 #+begin_src bash
 ssh-keygen -R watchfulsystem.oci.mantannest.com
 ssh nixos@watchfulsystem.oci.mantannest.com
+#+end_src
+
+#+begin_src bash
 sudo su - root
 #+end_src
 
