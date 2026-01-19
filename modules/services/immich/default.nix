@@ -7,37 +7,67 @@
   postgresqlEnabled = config.homelab.services.postgresql.enable;
   caddyEnabled = config.homelab.services.caddy.enable;
 in {
-  services = lib.mkIf immichCfg.enable {
-    immich = {
-      inherit (immichCfg) enable mediaLocation;
+  options.homelab.services.immich = {
+    enable = lib.mkEnableOption "Whether to enable Immich.";
 
-      database = {
-        enable = postgresqlEnabled;
-        enableVectors = false;
-      };
+    dataDir = lib.mkOption {
+      type = lib.types.path;
+      default = "/mnt/tank/services/immich";
     };
 
-    caddy = lib.mkIf caddyEnabled {
-      virtualHosts = {
-        "${immichCfg.webDomain}" = {
-          useACMEHost = immichCfg.webDomain;
-          extraConfig = ''
-            reverse_proxy http://127.0.0.1:${toString config.services.immich.port}
-          '';
+    webDomain = lib.mkOption {
+      type = lib.types.str;
+      default = "photos.mantannest.com";
+    };
+
+    userId = lib.mkOption {
+      default = 3001;
+      type = lib.types.ints.u16;
+      description = "User ID of Immich user";
+    };
+
+    groupId = lib.mkOption {
+      default = 3001;
+      type = lib.types.ints.u16;
+      description = "Group ID of Immich group";
+    };
+  };
+
+  config = lib.mkIf immichCfg.enable {
+    services = {
+      immich = {
+        inherit (immichCfg) enable;
+
+        mediaLocation = immichCfg.dataDir;
+
+        database = {
+          enable = postgresqlEnabled;
+          enableVectors = false;
+        };
+      };
+
+      caddy = lib.mkIf caddyEnabled {
+        virtualHosts = {
+          "${immichCfg.webDomain}" = {
+            useACMEHost = immichCfg.webDomain;
+            extraConfig = ''
+              reverse_proxy http://127.0.0.1:${toString config.services.immich.port}
+            '';
+          };
         };
       };
     };
-  };
 
-  security = lib.mkIf (caddyEnabled && immichCfg.enable) {
-    acme.certs."${immichCfg.webDomain}".domain = "${immichCfg.webDomain}";
-  };
+    security = caddyEnabled {
+      acme.certs."${immichCfg.webDomain}".domain = "${immichCfg.webDomain}";
+    };
 
-  users.users = lib.optionalAttrs immichCfg.enable {
-    immich.uid = immichCfg.userId;
-  };
+    users.users = {
+      immich.uid = immichCfg.userId;
+    };
 
-  users.groups = lib.optionalAttrs immichCfg.enable {
-    immich.gid = immichCfg.groupId;
+    users.groups = {
+      immich.gid = immichCfg.groupId;
+    };
   };
 }
