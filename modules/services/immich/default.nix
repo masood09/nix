@@ -31,9 +31,46 @@ in {
       type = lib.types.ints.u16;
       description = "Group ID of Immich group";
     };
+
+    zfs = {
+      enable = lib.mkEnableOption "Store Uptime Kuma dataDir on a ZFS dataset.";
+
+      restic = {
+        enable = lib.mkEnableOption "Enable restic backup";
+      };
+
+      dataset = lib.mkOption {
+        type = lib.types.str;
+        example = "dpool/tank/services/immich";
+        description = "ZFS dataset to create and mount at dataDir.";
+      };
+
+      properties = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = {};
+        description = "ZFS properties for the dataset.";
+      };
+    };
   };
 
   config = lib.mkIf immichCfg.enable {
+    # ZFS dataset for dataDir
+    homelab.zfs.datasets.uptime-kuma = lib.mkIf immichCfg.zfs.enable {
+      inherit (immichCfg.zfs) dataset properties;
+
+      enable = true;
+      mountpoint = immichCfg.dataDir;
+
+      requiredBy = [
+        "immich-server.service"
+        "immich-machine-learning.service"
+      ];
+
+      restic = {
+        enable = true;
+      };
+    };
+
     services = {
       immich = {
         inherit (immichCfg) enable;
@@ -68,6 +105,42 @@ in {
 
     users.groups = {
       immich.gid = immichCfg.groupId;
+    };
+
+    # Service hardening + mount ordering
+    systemd = {
+      services.immich-server = lib.mkMerge [
+        {
+          # Unit-level ordering / mount requirements
+          unitConfig = {
+            RequiresMountsFor = [immichCfg.dataDir];
+          };
+        }
+
+        (lib.mkIf immichCfg.zfs.enable {
+          requires = ["zfs-dataset-immich.service"];
+          after = ["zfs-dataset-immich.service"];
+        })
+      ];
+
+      services.immich-machine-learning = lib.mkMerge [
+        {
+          # Unit-level ordering / mount requirements
+          unitConfig = {
+            RequiresMountsFor = [immichCfg.dataDir];
+          };
+        }
+
+        (lib.mkIf immichCfg.zfs.enable {
+          requires = ["zfs-dataset-immich.service"];
+          after = ["zfs-dataset-immich.service"];
+        })
+      ];
+
+      tmpfiles.rules = [
+        # Ensure base dir exists and is owned correctly
+        "d ${immichCfg.dataDir} 0750 immich immich -"
+      ];
     };
   };
 }
