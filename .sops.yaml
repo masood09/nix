@@ -5,6 +5,8 @@ keys:
     age1knvvq7pkyyf0c3qsn5thssg2wg3yzvaay9ewxyqzc3gd8xlctyas7jfz3r
   - &watchfulsystem
     age1sh9wz07py8qysc3dvf228r85pfafaraf0a23244stpxanmq68slq06cxx6
+  - &heartbeat
+    age1r84yxudulk0jgdtgcmu0qx79ztuxzrzrk4jl5s9n52x4874q35cqzu4enh
   - &nastest
     age1m24xcey4jcvyjncz4krmzwy9m6efqvr0jrzdjxfxg8fsalt83cqqpwnz3j
   - &murderbot
@@ -29,6 +31,7 @@ creation_rules:
           - *accesscontrolsystem
           - *meshcontrol
           - *watchfulsystem
+          - *heartbeat
           - *nastest
           - *murderbot
           - *caretaker
@@ -55,6 +58,12 @@ creation_rules:
       - age:
         - *murderbot
         - *watchfulsystem
+
+  - path_regex: secrets/heartbeat-server\.yaml$
+    key_groups:
+      - age:
+        - *heartbeat
+        - *murderbot
 
   - path_regex: secrets/caretaker\.yaml$
     key_groups:

@@ -2,6 +2,7 @@
   imports = [
     ./_auto-update.nix
     ./_boot.nix
+    ./_disks.nix
     ./_impermanence.nix
     ./_networking.nix
     ./_nixpkgs.nix
