@@ -22,7 +22,7 @@
     };
 
     systemd.timers.nix-prune-system-generations = {
-      wantedBy = [ "timers.target" ];
+      wantedBy = ["timers.target"];
       timerConfig = {
         OnCalendar = "Sat *-*-* 21:50:00";
         Persistent = true;
