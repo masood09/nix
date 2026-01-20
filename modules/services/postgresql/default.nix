@@ -15,6 +15,7 @@ in {
   options.homelab.services.postgresql = {
     enable = lib.mkEnableOption "Whether to enable PostgreSQL database.";
     package = lib.mkPackageOption pkgs "postgresql_17" {};
+    enableTCPIP = lib.mkEnableOption "Whether PostgreSQL should listen on all network interfaces.";
 
     dataDir = lib.mkOption {
       type = lib.types.path;
@@ -102,7 +103,7 @@ in {
 
     services = {
       postgresql = {
-        inherit (postgresqlCfg) enable package dataDir;
+        inherit (postgresqlCfg) enable enableTCPIP package dataDir;
       };
 
       postgresqlBackup = lib.mkIf backupCfg.enable {
@@ -151,5 +152,14 @@ in {
           postgresqlCfg.dataDir
         ];
       };
+
+    networking.firewall.allowedTCPPorts =
+      lib.mkIf (
+        postgresqlCfg.enable
+        && config.services.postgresql.enableTCPIP
+      )
+        [
+          config.services.postgresql.settings.port
+        ];
   };
 }
