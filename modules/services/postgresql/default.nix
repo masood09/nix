@@ -85,8 +85,7 @@ in {
     # ZFS dataset for backup dataDir
     homelab.zfs.datasets.postgresql-backup =
       lib.mkIf (
-        postgresqlCfg.zfs.enable
-        && backupCfg.enable
+        backupCfg.enable
         && backupCfg.zfs.enable
       )
       {
