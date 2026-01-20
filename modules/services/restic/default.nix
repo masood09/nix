@@ -56,6 +56,11 @@ in {
       repositoryFile = config.sops.secrets."restic-repo".path;
       passwordFile = config.sops.secrets."restic-password".path;
 
+      extraOptions = [
+        "s3.connections=50"
+        "--no-extra-verify"
+      ];
+
       # Restic backs up *already-mounted* snapshot views
       paths = resticPaths ++ homelabCfg.services.restic.extraPaths;
       pruneOpts = homelabCfg.services.restic.pruneOpts;
