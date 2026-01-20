@@ -37,7 +37,7 @@ in {
       '';
     };
   };
-  
+
   config = {
     networking = {
       inherit (cfg) hostName;
