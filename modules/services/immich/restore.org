@@ -1,0 +1,126 @@
+#+TITLE: Restoring Immich Database and Media from Restic Backup
+#+AUTHOR: Masood Ahmed
+#+OPTIONS: toc:nil num:nil
+
+This document describes a *safe, repeatable procedure* for restoring the
+Immich PostgreSQL database and media files from Restic backups staged
+via =/mnt/nightly_backup=.
+
+The workflow:
+- Verifies available backups
+- Restores database dump and media to a temporary location
+- Stops all Immich services
+- Drops and restores the PostgreSQL database
+- Fixes ownership of database objects
+- Restores media files with correct permissions
+- Restarts services cleanly
+
+* Backup Information
+
+- Database: =immich=
+- Database owner: =immich=
+- Database engine: PostgreSQL
+- Media path: =/mnt/tank/services/immich/=
+
+* Verify Available Snapshots
+
+Confirm the snapshot you intend to restore:
+
+#+begin_src bash
+sudo restic-s3-backup snapshots
+#+end_src
+
+* Restore the Latest Snapshot to a Temporary Location
+
+Restore the PostgreSQL backup and Immich media into =/tmp=:
+
+#+begin_src bash
+sudo restic-s3-backup restore latest \
+  --include /mnt/nightly_backup/postgresql-backup \
+  --target /tmp
+
+sudo restic-s3-backup restore latest \
+  --include /mnt/nightly_backup/immich \
+  --target /tmp
+#+end_src
+
+This will create the following directory structure:
+
+#+begin_example
+/tmp/mnt/nightly_backup/postgresql-backup/
+/tmp/mnt/nightly_backup/immich/
+#+end_example
+
+* Stop Immich Services
+
+Stop all Immich-related services before restoring the database:
+
+#+begin_src bash
+sudo systemctl stop immich-server.service
+sudo systemctl stop immich-machine-learning.service
+#+end_src
+
+* Drop the Existing Database
+
+Remove the existing database before restoring from backup:
+
+#+begin_src bash
+sudo -u postgres psql -d postgres -c "DROP DATABASE immich;"
+sudo systemctl restart postgresql
+#+end_src
+
+* Restore the Database
+
+Restore the database from the compressed SQL backup:
+
+#+begin_src bash
+sudo cp /tmp/mnt/nightly_backup/postgresql-backup/immich.sql.gz /tmp/immich.sql.gz
+sudo chmod 644 /tmp/immich.sql.gz
+
+sudo -u immich bash -lc \
+  'gunzip -c /tmp/immich.sql.gz | psql -v ON_ERROR_STOP=1 -d immich'
+#+end_src
+
+* Clear the Existing Media Directory
+
+Remove all existing contents while preserving the directory itself:
+
+#+begin_src bash
+sudo find /mnt/tank/services/immich/ -mindepth 1 -delete
+#+end_src
+
+This approach is:
+- Shell-agnostic (bash/zsh)
+- Safe even if the directory is already empty
+
+* Restore Media Files
+
+Copy the restored media into the live directory:
+
+#+begin_src bash
+sudo rsync -a --delete \
+  /tmp/mnt/nightly_backup/immich/ \
+  /mnt/tank/services/immich/
+#+end_src
+
+Fix ownership so the service can read and write all files:
+
+#+begin_src bash
+sudo chown -R immich:immich /mnt/tank/services/immich
+#+end_src
+
+* Start Immich Services
+
+Restart the Immich services:
+
+#+begin_src bash
+sudo systemctl start immich-server.service
+sudo systemctl start immich-machine-learning.service
+#+end_src
+
+* Notes & Best Practices
+
+- Always stop all Immich services before restoring the database.
+- Use =ON_ERROR_STOP= to ensure restore failures abort immediately.
+- Consider taking a *ZFS snapshot* of the PostgreSQL data directory and
+  media directory before restoring for quick rollback.
