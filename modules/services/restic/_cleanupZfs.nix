@@ -52,7 +52,7 @@ in {
     systemd.timers.restic-zfs-cleanup = {
       wantedBy = ["timers.target"];
       timerConfig = {
-        OnCalendar = "*-*-* 23:00:00";
+        OnCalendar = "*-*-* 8:00:00";
         Persistent = true;
       };
     };

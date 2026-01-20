@@ -64,7 +64,7 @@ in {
       timers.restic-zfs-prepare = {
         wantedBy = ["timers.target"];
         timerConfig = {
-          OnCalendar = "*-*-* 02:00:00";
+          OnCalendar = "*-*-* 01:50:00";
           Persistent = true;
         };
       };
