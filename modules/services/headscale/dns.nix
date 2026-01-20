@@ -16,7 +16,7 @@ in {
 
             extra_records = [
               {
-                name = "babybuddy.mantannest.com";
+                name = "babybuddy.homelab.mantannest.com";
                 type = "A";
                 value = "100.64.0.23";
               }
