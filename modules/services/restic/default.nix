@@ -50,6 +50,8 @@ in {
 
   config = lib.mkIf resticEnabled {
     services.restic.backups.s3-backup = lib.mkIf (resticS3Enabled && datasetNames != []) {
+      inherit (homelabCfg.services.restic) pruneOpts;
+
       initialize = true;
 
       environmentFile = config.sops.secrets."restic-env".path;
@@ -63,7 +65,6 @@ in {
 
       # Restic backs up *already-mounted* snapshot views
       paths = resticPaths ++ homelabCfg.services.restic.extraPaths;
-      pruneOpts = homelabCfg.services.restic.pruneOpts;
 
       timerConfig = {
         OnCalendar = "*-*-* 02:00:00";
