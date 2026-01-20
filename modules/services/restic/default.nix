@@ -57,7 +57,7 @@ in {
       passwordFile = config.sops.secrets."restic-password".path;
 
       extraOptions = [
-        "s3.connections=50"
+        "s3.connections=10"
         "--no-extra-verify"
       ];
 
