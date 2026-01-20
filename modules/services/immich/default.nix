@@ -7,6 +7,7 @@
   postgresqlEnabled = config.homelab.services.postgresql.enable;
   postgresqlBackupEnabled = config.homelab.services.postgresql.backup.enable;
   caddyEnabled = config.homelab.services.caddy.enable;
+  resticEnabled = config.homelab.services.restic.enable;
 in {
   options.homelab.services.immich = {
     enable = lib.mkEnableOption "Whether to enable Immich.";
@@ -81,6 +82,16 @@ in {
         database = {
           enable = postgresqlEnabled;
           enableVectors = false;
+        };
+      };
+
+      restic = lib.mkIf (resticEnabled && immichCfg.zfs.enable) {
+        backups = {
+          s3-backup.exclude = [
+            "/mnt/nightly_backup/immich/backups"
+            "/mnt/nightly_backup/immich/encoded-video"
+            "/mnt/nightly_backup/immich/thumbs"
+          ];
         };
       };
 

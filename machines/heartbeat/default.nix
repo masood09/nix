@@ -31,12 +31,6 @@
     ];
   };
 
-  services.restic.backups.s3-backup.exclude = [
-    "/mnt/nightly_backup/immich/backups"
-    "/mnt/nightly_backup/immich/encoded-video"
-    "/mnt/nightly_backup/immich/thumbs"
-  ];
-
   fileSystems = {
     "/".neededForBoot = true;
     "/nix".neededForBoot = true;
