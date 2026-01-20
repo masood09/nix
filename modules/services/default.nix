@@ -6,6 +6,7 @@
     ./immich
     ./headscale
     ./minio
+    ./podman
     ./postgresql
     ./restic
     ./ssh

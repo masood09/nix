@@ -37,6 +37,19 @@
         };
       };
 
+      podman = {
+        enable = true;
+
+        zfs = {
+          enable = true;
+
+          properties = {
+            logbias = "latency";
+            recordsize = "16K";
+          };
+        };
+      };
+
       postgresql = {
         enable = true;
         enableTCPIP = true;
