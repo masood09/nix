@@ -8,6 +8,7 @@
   caddyEnabled = config.services.caddy.enable;
   postgresqlEnabled = config.services.postgresql.enable;
   postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
+  resticEnabled = config.homelab.services.restic.enable;
 in {
   options.homelab.services.vaultwarden = {
     enable = lib.mkEnableOption "Whether to enable Vaultwarden.";
@@ -89,6 +90,14 @@ in {
           DOMAIN = "https://${vaultwardenCfg.webDomain}";
           ROCKET_ADDRESS = vaultwardenCfg.listenAddress;
           ROCKET_PORT = vaultwardenCfg.listenPort;
+        };
+      };
+
+      restic = lib.mkIf (resticEnabled && vaultwardenCfg.zfs.enable) {
+        backups = {
+          s3-backup.exclude = [
+            "/mnt/nightly_backup/vaultwarden/tmp"
+          ];
         };
       };
 
