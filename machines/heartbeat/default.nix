@@ -5,6 +5,7 @@
     ./_config.nix
     ./_networking.nix
     ./_secrets.nix
+    ./_postgresql.nix
 
     ./../../modules/nixos
     ./../../modules/home-manager
