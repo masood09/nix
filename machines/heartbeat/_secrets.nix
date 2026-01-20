@@ -23,6 +23,10 @@
       sopsFile = ./../../secrets/heartbeat-server.yaml;
     };
 
+    "babybuddy-env" = {
+      sopsFile = ./../../secrets/heartbeat-server.yaml;
+    };
+
     "vaultwarden-env" = {
       sopsFile = ./../../secrets/heartbeat-server.yaml;
     };

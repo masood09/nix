@@ -15,6 +15,14 @@
         };
       };
 
+      babybuddy = {
+        enable = true;
+
+        zfs = {
+          enable = true;
+        };
+      };
+
       caddy = {
         enable = true;
       };
