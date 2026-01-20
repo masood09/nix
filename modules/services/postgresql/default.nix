@@ -103,6 +103,19 @@ in {
     services = {
       postgresql = {
         inherit (postgresqlCfg) enable enableTCPIP package dataDir;
+
+        authentication = lib.mkDefault ''
+          # TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+          # postgres can connect ONLY via Unix socket
+          local   all             postgres                                peer
+          host    all             postgres        127.0.0.1/32            reject
+          host    all             postgres        ::1/128                 reject
+          host    all             postgres        0.0.0.0/0               reject
+
+          # Other local users via Unix socket (no password), but ONLY to DB with same name as user
+          local   sameuser        all                                     peer
+        '';
       };
 
       postgresqlBackup = lib.mkIf backupCfg.enable {
