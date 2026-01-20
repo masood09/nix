@@ -5,6 +5,7 @@
 }: let
   immichCfg = config.homelab.services.immich;
   postgresqlEnabled = config.homelab.services.postgresql.enable;
+  postgresqlBackupEnabled = config.homelab.services.postgresql.backup.enable;
   caddyEnabled = config.homelab.services.caddy.enable;
 in {
   options.homelab.services.immich = {
@@ -92,6 +93,12 @@ in {
             '';
           };
         };
+      };
+
+      postgresqlBackup = lib.mkIf (postgresqlEnabled && postgresqlBackupEnabled) {
+        databases = [
+          config.services.immich.database.name
+        ];
       };
     };
 
