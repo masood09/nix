@@ -49,7 +49,9 @@ in {
 
       properties = lib.mkOption {
         type = lib.types.attrsOf lib.types.str;
-        default = {};
+        default = {
+          recordsize = "1M";
+        };
         description = "ZFS properties for the dataset.";
       };
     };

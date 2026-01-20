@@ -12,10 +12,6 @@
       acme = {
         zfs = {
           enable = true;
-
-          properties = {
-            recordsize = "16K";
-          };
         };
       };
 
@@ -28,10 +24,6 @@
 
         zfs = {
           enable = true;
-
-          properties = {
-            recordsize = "1M";
-          };
         };
       };
 
@@ -40,11 +32,6 @@
 
         zfs = {
           enable = true;
-
-          properties = {
-            logbias = "latency";
-            recordsize = "16K";
-          };
         };
       };
 
@@ -54,14 +41,6 @@
 
         zfs = {
           enable = true;
-
-          properties = {
-            compression = "lz4";
-            dnodesize = "auto";
-            logbias = "latency";
-            recordsize = "8K";
-            redundant_metadata = "most";
-          };
         };
 
         backup = {
@@ -70,11 +49,6 @@
 
           zfs = {
             enable = true;
-
-            properties = {
-              recordsize = "1M";
-              dnodesize = "auto";
-            };
           };
         };
       };
@@ -89,9 +63,6 @@
 
         zfs = {
           enable = true;
-          properties = {
-            recordsize = "16K";
-          };
         };
       };
 
@@ -100,11 +71,6 @@
 
         zfs = {
           enable = true;
-
-          properties = {
-            logbias = "latency";
-            recordsize = "16K";
-          };
         };
       };
     };
