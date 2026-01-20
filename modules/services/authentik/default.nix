@@ -29,8 +29,8 @@ in {
     };
   };
 
-  config = {
-    services = lib.mkIf authentikCfg.enable {
+  config = lib.mkIf authentikCfg.enable {
+    services = {
       authentik = {
         inherit (authentikCfg) enable;
 
@@ -65,8 +65,14 @@ in {
       };
     };
 
-    security = lib.mkIf (caddyEnabled && authentikCfg.enable) {
+    security = lib.mkIf caddyEnabled {
       acme.certs."${authentikCfg.webDomain}".domain = "${authentikCfg.webDomain}";
+    };
+
+    environment.persistence."/nix/persist" = {
+      directories = [
+        "/var/lib/private/authentik/media"
+      ];
     };
   };
 }
