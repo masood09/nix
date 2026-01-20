@@ -68,11 +68,5 @@ in {
     security = lib.mkIf caddyEnabled {
       acme.certs."${authentikCfg.webDomain}".domain = "${authentikCfg.webDomain}";
     };
-
-    environment.persistence."/nix/persist" = {
-      directories = [
-        "/var/lib/private/authentik/media"
-      ];
-    };
   };
 }
