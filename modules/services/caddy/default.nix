@@ -30,7 +30,9 @@ in {
 
         properties = lib.mkOption {
           type = lib.types.attrsOf lib.types.str;
-          default = {};
+          default = {
+            recordsize = "16K";
+          };
           description = "ZFS properties for the ACME dataset.";
         };
       };

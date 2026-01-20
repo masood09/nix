@@ -12,10 +12,6 @@
       acme = {
         zfs = {
           enable = true;
-
-          properties = {
-            recordsize = "16K";
-          };
         };
       };
 
@@ -51,10 +47,6 @@
 
         zfs = {
           enable = true;
-
-          properties = {
-            recordsize = "16K";
-          };
         };
       };
     };

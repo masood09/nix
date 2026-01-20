@@ -16,10 +16,6 @@
       acme = {
         zfs = {
           enable = true;
-
-          properties = {
-            recordsize = "16K";
-          };
         };
       };
 
@@ -33,14 +29,6 @@
         zfs = {
           enable = true;
           dataset = "rpool/root/var/lib/postgresql/17";
-
-          properties = {
-            compression = "lz4";
-            dnodesize = "auto";
-            logbias = "latency";
-            recordsize = "8K";
-            redundant_metadata = "most";
-          };
         };
 
         backup = {
@@ -49,11 +37,6 @@
           zfs = {
             enable = true;
             dataset = "rpool/root/var/backup/postgresql";
-
-            properties = {
-              recordsize = "1M";
-              dnodesize = "auto";
-            };
           };
         };
       };
@@ -70,9 +53,6 @@
 
         zfs = {
           enable = true;
-          properties = {
-            recordsize = "16K";
-          };
         };
       };
     };

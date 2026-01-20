@@ -45,7 +45,9 @@ in {
 
         properties = lib.mkOption {
           type = lib.types.attrsOf lib.types.str;
-          default = {};
+          default = {
+            recordsize = "1M";
+          };
           description = "ZFS properties for the dataset.";
         };
       };
@@ -66,7 +68,12 @@ in {
 
       properties = lib.mkOption {
         type = lib.types.attrsOf lib.types.str;
-        default = {};
+        default = {
+          compression = "lz4";
+          logbias = "latency";
+          recordsize = "8K";
+          redundant_metadata = "most";
+        };
         description = "ZFS properties for the dataset.";
       };
     };
