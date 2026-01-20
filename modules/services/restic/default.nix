@@ -36,12 +36,12 @@ in {
     pruneOpts = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [
-        "--keep-daily 1"
-        "--keep-weekly 7"
-        "--keep-monthly 30"
-        "--keep-yearly 12"
+        "--keep-daily 3"
+        "--keep-weekly 4"
       ];
+
       description = "Restic forget/prune retention options passed as pruneOpts.";
+
       example = [
         "--keep-last 7"
       ];
