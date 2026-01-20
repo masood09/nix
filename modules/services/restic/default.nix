@@ -66,7 +66,7 @@ in {
       pruneOpts = homelabCfg.services.restic.pruneOpts;
 
       timerConfig = {
-        OnCalendar = "*-*-* 03:00:00";
+        OnCalendar = "*-*-* 02:00:00";
         Persistent = true;
       };
     };
