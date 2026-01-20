@@ -32,6 +32,20 @@ in {
       default = [];
       description = "Extra filesystem paths to include in restic backup (in addition to staged ZFS snapshot views).";
     };
+
+    pruneOpts = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [
+        "--keep-daily 1"
+        "--keep-weekly 7"
+        "--keep-monthly 30"
+        "--keep-yearly 12"
+      ];
+      description = "Restic forget/prune retention options passed as pruneOpts.";
+      example = [
+        "--keep-last 7"
+      ];
+    };
   };
 
   config = lib.mkIf resticEnabled {
@@ -44,13 +58,7 @@ in {
 
       # Restic backs up *already-mounted* snapshot views
       paths = resticPaths ++ homelabCfg.services.restic.extraPaths;
-
-      pruneOpts = [
-        "--keep-daily 1"
-        "--keep-weekly 7"
-        "--keep-monthly 30"
-        "--keep-yearly 12"
-      ];
+      pruneOpts = homelabCfg.services.restic.pruneOpts;
 
       timerConfig = {
         OnCalendar = "*-*-* 03:00:00";

@@ -71,6 +71,11 @@
       restic = {
         enable = true;
         s3Enable = true;
+
+        pruneOpts = [
+          "--keep-within 7d"
+          "--keep-last 3"
+        ];
       };
 
       tailscale = {
