@@ -170,8 +170,8 @@ in {
         postgresqlCfg.enable
         && config.services.postgresql.enableTCPIP
       )
-        [
-          config.services.postgresql.settings.port
-        ];
+      [
+        config.services.postgresql.settings.port
+      ];
   };
 }
