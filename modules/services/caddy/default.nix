@@ -24,7 +24,7 @@ in {
 
         dataset = lib.mkOption {
           type = lib.types.str;
-          example = "rpool/root/var/lib/acme";
+          default = "rpool/root/var/lib/acme";
           description = "ZFS dataset to create and mount at /var/lib/acme.";
         };
 

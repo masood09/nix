@@ -34,7 +34,7 @@ in {
 
       dataset = lib.mkOption {
         type = lib.types.str;
-        example = "rpool/root/var/lib/tailscale";
+        default = "rpool/root/var/lib/tailscale";
         description = "ZFS dataset to create and mount at dataDir.";
       };
 

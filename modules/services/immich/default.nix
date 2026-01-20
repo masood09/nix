@@ -43,7 +43,7 @@ in {
 
       dataset = lib.mkOption {
         type = lib.types.str;
-        example = "dpool/tank/services/immich";
+        default = "dpool/tank/services/immich";
         description = "ZFS dataset to create and mount at dataDir.";
       };
 
