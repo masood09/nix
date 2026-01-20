@@ -134,7 +134,6 @@
       failsafeunit = mkNixOSConfig ./machines/failsafeunit;
       nastest = mkNixOSConfig ./machines/nastest;
 
-      pve-database = mkNixOSConfig ./machines/pve-database/configuration.nix;
       pve-monitoring = mkNixOSConfig ./machines/pve-monitoring/configuration.nix;
       pve-proxy = mkNixOSConfig ./machines/pve-proxy/configuration.nix;
 
