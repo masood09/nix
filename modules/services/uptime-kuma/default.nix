@@ -41,7 +41,7 @@ in {
 
       dataset = lib.mkOption {
         type = lib.types.str;
-        example = "rpool/root/var/lib/uptime-kuma";
+        default = "rpool/root/var/lib/uptime-kuma";
         description = "ZFS dataset to create and mount at dataDir.";
       };
 

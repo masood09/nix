@@ -39,7 +39,7 @@ in {
 
         dataset = lib.mkOption {
           type = lib.types.str;
-          example = "rpool/root/var/backup/postgresql";
+          default = "fpool/fast/backup/postgresql";
           description = "ZFS dataset to create and mount at dataDir.";
         };
 
@@ -60,7 +60,7 @@ in {
 
       dataset = lib.mkOption {
         type = lib.types.str;
-        example = "rpool/root/var/lib/postgresql/17";
+        default = "fpool/fast/services/postgresql_17";
         description = "ZFS dataset to create and mount at dataDir.";
       };
 

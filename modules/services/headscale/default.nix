@@ -59,7 +59,7 @@ in {
 
       dataset = lib.mkOption {
         type = lib.types.str;
-        example = "rpool/root/var/lib/headscale";
+        default = "rpool/root/var/lib/headscale";
         description = "ZFS dataset to create and mount at dataDir.";
       };
 

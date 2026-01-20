@@ -12,7 +12,6 @@
       acme = {
         zfs = {
           enable = true;
-          dataset = "rpool/root/var/lib/acme";
 
           properties = {
             recordsize = "16K";
@@ -29,7 +28,6 @@
 
         zfs = {
           enable = true;
-          dataset = "dpool/tank/services/immich";
 
           properties = {
             recordsize = "1M";
@@ -56,7 +54,6 @@
 
         zfs = {
           enable = true;
-          dataset = "fpool/fast/services/postgresql_17";
 
           properties = {
             compression = "lz4";
@@ -73,7 +70,6 @@
 
           zfs = {
             enable = true;
-            dataset = "fpool/fast/backup/postgresql";
 
             properties = {
               recordsize = "1M";
@@ -93,7 +89,6 @@
 
         zfs = {
           enable = true;
-          dataset = "rpool/root/var/lib/tailscale";
           properties = {
             recordsize = "16K";
           };
@@ -105,7 +100,6 @@
 
         zfs = {
           enable = true;
-          dataset = "dpool/tank/services/vaultwarden";
 
           properties = {
             logbias = "latency";

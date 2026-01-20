@@ -12,7 +12,6 @@
       acme = {
         zfs = {
           enable = true;
-          dataset = "rpool/root/var/lib/acme";
           properties = {
             recordsize = "16K";
           };
@@ -33,7 +32,6 @@
 
         zfs = {
           enable = true;
-          dataset = "rpool/root/var/lib/tailscale";
           properties = {
             recordsize = "16K";
           };
@@ -45,7 +43,6 @@
 
         zfs = {
           enable = true;
-          dataset = "rpool/root/var/lib/uptime-kuma";
           properties = {
             recordsize = "16K";
           };
