@@ -11,6 +11,7 @@
     ./ssh
     ./tailscale
     ./uptime-kuma
+    ./vaultwarden
   ];
 
   services = {

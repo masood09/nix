@@ -85,6 +85,20 @@
           };
         };
       };
+
+      vaultwarden = {
+        enable = true;
+
+        zfs = {
+          enable = true;
+          dataset = "dpool/tank/services/vaultwarden";
+
+          properties = {
+            logbias = "latency";
+            recordsize = "16K";
+          };
+        };
+      };
     };
   };
 }

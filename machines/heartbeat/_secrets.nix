@@ -22,5 +22,9 @@
     "restic-password" = {
       sopsFile = ./../../secrets/heartbeat-server.yaml;
     };
+
+    "vaultwarden-env" = {
+      sopsFile = ./../../secrets/heartbeat-server.yaml;
+    };
   };
 }
