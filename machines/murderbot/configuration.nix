@@ -1,15 +1,9 @@
 {
-  config,
-  inputs,
-  outputs,
-  ...
-}: let
-  homelabCfg = config.homelab;
-in {
   imports = [
     ./hardware-configuration.nix
 
     ./../../modules/macos/base.nix
+    ./../../modules/home-manager
   ];
 
   # Host-local override for setproctitle on Darwin
@@ -29,6 +23,8 @@ in {
   ];
 
   homelab = {
+    role = "desktop";
+
     networking = {
       hostName = "murderbot";
     };
@@ -36,26 +32,6 @@ in {
     programs = {
       emacs.enable = true;
       neovim.enable = true;
-    };
-
-    role = "desktop";
-    isEncryptedRoot = false;
-  };
-
-  home-manager = {
-    extraSpecialArgs = {
-      inherit inputs outputs homelabCfg;
-    };
-
-    useGlobalPkgs = true;
-    useUserPackages = true;
-
-    users = {
-      ${homelabCfg.primaryUser.userName} = {
-        imports = [
-          ./../../modules/home-manager
-        ];
-      };
     };
   };
 }
