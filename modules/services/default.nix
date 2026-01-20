@@ -2,6 +2,7 @@
   imports = [
     ./alloy
     ./authentik
+    ./babybuddy
     ./caddy
     ./immich
     ./headscale
