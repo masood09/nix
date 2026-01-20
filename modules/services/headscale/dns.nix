@@ -16,6 +16,21 @@ in {
 
             extra_records = [
               {
+                name = "database.mantannest.com";
+                type = "A";
+                value = "100.64.0.23";
+              }
+              {
+                name = "passwords.mantannest.com";
+                type = "A";
+                value = "100.64.0.23";
+              }
+              {
+                name = "photos.mantannest.com";
+                type = "A";
+                value = "100.64.0.23";
+              }
+              {
                 name = "grafana.mantannest.com";
                 type = "A";
                 value = "100.64.0.7";
@@ -29,16 +44,6 @@ in {
                 name = "homeassistant.mantannest.com";
                 type = "A";
                 value = "100.64.0.13";
-              }
-              {
-                name = "photos.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
-              }
-              {
-                name = "passwords.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
               }
               {
                 name = "loki.monitoring.server.mantannest.com";
