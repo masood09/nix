@@ -45,7 +45,6 @@
 
         backup = {
           enable = true;
-          dataDir = "/mnt/fast/backup/postgresql";
 
           zfs = {
             enable = true;
