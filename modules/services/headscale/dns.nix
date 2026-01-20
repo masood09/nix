@@ -38,7 +38,7 @@ in {
               {
                 name = "passwords.mantannest.com";
                 type = "A";
-                value = "100.64.0.3";
+                value = "100.64.0.23";
               }
               {
                 name = "loki.monitoring.server.mantannest.com";
