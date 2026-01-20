@@ -12,5 +12,15 @@
     "fpool_fast_key" = {
       sopsFile = ./../../secrets/heartbeat-server.yaml;
     };
+
+    "restic-env" = {
+      sopsFile = ./../../secrets/heartbeat-server.yaml;
+    };
+    "restic-repo" = {
+      sopsFile = ./../../secrets/heartbeat-server.yaml;
+    };
+    "restic-password" = {
+      sopsFile = ./../../secrets/heartbeat-server.yaml;
+    };
   };
 }
