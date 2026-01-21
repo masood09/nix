@@ -82,7 +82,8 @@ in {
     };
 
     virtualisation.oci-containers.containers.babybuddy = {
-      image = "lscr.io/linuxserver/babybuddy:2.7.1";
+      # renovate: datasource=docker depName=lscr.io/linuxserver/babybuddy
+      image = "lscr.io/linuxserver/babybuddy:2.7.0";
       autoStart = true;
 
       extraOptions = [
