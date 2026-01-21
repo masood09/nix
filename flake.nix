@@ -132,7 +132,6 @@
 
       caretaker = mkNixOSConfig ./machines/caretaker/configuration.nix;
       failsafeunit = mkNixOSConfig ./machines/failsafeunit;
-      nastest = mkNixOSConfig ./machines/nastest;
 
       pve-monitoring = mkNixOSConfig ./machines/pve-monitoring/configuration.nix;
 
