@@ -27,6 +27,11 @@
       sopsFile = ./../../secrets/heartbeat-server.yaml;
     };
 
+    "caddy-env" = {
+      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      owner = "caddy";
+    };
+
     "vaultwarden-env" = {
       sopsFile = ./../../secrets/heartbeat-server.yaml;
     };
