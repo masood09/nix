@@ -5,6 +5,7 @@
     ./babybuddy
     ./caddy
     ./immich
+    ./ittools
     ./headscale
     ./loki
     ./minio

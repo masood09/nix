@@ -35,6 +35,10 @@
         };
       };
 
+      ittools = {
+        enable = true;
+      };
+
       loki = {
         enable = true;
 
