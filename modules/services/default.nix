@@ -4,6 +4,7 @@
     ./authentik
     ./babybuddy
     ./caddy
+    ./dell-idrac-fan-controller
     ./immich
     ./ittools
     ./jobscraper
