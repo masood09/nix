@@ -48,7 +48,7 @@ in {
   config = lib.mkIf (cfg.enable && podmanEnabled) {
     virtualisation.oci-containers.containers.dell-idrac-fan-controller = {
       # renovate: datasource=docker depName=tigerblue77/dell_idrac_fan_controller
-      image = "tigerblue77/dell_idrac_fan_controller:v1.10";
+      image = "tigerblue77/dell_idrac_fan_controller:v1.11";
       autoStart = true;
 
       environment =
