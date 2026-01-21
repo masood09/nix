@@ -11,7 +11,7 @@
   enableZFS = (homelabCfg.isRootZFS or false) || anyManagedDatasets;
 in {
   imports = [
-    ./alloy.nix
+    # ./alloy.nix
     ./dataset.nix
     ./notification.nix
   ];
