@@ -31,6 +31,14 @@
         enable = true;
       };
 
+      grafana = {
+        enable = true;
+
+        zfs = {
+          enable = true;
+        };
+      };
+
       immich = {
         enable = true;
 

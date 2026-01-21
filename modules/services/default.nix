@@ -5,6 +5,7 @@
     ./babybuddy
     ./caddy
     ./dell-idrac-fan-controller
+    ./grafana
     ./immich
     ./ittools
     ./jobscraper

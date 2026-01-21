@@ -36,6 +36,11 @@
       sopsFile = ./../../secrets/heartbeat-server.yaml;
     };
 
+    "grafana-authentik-client-secret" = {
+      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      owner = "grafana";
+    };
+
     "jobscraper-env" = {
       sopsFile = ./../../secrets/heartbeat-server.yaml;
     };
