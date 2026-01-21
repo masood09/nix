@@ -67,20 +67,32 @@ in {
       };
     };
 
-    # Make systemd enforce the mount is present
-    systemd.services.tailscaled = lib.mkIf (cfg.enable && cfg.zfs.enable) {
-      unitConfig = {
-        RequiresMountsFor = [cfg.dataDir];
-      };
+    # Service hardening + mount ordering
+    systemd = {
+      services.tailscaled = lib.mkMerge [
+        {
+          # Unit-level ordering / mount requirements
+          unitConfig = {
+            RequiresMountsFor = [cfg.dataDir];
+          };
+        }
 
-      requires = ["zfs-dataset-tailscale.service"];
-      after = ["zfs-dataset-tailscale.service"];
-    };
-
-    environment.persistence."/nix/persist" = lib.mkIf (!homelabCfg.isRootZFS && cfg.enable && !cfg.zfs.enable) {
-      directories = [
-        cfg.dataDir
+        (lib.mkIf cfg.zfs.enable {
+          requires = ["zfs-dataset-tailscale.service"];
+          after = ["zfs-dataset-tailscale.service"];
+        })
       ];
     };
+
+    environment.persistence."/nix/persist" =
+      lib.mkIf (
+        !homelabCfg.isRootZFS
+        && cfg.enable
+        && !cfg.zfs.enable
+      ) {
+        directories = [
+          cfg.dataDir
+        ];
+      };
   };
 }

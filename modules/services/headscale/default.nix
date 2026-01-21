@@ -115,7 +115,7 @@ in {
 
     # Service hardening + mount ordering
     systemd = {
-      services.uptime-kuma = lib.mkMerge [
+      services.headscale = lib.mkMerge [
         {
           # Unit-level ordering / mount requirements
           unitConfig = {
@@ -124,8 +124,8 @@ in {
         }
 
         (lib.mkIf headscaleCfg.zfs.enable {
-          requires = ["zfs-dataset-uptime-kuma.service"];
-          after = ["zfs-dataset-uptime-kuma.service"];
+          requires = ["zfs-dataset-headscale.service"];
+          after = ["zfs-dataset-headscale.service"];
         })
       ];
 
