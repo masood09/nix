@@ -135,7 +135,6 @@
       nastest = mkNixOSConfig ./machines/nastest;
 
       pve-monitoring = mkNixOSConfig ./machines/pve-monitoring/configuration.nix;
-      pve-proxy = mkNixOSConfig ./machines/pve-proxy/configuration.nix;
 
       nixiso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
