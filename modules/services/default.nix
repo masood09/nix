@@ -6,6 +6,7 @@
     ./caddy
     ./immich
     ./ittools
+    ./jobscraper
     ./headscale
     ./loki
     ./minio

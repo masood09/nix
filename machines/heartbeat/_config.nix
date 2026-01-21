@@ -39,6 +39,10 @@
         enable = true;
       };
 
+      jobscraper = {
+        enable = true;
+      };
+
       loki = {
         enable = true;
 
