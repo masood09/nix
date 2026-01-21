@@ -137,11 +137,36 @@ in {
             working_directory = lokiPath "compactor";
             retention_enabled = true;
             retention_delete_worker_count = 10;
+            retention_delete_delay = "2h";
             delete_request_store = "filesystem";
           };
 
           limits_config = {
-            retention_period = "30d";
+            # Default for anything that doesn't match a retention_stream selector
+            retention_period = "240h"; # 10d
+
+            retention_stream = [
+              {
+                selector = "{level=\"debug\"}";
+                priority = 40;
+                period   = "24h";  # 1d
+              }
+              {
+                selector = "{level=\"info\"}";
+                priority = 30;
+                period   = "240h"; # 10d (optional since it's the default)
+              }
+              {
+                selector = "{level=\"warn\"}";
+                priority = 20;
+                period   = "720h"; # 30d
+              }
+              {
+                selector = "{level=\"error\"}";
+                priority = 10;
+                period   = "1440h"; # 60d
+              }
+            ];
           };
 
           ingester = {
