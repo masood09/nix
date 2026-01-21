@@ -149,7 +149,7 @@ in {
 
     # Service hardening + mount ordering
     systemd = {
-      services.immich-server = lib.mkMerge [
+      services.vaultwarden = lib.mkMerge [
         {
           # Unit-level ordering / mount requirements
           unitConfig = {
@@ -158,8 +158,8 @@ in {
         }
 
         (lib.mkIf vaultwardenCfg.zfs.enable {
-          requires = ["zfs-dataset-immich.service"];
-          after = ["zfs-dataset-immich.service"];
+          requires = ["zfs-dataset-vaultwarden.service"];
+          after = ["zfs-dataset-vaultwarden.service"];
         })
       ];
 
