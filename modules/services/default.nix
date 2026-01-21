@@ -6,6 +6,7 @@
     ./caddy
     ./immich
     ./headscale
+    ./loki
     ./minio
     ./podman
     ./postgresql

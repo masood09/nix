@@ -35,6 +35,14 @@
         };
       };
 
+      loki = {
+        enable = true;
+
+        zfs = {
+          enable = true;
+        };
+      };
+
       podman = {
         enable = true;
 
