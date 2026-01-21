@@ -32,6 +32,10 @@
       owner = "caddy";
     };
 
+    "dell-idrac-fan-controller-env" = {
+      sopsFile = ./../../secrets/heartbeat-server.yaml;
+    };
+
     "jobscraper-env" = {
       sopsFile = ./../../secrets/heartbeat-server.yaml;
     };
