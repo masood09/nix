@@ -29,8 +29,8 @@ in {
 
   config = lib.mkIf (ittoolsCfg.enable && podmanEnabled) {
     virtualisation.oci-containers.containers.ittools = {
-      # renovate: datasource=docker depName=ghcr.io/corentinth/it-tools
-      image = "ghcr.io/corentinth/it-tools:2024.5.13-a0bc346";
+      # renovate: datasource=docker depName=corentinth/it-tools
+      image = "corentinth/it-tools:2024.5.13-a0bc346";
       autoStart = true;
 
       ports = [
