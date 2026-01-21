@@ -8,9 +8,9 @@
   postgresqlCfg = homelabCfg.services.postgresql;
   backupCfg = postgresqlCfg.backup;
 in {
-  imports = [
-    ./alloy.nix
-  ];
+  # imports = [
+    # ./alloy.nix
+  # ];
 
   options.homelab.services.postgresql = {
     enable = lib.mkEnableOption "Whether to enable PostgreSQL database.";
