@@ -27,6 +27,10 @@
         enable = true;
       };
 
+      dell-idrac-fan-controller = {
+        enable = true;
+      };
+
       immich = {
         enable = true;
 
