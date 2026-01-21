@@ -31,6 +31,11 @@ in {
                 value = "100.64.0.23";
               }
               {
+                name = "jobscraper.mantannest.com";
+                type = "A";
+                value = "100.64.0.23";
+              }
+              {
                 name = "loki.mantannest.com";
                 type = "A";
                 value = "100.64.0.23";
