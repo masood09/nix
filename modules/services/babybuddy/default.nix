@@ -86,10 +86,6 @@ in {
       image = "lscr.io/linuxserver/babybuddy:2.7.1";
       autoStart = true;
 
-      extraOptions = [
-        "--cap-add=CAP_NET_RAW"
-      ];
-
       volumes = [
         "${toString babybuddyCfg.dataDir}:/config"
       ];
