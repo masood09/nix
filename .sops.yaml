@@ -7,22 +7,14 @@ keys:
     age1xgqt4c8v3uv0yeq5mfdj32ecy7qgzm65gg3qgtqprr6vg5aedgxqzh20lc
   - &heartbeat
     age1r84yxudulk0jgdtgcmu0qx79ztuxzrzrk4jl5s9n52x4874q35cqzu4enh
-  - &nastest
-    age1m24xcey4jcvyjncz4krmzwy9m6efqvr0jrzdjxfxg8fsalt83cqqpwnz3j
   - &murderbot
     age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
   - &caretaker
     age1gqvw59226drpwn8942x55jcf5zca5gfupj9eppmeagfevx3pupzs78dfs6
   - &failsafeunit
     age14vkyvuykxaceu3hwmwf5uscs54prr507vvgejwjcmp4taq0klcsqzkdsuu
-  - &pve-app-1
-    age1vs8ffqtt3hfdtur82tv59z6kfwf27nk4e46nrkrj79jcmuxdsy2sag38sf
-  - &pve-database
-    age1m72xl459t3rws9y9m8ks2madx64f86dde33www6fqpnd6h4lec2skhlwxd
   - &pve-monitoring
     age1trh5rr42turkhzcxyxfv3ana72htqlevdglnsdyhn9e3atct7vpshyg87q
-  - &pve-proxy
-    age16fd6tkmtpqy9kg04s0amn37mdj2vp0p7fngalu3244kw589x9qvqfnw62q
 
 creation_rules:
   - path_regex: secrets/secrets\.yaml$
@@ -32,14 +24,10 @@ creation_rules:
           - *meshcontrol
           - *watchfulsystem
           - *heartbeat
-          - *nastest
           - *murderbot
           - *caretaker
           - *failsafeunit
-          - *pve-app-1
-          - *pve-database
           - *pve-monitoring
-          - *pve-proxy
 
   - path_regex: secrets/accesscontrolsystem-server\.yaml$
     key_groups:
@@ -76,18 +64,6 @@ creation_rules:
       - age:
         - *murderbot
         - *failsafeunit
-
-  - path_regex: secrets/pve-app-1\.yaml$
-    key_groups:
-      - age:
-        - *murderbot
-        - *pve-app-1
-
-  - path_regex: secrets/pve-database\.yaml$
-    key_groups:
-      - age:
-        - *murderbot
-        - *pve-database
 
   - path_regex: secrets/pve-monitoring\.yaml$
     key_groups:
