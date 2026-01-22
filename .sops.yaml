@@ -13,8 +13,6 @@ keys:
     age1gqvw59226drpwn8942x55jcf5zca5gfupj9eppmeagfevx3pupzs78dfs6
   - &failsafeunit
     age14vkyvuykxaceu3hwmwf5uscs54prr507vvgejwjcmp4taq0klcsqzkdsuu
-  - &pve-monitoring
-    age1trh5rr42turkhzcxyxfv3ana72htqlevdglnsdyhn9e3atct7vpshyg87q
 
 creation_rules:
   - path_regex: secrets/secrets\.yaml$
@@ -27,7 +25,6 @@ creation_rules:
           - *murderbot
           - *caretaker
           - *failsafeunit
-          - *pve-monitoring
 
   - path_regex: secrets/accesscontrolsystem-server\.yaml$
     key_groups:
@@ -64,12 +61,6 @@ creation_rules:
       - age:
         - *murderbot
         - *failsafeunit
-
-  - path_regex: secrets/pve-monitoring\.yaml$
-    key_groups:
-      - age:
-        - *murderbot
-        - *pve-monitoring
 
 stores:
   yaml:
