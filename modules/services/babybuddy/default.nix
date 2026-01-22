@@ -30,7 +30,7 @@ in {
     };
 
     listenPort = lib.mkOption {
-      default = 8804;
+      default = 8903;
       type = lib.types.port;
     };
 
