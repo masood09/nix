@@ -14,6 +14,7 @@
     ./minio
     ./podman
     ./postgresql
+    ./prometheus
     ./restic
     ./ssh
     ./tailscale

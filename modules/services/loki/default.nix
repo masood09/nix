@@ -194,8 +194,7 @@ in {
                 # Everything else requires basic auth
                 handle {
                   basicauth {
-                    # username is whatever you want; password is a bcrypt hash in SOPS
-                    qxjKhLQhXXXRsYWO {$LOKI_BCRYPT}
+                    {$LOKI_USERNAME} {$LOKI_BCRYPT}
                   }
                   reverse_proxy http://${lokiCfg.listenAddress}:${toString lokiCfg.listenPort}
                 }
