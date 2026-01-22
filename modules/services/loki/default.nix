@@ -150,22 +150,22 @@ in {
               {
                 selector = "{level=\"debug\"}";
                 priority = 40;
-                period   = "24h";  # 1d
+                period = "24h"; # 1d
               }
               {
                 selector = "{level=\"info\"}";
                 priority = 30;
-                period   = "240h"; # 10d (optional since it's the default)
+                period = "240h"; # 10d (optional since it's the default)
               }
               {
                 selector = "{level=\"warn\"}";
                 priority = 20;
-                period   = "720h"; # 30d
+                period = "720h"; # 30d
               }
               {
                 selector = "{level=\"error\"}";
                 priority = 10;
-                period   = "1440h"; # 60d
+                period = "1440h"; # 60d
               }
             ];
           };
