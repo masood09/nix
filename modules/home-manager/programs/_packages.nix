@@ -30,6 +30,7 @@ in {
         opentofu
         restic
         statix
+        awscli2
 
         # Fonts
         julia-mono
