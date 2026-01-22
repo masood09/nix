@@ -261,6 +261,7 @@ in {
       tmpfiles.rules = [
         # Ensure base dir exists and is owned correctly
         "d ${lokiDataDir} 0700 loki loki -"
+        "z ${lokiDataDir} 0700 loki loki -"
       ];
     };
 
