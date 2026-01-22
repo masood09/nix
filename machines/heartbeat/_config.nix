@@ -88,6 +88,11 @@
         };
       };
 
+      prometheus = {
+        enable = true;
+        zfs.enable = true;
+      };
+
       restic = {
         enable = true;
         s3Enable = true;
