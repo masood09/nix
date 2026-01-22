@@ -194,7 +194,16 @@ in {
           "${garageCfg.s3Domain}" = {
             useACMEHost = garageCfg.s3Domain;
             extraConfig = ''
-              reverse_proxy http://127.0.0.1:${toString garageCfg.s3.port}
+              route {
+                handle /-/health {
+                  rewrite * /health
+                  reverse_proxy http://127.0.0.1:${toString garageCfg.admin.port}
+                }
+
+                handle {
+                  reverse_proxy http://127.0.0.1:${toString garageCfg.s3.port}
+                }
+              }
             '';
           };
         };
