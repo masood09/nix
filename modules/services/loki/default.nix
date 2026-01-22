@@ -193,7 +193,7 @@ in {
 
                 # Everything else requires basic auth
                 handle {
-                  basicauth {
+                  basic_auth {
                     {$LOKI_USERNAME} {$LOKI_BCRYPT}
                   }
                   reverse_proxy http://${lokiCfg.listenAddress}:${toString lokiCfg.listenPort}
