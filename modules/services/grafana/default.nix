@@ -187,6 +187,7 @@ in {
 
       tmpfiles.rules = [
         # Ensure base dir exists and is owned correctly
+        "d ${grafanaDataDir} 0700 grafana grafana -"
         "z ${grafanaDataDir} 0700 grafana grafana -"
       ];
     };
