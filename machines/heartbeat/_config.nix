@@ -31,6 +31,14 @@
         enable = true;
       };
 
+      garage = {
+        enable = true;
+
+        zfs = {
+          enable = true;
+        };
+      };
+
       grafana = {
         enable = true;
 
