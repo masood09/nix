@@ -1,5 +1,0 @@
-{
-  imports = [
-    ./_minio.nix
-  ];
-}

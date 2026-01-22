@@ -11,8 +11,6 @@ keys:
     age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
   - &caretaker
     age1gqvw59226drpwn8942x55jcf5zca5gfupj9eppmeagfevx3pupzs78dfs6
-  - &failsafeunit
-    age14vkyvuykxaceu3hwmwf5uscs54prr507vvgejwjcmp4taq0klcsqzkdsuu
 
 creation_rules:
   - path_regex: secrets/secrets\.yaml$
@@ -24,7 +22,6 @@ creation_rules:
           - *heartbeat
           - *murderbot
           - *caretaker
-          - *failsafeunit
 
   - path_regex: secrets/accesscontrolsystem-server\.yaml$
     key_groups:
@@ -55,12 +52,6 @@ creation_rules:
       - age:
         - *murderbot
         - *caretaker
-
-  - path_regex: secrets/failsafeunit\.yaml$
-    key_groups:
-      - age:
-        - *murderbot
-        - *failsafeunit
 
 stores:
   yaml:

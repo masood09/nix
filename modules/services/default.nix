@@ -12,7 +12,6 @@
     ./jobscraper
     ./headscale
     ./loki
-    ./minio
     ./podman
     ./postgresql
     ./prometheus

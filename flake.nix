@@ -97,8 +97,6 @@
           inputs.authentik-nix.nixosModules.default
           inputs.impermanence.nixosModules.impermanence
 
-          ./config/homelab
-
           path
         ];
       };
@@ -131,7 +129,6 @@
       heartbeat = mkNixOSConfig ./machines/heartbeat;
 
       caretaker = mkNixOSConfig ./machines/caretaker/configuration.nix;
-      failsafeunit = mkNixOSConfig ./machines/failsafeunit;
 
       nixiso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
