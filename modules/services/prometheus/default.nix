@@ -87,7 +87,7 @@ in {
 
                 # Everything else requires basic auth
                 handle {
-                  basicauth {
+                  basic_auth {
                     {$PROMETHEUS_USERNAME} {$PROMETHEUS_BCRYPT}
                   }
                   reverse_proxy http://127.0.0.1:${toString config.services.prometheus.port}
