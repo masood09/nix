@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   homelabCfg = config.homelab;
@@ -219,19 +220,43 @@ in {
 
     # Service hardening + mount ordering
     systemd = {
-      services.loki = lib.mkMerge [
-        {
-          # Unit-level ordering / mount requirements
-          unitConfig = {
-            RequiresMountsFor = [lokiDataDir];
-          };
-        }
+      services = {
+        loki = lib.mkMerge [
+          {
+            # Unit-level ordering / mount requirements
+            unitConfig = {
+              RequiresMountsFor = [lokiDataDir];
+            };
 
-        (lib.mkIf lokiCfg.zfs.enable {
-          requires = ["zfs-dataset-loki.service"];
-          after = ["zfs-dataset-loki.service"];
-        })
-      ];
+            requires = ["loki-permissions.service"];
+            after = ["loki-permissions.service"];
+          }
+
+          (lib.mkIf lokiCfg.zfs.enable {
+            requires = ["zfs-dataset-loki.service"];
+            after = ["zfs-dataset-loki.service"];
+          })
+        ];
+
+        loki-permissions = {
+          description = "Fix Loki dataDir ownership/permissions";
+          wantedBy = ["multi-user.target"];
+          before = ["loki.service"];
+          after =
+            ["local-fs.target"]
+            ++ lib.optionals lokiCfg.zfs.enable ["zfs-dataset-loki.service"];
+          requires =
+            lib.optionals lokiCfg.zfs.enable ["zfs-dataset-loki.service"];
+
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = ''
+              ${pkgs.coreutils}/bin/install -d -m 0700 -o loki -g loki ${lokiDataDir}
+            '';
+          };
+        };
+      };
 
       tmpfiles.rules = [
         # Ensure base dir exists and is owned correctly
