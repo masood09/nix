@@ -8,6 +8,7 @@
   grafanaCfg = homelabCfg.services.grafana;
   caddyEnabled = config.services.caddy.enable;
   lokiCfg = homelabCfg.services.loki;
+  prometheusEnabled = config.services.prometheus.enable;
 
   grafanaDataDir = lib.removeSuffix "/" (toString grafanaCfg.dataDir);
 in {
@@ -90,14 +91,23 @@ in {
         provision = {
           enable = true;
 
-          datasources.settings.datasources = lib.optionals lokiCfg.enable [
-            {
-              name = "Loki";
-              type = "loki";
-              access = "proxy";
-              url = "http://127.0.0.1:${toString lokiCfg.listenPort}";
-            }
-          ];
+          datasources.settings.datasources =
+            lib.optionals lokiCfg.enable [
+              {
+                name = "Loki";
+                type = "loki";
+                access = "proxy";
+                url = "http://127.0.0.1:${toString lokiCfg.listenPort}";
+              }
+            ]
+            ++ lib.optionals prometheusEnabled [
+              {
+                name = "Prometheus";
+                type = "prometheus";
+                access = "proxy";
+                url = "http://127.0.0.1:${toString config.services.prometheus.port}";
+              }
+            ];
         };
 
         settings = {
