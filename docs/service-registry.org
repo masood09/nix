@@ -31,6 +31,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | vaultwarden | 3003 | 3003 |
 | babybuddy   | 3004 | 3004 |
 | loki        | 3005 | 3005 |
+| garage      | 3006 | 3006 |
 
 
 * Port Registry
@@ -43,6 +44,11 @@ This file should be consulted *before* adding any new service, container, or sys
 | Uptime-Kuma                  | 3001 |
 | Immich (Machine Learning)    | 3003 |
 | Loki                         | 3100 |
+| Garage (S3 API)              | 3900 |
+| Garage (RPC)                 | 3901 |
+| Garage (S3 Web)              | 3902 |
+| Garage (Admin/Metrics)       | 3903 |
+| Garage (K2 API)              | 3904 |
 | Headscale                    | 8080 |
 | Vaultwarden                  | 8222 |
 | IT-Tools                     | 8901 |

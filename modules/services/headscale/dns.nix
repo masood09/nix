@@ -61,6 +61,11 @@ in {
                 value = "100.64.0.23";
               }
               {
+                name = "s3.mantannest.com";
+                type = "A";
+                value = "100.64.0.23";
+              }
+              {
                 name = "keep.mantannest.com";
                 type = "A";
                 value = "100.64.0.13";
