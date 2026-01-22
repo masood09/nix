@@ -133,8 +133,6 @@
       caretaker = mkNixOSConfig ./machines/caretaker/configuration.nix;
       failsafeunit = mkNixOSConfig ./machines/failsafeunit;
 
-      pve-monitoring = mkNixOSConfig ./machines/pve-monitoring/configuration.nix;
-
       nixiso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {inherit inputs outputs;};
