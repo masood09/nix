@@ -59,6 +59,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | Karakeep                     | 8904 |
 | Authentik                    | 9000 |
 | Prometheus                   | 9090 |
+| Headscale (Metrics)          | 9091 |
 | prometheus-zfs-exporter      | 9134 |
 | prometheus-postgres-exporter | 9187 |
 | google-chrome-stable         | 9222 |
