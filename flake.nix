@@ -126,9 +126,8 @@
       meshcontrol = mkNixOSConfig ./machines/meshcontrol;
       watchfulsystem = mkNixOSConfig ./machines/watchfulsystem;
 
+      caretaker = mkNixOSConfig ./machines/caretaker;
       heartbeat = mkNixOSConfig ./machines/heartbeat;
-
-      caretaker = mkNixOSConfig ./machines/caretaker/configuration.nix;
 
       nixiso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
