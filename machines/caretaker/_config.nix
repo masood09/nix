@@ -9,6 +9,10 @@
     };
 
     services = {
+      blocky = {
+        enable = true;
+      };
+
       tailscale = {
         enable = true;
       };

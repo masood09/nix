@@ -3,6 +3,7 @@
     ./alloy
     ./authentik
     ./babybuddy
+    ./blocky
     ./caddy
     ./dell-idrac-fan-controller
     ./garage
