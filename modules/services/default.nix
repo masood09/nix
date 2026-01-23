@@ -7,10 +7,11 @@
     ./dell-idrac-fan-controller
     ./garage
     ./grafana
+    ./headscale
     ./immich
     ./ittools
     ./jobscraper
-    ./headscale
+    ./karakeep
     ./loki
     ./podman
     ./postgresql

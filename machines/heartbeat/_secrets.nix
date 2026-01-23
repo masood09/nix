@@ -49,6 +49,11 @@
       sopsFile = ./../../secrets/heartbeat-server.yaml;
     };
 
+    "karakeep-env" = {
+      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      owner = "karakeep";
+    };
+
     "vaultwarden-env" = {
       sopsFile = ./../../secrets/heartbeat-server.yaml;
     };

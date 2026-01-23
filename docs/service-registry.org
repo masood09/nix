@@ -32,6 +32,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | babybuddy   | 3004 | 3004 |
 | loki        | 3005 | 3005 |
 | garage      | 3006 | 3006 |
+| karakeep    | 3007 | 3007 |
 
 
 * Port Registry
@@ -49,14 +50,17 @@ This file should be consulted *before* adding any new service, container, or sys
 | Garage (S3 Web)              | 3902 |
 | Garage (Admin/Metrics)       | 3903 |
 | Garage (K2 API)              | 3904 |
+| Meilisearch                  | 7700 |
 | Headscale                    | 8080 |
 | Vaultwarden                  | 8222 |
 | IT-Tools                     | 8901 |
 | Job Scraper                  | 8902 |
 | Baby Buddy                   | 8903 |
+| Karakeep                     | 8904 |
 | Authentik                    | 9000 |
 | Prometheus                   | 9090 |
 | prometheus-zfs-exporter      | 9134 |
 | prometheus-postgres-exporter | 9187 |
-| Authentik (Embedded Outpost) | 9300 |
+| google-chrome-stable         | 9222 |
+| Authentik (Metric)           | 9300 |
 | Authentik (Built-in HTTPS)   | 9443 |

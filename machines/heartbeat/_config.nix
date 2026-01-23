@@ -63,6 +63,12 @@
         enable = true;
       };
 
+      karakeep = {
+        enable = true;
+
+        zfs.enable = true;
+      };
+
       loki = {
         enable = true;
 
