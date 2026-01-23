@@ -8,24 +8,16 @@
   postgresqlEnabled = config.homelab.services.postgresql.enable;
   postgresqlBackupEnabled = config.homelab.services.postgresql.backup.enable;
 in {
+  imports = [
+    ./alloy.nix
+  ];
+
   options.homelab.services.authentik = {
     enable = lib.mkEnableOption "Whether to enable Authentik.";
 
     webDomain = lib.mkOption {
       type = lib.types.str;
       default = "auth.mantannest.com";
-    };
-
-    listenPort = lib.mkOption {
-      default = 9001;
-      type = lib.types.port;
-      description = "The port of the authentik server.";
-    };
-
-    listenMetricsPort = lib.mkOption {
-      default = 9301;
-      type = lib.types.port;
-      description = "The port for metrics";
     };
   };
 
@@ -39,11 +31,6 @@ in {
         settings = {
           disable_startup_analytics = true;
           avatars = "initials";
-        };
-
-        worker = {
-          listenHTTP = "127.0.0.1:${toString config.homelab.services.authentik.listenPort}";
-          listenMetrics = "127.0.0.1:${toString config.homelab.services.authentik.listenMetricsPort}";
         };
       };
 
