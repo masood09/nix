@@ -125,6 +125,12 @@ in {
               url = "https://grafana.com/api/dashboards/1860/revisions/42/download";
               options.path = makeReadOnly ./dashboards/node-exporter-full.json;
             }
+            {
+              name = "PostgreSQL";
+              type = "file";
+              url = "https://grafana.com/api/dashboards/9628/revisions/8/download";
+              options.path = makeReadOnly ./dashboards/postgresql.json;
+            }
           ];
         };
 
