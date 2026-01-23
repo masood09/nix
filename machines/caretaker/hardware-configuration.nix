@@ -31,26 +31,12 @@
       };
     };
 
+    kernelParams = [
+      "ip=10.0.20.2::10.0.20.1:255.255.255.0:${config.homelab.networking.hostName}:enp1s0:"
+    ];
+
     kernelModules = ["kvm-intel"];
     extraModulePackages = [];
-  };
-
-  fileSystems = {
-    "/" = {
-      device = "none";
-      fsType = "tmpfs";
-      options = ["defaults" "size=20G" "mode=0755"];
-    };
-    "/boot" = {
-      device = "/dev/nvme0n1p1";
-      fsType = "vfat";
-      options = ["umask=0077"];
-      neededForBoot = true;
-    };
-    "/nix" = {
-      device = "/dev/mapper/cryptroot";
-      fsType = "ext4";
-    };
   };
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

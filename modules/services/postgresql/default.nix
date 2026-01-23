@@ -9,7 +9,7 @@
   backupCfg = postgresqlCfg.backup;
 in {
   # imports = [
-    # ./alloy.nix
+  # ./alloy.nix
   # ];
 
   options.homelab.services.postgresql = {
