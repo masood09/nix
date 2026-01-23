@@ -108,6 +108,24 @@ in {
                 url = "http://127.0.0.1:${toString config.services.prometheus.port}";
               }
             ];
+
+          dashboards.settings.providers = let
+            makeReadOnly = x:
+              lib.pipe x [
+                builtins.readFile
+                builtins.fromJSON
+                (x: x // {editable = false;})
+                builtins.toJSON
+                (pkgs.writeText (builtins.baseNameOf x))
+              ];
+          in [
+            {
+              name = "Node Exporter Full";
+              type = "file";
+              url = "https://grafana.com/api/dashboards/1860/revisions/42/download";
+              options.path = makeReadOnly ./dashboards/node-exporter-full.json;
+            }
+          ];
         };
 
         settings = {
