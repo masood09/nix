@@ -1,0 +1,90 @@
+#+TITLE: Restoring Karakeep Data from Restic Backup
+#+AUTHOR: Masood Ahmed
+#+OPTIONS: toc:nil num:nil
+
+This document describes a *safe, repeatable procedure* for restoring the
+Karakeep data files from Restic backups staged via =/mnt/nightly_backup=.
+
+The workflow:
+- Verifies available backups
+- Restores data to a temporary location
+- Stops Karakeep services
+- Restores data files with correct permissions
+- Restarts service cleanly
+
+* Backup Information
+
+- Data path: =/var/lib/karakeep=
+
+* Verify Available Snapshots
+
+Confirm the snapshot you intend to restore:
+
+#+begin_src bash
+sudo restic-s3-backup snapshots
+#+end_src
+
+* Restore the Latest Snapshot to a Temporary Location
+
+Restore the Karakeep data into =/tmp=:
+
+#+begin_src bash
+sudo restic-s3-backup restore latest \
+  --include /mnt/nightly_backup/karakeep \
+  --target /tmp
+#+end_src
+
+This will create the following directory structure:
+
+#+begin_example
+/tmp/mnt/nightly_backup/karakeep
+#+end_example
+
+* Stop Karakeep Service
+
+Stop Karakeep service before restoring the data:
+
+#+begin_src bash
+sudo systemctl stop karakeep.service
+#+end_src
+
+* Clear the Existing Data Directory
+
+Remove all existing contents while preserving the directory itself:
+
+#+begin_src bash
+sudo find /var/lib/karakeep -mindepth 1 -delete
+#+end_src
+
+This approach is:
+- Shell-agnostic (bash/zsh)
+- Safe even if the directory is already empty
+
+* Restore Data Files
+
+Copy the restored data into the live directory:
+
+#+begin_src bash
+sudo rsync -a --delete \
+  /tmp/mnt/nightly_backup/karakeep/ \
+  /var/lib/karakeep/
+#+end_src
+
+Fix ownership so the service can read and write all files:
+
+#+begin_src bash
+sudo chown -R karakeep:karakeep /var/lib/karakeep
+#+end_src
+
+* Start Karakeep Service
+
+Restart the Karakeep service:
+
+#+begin_src bash
+sudo systemctl start karakeep.service
+#+end_src
+
+* Notes & Best Practices
+
+- Always stop the Karakeep service before restoring the datab.
+- Consider taking a *ZFS snapshot* of the Karakeep data directory before restoring for quick rollback.
