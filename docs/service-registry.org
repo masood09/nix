@@ -40,6 +40,7 @@ This file should be consulted *before* adding any new service, container, or sys
 ** Services
 | Service                      | Port |
 |------------------------------+------|
+| Blocky (DNS)                 |   53 |
 | Immich (Server)              | 2283 |
 | Grafana                      | 3000 |
 | Uptime-Kuma                  | 3001 |
@@ -50,6 +51,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | Garage (S3 Web)              | 3902 |
 | Garage (Admin/Metrics)       | 3903 |
 | Garage (K2 API)              | 3904 |
+| Blocky (Metrics)             | 4000 |
 | Meilisearch                  | 7700 |
 | Headscale                    | 8080 |
 | Vaultwarden                  | 8222 |
