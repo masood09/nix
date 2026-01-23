@@ -9,6 +9,7 @@
 in {
   imports = [
     ./acl.nix
+    ./alloy.nix
     ./dns.nix
     ./oidc.nix
   ];
@@ -29,6 +30,11 @@ in {
     adminUser = lib.mkOption {
       type = lib.types.str;
       default = "admin@ahmedmasood.com";
+    };
+
+    metricsPort = lib.mkOption {
+      default = 9091;
+      type = lib.types.port;
     };
 
     oidc = {
@@ -94,6 +100,7 @@ in {
         settings = {
           logtail.enabled = false;
           server_url = "https://${headscaleCfg.webDomain}";
+          metrics_listen_addr = "127.0.0.1:${toString headscaleCfg.metricsPort}";
         };
       };
 
