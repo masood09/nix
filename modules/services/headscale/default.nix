@@ -9,7 +9,6 @@
 in {
   imports = [
     ./acl.nix
-    ./alloy.nix
     ./dns.nix
     ./oidc.nix
   ];
