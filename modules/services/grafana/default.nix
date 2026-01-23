@@ -120,18 +120,6 @@ in {
               ];
           in [
             {
-              name = "Authentik";
-              type = "file";
-              url = "https://grafana.com/api/dashboards/14837/revisions/2/download";
-              options.path = makeReadOnly ./dashboards/authentik.json;
-            }
-            {
-              name = "Blocky";
-              type = "file";
-              url = "https://grafana.com/api/dashboards/13768/revisions/6/download";
-              options.path = makeReadOnly ./dashboards/blocky.json;
-            }
-            {
               name = "Node Exporter Full";
               type = "file";
               url = "https://grafana.com/api/dashboards/1860/revisions/42/download";
