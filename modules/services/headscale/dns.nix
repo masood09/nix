@@ -32,6 +32,11 @@ in {
                 value = "100.64.0.23";
               }
               {
+                name = "drive.mantannest.com";
+                type = "A";
+                value = "100.64.0.23";
+              }
+              {
                 name = "grafana.mantannest.com";
                 type = "A";
                 value = "100.64.0.23";
