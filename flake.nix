@@ -65,8 +65,7 @@
     catppuccin.url = "github:catppuccin/nix/release-25.11";
 
     authentik-nix = {
-      # url = "github:nix-community/authentik-nix";
-      url = "github:Pentusha/authentik-nix";
+      url = "github:nix-community/authentik-nix";
     };
   };
 
