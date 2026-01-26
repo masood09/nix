@@ -9,6 +9,14 @@
     };
 
     services = {
+      podman = {
+        enable = true;
+
+        zfs = {
+          enable = true;
+        };
+      };
+
       tailscale = {
         enable = true;
 
