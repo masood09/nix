@@ -10,6 +10,12 @@
       sopsFile = ./../../secrets/meshcontrol-server.yaml;
     };
 
+    "headscale-extra-records.json" = {
+      owner = "headscale";
+      sopsFile = ./../../secrets/headscale-dns.yaml;
+      restartUnits = ["headscale.service"];
+    };
+
     "restic-env" = {
       sopsFile = ./../../secrets/meshcontrol-server.yaml;
     };
