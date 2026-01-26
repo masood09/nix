@@ -9,6 +9,21 @@
     };
 
     services = {
+      acme = {
+        zfs = {
+          enable = true;
+        };
+      };
+
+      caddy = {
+        enable = true;
+      };
+
+      opencloud = {
+        enable = true;
+        webDomain = "cloud.test.mantannest.com";
+      };
+
       podman = {
         enable = true;
 

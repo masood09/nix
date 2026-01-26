@@ -1,5 +1,9 @@
 {
   config.sops.secrets = {
+    "cloudflare-api-key" = {
+      restartUnits = ["acme-setup.service"];
+    };
+
     "headscale-preauth-key" = {};
     "discord-zfs-webhook" = {};
 
