@@ -5,12 +5,14 @@ keys:
     age1knvvq7pkyyf0c3qsn5thssg2wg3yzvaay9ewxyqzc3gd8xlctyas7jfz3r
   - &watchfulsystem
     age1xgqt4c8v3uv0yeq5mfdj32ecy7qgzm65gg3qgtqprr6vg5aedgxqzh20lc
-  - &heartbeat
-    age1r84yxudulk0jgdtgcmu0qx79ztuxzrzrk4jl5s9n52x4874q35cqzu4enh
-  - &murderbot
-    age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
   - &caretaker
     age1gqvw59226drpwn8942x55jcf5zca5gfupj9eppmeagfevx3pupzs78dfs6
+  - &heartbeat
+    age1r84yxudulk0jgdtgcmu0qx79ztuxzrzrk4jl5s9n52x4874q35cqzu4enh
+  - &trialunit
+    age1pcju0zkh2k3f8m7856k9ftzkjqw538jf255t2azusf9yr6v2nqksfn2pwa
+  - &murderbot
+    age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
 
 creation_rules:
   - path_regex: secrets/secrets\.yaml$
@@ -19,9 +21,10 @@ creation_rules:
           - *accesscontrolsystem
           - *meshcontrol
           - *watchfulsystem
-          - *heartbeat
-          - *murderbot
           - *caretaker
+          - *heartbeat
+          - *trialunit
+          - *murderbot
 
   - path_regex: secrets/accesscontrolsystem-server\.yaml$
     key_groups:
@@ -47,17 +50,23 @@ creation_rules:
         - *murderbot
         - *watchfulsystem
 
+  - path_regex: secrets/caretaker\.yaml$
+    key_groups:
+      - age:
+        - *murderbot
+        - *caretaker
+
   - path_regex: secrets/heartbeat-server\.yaml$
     key_groups:
       - age:
         - *heartbeat
         - *murderbot
 
-  - path_regex: secrets/caretaker\.yaml$
+  - path_regex: secrets/trialunit-server\.yaml$
     key_groups:
       - age:
+        - *trialunit
         - *murderbot
-        - *caretaker
 
 stores:
   yaml:

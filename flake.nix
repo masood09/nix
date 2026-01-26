@@ -125,6 +125,7 @@
 
       caretaker = mkNixOSConfig ./machines/caretaker;
       heartbeat = mkNixOSConfig ./machines/heartbeat;
+      trialunit = mkNixOSConfig ./machines/trialunit;
 
       nixiso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
