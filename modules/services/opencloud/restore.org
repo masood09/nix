@@ -1,0 +1,121 @@
+#+TITLE: Restoring Baby Buddy Database and Data from Restic Backup
+#+AUTHOR: Masood Ahmed
+#+OPTIONS: toc:nil num:nil
+
+This document describes a *safe, repeatable procedure* for restoring the
+Baby Buddy PostgreSQL database and data files from Restic backups staged
+via =/mnt/nightly_backup=.
+
+The workflow:
+- Verifies available backups
+- Restores database dump and data to a temporary location
+- Stops Baby Buddy service
+- Drops and restores the PostgreSQL database
+- Restarts service cleanly
+
+* Backup Information
+
+- Database: =babybuddy=
+- Database owner: =babybuddy=
+- Database engine: PostgreSQL
+- Data path: =/var/lib/babybuddy=
+
+* Verify Available Snapshots
+
+Confirm the snapshot you intend to restore:
+
+#+begin_src bash
+sudo restic-s3-backup snapshots
+#+end_src
+
+* Restore the Latest Snapshot to a Temporary Location
+
+Restore the PostgreSQL backup and Baby Buddy data into =/tmp=:
+
+#+begin_src bash
+sudo restic-s3-backup restore latest \
+  --include /mnt/nightly_backup/postgresql-backup/babybuddy.sql.gz \
+  --target /tmp
+
+sudo restic-s3-backup restore latest \
+  --include /mnt/nightly_backup/babybuddy \
+  --target /tmp
+#+end_src
+
+This will create the following directory structure:
+
+#+begin_example
+/tmp/mnt/nightly_backup/postgresql-backup/babybuddy.sql.gz
+/tmp/mnt/nightly_backup/babybuddy
+#+end_example
+
+* Stop Baby Buddy Service
+
+Stop Baby Buddy service before restoring the database:
+
+#+begin_src bash
+sudo systemctl stop podman-babybuddy.service
+#+end_src
+
+* Drop the Existing Database
+
+Remove the existing database before restoring from backup:
+
+#+begin_src bash
+sudo -u postgres psql -d postgres -c "DROP DATABASE babybuddy;"
+sudo systemctl restart postgresql
+#+end_src
+
+* Restore the Database
+
+Restore the database from the compressed SQL backup:
+
+#+begin_src bash
+sudo cp /tmp/mnt/nightly_backup/postgresql-backup/babybuddy.sql.gz /tmp/babybuddy.sql.gz
+sudo chmod 644 /tmp/babybuddy.sql.gz
+
+gunzip -c /tmp/babybuddy.sql.gz | psql -v ON_ERROR_STOP=1 -U babybuddy -d babybuddy
+#+end_src
+
+* Clear the Existing Data Directory
+
+Remove all existing contents while preserving the directory itself:
+
+#+begin_src bash
+sudo find /var/lib/babybuddy -mindepth 1 -delete
+#+end_src
+
+This approach is:
+- Shell-agnostic (bash/zsh)
+- Safe even if the directory is already empty
+
+* Restore Data Files
+
+Copy the restored data into the live directory:
+
+#+begin_src bash
+sudo rsync -a --delete \
+  /tmp/mnt/nightly_backup/babybuddy/ \
+  /var/lib/babybuddy/
+#+end_src
+
+Fix ownership so the service can read and write all files:
+
+#+begin_src bash
+sudo chown -R babybuddy:babybuddy /var/lib/babybuddy
+#+end_src
+
+* Start Baby Buddy Service
+
+Restart the Baby Buddy service:
+
+#+begin_src bash
+sudo systemctl start podman-babybuddy.service
+#+end_src
+
+* Notes & Best Practices
+
+- Always stop Baby Buddy service before restoring the database.
+- Use =ON_ERROR_STOP= to ensure restore failures abort immediately.
+- Consider taking a *ZFS snapshot* of the PostgreSQL data directory and
+  Baby Buddy data directory before restoring for quick rollback.

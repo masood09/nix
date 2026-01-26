@@ -33,6 +33,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | loki        | 3005 | 3005 |
 | garage      | 3006 | 3006 |
 | karakeep    | 3007 | 3007 |
+| opencloud   | 3008 | 3008 |
 
 
 * Port Registry
