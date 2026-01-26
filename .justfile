@@ -19,7 +19,7 @@ lint:
     statix check .
 
 fmt:
-    nix fmt .     
+    nix fmt .
 
 gc:
     sudo nix-collect-garbage -d && nix-collect-garbage -d

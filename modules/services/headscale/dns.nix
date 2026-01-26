@@ -20,68 +20,7 @@ in {
               ];
             };
 
-            extra_records = [
-              {
-                name = "babybuddy.homelab.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
-              }
-              {
-                name = "database.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
-              }
-              {
-                name = "drive.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
-              }
-              {
-                name = "grafana.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
-              }
-              {
-                name = "ittools.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
-              }
-              {
-                name = "jobscraper.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
-              }
-              {
-                name = "keep.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
-              }
-              {
-                name = "loki.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
-              }
-              {
-                name = "passwords.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
-              }
-              {
-                name = "photos.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
-              }
-              {
-                name = "prometheus.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
-              }
-              {
-                name = "s3.mantannest.com";
-                type = "A";
-                value = "100.64.0.23";
-              }
-            ];
+            extra_records_path = config.sops.secrets."headscale-extra-records.json".path;
           };
         };
       };

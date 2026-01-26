@@ -29,6 +29,12 @@ creation_rules:
         - *accesscontrolsystem
         - *murderbot
 
+  - path_regex: secrets/headscale-dns\.yaml$
+    key_groups:
+      - age:
+        - *meshcontrol
+        - *murderbot
+
   - path_regex: secrets/meshcontrol-server\.yaml$
     key_groups:
       - age:
