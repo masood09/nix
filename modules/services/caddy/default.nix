@@ -7,10 +7,6 @@
   caddyEnabled = homelabCfg.services.caddy.enable;
   acmeCfg = homelabCfg.services.acme;
 in {
-  # imports = [
-  #   ./alloy.nix
-  # ];
-
   options.homelab.services = {
     acme = {
       cloudflareAPIKeyPath = lib.mkOption {
