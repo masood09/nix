@@ -13,6 +13,7 @@
 in {
   imports = [
     ./options.nix
+    ./users.nix
   ];
 
   config = lib.mkIf (cfg.enable && podmanEnabled) {
