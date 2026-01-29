@@ -14,6 +14,7 @@ in {
           isSystemUser = true;
           group = "opencloud";
           uid = cfg.userId;
+          home = cfg.dataDir;
         };
       };
 
