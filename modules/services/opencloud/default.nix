@@ -13,6 +13,7 @@
 in {
   imports = [
     ./options.nix
+    ./systemd.nix
     ./users.nix
     ./zfs.nix
   ];
