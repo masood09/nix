@@ -14,6 +14,7 @@ in {
   imports = [
     ./options.nix
     ./users.nix
+    ./zfs.nix
   ];
 
   config = lib.mkIf (cfg.enable && podmanEnabled) {
