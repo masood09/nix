@@ -24,6 +24,8 @@ in {
             "zfs-dataset-opencloud-storage.service"
             "zfs-dataset-opencloud-storage-metadata.service"
             "zfs-dataset-opencloud-storage-users.service"
+            "podman-compose-opencloud-root.service"
+            "podman-opencloud-collabora.service"
           ];
         };
 
@@ -33,6 +35,11 @@ in {
           mountpoint = cfg.dataDir + "/etc";
           restic.enable = true;
           properties = cfg.zfs.etcProperties;
+
+          requiredBy = [
+            "podman-compose-opencloud-root.service"
+            "podman-opencloud-collabora.service"
+          ];
         };
 
         opencloud-idm = {
@@ -41,6 +48,11 @@ in {
           mountpoint = cfg.dataDir + "/idm";
           restic.enable = true;
           properties = cfg.zfs.idmProperties;
+
+          requiredBy = [
+            "podman-compose-opencloud-root.service"
+            "podman-opencloud-collabora.service"
+          ];
         };
 
         opencloud-nats = {
@@ -49,6 +61,11 @@ in {
           mountpoint = cfg.dataDir + "/nats";
           restic.enable = false;
           properties = cfg.zfs.natsProperties;
+
+          requiredBy = [
+            "podman-compose-opencloud-root.service"
+            "podman-opencloud-collabora.service"
+          ];
         };
 
         opencloud-search = {
@@ -57,6 +74,11 @@ in {
           mountpoint = cfg.dataDir + "/search";
           restic.enable = false;
           properties = cfg.zfs.searchProperties;
+
+          requiredBy = [
+            "podman-compose-opencloud-root.service"
+            "podman-opencloud-collabora.service"
+          ];
         };
 
         opencloud-storage = {
@@ -66,6 +88,8 @@ in {
           restic.enable = false;
 
           requiredBy = [
+            "podman-compose-opencloud-root.service"
+            "podman-opencloud-collabora.service"
             "zfs-dataset-opencloud-storage-metadata.service"
             "zfs-dataset-opencloud-storage-users.service"
           ];
@@ -77,6 +101,11 @@ in {
           mountpoint = cfg.dataDir + "/storage/metadata";
           restic.enable = true;
           properties = cfg.zfs.storageMetaProperties;
+
+          requiredBy = [
+            "podman-compose-opencloud-root.service"
+            "podman-opencloud-collabora.service"
+          ];
         };
 
         opencloud-storage-users = {
@@ -85,6 +114,11 @@ in {
           mountpoint = cfg.dataDir + "/storage/users";
           restic.enable = true;
           properties = cfg.zfs.userStorageProperties;
+
+          requiredBy = [
+            "podman-compose-opencloud-root.service"
+            "podman-opencloud-collabora.service"
+          ];
         };
       })
     ];

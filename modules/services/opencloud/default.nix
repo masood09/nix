@@ -12,6 +12,7 @@
   wopiWebDomain = "wopi.${cfg.webDomain}";
 in {
   imports = [
+    ./containers.nix
     ./options.nix
     ./systemd.nix
     ./users.nix

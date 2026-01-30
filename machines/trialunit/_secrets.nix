@@ -14,5 +14,10 @@
     "dpool_tank_key" = {
       sopsFile = ./../../secrets/trialunit-server.yaml;
     };
+
+    "opencloud-collabora.env" = {
+      owner = "opencloud";
+      sopsFile = ./../../secrets/trialunit-server.yaml;
+    };
   };
 }
