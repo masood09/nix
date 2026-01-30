@@ -16,7 +16,10 @@
     };
 
     "opencloud-collabora.env" = {
-      owner = "opencloud";
+      sopsFile = ./../../secrets/trialunit-server.yaml;
+    };
+
+    "opencloud-opencloud.env" = {
       sopsFile = ./../../secrets/trialunit-server.yaml;
     };
   };

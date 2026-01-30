@@ -26,7 +26,7 @@ in {
           "${cfg.webDomain}" = {
             useACMEHost = cfg.webDomain;
             extraConfig = ''
-              reverse_proxy http://127.0.0.1:9200
+              reverse_proxy http://127.0.0.1:${toString cfg.port}
             '';
           };
 
