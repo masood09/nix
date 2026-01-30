@@ -93,7 +93,7 @@ in {
         ];
 
         entrypoint = "/bin/bash";
-        cmd = [ "-c" "opencloud init || true; opencloud server" ];
+        cmd = ["-c" "opencloud init || true; opencloud server"];
         user = "${toString cfg.userId}:${toString cfg.groupId}";
         log-driver = "journald";
 
