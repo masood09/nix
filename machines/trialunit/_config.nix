@@ -27,6 +27,11 @@
         };
       };
 
+      authentik = {
+        enable = true;
+        webDomain = "auth.test.mantannest.com";
+      };
+
       caddy = {
         enable = true;
       };
@@ -55,7 +60,32 @@
         };
       };
 
+      postgresql = {
+        enable = true;
+
+        zfs = {
+          enable = true;
+          dataset = "dpool/tank/services/postgresql_17";
+        };
+
+        backup = {
+          enable = true;
+
+          zfs = {
+            enable = true;
+            dataset = "dpool/tank/backup/postgresql";
+          };
+        };
+      };
+
       rebootRequiredCheck.enable = true;
+
+      restic = {
+        enable = true;
+        s3Enable = true;
+
+        extraPaths = ["/var/lib/private/authentik/media"];
+      };
 
       tailscale = {
         enable = true;
