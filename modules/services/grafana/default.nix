@@ -140,15 +140,15 @@ in {
 
           "auth.generic_oauth".name = "authentik";
           "auth.generic_oauth".enabled = true;
-          "auth.generic_oauth".client_id = "0i7eoX2Og14H7lL4v3Mh8C2WhSoN2dLCiq7yJgb4";
+          "auth.generic_oauth".client_id = grafanaCfg.oauth.clientId;
           "auth.generic_oauth".client_secret = "$__file{${
             config.sops.secrets."grafana-authentik-client-secret".path
           }}";
-          "auth.generic_oauth".scopes = "openid email profile";
+          "auth.generic_oauth".scopes = grafanaCfg.oauth.scopes;
           "auth.generic_oauth".auth_url = "https://${grafanaCfg.oauth.providerHost}/application/o/authorize/";
           "auth.generic_oauth".token_url = "https://${grafanaCfg.oauth.providerHost}/application/o/token/";
           "auth.generic_oauth".api_url = "https://${grafanaCfg.oauth.providerHost}/application/o/userinfo/";
-          "auth.generic_oauth".role_attribute_path = "contains(groups, 'Homelab Admins') && 'Admin' || 'Viewer'";
+          "auth.generic_oauth".role_attribute_path = grafanaCfg.oauth.roleAttributePath;
 
           analytics.reporting_enabled = false;
 
