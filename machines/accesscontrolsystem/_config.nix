@@ -10,7 +10,14 @@
     };
 
     programs = {
-      motd.enable = true;
+      motd = {
+        enable = true;
+
+        networkInterfaces = [
+          "enp0s6"
+          "tailscale0"
+        ];
+      };
     };
 
     services = {
