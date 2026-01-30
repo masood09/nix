@@ -12,15 +12,15 @@
     };
 
     "dpool_tank_key" = {
-      sopsFile = ./../../secrets/trialunit-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
 
     "opencloud-collabora.env" = {
-      sopsFile = ./../../secrets/trialunit-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
 
     "opencloud-opencloud.env" = {
-      sopsFile = ./../../secrets/trialunit-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
   };
 }

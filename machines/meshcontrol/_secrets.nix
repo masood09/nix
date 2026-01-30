@@ -13,24 +13,24 @@
 
     "headscale-authentik-client-secret" = {
       owner = "headscale";
-      sopsFile = ./../../secrets/meshcontrol-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
       restartUnits = ["headscale.service"];
     };
 
     "headscale-extra-records.json" = {
       owner = "headscale";
-      sopsFile = ./../../secrets/headscale-dns.yaml;
+      sopsFile = ./../../secrets/headscale-dns.sops.yaml;
       restartUnits = ["headscale.service"];
     };
 
     "restic-env" = {
-      sopsFile = ./../../secrets/meshcontrol-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
     "restic-repo" = {
-      sopsFile = ./../../secrets/meshcontrol-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
     "restic-password" = {
-      sopsFile = ./../../secrets/meshcontrol-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
   };
 }

@@ -12,57 +12,57 @@
     };
 
     "dpool_tank_key" = {
-      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
 
     "fpool_fast_key" = {
-      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
 
     "restic-env" = {
-      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
     "restic-repo" = {
-      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
     "restic-password" = {
-      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
 
     "babybuddy-env" = {
-      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-babybuddy.service"];
     };
 
     "caddy-env" = {
-      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
       owner = "caddy";
       restartUnits = ["caddy.service"];
     };
 
     "dell-idrac-fan-controller-env" = {
-      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-dell-idrac-fan-controller.service"];
     };
 
     "garage-env" = {
-      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
       restartUnits = ["garage.service"];
     };
 
     "grafana-authentik-client-secret" = {
-      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
       owner = "grafana";
       restartUnits = ["grafana.service"];
     };
 
     "jobscraper-env" = {
-      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-jobscraper.service"];
     };
 
     "karakeep-env" = {
-      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
       owner = "karakeep";
       restartUnits = [
         "karakeep-web.service"
@@ -71,7 +71,7 @@
     };
 
     "vaultwarden-env" = {
-      sopsFile = ./../../secrets/heartbeat-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
       restartUnits = ["vaultwarden.service"];
     };
   };
