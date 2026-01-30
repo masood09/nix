@@ -5,16 +5,18 @@
   ...
 }: let
   inherit (homelabCfg) role;
+
+  globalPkgs = with pkgs; [
+    # Packages that are global.
+  ];
 in {
   home = {
-    packages = with pkgs;
-      [
-        # Packages that are global.
-      ]
-      ++ lib.optionals (role == "server") [
+    packages =
+      globalPkgs
+      ++ lib.optionals (role == "server") (with pkgs; [
         # Packages to be installed only on servers
-      ]
-      ++ lib.optionals (role == "desktop") [
+      ])
+      ++ lib.optionals (role == "desktop") (with pkgs; [
         # Packages to be installed only on desktops (laptops/macs)
         age
         alejandra
@@ -38,9 +40,9 @@ in {
         nerd-fonts.meslo-lg
         nerd-fonts.symbols-only
         nerd-fonts.hack
-      ]
-      ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) [
+      ])
+      ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
         nixos-rebuild
-      ];
+      ]);
   };
 }
