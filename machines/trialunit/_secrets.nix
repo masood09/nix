@@ -30,6 +30,12 @@
       sopsFile = ./secrets.sops.yaml;
     };
 
+    "grafana-authentik-client-secret" = {
+      sopsFile = ./secrets.sops.yaml;
+      owner = "grafana";
+      restartUnits = ["grafana.service"];
+    };
+
     "opencloud-collabora.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-compose-opencloud-root.target"];
