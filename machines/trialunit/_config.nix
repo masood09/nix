@@ -36,6 +36,21 @@
         enable = true;
       };
 
+      grafana = {
+        enable = true;
+        webDomain = "grafana.test.mantannest.com";
+
+        oauth = {
+          providerHost = "auth.test.mantannest.com";
+          clientId = "2IzKY9RBUmYXZ81AugDy5OcyeKTMzsXb";
+          roleAttributePath = "contains(groups, 'homelab-admins') && 'Admin' || 'Viewer'";
+        };
+
+        zfs = {
+          enable = true;
+        };
+      };
+
       loki = {
         enable = true;
         webDomain = "loki.test.mantannest.com";
