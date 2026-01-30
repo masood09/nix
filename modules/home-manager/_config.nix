@@ -42,13 +42,7 @@
       };
 
       emacs = {
-        enable = lib.mkOption {
-          default = false;
-          type = lib.types.bool;
-          description = ''
-            Whether to enable emacs.
-          '';
-        };
+        enable = lib.mkEnableOption "Whether to enable emacs.";
       };
 
       eza = {
@@ -82,13 +76,7 @@
       };
 
       fish = {
-        enable = lib.mkOption {
-          default = false;
-          type = lib.types.bool;
-          description = ''
-            Whether to enable fish shell.
-          '';
-        };
+        enable = lib.mkEnableOption "Whether to enable fish shell.";
       };
 
       fzf = {
@@ -122,13 +110,7 @@
       };
 
       neovim = {
-        enable = lib.mkOption {
-          default = false;
-          type = lib.types.bool;
-          description = ''
-            Whether to enable neovim.
-          '';
-        };
+        enable = lib.mkEnableOption "Whether to enable neovim.";
       };
 
       ripgrep = {
