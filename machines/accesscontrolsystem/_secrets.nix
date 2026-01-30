@@ -12,7 +12,7 @@
     };
 
     "authentik-env" = {
-      sopsFile = ./../../secrets/accesscontrolsystem-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
       restartUnits = [
         "authentik.service"
         "authentik-worker.service"
@@ -20,13 +20,13 @@
     };
 
     "restic-env" = {
-      sopsFile = ./../../secrets/accesscontrolsystem-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
     "restic-repo" = {
-      sopsFile = ./../../secrets/accesscontrolsystem-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
     "restic-password" = {
-      sopsFile = ./../../secrets/accesscontrolsystem-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
   };
 }

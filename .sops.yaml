@@ -15,7 +15,7 @@ keys:
     age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
 
 creation_rules:
-  - path_regex: secrets/secrets\.yaml$
+  - path_regex: ^secrets/secrets\.sops\.yaml$
     key_groups:
       - age:
           - *accesscontrolsystem
@@ -26,43 +26,44 @@ creation_rules:
           - *trialunit
           - *murderbot
 
-  - path_regex: secrets/accesscontrolsystem-server\.yaml$
+  - path_regex: ^secrets/headscale-dns\.sops\.yaml$
+    key_groups:
+      - age:
+        - *meshcontrol
+        - *murderbot
+
+  - path_regex: ^machines/accesscontrolsystem/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *accesscontrolsystem
         - *murderbot
 
-  - path_regex: secrets/headscale-dns\.yaml$
+
+  - path_regex: ^machines/meshcontrol/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *meshcontrol
         - *murderbot
 
-  - path_regex: secrets/meshcontrol-server\.yaml$
-    key_groups:
-      - age:
-        - *meshcontrol
-        - *murderbot
-
-  - path_regex: secrets/watchfulsystem-server\.yaml$
+  - path_regex: ^machines/watchfulsystem/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *murderbot
         - *watchfulsystem
 
-  - path_regex: secrets/caretaker\.yaml$
+  - path_regex: ^machines/caretaker/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *murderbot
         - *caretaker
 
-  - path_regex: secrets/heartbeat-server\.yaml$
+  - path_regex: ^machines/heartbeat/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *heartbeat
         - *murderbot
 
-  - path_regex: secrets/trialunit-server\.yaml$
+  - path_regex: ^machines/trialunit/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *trialunit

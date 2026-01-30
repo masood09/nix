@@ -27,14 +27,11 @@ gc:
 repair:
     sudo nix-store --verify --check-contents --repair
 
-sops-edit:
-    sops secrets/secrets.yaml
-
 sops-rotate:
-    for file in secrets/*; do sops --rotate --in-place "$file"; done
+    find . -name "*.sops.yaml" -type f ! -name ".sops.yaml" -print0 | xargs -0 -n1 sops --rotate --in-place
 
 sops-update:
-    for file in secrets/*; do sops updatekeys "$file"; done
+    find . -name "*.sops.yaml" -type f ! -name ".sops.yaml" -print0 | xargs -0 -n1 sops updatekeys
 
 build-iso:
     nix build .#nixosConfigurations.nixiso.config.system.build.isoImage

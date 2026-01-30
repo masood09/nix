@@ -12,13 +12,13 @@
     };
 
     "restic-env" = {
-      sopsFile = ./../../secrets/watchfulsystem-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
     "restic-repo" = {
-      sopsFile = ./../../secrets/watchfulsystem-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
     "restic-password" = {
-      sopsFile = ./../../secrets/watchfulsystem-server.yaml;
+      sopsFile = ./secrets.sops.yaml;
     };
   };
 }
