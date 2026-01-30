@@ -1,7 +1,6 @@
 {
   config.homelab = {
     purpose = "Test & Integration Environment";
-
     isRootZFS = true;
     isEncryptedRoot = true;
     impermanence = true;

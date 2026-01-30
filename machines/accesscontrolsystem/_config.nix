@@ -1,11 +1,16 @@
 {
   config.homelab = {
+    purpose = "Identity & Access Control (SSO / Authentik)";
     isRootZFS = true;
     isEncryptedRoot = true;
     impermanence = true;
 
     networking = {
       hostName = "accesscontrolsystem";
+    };
+
+    programs = {
+      motd.enable = true;
     };
 
     services = {

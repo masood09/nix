@@ -1,11 +1,16 @@
 {
   config.homelab = {
+    purpose = "Primary Homelab Core (NAS + Shared Services)";
     isRootZFS = true;
     isEncryptedRoot = true;
     impermanence = true;
 
     networking = {
       hostName = "heartbeat";
+    };
+
+    programs = {
+      motd.enable = true;
     };
 
     services = {
