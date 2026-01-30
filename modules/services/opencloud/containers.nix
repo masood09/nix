@@ -10,6 +10,23 @@
 
   wopiWebDomain = "wopi.${cfg.webDomain}";
   collaboraWebDomain = "collabora.${cfg.webDomain}";
+
+  waitForCollabora = pkgs.writeShellScript "wait-for-podman-opencloud-collabora" ''
+    set -euo pipefail
+    url="http://127.0.0.1:${toString cfg.collabora.port}/hosting/discovery"
+    echo "Waiting for Collabora: $url"
+
+    for i in $(seq 1 120); do
+      if ${pkgs.curl}/bin/curl -fsS --max-time 2 "$url" >/dev/null; then
+        echo "Collabora is up"
+        exit 0
+      fi
+      sleep 1
+    done
+
+    echo "Timed out waiting for Collabora"
+    exit 1
+  '';
 in {
   config = lib.mkIf (cfg.enable && podmanEnabled) {
     virtualisation.oci-containers.containers = {
@@ -262,6 +279,8 @@ in {
         "podman-opencloud-wopi" = {
           serviceConfig = {
             Restart = lib.mkOverride 90 "always";
+
+            ExecStartPre = [waitForCollabora];
           };
 
           after = [
