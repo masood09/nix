@@ -109,6 +109,20 @@
         };
       };
 
+      motd = {
+        enable = lib.mkEnableOption "Show a custom MOTD on interactive shells.";
+
+        networkInterfaces = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+        };
+
+        zshInitOrder = lib.mkOption {
+          type = lib.types.int;
+          default = 650;
+        };
+      };
+
       neovim = {
         enable = lib.mkEnableOption "Whether to enable neovim.";
       };

@@ -27,6 +27,11 @@
         The role of this machine. Could be server or desktop.
       '';
     };
+
+    purpose = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+    };
   };
 
   config = {
