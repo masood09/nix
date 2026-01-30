@@ -25,7 +25,7 @@ in {
             "zfs-dataset-opencloud-storage-metadata.service"
             "zfs-dataset-opencloud-storage-users.service"
             "podman-compose-opencloud-root.service"
-            "podman-opencloud-collabora.service"
+            "podman-opencloud-wopi.service"
           ];
         };
 
@@ -38,7 +38,7 @@ in {
 
           requiredBy = [
             "podman-compose-opencloud-root.service"
-            "podman-opencloud-collabora.service"
+            "podman-opencloud-wopi.service"
           ];
         };
 
@@ -51,7 +51,7 @@ in {
 
           requiredBy = [
             "podman-compose-opencloud-root.service"
-            "podman-opencloud-collabora.service"
+            "podman-opencloud-wopi.service"
           ];
         };
 
@@ -64,7 +64,7 @@ in {
 
           requiredBy = [
             "podman-compose-opencloud-root.service"
-            "podman-opencloud-collabora.service"
+            "podman-opencloud-wopi.service"
           ];
         };
 
@@ -77,7 +77,7 @@ in {
 
           requiredBy = [
             "podman-compose-opencloud-root.service"
-            "podman-opencloud-collabora.service"
+            "podman-opencloud-wopi.service"
           ];
         };
 
@@ -89,7 +89,7 @@ in {
 
           requiredBy = [
             "podman-compose-opencloud-root.service"
-            "podman-opencloud-collabora.service"
+            "podman-opencloud-wopi.service"
             "zfs-dataset-opencloud-storage-metadata.service"
             "zfs-dataset-opencloud-storage-users.service"
           ];
@@ -104,7 +104,7 @@ in {
 
           requiredBy = [
             "podman-compose-opencloud-root.service"
-            "podman-opencloud-collabora.service"
+            "podman-opencloud-wopi.service"
           ];
         };
 
@@ -117,7 +117,7 @@ in {
 
           requiredBy = [
             "podman-compose-opencloud-root.service"
-            "podman-opencloud-collabora.service"
+            "podman-opencloud-wopi.service"
           ];
         };
       })

@@ -61,7 +61,7 @@ in {
 
           before = [
             "podman-compose-opencloud-root.service"
-            "podman-opencloud-collabora.service"
+            "podman-opencloud-wopi.service"
           ];
 
           requires = [

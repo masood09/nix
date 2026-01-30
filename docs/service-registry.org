@@ -60,6 +60,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | Job Scraper                  | 8902 |
 | Baby Buddy                   | 8903 |
 | Karakeep                     | 8904 |
+| OpenCloud WOPI               | 8905 |
 | Authentik                    | 9000 |
 | Prometheus                   | 9090 |
 | Headscale (Metrics)          | 9091 |
