@@ -42,7 +42,7 @@ else
 fi
 echo ""
 
-# 5. Evaluate all host configurations
+# 4. Evaluate all host configurations
 echo "4️⃣  Evaluating host configurations..."
 HOSTS=$(nix eval .#nixosConfigurations --apply 'x: builtins.attrNames x' --json 2>/dev/null | jq -r '.[]')
 for host in $HOSTS; do
@@ -55,7 +55,39 @@ for host in $HOSTS; do
 done
 echo ""
 
-echo "5️⃣  Verifying flake.lock is unchanged..."
+# 5. SOPS secrets validation (check that *.sops.yaml files are SOPS-encrypted)
+echo "5️⃣  Validating SOPS secrets..."
+SOPS_ERRORS=0
+while IFS= read -r -d '' sops_file; do
+  # Skip unreadable files
+  if [ ! -r "$sops_file" ]; then
+    echo "⚠️  Cannot read SOPS file: $sops_file"
+    ((SOPS_ERRORS++))
+    continue
+  fi
+  # A properly-encrypted SOPS YAML should contain:
+  # - a top-level `sops:` metadata block, and
+  # - at least one `ENC[` encrypted value somewhere
+  if ! grep -qE '^sops:' "$sops_file" || ! grep -q 'ENC\[' "$sops_file"; then
+    echo "⚠️  Possible unencrypted or malformed SOPS file: $sops_file"
+    ((SOPS_ERRORS++))
+  fi
+done < <(
+  find . \
+    -type f \
+    -name "*.sops.yaml" \
+    ! -name ".sops.yaml" \
+    ! -path "*/.git/*" \
+    -print0 2>/dev/null
+)
+if [ "$SOPS_ERRORS" -eq 0 ]; then
+  echo "✅ SOPS secrets look encrypted"
+else
+  echo "⚠️  Found $SOPS_ERRORS potentially unencrypted/malformed SOPS file(s)"
+fi
+echo ""
+
+echo "6️⃣ ️Verifying flake.lock is unchanged..."
 if git diff --name-only --exit-code flake.lock > /dev/null; then
   echo "✅ flake.lock unchanged"
 else
