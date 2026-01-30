@@ -6,6 +6,7 @@
 }: let
   cfg = homelabCfg.programs.motd;
   zshEnabled = homelabCfg.programs.zsh.enable or false;
+  fishEnabled = homelabCfg.programs.fish.enable or false;
 
   motd = pkgs.writeShellScriptBin "motd" ''
     #!/usr/bin/env bash
@@ -151,10 +152,16 @@ in {
       pkgs.lolcat
     ];
 
-    # Your _zsh.nix already returns early for TERM=dumb and non-interactive.
-    # So we only need a lightweight call here, ordered after that guard.
-    programs.zsh.initContent = lib.mkIf zshEnabled (lib.mkOrder cfg.zshInitOrder ''
-      [[ -o interactive ]] && command -v motd >/dev/null 2>&1 && motd
-    '');
+    programs = {
+      zsh.initContent = lib.mkIf zshEnabled (lib.mkOrder cfg.zshInitOrder ''
+        [[ -o interactive ]] && command -v motd >/dev/null 2>&1 && motd
+      '');
+
+      fish.interactiveShellInit = lib.mkIf fishEnabled (lib.mkAfter ''
+        if status is-interactive
+          command -sq motd; and motd
+        end
+      '');
+    };
   };
 }
