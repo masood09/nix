@@ -17,12 +17,12 @@
 
     "opencloud-collabora.env" = {
       sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["podman-compose-opencloud-root.service"];
+      restartUnits = ["podman-compose-opencloud-root.target"];
     };
 
     "opencloud-opencloud.env" = {
       sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["podman-compose-opencloud-root.service"];
+      restartUnits = ["podman-compose-opencloud-root.target"];
     };
   };
 }
