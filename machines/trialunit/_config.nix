@@ -103,7 +103,7 @@
       };
 
       prometheus = {
-        enable = true;
+        enable = false;
         webDomain = "prometheus.test.mantannest.com";
         zfs.enable = true;
       };
