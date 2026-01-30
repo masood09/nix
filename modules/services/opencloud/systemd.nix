@@ -7,6 +7,9 @@
   homelabCfg = config.homelab;
   cfg = homelabCfg.services.opencloud;
   podmanEnabled = homelabCfg.services.podman.enable;
+
+  proxySrc = ./config/proxy.yaml;
+  cspSrc = ./config/csp.yaml;
 in {
   config = lib.mkIf (cfg.enable && podmanEnabled) {
     systemd = {
@@ -45,6 +48,40 @@ in {
               ${pkgs.coreutils}/bin/chown -R opencloud:opencloud ${toString cfg.dataDir}
             '';
           };
+        };
+
+        opencloud-sync-etc = {
+          description = "Materialize OpenCloud proxy.yaml and csp.yaml into ${cfg.dataDir}/etc";
+          wantedBy = ["multi-user.target"];
+
+          after = [
+            "opencloud-permissions.service"
+            "zfs-dataset-opencloud-etc.service"
+          ];
+
+          before = [
+            "podman-compose-opencloud-root.service"
+            "podman-opencloud-collabora.service"
+          ];
+
+          requires = [
+            "opencloud-permissions.service"
+            "zfs-dataset-opencloud-etc.service"
+          ];
+
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
+
+          script = ''
+            set -euo pipefail
+            install -d -m 0750 -o opencloud -g opencloud ${cfg.dataDir}/etc
+
+            # install copies and sets perms atomically
+            install -m 0600 -o opencloud -g opencloud ${proxySrc} ${cfg.dataDir}/etc/proxy.yaml
+            install -m 0600 -o opencloud -g opencloud ${cspSrc} ${cfg.dataDir}/etc/csp.yaml
+          '';
         };
       };
 
