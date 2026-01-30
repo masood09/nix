@@ -1,14 +1,21 @@
 {
+  config,
   homelabCfg,
   lib,
+  pkgs,
   ...
 }: let
   gitCfg = homelabCfg.programs.git;
+
+  key = homelabCfg.primaryUser.sshPublicKey;
+  email = gitCfg.userEmail;
+
+  signersFile = pkgs.writeText "git-allowed-signers" ''
+    ${email} namespaces="git" ${key}
+  '';
 in {
   config = lib.mkIf gitCfg.enable {
-    home = {
-      file.".ssh/allowed_signers".text = "* ${homelabCfg.primaryUser.sshPublicKey}";
-    };
+    xdg.configFile."git/allowed_signers".source = signersFile;
 
     programs.git = {
       inherit (gitCfg) enable;
@@ -16,7 +23,7 @@ in {
 
       settings = {
         user = {
-          email = gitCfg.userEmail;
+          email = email;
           name = gitCfg.userName;
         };
 
@@ -27,6 +34,11 @@ in {
 
         diff = {
           colorMoved = "default";
+        };
+
+        gpg = {
+          format = "ssh";
+          ssh.allowedSignersFile = toString signersFile;
         };
 
         init = {
@@ -40,6 +52,11 @@ in {
         pull = {
           rebase = true;
         };
+      };
+
+      signing = {
+        key = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
+        signByDefault = true;
       };
     };
   };
