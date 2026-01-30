@@ -61,6 +61,7 @@ in {
 
           before = [
             "podman-compose-opencloud-root.service"
+            "podman-opencloud-opencloud.service"
             "podman-opencloud-wopi.service"
           ];
 

@@ -33,17 +33,27 @@
       type = lib.types.ints.u16;
     };
 
+    port = lib.mkOption {
+      type = lib.types.port;
+      default = 8905;
+    };
+
+    idpDomain = lib.mkOption {
+      type = lib.types.str;
+      default = "auth.mantannest.com";
+    };
+
     collabora = {
       port = lib.mkOption {
         type = lib.types.port;
-        default = 9980;
+        default = 8906;
       };
     };
 
     wopi = {
       port = lib.mkOption {
         type = lib.types.port;
-        default = 8905;
+        default = 8907;
       };
     };
 
