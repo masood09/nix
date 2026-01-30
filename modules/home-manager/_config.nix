@@ -102,13 +102,7 @@
       };
 
       git = {
-        enable = lib.mkOption {
-          default = true;
-          type = lib.types.bool;
-          description = ''
-            Whether to enable git.
-          '';
-        };
+        enable = lib.mkEnableOption "Whether to enable git.";
 
         userName = lib.mkOption {
           default = "Masood Ahmed";
