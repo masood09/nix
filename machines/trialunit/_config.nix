@@ -1,11 +1,17 @@
 {
   config.homelab = {
+    purpose = "Test & Integration Environment";
+
     isRootZFS = true;
     isEncryptedRoot = true;
     impermanence = true;
 
     networking = {
       hostName = "trialunit";
+    };
+
+    programs = {
+      motd.enable = true;
     };
 
     services = {

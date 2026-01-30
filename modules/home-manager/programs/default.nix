@@ -12,6 +12,7 @@
     ./_fish.nix
     ./_fzf.nix
     ./_git.nix
+    ./_motd.nix
     ./_neovim.nix
     ./_ripgrep.nix
     ./_starship.nix
