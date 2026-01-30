@@ -23,7 +23,7 @@ in {
 
       settings = {
         user = {
-          email = email;
+          inherit email;
           name = gitCfg.userName;
         };
 
