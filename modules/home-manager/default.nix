@@ -7,7 +7,7 @@
   homelabCfg = config.homelab;
 in {
   imports = [
-    ./_config.nix
+    ./_options.nix
   ];
 
   config = {
