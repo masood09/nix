@@ -22,6 +22,13 @@
       type = lib.types.ints.u16;
     };
 
+    collabora = {
+      port = lib.mkOption {
+        type = lib.types.port;
+        default = 9980;
+      };
+    };
+
     zfs = {
       enable = lib.mkEnableOption "Create ZFS datasets for OpenCloud data/meta.";
 

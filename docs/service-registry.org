@@ -68,3 +68,4 @@ This file should be consulted *before* adding any new service, container, or sys
 | google-chrome-stable         | 9222 |
 | Authentik (Metric)           | 9300 |
 | Authentik (Built-in HTTPS)   | 9443 |
+| OpenCloud Collabora          | 9980 |
