@@ -1,11 +1,16 @@
 {
   config.homelab = {
+    purpose = "Monitoring & Service Health (Uptime Kuma)";
     isRootZFS = true;
     isEncryptedRoot = true;
     impermanence = true;
 
     networking = {
       hostName = "watchfulsystem";
+    };
+
+    programs = {
+      motd.enable = true;
     };
 
     services = {

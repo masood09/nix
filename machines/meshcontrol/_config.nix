@@ -1,11 +1,16 @@
 {
   config.homelab = {
+    purpose = "Mesh Networking Control Plane (Headscale)";
     isRootZFS = true;
     isEncryptedRoot = true;
     impermanence = true;
 
     networking = {
       hostName = "meshcontrol";
+    };
+
+    programs = {
+      motd.enable = true;
     };
 
     services = {
