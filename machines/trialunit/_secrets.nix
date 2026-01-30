@@ -8,6 +8,7 @@
     "discord-zfs-webhook" = {};
 
     "grafana-alloy-env" = {
+      sopsFile = ./secrets.sops.yaml;
       restartUnits = ["alloy.service"];
     };
 
@@ -17,6 +18,12 @@
         "authentik.service"
         "authentik-worker.service"
       ];
+    };
+
+    "caddy-env" = {
+      sopsFile = ./secrets.sops.yaml;
+      owner = "caddy";
+      restartUnits = ["caddy.service"];
     };
 
     "dpool_tank_key" = {
