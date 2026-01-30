@@ -14,6 +14,7 @@ in {
   config = lib.mkIf (cfg.enable && podmanEnabled) {
     virtualisation.oci-containers.containers = {
       "opencloud-opencloud" = {
+        # renovate: datasource=docker depName=docker.io/opencloudeu/opencloud
         image = "docker.io/opencloudeu/opencloud:4.0.1";
 
         environment = {
@@ -86,6 +87,7 @@ in {
       };
 
       "opencloud-wopi" = {
+        # renovate: datasource=docker depName=docker.io/opencloudeu/opencloud
         image = "docker.io/opencloudeu/opencloud:4.0.1";
 
         environment = {
@@ -131,6 +133,7 @@ in {
       };
 
       "opencloud-collabora" = {
+        # renovate: datasource=docker depName=docker.io/collabora/code
         image = "docker.io/collabora/code:25.04.7.1.1";
 
         environment = {
