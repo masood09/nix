@@ -8,6 +8,7 @@
     ./_nixpkgs.nix
     ./_packages.nix
     ./_prune-system-generations.nix
+    ./_reboot-required-check.nix
     ./_remote-unlock.nix
     ./_security.nix
     ./_sops.nix

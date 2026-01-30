@@ -43,6 +43,8 @@
         };
       };
 
+      rebootRequiredCheck.enable = true;
+
       tailscale = {
         enable = true;
 
