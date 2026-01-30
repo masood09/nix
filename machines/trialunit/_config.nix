@@ -87,6 +87,12 @@
         };
       };
 
+      prometheus = {
+        enable = true;
+        webDomain = "prometheus.test.mantannest.com";
+        zfs.enable = true;
+      };
+
       rebootRequiredCheck.enable = true;
 
       restic = {
