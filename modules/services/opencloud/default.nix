@@ -40,7 +40,7 @@ in {
           "${wopiWebDomain}" = {
             useACMEHost = wopiWebDomain;
             extraConfig = ''
-              reverse_proxy http://127.0.0.1:9300
+              reverse_proxy http://127.0.0.1:${toString cfg.wopi.port}
             '';
           };
         };

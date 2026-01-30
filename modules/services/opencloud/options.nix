@@ -12,6 +12,17 @@
       default = "/var/lib/opencloud";
     };
 
+    logLevel = lib.mkOption {
+      type = lib.types.enum [
+        "debug"
+        "info"
+        "warning"
+        "error"
+      ];
+
+      default = "info";
+    };
+
     userId = lib.mkOption {
       default = 3008;
       type = lib.types.ints.u16;
@@ -26,6 +37,13 @@
       port = lib.mkOption {
         type = lib.types.port;
         default = 9980;
+      };
+    };
+
+    wopi = {
+      port = lib.mkOption {
+        type = lib.types.port;
+        default = 8905;
       };
     };
 

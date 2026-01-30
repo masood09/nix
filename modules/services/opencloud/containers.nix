@@ -9,9 +9,54 @@
   podmanEnabled = homelabCfg.services.podman.enable;
 
   wopiWebDomain = "wopi.${cfg.webDomain}";
+  collaboraWebDomain = "collabora.${cfg.webDomain}";
 in {
   config = lib.mkIf (cfg.enable && podmanEnabled) {
     virtualisation.oci-containers.containers = {
+      "opencloud-wopi" = {
+        image = "docker.io/opencloudeu/opencloud:4.0.1";
+
+        environment = {
+          "COLLABORATION_APP_ADDR" = "https://${collaboraWebDomain}";
+          "COLLABORATION_APP_ICON" = "https://${collaboraWebDomain}/favicon.ico";
+          "COLLABORATION_APP_INSECURE" = "true";
+          "COLLABORATION_APP_NAME" = "CollaboraOnline";
+          "COLLABORATION_APP_PRODUCT" = "Collabora";
+          "COLLABORATION_CS3API_DATAGATEWAY_INSECURE" = "true";
+          "COLLABORATION_GRPC_ADDR" = "0.0.0.0:9301";
+          "COLLABORATION_HTTP_ADDR" = "0.0.0.0:9300";
+          "COLLABORATION_LOG_LEVEL" = "${cfg.logLevel}";
+          "COLLABORATION_WOPI_SRC" = "https://wopi.cloud.test.mantannest.com";
+          "MICRO_REGISTRY" = "nats-js-kv";
+          "MICRO_REGISTRY_ADDRESS" = "opencloud:9233";
+          "OC_URL" = "https://cloud.test.mantannest.com";
+        };
+
+        volumes = [
+          "${cfg.dataDir}:/var/lib/opencloud:rw"
+          "${cfg.dataDir}/etc:/etc/opencloud:rw"
+        ];
+
+        ports = [
+          "127.0.0.1:${toString cfg.wopi.port}:9300/tcp"
+        ];
+
+        entrypoint = "/bin/bash";
+        cmd = ["-c" "opencloud collaboration server"];
+
+        dependsOn = [
+          "opencloud-collabora"
+        ];
+
+        user = "${toString cfg.userId}:${toString cfg.groupId}";
+        log-driver = "journald";
+
+        extraOptions = [
+          "--network-alias=wopi"
+          "--network=opencloud_opencloud-net"
+        ];
+      };
+
       "opencloud-collabora" = {
         image = "docker.io/collabora/code:25.04.7.1.1";
 
@@ -98,7 +143,7 @@ in {
           wantedBy = ["podman-compose-opencloud-root.target"];
         };
 
-        "podman-opencloud-collabora" = {
+        "podman-opencloud-wopi" = {
           serviceConfig = {
             Restart = lib.mkOverride 90 "always";
           };
@@ -127,6 +172,28 @@ in {
             "zfs-dataset-opencloud-storage-metadata.service"
             "zfs-dataset-opencloud-storage-users.service"
             "opencloud-permissions.service"
+          ];
+
+          partOf = [
+            "podman-compose-opencloud-root.target"
+          ];
+
+          wantedBy = [
+            "podman-compose-opencloud-root.target"
+          ];
+        };
+
+        "podman-opencloud-collabora" = {
+          serviceConfig = {
+            Restart = lib.mkOverride 90 "always";
+          };
+
+          after = [
+            "podman-network-opencloud_opencloud-net.service"
+          ];
+
+          requires = [
+            "podman-network-opencloud_opencloud-net.service"
           ];
 
           partOf = [
