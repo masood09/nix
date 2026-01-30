@@ -14,22 +14,6 @@ in {
           isSystemUser = true;
           group = "opencloud";
           uid = cfg.userId;
-          home = cfg.dataDir;
-          linger = true;
-
-          subUidRanges = [
-            {
-              startUid = 100000;
-              count = 65536;
-            }
-          ];
-
-          subGidRanges = [
-            {
-              startGid = 100000;
-              count = 65536;
-            }
-          ];
         };
       };
 
