@@ -95,6 +95,7 @@
 
       postgresql = {
         enable = true;
+        enableTCPIP = true;
 
         zfs = {
           enable = true;
