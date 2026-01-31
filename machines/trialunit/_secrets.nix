@@ -63,6 +63,15 @@
       restartUnits = ["podman-jobscraper.service"];
     };
 
+    "karakeep-env" = {
+      sopsFile = ./secrets.sops.yaml;
+      owner = "karakeep";
+      restartUnits = [
+        "karakeep-web.service"
+        "karakeep-workers.service"
+      ];
+    };
+
     "opencloud-collabora.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-compose-opencloud-root.target"];

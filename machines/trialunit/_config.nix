@@ -116,6 +116,18 @@
         webDomain = "jobscraper.test.mantannest.com";
       };
 
+      karakeep = {
+        enable = true;
+        webDomain = "keep.test.mantannest.com";
+
+        oauth = {
+          providerHost = "auth.test.mantannest.com";
+          clientId = "karakeep";
+        };
+
+        zfs.enable = true;
+      };
+
       loki = {
         enable = true;
         webDomain = "loki.test.mantannest.com";
