@@ -4,6 +4,7 @@
     ./hardware-configuration.nix
     ./_config.nix
     ./_networking.nix
+    ./_postgresql.nix
     ./_secrets.nix
 
     ./../../modules/nixos

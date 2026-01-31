@@ -32,6 +32,15 @@
         webDomain = "auth.test.mantannest.com";
       };
 
+      babybuddy = {
+        enable = true;
+        webDomain = "babybuddy.test.mantannest.com";
+
+        zfs = {
+          enable = true;
+        };
+      };
+
       caddy = {
         enable = true;
       };
