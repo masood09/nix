@@ -1,5 +1,10 @@
 {
   config.sops.secrets = {
+    "babybuddy-env" = {
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["podman-babybuddy.service"];
+    };
+
     "cloudflare-api-key" = {
       restartUnits = ["acme-setup.service"];
     };
