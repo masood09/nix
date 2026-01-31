@@ -111,6 +111,11 @@
         webDomain = "ittools.test.mantannest.com";
       };
 
+      jobscraper = {
+        enable = true;
+        webDomain = "jobscraper.test.mantannest.com";
+      };
+
       loki = {
         enable = true;
         webDomain = "loki.test.mantannest.com";
