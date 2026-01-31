@@ -46,6 +46,18 @@
       restartUnits = ["grafana.service"];
     };
 
+    "headscale-authentik-client-secret" = {
+      owner = "headscale";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["headscale.service"];
+    };
+
+    "headscale-extra-records.json" = {
+      owner = "headscale";
+      sopsFile = ./../../secrets/headscale-dns.sops.yaml;
+      restartUnits = ["headscale.service"];
+    };
+
     "opencloud-collabora.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-compose-opencloud-root.target"];
