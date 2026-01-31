@@ -212,6 +212,15 @@
           dataset = "dpool/tank/services/uptime-kuma";
         };
       };
+
+      vaultwarden = {
+        enable = true;
+        webDomain = "passwords.test.mantannest.com";
+
+        zfs = {
+          enable = true;
+        };
+      };
     };
   };
 }
