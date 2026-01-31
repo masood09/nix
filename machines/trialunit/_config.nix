@@ -202,6 +202,16 @@
           enable = true;
         };
       };
+
+      uptime-kuma = {
+        enable = true;
+        webDomain = "uptime.test.mantannest.com";
+
+        zfs = {
+          enable = true;
+          dataset = "dpool/tank/services/uptime-kuma";
+        };
+      };
     };
   };
 }
