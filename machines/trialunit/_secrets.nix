@@ -91,5 +91,10 @@
     "restic-password" = {
       sopsFile = ./secrets.sops.yaml;
     };
+
+    "vaultwarden-env" = {
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["vaultwarden.service"];
+    };
   };
 }
