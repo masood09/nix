@@ -106,6 +106,11 @@
         };
       };
 
+      ittools = {
+        enable = true;
+        webDomain = "ittools.test.mantannest.com";
+      };
+
       loki = {
         enable = true;
         webDomain = "loki.test.mantannest.com";
