@@ -41,6 +41,10 @@
         };
       };
 
+      blocky = {
+        enable = true;
+      };
+
       caddy = {
         enable = true;
       };
