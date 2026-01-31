@@ -97,6 +97,15 @@
         };
       };
 
+      immich = {
+        enable = true;
+        webDomain = "photos.test.mantannest.com";
+
+        zfs = {
+          enable = true;
+        };
+      };
+
       loki = {
         enable = true;
         webDomain = "loki.test.mantannest.com";
