@@ -49,6 +49,16 @@
         enable = true;
       };
 
+      garage = {
+        enable = true;
+        s3Domain = "s3.test.mantannest.com";
+
+        zfs = {
+          enable = true;
+          datasetMeta = "dpool/tank/services/garage_meta";
+        };
+      };
+
       grafana = {
         enable = true;
         webDomain = "grafana.test.mantannest.com";
