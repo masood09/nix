@@ -65,12 +65,34 @@
 
         oauth = {
           providerHost = "auth.test.mantannest.com";
-          clientId = "2IzKY9RBUmYXZ81AugDy5OcyeKTMzsXb";
+          clientId = "grafana";
           roleAttributePath = "contains(groups, 'homelab-admins') && 'Admin' || 'Viewer'";
         };
 
         zfs = {
           enable = true;
+        };
+      };
+
+      headscale = {
+        enable = true;
+        webDomain = "headscale.test.mantannest.com";
+
+        oidc = {
+          enable = true;
+          issuer = "https://auth.test.mantannest.com/application/o/headscale/";
+          client_id = "headscale";
+        };
+
+        zfs = {
+          enable = true;
+          dataset = "dpool/tank/services/headscale";
+
+          properties = {
+            logbias = "latency";
+            recordsize = "16K";
+            redundant_metadata = "most";
+          };
         };
       };
 
