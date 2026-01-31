@@ -119,8 +119,12 @@ in {
       enable = true;
 
       settings = {
-        ports = lib.mkIf blockyCfg.metrics.enable {
-          http = "127.0.0.1:${toString blockyCfg.metrics.listenPort}";
+        ports = {
+          dns = [
+            blockyCfg.dnsPort
+          ];
+
+          http = lib.mkIf blockyCfg.metrics.enable "127.0.0.1:${toString blockyCfg.metrics.listenPort}";
         };
 
         upstreams.groups.default = blockyCfg.upstreamDefault;
