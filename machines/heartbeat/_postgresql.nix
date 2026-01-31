@@ -32,6 +32,12 @@
           host    all             all             ::/0                    reject
         '';
       };
+
+      postgresqlBackup = {
+        databases = [
+          "applysmart"
+        ];
+      };
     };
   };
 }
