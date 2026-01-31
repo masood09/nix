@@ -43,6 +43,7 @@
 
       blocky = {
         enable = true;
+        dnsPort = 54;
       };
 
       caddy = {
