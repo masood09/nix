@@ -58,6 +58,11 @@
       restartUnits = ["headscale.service"];
     };
 
+    "jobscraper-env" = {
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["podman-jobscraper.service"];
+    };
+
     "opencloud-collabora.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-compose-opencloud-root.target"];
