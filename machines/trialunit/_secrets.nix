@@ -33,7 +33,7 @@
     };
 
     "discord-zfs-webhook" = {};
-    "headscale-preauth-key" = {};
+    "headscale-preauth.key" = {};
 
     "garage.env" = {
       sopsFile = ./secrets.sops.yaml;

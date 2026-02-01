@@ -34,7 +34,7 @@
       sopsFile = ./secrets.sops.yaml;
     };
 
-    "headscale-preauth-key" = {};
+    "headscale-preauth.key" = {};
 
     "garage.env" = {
       sopsFile = ./secrets.sops.yaml;
