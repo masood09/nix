@@ -71,7 +71,7 @@ in {
         // cfg.extraEnvironment;
 
       environmentFiles = [
-        config.sops.secrets."dell-idrac-fan-controller-env".path
+        config.sops.secrets."dell-idrac-fan-controller.env".path
       ];
     };
   };
