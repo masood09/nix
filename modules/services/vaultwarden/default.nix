@@ -98,7 +98,7 @@ in {
 
       restic = lib.mkIf (resticEnabled && vaultwardenCfg.zfs.enable) {
         backups = {
-          s3-backup.exclude = [
+          backup.exclude = [
             "/mnt/nightly_backup/vaultwarden/tmp"
           ];
         };

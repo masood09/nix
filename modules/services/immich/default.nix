@@ -89,7 +89,7 @@ in {
 
       restic = lib.mkIf (resticEnabled && immichCfg.zfs.enable) {
         backups = {
-          s3-backup.exclude = [
+          backup.exclude = [
             "/mnt/nightly_backup/immich/backups"
             "/mnt/nightly_backup/immich/encoded-video"
             "/mnt/nightly_backup/immich/thumbs"
