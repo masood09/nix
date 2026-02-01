@@ -61,7 +61,7 @@
       ];
     };
 
-    "restic-env" = {
+    "restic.env" = {
       sopsFile = ./secrets.sops.yaml;
     };
     "restic-repo" = {
