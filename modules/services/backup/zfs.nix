@@ -9,8 +9,7 @@
   resticEnabled = homelabCfg.services.restic.enable;
 
   zfsDatasets = homelabCfg.zfs.datasets or {};
-  resticDatasetEntries =
-    lib.filterAttrs (_: ds: (ds.restic.enable or false)) zfsDatasets;
+  resticDatasetEntries = lib.filterAttrs (_: ds: (ds.restic.enable or false)) zfsDatasets;
 
   datasetNames = lib.attrNames resticDatasetEntries;
 
