@@ -16,7 +16,7 @@
         description = "systemd unit names to stop while snapshots/db dumps are taken.";
       };
     };
-      
+
     restic = {
       enable = lib.mkEnableOption "Enable restic backups";
 
