@@ -12,10 +12,13 @@
     lib.filterAttrs (_: ds: (ds.restic.enable or false)) zfsDatasets;
 
   datasetNames = lib.attrNames resticDatasetEntries;
+  extraPaths = homelabCfg.services.restic.extraPaths or [];
 
   backupRoot = "/mnt/nightly_backup";
   mountPathFor = name: "${backupRoot}/${name}";
   resticPaths = map mountPathFor datasetNames;
+
+  hasResticPaths = (datasetNames != []) || (extraPaths != []);
 in {
   imports = [
     ./options.nix
@@ -24,7 +27,7 @@ in {
   ];
 
   config = lib.mkIf resticEnabled {
-    services.restic.backups.backup = lib.mkIf (datasetNames != []) {
+    services.restic.backups.backup = lib.mkIf hasResticPaths {
       inherit (homelabCfg.services.restic) pruneOpts;
 
       initialize = true;
