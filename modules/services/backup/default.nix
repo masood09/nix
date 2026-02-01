@@ -7,10 +7,9 @@
   cfg = homelabCfg.services.backup;
 in {
   imports = [
-    ./restic.nix
     ./options.nix
-    ./_cleanupZfs.nix
-    ./_prepareZfs.nix
+    ./restic.nix
+    ./zfs.nix
   ];
 
   config = lib.mkIf cfg.enable {
