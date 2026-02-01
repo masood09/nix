@@ -4,6 +4,6 @@
       restartUnits = ["alloy.service"];
     };
 
-    "headscale-preauth-key" = {};
+    "headscale-preauth.key" = {};
   };
 }
