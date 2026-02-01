@@ -1,17 +1,17 @@
 {
   config.sops.secrets = {
+    "alloy.env" = {
+      restartUnits = ["alloy.service"];
+    };
+
     "cloudflare-api-key" = {
       restartUnits = ["acme-setup.service"];
     };
 
-    "headscale-preauth-key" = {};
     "discord-zfs-webhook" = {};
+    "headscale-preauth.key" = {};
 
-    "grafana-alloy-env" = {
-      restartUnits = ["alloy.service"];
-    };
-
-    "restic-env" = {
+    "restic.env" = {
       sopsFile = ./secrets.sops.yaml;
     };
     "restic-repo" = {

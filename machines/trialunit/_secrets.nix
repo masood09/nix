@@ -1,23 +1,11 @@
 {
   config.sops.secrets = {
-    "babybuddy-env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["podman-babybuddy.service"];
-    };
-
-    "cloudflare-api-key" = {
-      restartUnits = ["acme-setup.service"];
-    };
-
-    "headscale-preauth-key" = {};
-    "discord-zfs-webhook" = {};
-
-    "grafana-alloy-env" = {
+    "alloy.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["alloy.service"];
     };
 
-    "authentik-env" = {
+    "authentik.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = [
         "authentik.service"
@@ -25,17 +13,29 @@
       ];
     };
 
-    "caddy-env" = {
+    "babybuddy.env" = {
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["podman-babybuddy.service"];
+    };
+
+    "caddy.env" = {
       sopsFile = ./secrets.sops.yaml;
       owner = "caddy";
       restartUnits = ["caddy.service"];
+    };
+
+    "cloudflare-api-key" = {
+      restartUnits = ["acme-setup.service"];
     };
 
     "dpool_tank_key" = {
       sopsFile = ./secrets.sops.yaml;
     };
 
-    "garage-env" = {
+    "discord-zfs-webhook" = {};
+    "headscale-preauth.key" = {};
+
+    "garage.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["garage.service"];
     };
@@ -58,12 +58,12 @@
       restartUnits = ["headscale.service"];
     };
 
-    "jobscraper-env" = {
+    "jobscraper.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-jobscraper.service"];
     };
 
-    "karakeep-env" = {
+    "karakeep.env" = {
       sopsFile = ./secrets.sops.yaml;
       owner = "karakeep";
       restartUnits = [
@@ -82,7 +82,7 @@
       restartUnits = ["podman-compose-opencloud-root.target"];
     };
 
-    "restic-env" = {
+    "restic.env" = {
       sopsFile = ./secrets.sops.yaml;
     };
     "restic-repo" = {
@@ -92,7 +92,7 @@
       sopsFile = ./secrets.sops.yaml;
     };
 
-    "vaultwarden-env" = {
+    "vaultwarden.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["vaultwarden.service"];
     };

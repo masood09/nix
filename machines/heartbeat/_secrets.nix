@@ -1,51 +1,42 @@
 {
   config.sops.secrets = {
+    "alloy.env" = {
+      restartUnits = ["alloy.service"];
+    };
+
+    "babybuddy.env" = {
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["podman-babybuddy.service"];
+    };
+
+    "caddy.env" = {
+      sopsFile = ./secrets.sops.yaml;
+      owner = "caddy";
+      restartUnits = ["caddy.service"];
+    };
+
     "cloudflare-api-key" = {
       restartUnits = ["acme-setup.service"];
     };
 
-    "headscale-preauth-key" = {};
-    "discord-zfs-webhook" = {};
-
-    "grafana-alloy-env" = {
-      restartUnits = ["alloy.service"];
+    "dell-idrac-fan-controller.env" = {
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["podman-dell-idrac-fan-controller.service"];
     };
 
     "dpool_tank_key" = {
       sopsFile = ./secrets.sops.yaml;
     };
 
+    "discord-zfs-webhook" = {};
+
     "fpool_fast_key" = {
       sopsFile = ./secrets.sops.yaml;
     };
 
-    "restic-env" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
-    "restic-repo" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
-    "restic-password" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
+    "headscale-preauth.key" = {};
 
-    "babybuddy-env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["podman-babybuddy.service"];
-    };
-
-    "caddy-env" = {
-      sopsFile = ./secrets.sops.yaml;
-      owner = "caddy";
-      restartUnits = ["caddy.service"];
-    };
-
-    "dell-idrac-fan-controller-env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["podman-dell-idrac-fan-controller.service"];
-    };
-
-    "garage-env" = {
+    "garage.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["garage.service"];
     };
@@ -56,12 +47,12 @@
       restartUnits = ["grafana.service"];
     };
 
-    "jobscraper-env" = {
+    "jobscraper.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-jobscraper.service"];
     };
 
-    "karakeep-env" = {
+    "karakeep.env" = {
       sopsFile = ./secrets.sops.yaml;
       owner = "karakeep";
       restartUnits = [
@@ -70,7 +61,17 @@
       ];
     };
 
-    "vaultwarden-env" = {
+    "restic.env" = {
+      sopsFile = ./secrets.sops.yaml;
+    };
+    "restic-repo" = {
+      sopsFile = ./secrets.sops.yaml;
+    };
+    "restic-password" = {
+      sopsFile = ./secrets.sops.yaml;
+    };
+
+    "vaultwarden.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["vaultwarden.service"];
     };

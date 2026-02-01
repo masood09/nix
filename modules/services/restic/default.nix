@@ -54,7 +54,7 @@ in {
 
       initialize = true;
 
-      environmentFile = config.sops.secrets."restic-env".path;
+      environmentFile = config.sops.secrets."restic.env".path;
       repositoryFile = config.sops.secrets."restic-repo".path;
       passwordFile = config.sops.secrets."restic-password".path;
 

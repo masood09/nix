@@ -178,7 +178,7 @@ in {
 
       # Caddy reverse proxy with auth except /ready
       caddy = lib.mkIf caddyEnabled {
-        environmentFile = config.sops.secrets."caddy-env".path;
+        environmentFile = config.sops.secrets."caddy.env".path;
 
         virtualHosts = {
           "${lokiCfg.webDomain}" = {

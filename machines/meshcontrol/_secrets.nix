@@ -1,15 +1,14 @@
 {
   config.sops.secrets = {
+    "alloy.env" = {
+      restartUnits = ["alloy.service"];
+    };
+
     "cloudflare-api-key" = {
       restartUnits = ["acme-setup.service"];
     };
 
-    "headscale-preauth-key" = {};
     "discord-zfs-webhook" = {};
-
-    "grafana-alloy-env" = {
-      restartUnits = ["alloy.service"];
-    };
 
     "headscale-authentik-client-secret" = {
       owner = "headscale";
@@ -23,7 +22,9 @@
       restartUnits = ["headscale.service"];
     };
 
-    "restic-env" = {
+    "headscale-preauth.key" = {};
+
+    "restic.env" = {
       sopsFile = ./secrets.sops.yaml;
     };
     "restic-repo" = {
