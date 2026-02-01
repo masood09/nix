@@ -12,7 +12,7 @@
     lib.filterAttrs (_: ds: (ds.restic.enable or false)) zfsDatasets;
 
   datasetNames = lib.attrNames resticDatasetEntries;
-  extraPaths = homelabCfg.services.restic.extraPaths or [];
+  extraPaths = homelabCfg.services.backup.extraPaths or [];
 
   backupRoot = "/mnt/nightly_backup";
   mountPathFor = name: "${backupRoot}/${name}";
@@ -21,6 +21,7 @@
   hasResticPaths = (datasetNames != []) || (extraPaths != []);
 in {
   imports = [
+    ./backup.nix
     ./options.nix
     ./_cleanupZfs.nix
     ./_prepareZfs.nix
@@ -42,7 +43,7 @@ in {
       ];
 
       # Restic backs up *already-mounted* snapshot views
-      paths = resticPaths ++ homelabCfg.services.restic.extraPaths;
+      paths = resticPaths ++ extraPaths;
 
       timerConfig = null;
     };

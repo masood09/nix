@@ -36,6 +36,10 @@
         };
       };
 
+      backup = {
+        enable = true;
+      };
+
       caddy = {
         enable = true;
       };
@@ -118,10 +122,6 @@
       prometheus = {
         enable = true;
         zfs.enable = true;
-      };
-
-      restic = {
-        enable = true;
       };
 
       tailscale = {
