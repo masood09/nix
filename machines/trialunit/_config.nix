@@ -41,6 +41,12 @@
         };
       };
 
+      backup = {
+        enable = true;
+
+        extraPaths = ["/var/lib/private/authentik/media"];
+      };
+
       blocky = {
         enable = true;
         dnsPort = 54;
@@ -187,12 +193,6 @@
       };
 
       rebootRequiredCheck.enable = true;
-
-      restic = {
-        enable = true;
-
-        extraPaths = ["/var/lib/private/authentik/media"];
-      };
 
       tailscale = {
         enable = true;

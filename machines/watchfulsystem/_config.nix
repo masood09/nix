@@ -27,11 +27,11 @@
         };
       };
 
-      caddy = {
+      backup = {
         enable = true;
       };
 
-      restic = {
+      caddy = {
         enable = true;
       };
 

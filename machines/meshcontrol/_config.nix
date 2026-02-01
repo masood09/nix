@@ -27,6 +27,10 @@
         };
       };
 
+      backup = {
+        enable = true;
+      };
+
       caddy = {
         enable = true;
       };
@@ -47,10 +51,6 @@
             redundant_metadata = "most";
           };
         };
-      };
-
-      restic = {
-        enable = true;
       };
 
       tailscale = {

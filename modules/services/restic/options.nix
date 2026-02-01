@@ -2,12 +2,6 @@
   options.homelab.services.restic = {
     enable = lib.mkEnableOption "Enable restic backups";
 
-    extraPaths = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [];
-      description = "Extra filesystem paths to include in restic backup (in addition to staged ZFS snapshot views).";
-    };
-
     pruneOpts = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [
