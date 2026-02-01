@@ -1,7 +1,6 @@
 {lib, ...}: {
   options.homelab.services.restic = {
     enable = lib.mkEnableOption "Enable restic backups";
-    s3Enable = lib.mkEnableOption "Enable S3 restic backups";
 
     extraPaths = lib.mkOption {
       type = lib.types.listOf lib.types.str;

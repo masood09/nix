@@ -7,7 +7,6 @@
   homelabCfg = config.homelab;
 
   resticEnabled = homelabCfg.services.restic.enable;
-  resticS3Enabled = homelabCfg.services.restic.s3Enable;
 
   zfsDatasets = homelabCfg.zfs.datasets or {};
   resticDatasetEntries =
@@ -45,7 +44,7 @@
       datasetNames)}
   '';
 in {
-  config = lib.mkIf (resticEnabled && resticS3Enabled && datasetNames != []) {
+  config = lib.mkIf (resticEnabled && datasetNames != []) {
     systemd = {
       tmpfiles.rules = [
         "d ${backupRoot} 0750 root root -"

@@ -51,7 +51,6 @@
 
       restic = {
         enable = true;
-        s3Enable = true;
       };
 
       tailscale = {
