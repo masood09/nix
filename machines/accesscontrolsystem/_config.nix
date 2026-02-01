@@ -35,6 +35,11 @@
         enable = true;
 
         extraPaths = ["/var/lib/private/authentik/media"];
+
+        serviceUnits = [
+          "authentik.service"
+          "authentik-worker.service"
+        ];
       };
 
       caddy = {

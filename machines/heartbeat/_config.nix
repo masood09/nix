@@ -38,6 +38,17 @@
 
       backup = {
         enable = true;
+
+        serviceUnits = [
+          "garage.service"
+          "immich-machine-learning.service"
+          "immich-server.service"
+          "karakeep-browser.service"
+          "karakeep-workers.service"
+          "karakeep-web.service"
+          "podman-babybuddy.service"
+          "vaultwarden.service"
+        ];
       };
 
       caddy = {
