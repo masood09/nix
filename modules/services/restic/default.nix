@@ -42,10 +42,7 @@ in {
       # Restic backs up *already-mounted* snapshot views
       paths = resticPaths ++ homelabCfg.services.restic.extraPaths;
 
-      timerConfig = {
-        OnCalendar = "*-*-* 02:00:00";
-        Persistent = true;
-      };
+      timerConfig = null;
     };
 
     systemd.services."restic-backups-backup" = lib.mkIf resticS3Enabled {

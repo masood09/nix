@@ -60,14 +60,6 @@ in {
         };
         path = with pkgs; [zfs util-linux coreutils];
       };
-
-      timers.restic-zfs-prepare = {
-        wantedBy = ["timers.target"];
-        timerConfig = {
-          OnCalendar = "*-*-* 01:50:00";
-          Persistent = true;
-        };
-      };
     };
   };
 }
