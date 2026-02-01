@@ -13,7 +13,7 @@
       ];
     };
 
-    "babybuddy-env" = {
+    "babybuddy.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-babybuddy.service"];
     };

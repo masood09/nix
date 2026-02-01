@@ -4,7 +4,7 @@
       restartUnits = ["alloy.service"];
     };
 
-    "babybuddy-env" = {
+    "babybuddy.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-babybuddy.service"];
     };
