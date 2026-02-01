@@ -63,7 +63,7 @@
       restartUnits = ["podman-jobscraper.service"];
     };
 
-    "karakeep-env" = {
+    "karakeep.env" = {
       sopsFile = ./secrets.sops.yaml;
       owner = "karakeep";
       restartUnits = [
