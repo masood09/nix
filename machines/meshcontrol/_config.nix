@@ -29,6 +29,10 @@
 
       backup = {
         enable = true;
+
+        serviceUnits = [
+          "headscale.service"
+        ];
       };
 
       caddy = {

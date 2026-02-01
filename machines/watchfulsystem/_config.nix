@@ -29,6 +29,10 @@
 
       backup = {
         enable = true;
+
+        serviceUnits = [
+          "uptime-kuma.service"
+        ];
       };
 
       caddy = {
