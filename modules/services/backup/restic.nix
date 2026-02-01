@@ -20,13 +20,6 @@
 
   hasResticPaths = (datasetNames != []) || (extraPaths != []);
 in {
-  imports = [
-    ./backup.nix
-    ./options.nix
-    ./_cleanupZfs.nix
-    ./_prepareZfs.nix
-  ];
-
   config = lib.mkIf resticEnabled {
     services.restic.backups.backup = lib.mkIf hasResticPaths {
       inherit (homelabCfg.services.restic) pruneOpts;

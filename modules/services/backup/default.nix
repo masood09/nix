@@ -6,6 +6,13 @@
   homelabCfg = config.homelab;
   cfg = homelabCfg.services.backup;
 in {
+  imports = [
+    ./restic.nix
+    ./options.nix
+    ./_cleanupZfs.nix
+    ./_prepareZfs.nix
+  ];
+
   options.homelab.services.backup = {
     enable = lib.mkEnableOption "Homelab backup orchestration";
 
