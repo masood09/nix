@@ -82,7 +82,7 @@
       restartUnits = ["podman-compose-opencloud-root.target"];
     };
 
-    "restic-env" = {
+    "restic.env" = {
       sopsFile = ./secrets.sops.yaml;
     };
     "restic-repo" = {

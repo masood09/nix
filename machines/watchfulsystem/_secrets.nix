@@ -11,7 +11,7 @@
     "discord-zfs-webhook" = {};
     "headscale-preauth-key" = {};
 
-    "restic-env" = {
+    "restic.env" = {
       sopsFile = ./secrets.sops.yaml;
     };
     "restic-repo" = {
