@@ -9,7 +9,7 @@
       restartUnits = ["podman-babybuddy.service"];
     };
 
-    "caddy-env" = {
+    "caddy.env" = {
       sopsFile = ./secrets.sops.yaml;
       owner = "caddy";
       restartUnits = ["caddy.service"];
