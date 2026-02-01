@@ -19,7 +19,7 @@
       restartUnits = ["acme-setup.service"];
     };
 
-    "dell-idrac-fan-controller-env" = {
+    "dell-idrac-fan-controller.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-dell-idrac-fan-controller.service"];
     };
