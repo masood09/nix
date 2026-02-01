@@ -12,7 +12,7 @@
     "headscale-preauth-key" = {};
     "discord-zfs-webhook" = {};
 
-    "grafana-alloy-env" = {
+    "alloy.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["alloy.service"];
     };

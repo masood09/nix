@@ -2,7 +2,7 @@
   config.sops.secrets = {
     "headscale-preauth-key" = {};
 
-    "grafana-alloy-env" = {
+    "alloy.env" = {
       restartUnits = ["alloy.service"];
     };
   };
