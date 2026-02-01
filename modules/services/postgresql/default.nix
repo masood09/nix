@@ -130,7 +130,7 @@ in {
 
         location = backupCfg.dataDir;
         pgdumpOptions = "--no-owner";
-        startAt = "*-*-* 1:00:00";
+        startAt = "2000-01-01 00:00";
       };
 
       prometheus.exporters.postgres = {

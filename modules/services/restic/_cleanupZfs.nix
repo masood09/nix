@@ -48,13 +48,5 @@ in {
       };
       path = with pkgs; [zfs util-linux coreutils];
     };
-
-    systemd.timers.restic-zfs-cleanup = {
-      wantedBy = ["timers.target"];
-      timerConfig = {
-        OnCalendar = "*-*-* 8:00:00";
-        Persistent = true;
-      };
-    };
   };
 }
