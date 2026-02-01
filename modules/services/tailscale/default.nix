@@ -9,18 +9,10 @@ in {
   options.homelab.services.tailscale = {
     enable = lib.mkEnableOption "Enable Tailscale.";
 
-    authKeyFile = lib.mkOption {
-      type = lib.types.path;
-      default = config.sops.secrets."headscale-preauth-key".path;
-      description = "Path to the Tailscale/Headscale preauth key file.";
-      example = "/run/secrets/headscale-preauth-key";
-    };
-
     loginServer = lib.mkOption {
       type = lib.types.str;
       default = "https://headscale.mantannest.com";
       description = "Control server URL passed to `tailscale up --login-server`.";
-      example = "https://headscale.example.com";
     };
 
     dataDir = lib.mkOption {
@@ -59,7 +51,9 @@ in {
 
     services = lib.mkIf cfg.enable {
       tailscale = {
-        inherit (cfg) authKeyFile enable;
+        inherit (cfg) enable;
+
+        authKeyFile = config.sops.secrets."headscale-preauth-key".path;
 
         extraUpFlags = [
           "--login-server=${cfg.loginServer}"
