@@ -3,6 +3,7 @@
     ./alloy
     ./authentik
     ./babybuddy
+    ./backup
     ./blocky
     ./caddy
     ./dell-idrac-fan-controller
@@ -18,7 +19,6 @@
     ./podman
     ./postgresql
     ./prometheus
-    ./restic
     ./ssh
     ./tailscale
     ./uptime-kuma
