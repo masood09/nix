@@ -36,7 +36,7 @@
 
     "headscale-preauth-key" = {};
 
-    "garage-env" = {
+    "garage.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["garage.service"];
     };
