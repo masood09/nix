@@ -1,17 +1,5 @@
 {
   config.sops.secrets = {
-    "babybuddy-env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["podman-babybuddy.service"];
-    };
-
-    "cloudflare-api-key" = {
-      restartUnits = ["acme-setup.service"];
-    };
-
-    "headscale-preauth-key" = {};
-    "discord-zfs-webhook" = {};
-
     "alloy.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["alloy.service"];
@@ -25,15 +13,27 @@
       ];
     };
 
+    "babybuddy-env" = {
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["podman-babybuddy.service"];
+    };
+
     "caddy-env" = {
       sopsFile = ./secrets.sops.yaml;
       owner = "caddy";
       restartUnits = ["caddy.service"];
     };
 
+    "cloudflare-api-key" = {
+      restartUnits = ["acme-setup.service"];
+    };
+
     "dpool_tank_key" = {
       sopsFile = ./secrets.sops.yaml;
     };
+
+    "discord-zfs-webhook" = {};
+    "headscale-preauth-key" = {};
 
     "garage-env" = {
       sopsFile = ./secrets.sops.yaml;
