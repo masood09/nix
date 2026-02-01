@@ -33,6 +33,26 @@
       fi
     done < ${unitsFile}
   '';
+
+  servicesStartScript = pkgs.writeShellScript "backup-start-units" ''
+    set -euo pipefail
+
+    echo "Starting units after backup..."
+
+    while IFS= read -r unit; do
+      [ -z "$unit" ] && continue
+
+      load_state="$(systemctl show -p LoadState --value "$unit" 2>/dev/null || true)"
+
+      if [ "$load_state" != "loaded" ]; then
+        echo " - $unit (not installed) -> skip"
+        continue
+      fi
+
+      echo " - starting $unit"
+      systemctl start "$unit" || echo "   ! failed to start $unit (continuing)"
+    done < ${unitsFile}
+  '';
 in {
   imports = [
     ./options.nix
@@ -69,6 +89,7 @@ in {
               echo "Backup pipeline complete."
             '';
 
+            ExecStartPost = servicesStartScript;
             TimeoutStartSec = "6h";
           };
         };
