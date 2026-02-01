@@ -47,10 +47,5 @@ in {
 
       timerConfig = null;
     };
-
-    systemd.services."restic-backups-backup" = {
-      after = ["restic-zfs-prepare.service"];
-      wants = ["restic-zfs-prepare.service"];
-    };
   };
 }
