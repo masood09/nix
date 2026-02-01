@@ -92,7 +92,7 @@
       sopsFile = ./secrets.sops.yaml;
     };
 
-    "vaultwarden-env" = {
+    "vaultwarden.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["vaultwarden.service"];
     };
