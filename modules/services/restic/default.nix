@@ -19,34 +19,10 @@
   resticPaths = map mountPathFor datasetNames;
 in {
   imports = [
+    ./options.nix
     ./_cleanupZfs.nix
     ./_prepareZfs.nix
   ];
-
-  options.homelab.services.restic = {
-    enable = lib.mkEnableOption "Enable restic backups";
-    s3Enable = lib.mkEnableOption "Enable S3 restic backups";
-
-    extraPaths = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [];
-      description = "Extra filesystem paths to include in restic backup (in addition to staged ZFS snapshot views).";
-    };
-
-    pruneOpts = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [
-        "--keep-daily 3"
-        "--keep-weekly 4"
-      ];
-
-      description = "Restic forget/prune retention options passed as pruneOpts.";
-
-      example = [
-        "--keep-last 7"
-      ];
-    };
-  };
 
   config = lib.mkIf resticEnabled {
     services.restic.backups.backup = lib.mkIf (resticS3Enabled && datasetNames != []) {
