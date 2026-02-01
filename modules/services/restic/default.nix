@@ -6,7 +6,6 @@
   homelabCfg = config.homelab;
 
   resticEnabled = homelabCfg.services.restic.enable;
-  resticS3Enabled = homelabCfg.services.restic.s3Enable;
 
   zfsDatasets = homelabCfg.zfs.datasets or {};
   resticDatasetEntries =
@@ -25,7 +24,7 @@ in {
   ];
 
   config = lib.mkIf resticEnabled {
-    services.restic.backups.backup = lib.mkIf (resticS3Enabled && datasetNames != []) {
+    services.restic.backups.backup = lib.mkIf (datasetNames != []) {
       inherit (homelabCfg.services.restic) pruneOpts;
 
       initialize = true;
@@ -45,7 +44,7 @@ in {
       timerConfig = null;
     };
 
-    systemd.services."restic-backups-backup" = lib.mkIf resticS3Enabled {
+    systemd.services."restic-backups-backup" = {
       after = ["restic-zfs-prepare.service"];
       wants = ["restic-zfs-prepare.service"];
     };

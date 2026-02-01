@@ -190,7 +190,6 @@
 
       restic = {
         enable = true;
-        s3Enable = true;
 
         extraPaths = ["/var/lib/private/authentik/media"];
       };
