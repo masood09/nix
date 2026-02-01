@@ -5,7 +5,7 @@
       restartUnits = ["alloy.service"];
     };
 
-    "authentik-env" = {
+    "authentik.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = [
         "authentik.service"
