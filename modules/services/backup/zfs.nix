@@ -76,7 +76,7 @@ in {
           path = with pkgs; [zfs util-linux coreutils];
         };
 
-        restic-zfs-dataset-prepare = {
+        backup-restic-zfs-dataset-prepare = {
           description = "Prepare ZFS snapshot mounts for restic backups";
           serviceConfig = {
             Type = "oneshot";
