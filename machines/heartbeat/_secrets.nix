@@ -47,7 +47,7 @@
       restartUnits = ["grafana.service"];
     };
 
-    "jobscraper-env" = {
+    "jobscraper.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-jobscraper.service"];
     };
