@@ -141,6 +141,13 @@
       loki = {
         enable = true;
 
+        retentionPeriod = {
+          default = "24h";
+          debug = "24h";
+          warn = "48h";
+          error = "168h";
+        };
+
         zfs = {
           enable = true;
         };
