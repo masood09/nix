@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   homelabCfg = config.homelab;
@@ -11,58 +12,9 @@
   postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
   resticEnabled = config.homelab.services.restic.enable;
 in {
-  options.homelab.services.babybuddy = {
-    enable = lib.mkEnableOption "Whether to enable Baby Buddy.";
-
-    webDomain = lib.mkOption {
-      type = lib.types.str;
-      default = "babybuddy.homelab.mantannest.com";
-    };
-
-    dataDir = lib.mkOption {
-      type = lib.types.path;
-      default = "/var/lib/babybuddy";
-    };
-
-    listenAddress = lib.mkOption {
-      default = "127.0.0.1";
-      type = lib.types.str;
-    };
-
-    listenPort = lib.mkOption {
-      default = 8903;
-      type = lib.types.port;
-    };
-
-    userId = lib.mkOption {
-      default = 3004;
-      type = lib.types.ints.u16;
-    };
-
-    groupId = lib.mkOption {
-      default = 3004;
-      type = lib.types.ints.u16;
-    };
-
-    zfs = {
-      enable = lib.mkEnableOption "Store Baby Buddy dataDir on a ZFS dataset.";
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "dpool/tank/services/babybuddy";
-        description = "ZFS dataset to create and mount at dataDir.";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          logbias = "latency";
-          recordsize = "16K";
-        };
-        description = "ZFS properties for the dataset.";
-      };
-    };
-  };
+  imports = [
+    ./options.nix
+  ];
 
   config = lib.mkIf (babybuddyCfg.enable && podmanEnabled) {
     # ZFS dataset for dataDir
@@ -176,23 +128,47 @@ in {
 
     # Service hardening + mount ordering
     systemd = {
-      services.podman-babybuddy = lib.mkMerge [
-        {
-          # Unit-level ordering / mount requirements
-          unitConfig = {
-            RequiresMountsFor = [babybuddyCfg.dataDir];
-          };
-        }
+      services = {
+        babybuddy-permissions = {
+          description = "Fix Babybuddy dataDir ownership/permissions";
+          wantedBy = ["multi-user.target"];
 
-        (lib.mkIf babybuddyCfg.zfs.enable {
-          requires = ["zfs-dataset-babybuddy.service"];
-          after = ["zfs-dataset-babybuddy.service"];
-        })
-      ];
+          after =
+            ["local-fs.target"]
+            ++ lib.optionals babybuddyCfg.zfs.enable [
+              "zfs-dataset-babybuddy.service"
+            ];
+          requires = lib.optionals babybuddyCfg.zfs.enable [
+            "zfs-dataset-babybuddy.service"
+          ];
+
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = ''
+              ${pkgs.coreutils}/bin/chown -R babybuddy:babybuddy ${toString babybuddyCfg.dataDir}
+            '';
+          };
+        };
+
+        podman-babybuddy = lib.mkMerge [
+          {
+            # Unit-level ordering / mount requirements
+            unitConfig = {
+              RequiresMountsFor = [babybuddyCfg.dataDir];
+            };
+          }
+
+          (lib.mkIf babybuddyCfg.zfs.enable {
+            requires = ["zfs-dataset-babybuddy.service"];
+            after = ["zfs-dataset-babybuddy.service"];
+          })
+        ];
+      };
 
       tmpfiles.rules = [
-        # Ensure base dir exists and is owned correctly
         "d ${babybuddyCfg.dataDir} 0750 babybuddy babybuddy -"
+        "z ${babybuddyCfg.dataDir} 0750 babybuddy babybuddy -"
       ];
     };
 
