@@ -44,8 +44,35 @@ discovery.relabel "systemd" {
 // - Set the stream label "level" from the parsed value
 // -------------------------
 loki.process "systemd" {
+
+  // -------------------------
+  // 1) JSON logs: {"level":"info", ...}
+  // -------------------------
   stage.match {
-    // Only attempt parsing on lines that contain a level key
+    selector = "{unit=~\".+\"} |~ \"^{\\\"\""
+
+    stage.json {
+      expressions = {
+        app_level = "level",
+      }
+    }
+
+    stage.template {
+      source   = "app_level"
+      template = "{{- $l := lower .Value -}}{{- if eq $l \"warning\" -}}warn{{- else -}}{{$l}}{{- end -}}"
+    }
+
+    stage.labels {
+      values = {
+        level = "app_level",
+      }
+    }
+  }
+
+  // -------------------------
+  // 2) logfmt logs: level=warn ts=... msg="..."
+  // -------------------------
+  stage.match {
     selector = "{unit=~\".+\"} |~ \"(^|[[:space:]])level=\""
 
     stage.logfmt {
@@ -66,9 +93,12 @@ loki.process "systemd" {
     }
   }
 
-  // Fallback: if we still don't have a level label, use journald priority
+  // -------------------------
+  // 3) Fallback: only if level still missing/empty
+  // -------------------------
   stage.match {
-    selector = "{level=\"\"}"
+    // Use regex-empty; more reliable than {level=""} in many setups
+    selector = "{level=~\"^$\"}"
 
     stage.labels {
       values = {
