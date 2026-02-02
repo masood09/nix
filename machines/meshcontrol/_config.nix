@@ -27,6 +27,14 @@
         };
       };
 
+      backup = {
+        enable = true;
+
+        serviceUnits = [
+          "headscale.service"
+        ];
+      };
+
       caddy = {
         enable = true;
       };
@@ -47,11 +55,6 @@
             redundant_metadata = "most";
           };
         };
-      };
-
-      restic = {
-        enable = true;
-        s3Enable = true;
       };
 
       tailscale = {

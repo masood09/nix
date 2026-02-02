@@ -27,13 +27,16 @@
         };
       };
 
-      caddy = {
+      backup = {
         enable = true;
+
+        serviceUnits = [
+          "uptime-kuma.service"
+        ];
       };
 
-      restic = {
+      caddy = {
         enable = true;
-        s3Enable = true;
       };
 
       tailscale = {

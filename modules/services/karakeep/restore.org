@@ -21,7 +21,7 @@ The workflow:
 Confirm the snapshot you intend to restore:
 
 #+begin_src bash
-sudo restic-s3-backup snapshots
+sudo restic-backup snapshots
 #+end_src
 
 * Restore the Latest Snapshot to a Temporary Location
@@ -29,7 +29,7 @@ sudo restic-s3-backup snapshots
 Restore the Karakeep data into =/tmp=:
 
 #+begin_src bash
-sudo restic-s3-backup restore latest \
+sudo restic-backup restore latest \
   --include /mnt/nightly_backup/karakeep \
   --target /tmp
 #+end_src

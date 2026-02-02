@@ -41,6 +41,29 @@
         };
       };
 
+      backup = {
+        enable = true;
+        extraPaths = ["/var/lib/private/authentik/media"];
+
+        serviceUnits = [
+          "authentik.service"
+          "authentik-worker.service"
+          "garage.service"
+          "headscale.service"
+          "immich-machine-learning.service"
+          "immich-server.service"
+          "karakeep-browser.service"
+          "karakeep-workers.service"
+          "karakeep-web.service"
+          "podman-babybuddy.service"
+          "podman-opencloud-collabora.service"
+          "podman-opencloud-opencloud.service"
+          "podman-opencloud-wopi.service"
+          "uptime-kuma.service"
+          "vaultwarden.service"
+        ];
+      };
+
       blocky = {
         enable = true;
         dnsPort = 54;
@@ -184,15 +207,6 @@
         enable = true;
         webDomain = "prometheus.test.mantannest.com";
         zfs.enable = true;
-      };
-
-      rebootRequiredCheck.enable = true;
-
-      restic = {
-        enable = true;
-        s3Enable = true;
-
-        extraPaths = ["/var/lib/private/authentik/media"];
       };
 
       tailscale = {
