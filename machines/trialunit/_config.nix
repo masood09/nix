@@ -103,18 +103,12 @@
 
         oidc = {
           enable = true;
-          client_id = "headscale";
+          clientId = "headscale";
         };
 
         zfs = {
           enable = true;
           dataset = "dpool/tank/services/headscale";
-
-          properties = {
-            logbias = "latency";
-            recordsize = "16K";
-            redundant_metadata = "most";
-          };
         };
       };
 
