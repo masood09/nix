@@ -21,6 +21,10 @@
     };
 
     services = {
+      backup = {
+        enable = true;
+      };
+
       blocky = {
         enable = true;
       };

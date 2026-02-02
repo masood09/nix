@@ -31,6 +31,17 @@
         };
       };
 
+      backup = {
+        enable = true;
+
+        extraPaths = ["/var/lib/private/authentik/media"];
+
+        serviceUnits = [
+          "authentik.service"
+          "authentik-worker.service"
+        ];
+      };
+
       caddy = {
         enable = true;
       };
@@ -51,13 +62,6 @@
             dataset = "rpool/root/var/backup/postgresql";
           };
         };
-      };
-
-      restic = {
-        enable = true;
-        s3Enable = true;
-
-        extraPaths = ["/var/lib/private/authentik/media"];
       };
 
       tailscale = {

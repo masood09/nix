@@ -15,7 +15,7 @@ The procedure:
 
 * Prerequisites
 
-- Restic repository configured (=restic-s3-backup=)
+- Restic repository configured (=restic-backup=)
 - Sufficient disk space in =/tmp=
 - =headscale= system user and group exist
 - Service managed via systemd
@@ -25,7 +25,7 @@ The procedure:
 Confirm the snapshot you intend to restore:
 
 #+begin_src bash
-sudo restic-s3-backup snapshots
+sudo restic-backup snapshots
 #+end_src
 
 * 2. Restore the Latest Snapshot to a Temporary Location
@@ -33,7 +33,7 @@ sudo restic-s3-backup snapshots
 Restore only the Headscale dataset into =/tmp=:
 
 #+begin_src bash
-sudo restic-s3-backup restore latest \
+sudo restic-backup restore latest \
   --include /mnt/nightly_backup/headscale \
   --target /tmp
 #+end_src

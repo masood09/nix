@@ -6,7 +6,11 @@
   cfg = config.homelab.services.rebootRequiredCheck;
 in {
   options.homelab.services.rebootRequiredCheck = {
-    enable = lib.mkEnableOption "Reboot required check";
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Reboot required check";
+    };
   };
 
   config = lib.mkIf cfg.enable {

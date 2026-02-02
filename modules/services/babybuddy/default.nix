@@ -124,7 +124,7 @@ in {
 
       restic = lib.mkIf (resticEnabled && babybuddyCfg.zfs.enable) {
         backups = {
-          s3-backup.exclude = [
+          backup.exclude = [
             "/mnt/nightly_backup/babybuddy/keys"
             "/mnt/nightly_backup/babybuddy/log"
             "/mnt/nightly_backup/babybuddy/nginx"
