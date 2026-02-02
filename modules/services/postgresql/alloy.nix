@@ -9,7 +9,7 @@
   postgresqlExporterPort = toString config.services.prometheus.exporters.postgres.port;
 in {
   config = {
-    environment.etc."alloy/config-postgresql.alloy" = lib.mkIf (postgresqlEnabled && alloyEnabled) {
+    environment.etc."alloy/postgresql.alloy" = lib.mkIf (postgresqlEnabled && alloyEnabled) {
       text = ''
         prometheus.scrape "postgresql_target" {
           targets = [
