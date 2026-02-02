@@ -1,10 +1,14 @@
-{lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   options.homelab.services.babybuddy = {
     enable = lib.mkEnableOption "Whether to enable Baby Buddy.";
 
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "babybuddy.homelab.mantannest.com";
+      default = "babybuddy.${config.networking.domain}";
     };
 
     dataDir = lib.mkOption {

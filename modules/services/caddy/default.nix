@@ -51,7 +51,7 @@ in {
         acceptTerms = true;
 
         defaults = {
-          email = "letsencrypt@mantannest.com";
+          email = "letsencrypt@${config.networking.domain}";
           dnsProvider = "cloudflare";
           dnsPropagationCheck = true;
           dnsResolver = "1.1.1.1:53";

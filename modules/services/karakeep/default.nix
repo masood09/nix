@@ -13,7 +13,7 @@ in {
 
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "keep.mantannest.com";
+      default = "keep.${config.networking.domain}";
     };
 
     dataDir = lib.mkOption {
@@ -39,7 +39,7 @@ in {
     oauth = {
       providerHost = lib.mkOption {
         type = lib.types.str;
-        default = "auth.mantannest.com";
+        default = "auth.${config.networking.domain}";
       };
 
       clientId = lib.mkOption {

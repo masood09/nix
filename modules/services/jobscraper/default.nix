@@ -13,7 +13,7 @@ in {
 
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "jobscraper.mantannest.com";
+      default = "jobscraper.${config.networking.domain}";
     };
 
     listenAddress = lib.mkOption {

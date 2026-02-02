@@ -13,7 +13,7 @@ in {
 
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "ittools.mantannest.com";
+      default = "ittools.${config.networking.domain}";
     };
 
     listenAddress = lib.mkOption {

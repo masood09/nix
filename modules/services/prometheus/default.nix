@@ -15,7 +15,7 @@ in {
 
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "prometheus.mantannest.com";
+      default = "prometheus.${config.networking.domain}";
     };
 
     zfs = {

@@ -17,7 +17,7 @@ in {
 
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "auth.mantannest.com";
+      default = "auth.${config.networking.domain}";
     };
   };
 

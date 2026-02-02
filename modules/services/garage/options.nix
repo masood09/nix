@@ -1,4 +1,8 @@
-{lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   options.homelab.services.garage = {
     enable = lib.mkEnableOption "Whether to enable Garage S3 (GarageHQ).";
 
@@ -14,7 +18,7 @@
 
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "s3.mantannest.com";
+      default = "s3.${config.networking.domain}";
       description = "Public S3 API hostname (for reverse proxy / TLS).";
     };
 

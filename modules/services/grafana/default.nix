@@ -17,7 +17,7 @@ in {
 
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "grafana.mantannest.com";
+      default = "grafana.${config.networking.domain}";
     };
 
     dataDir = lib.mkOption {
@@ -28,7 +28,7 @@ in {
     oauth = {
       providerHost = lib.mkOption {
         type = lib.types.str;
-        default = "auth.mantannest.com";
+        default = "auth.${config.networking.domain}";
       };
 
       clientId = lib.mkOption {
