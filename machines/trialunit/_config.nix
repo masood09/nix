@@ -80,7 +80,7 @@
 
       garage = {
         enable = true;
-        s3Domain = "s3.test.mantannest.com";
+        webDomain = "s3.test.mantannest.com";
 
         zfs = {
           enable = true;
