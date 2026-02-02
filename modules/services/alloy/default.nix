@@ -64,8 +64,16 @@ in {
       };
     };
 
-    environment.etc."alloy/config.alloy" = {
-      source = ./config.alloy;
+    environment.etc = {
+      "alloy/config.alloy" = {
+        source = ./config.alloy;
+      };
+      "alloy/loki.alloy" = {
+        source = ./loki.alloy;
+      };
+      "alloy/prometheus.alloy" = {
+        source = ./prometheus.alloy;
+      };
     };
   };
 }
