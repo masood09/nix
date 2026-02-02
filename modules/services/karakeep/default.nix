@@ -8,65 +8,9 @@
   cfg = homelabCfg.services.karakeep;
   caddyEnabled = config.services.caddy.enable;
 in {
-  options.homelab.services.karakeep = {
-    enable = lib.mkEnableOption "Whether to enable Karakeep.";
-
-    webDomain = lib.mkOption {
-      type = lib.types.str;
-      default = "keep.${config.networking.domain}";
-    };
-
-    dataDir = lib.mkOption {
-      type = lib.types.path;
-      default = "/var/lib/karakeep/";
-    };
-
-    listenPort = lib.mkOption {
-      default = 8904;
-      type = lib.types.port;
-    };
-
-    userId = lib.mkOption {
-      default = 3007;
-      type = lib.types.ints.u16;
-    };
-
-    groupId = lib.mkOption {
-      default = 3007;
-      type = lib.types.ints.u16;
-    };
-
-    oauth = {
-      providerHost = lib.mkOption {
-        type = lib.types.str;
-        default = "auth.${config.networking.domain}";
-      };
-
-      clientId = lib.mkOption {
-        type = lib.types.str;
-        default = "LMIokPsj1HsqybAQGh6JOVpF33ChM6eS0EE2JYG0";
-      };
-    };
-
-    zfs = {
-      enable = lib.mkEnableOption "Store Karakeep dataDir on a ZFS dataset.";
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "dpool/tank/services/karakeep";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          logbias = "latency";
-          recordsize = "16K";
-          relatime = "off";
-          primarycache = "all";
-        };
-      };
-    };
-  };
+  imports = [
+    ./options.nix
+  ];
 
   config = lib.mkIf cfg.enable {
     # ZFS dataset for dataDir
@@ -216,7 +160,7 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/install -d -m 0700 -o karakeep -g karakeep ${cfg.dataDir}
+              ${pkgs.coreutils}/bin/chown -R karakeep:karakeep ${cfg.dataDir}
             '';
           };
         };
