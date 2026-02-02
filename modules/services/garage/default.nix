@@ -192,7 +192,7 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${garageCfg.s3Domain}" = {
-            useACMEHost = garageCfg.s3Domain;
+            useACMEHost = config.networking.domain;
             extraConfig = ''
               route {
                 handle /-/health {
@@ -208,10 +208,6 @@ in {
           };
         };
       };
-    };
-
-    security.acme = lib.mkIf caddyEnabled {
-      certs."${garageCfg.s3Domain}".domain = garageCfg.s3Domain;
     };
 
     users = {

@@ -45,17 +45,13 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${ittoolsCfg.webDomain}" = {
-            useACMEHost = ittoolsCfg.webDomain;
+            useACMEHost = config.networking.domain;
             extraConfig = ''
               reverse_proxy http://${ittoolsCfg.listenAddress}:${toString ittoolsCfg.listenPort}
             '';
           };
         };
       };
-    };
-
-    security = lib.mkIf (caddyEnabled && ittoolsCfg.enable) {
-      acme.certs."${ittoolsCfg.webDomain}".domain = "${ittoolsCfg.webDomain}";
     };
   };
 }

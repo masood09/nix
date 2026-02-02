@@ -165,7 +165,7 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${grafanaCfg.webDomain}" = {
-            useACMEHost = grafanaCfg.webDomain;
+            useACMEHost = config.networking.domain;
 
             extraConfig = ''
               reverse_proxy http://127.0.0.1:${toString config.services.grafana.settings.server.http_port}
@@ -173,10 +173,6 @@ in {
           };
         };
       };
-    };
-
-    security = lib.mkIf caddyEnabled {
-      acme.certs."${grafanaCfg.webDomain}".domain = "${grafanaCfg.webDomain}";
     };
 
     # Service hardening + mount ordering

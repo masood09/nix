@@ -100,7 +100,7 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${immichCfg.webDomain}" = {
-            useACMEHost = immichCfg.webDomain;
+            useACMEHost = config.networking.domain;
             extraConfig = ''
               reverse_proxy http://127.0.0.1:${toString config.services.immich.port}
             '';
@@ -113,10 +113,6 @@ in {
           config.services.immich.database.name
         ];
       };
-    };
-
-    security = lib.mkIf caddyEnabled {
-      acme.certs."${immichCfg.webDomain}".domain = "${immichCfg.webDomain}";
     };
 
     users.users = {

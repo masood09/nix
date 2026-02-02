@@ -7,6 +7,7 @@
 
     networking = {
       hostName = "trialunit";
+      domain = "test.mantannest.com";
     };
 
     programs = {

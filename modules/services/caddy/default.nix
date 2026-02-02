@@ -59,6 +59,13 @@ in {
             "CLOUDFLARE_DNS_API_TOKEN_FILE" = homelabCfg.services.acme.cloudflareAPIKeyPath;
           };
         };
+
+        certs.${config.networking.domain} = {
+          extraDomainNames = [
+            "${config.networking.domain}"
+            "*.${config.networking.domain}"
+          ];
+        };
       };
     };
 

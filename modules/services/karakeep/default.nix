@@ -118,7 +118,7 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${cfg.webDomain}" = {
-            useACMEHost = cfg.webDomain;
+            useACMEHost = config.networking.domain;
 
             extraConfig = ''
               reverse_proxy http://127.0.0.1:${toString cfg.listenPort}
@@ -126,10 +126,6 @@ in {
           };
         };
       };
-    };
-
-    security = lib.mkIf caddyEnabled {
-      acme.certs."${cfg.webDomain}".domain = "${cfg.webDomain}";
     };
 
     users = {

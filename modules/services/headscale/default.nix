@@ -106,17 +106,13 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${headscaleCfg.webDomain}" = {
-            useACMEHost = headscaleCfg.webDomain;
+            useACMEHost = config.networking.domain;
             extraConfig = ''
               reverse_proxy http://127.0.0.1:${toString config.services.headscale.port}
             '';
           };
         };
       };
-    };
-
-    security = lib.mkIf caddyEnabled {
-      acme.certs."${headscaleCfg.webDomain}".domain = "${headscaleCfg.webDomain}";
     };
 
     # Service hardening + mount ordering

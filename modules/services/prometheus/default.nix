@@ -72,7 +72,7 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${cfg.webDomain}" = {
-            useACMEHost = cfg.webDomain;
+            useACMEHost = config.networking.domain;
 
             extraConfig = ''
               route {
@@ -97,10 +97,6 @@ in {
           };
         };
       };
-    };
-
-    security = lib.mkIf caddyEnabled {
-      acme.certs."${cfg.webDomain}".domain = "${cfg.webDomain}";
     };
 
     # Service hardening + mount ordering
