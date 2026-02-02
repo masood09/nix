@@ -66,7 +66,7 @@ in {
   config = lib.mkIf (resticEnabled && datasetNames != []) {
     systemd = {
       services = {
-        backup-zfs-dataset-cleanup = {
+        backup-restic-zfs-dataset-cleanup = {
           description = "Cleanup ZFS snapshot mounts after restic backups";
           serviceConfig = {
             Type = "oneshot";

@@ -169,6 +169,24 @@
       systemctl start "$resticUnit"
     fi
 
+    if [ "${
+      if (datasetNames != [])
+      then "1"
+      else "0"
+    }" = "1" ]; then
+      echo "Cleanup ZFS snapshot mounts for restic backups"
+
+      unit="backup-restic-zfs-dataset-cleanup.service"
+      load_state="$(systemctl show -p LoadState --value "$unit" 2>/dev/null || true)"
+
+      if [ "$load_state" != "loaded" ]; then
+        echo "   - $unit (not installed) -> skip"
+      else
+        echo "   - starting $unit"
+        systemctl start "$unit"
+      fi
+    fi
+
     echo "Backup pipeline complete."
   '';
 in {
