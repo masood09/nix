@@ -23,7 +23,7 @@ in {
 
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "headscale.mantannest.com";
+      default = "headscale.${config.networking.domain}";
     };
 
     adminUser = lib.mkOption {
@@ -41,7 +41,7 @@ in {
 
       issuer = lib.mkOption {
         type = lib.types.str;
-        default = "https://auth.mantannest.com/application/o/headscale/";
+        default = "https://auth.${config.networking.domain}/application/o/headscale/";
       };
 
       client_id = lib.mkOption {

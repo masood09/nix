@@ -19,7 +19,7 @@ in {
 
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "photos.mantannest.com";
+      default = "photos.${config.networking.domain}";
     };
 
     userId = lib.mkOption {

@@ -15,7 +15,7 @@ in {
 
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "passwords.mantannest.com";
+      default = "passwords.${config.networking.domain}";
     };
 
     dataDir = lib.mkOption {

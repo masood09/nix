@@ -16,7 +16,7 @@ in {
 
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "loki.mantannest.com";
+      default = "loki.${config.networking.domain}";
     };
 
     dataDir = lib.mkOption {
