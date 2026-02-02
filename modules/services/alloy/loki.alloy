@@ -1,0 +1,71 @@
+// -------------------------
+// Journald source
+// -------------------------
+loki.source.journal "systemd" {
+  relabel_rules = discovery.relabel.systemd.rules
+  forward_to    = [loki.process.systemd.receiver]
+}
+
+// -------------------------
+// Relabeling rules (journald metadata -> labels)
+// -------------------------
+discovery.relabel "systemd" {
+  targets = []
+
+  rule {
+    // Extract systemd unit information into a label
+    source_labels = ["__journal__systemd_unit"]
+    target_label  = "unit"
+  }
+
+  rule {
+    // Extract boot ID information into a label
+    source_labels = ["__journal__boot_id"]
+    target_label  = "boot_id"
+  }
+
+  rule {
+    // Extract transport information into a label
+    source_labels = ["__journal__transport"]
+    target_label  = "transport"
+  }
+
+  rule {
+    // Keep journald priority keyword, but DON'T call it "level"
+    // so it doesn't override the application's level=... field.
+    source_labels = ["__journal_priority_keyword"]
+    target_label  = "journal_level"
+  }
+}
+
+// -------------------------
+// Processing pipeline
+// - Extract app "level=warn" from log line (logfmt)
+// - Set the stream label "level" from the parsed value
+// -------------------------
+loki.process "systemd" {
+
+  stage.match {
+    // Only attempt parsing on lines that contain a level key
+    selector = "{unit=~\".+\"} |~ \"(^|[[:space:]])level=\""
+
+    stage.logfmt {
+      mapping = {
+        app_level = "level",
+      }
+    }
+
+    stage.template {
+      source   = "app_level"
+      template = "{{- $l := lower .Value -}}{{- if eq $l \"warning\" -}}warn{{- else -}}{{$l}}{{- end -}}"
+    }
+
+    stage.labels {
+      values = {
+        level = "app_level",
+      }
+    }
+  }
+
+  forward_to = [loki.write.logs_service.receiver]
+}

@@ -68,6 +68,9 @@ in {
       "alloy/config.alloy" = {
         source = ./config.alloy;
       };
+      "alloy/loki.alloy" = {
+        source = ./loki.alloy;
+      };
       "alloy/prometheus.alloy" = {
         source = ./prometheus.alloy;
       };
