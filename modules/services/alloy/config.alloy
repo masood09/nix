@@ -2,20 +2,10 @@ prometheus.exporter.unix "local_system" {
   enable_collectors = ["systemd", "ethtool", "softirqs", "tcpstat"]
 }
 
-prometheus.scrape "scrape_metrics" {
+prometheus.scrape "scrape_unix_metrics" {
   targets         = prometheus.exporter.unix.local_system.targets
-  forward_to      = [prometheus.relabel.filter_metrics.receiver]
+  forward_to      = [prometheus.remote_write.metrics_service.receiver]
   scrape_interval = "10s"
-}
-
-prometheus.relabel "filter_metrics" {
-  rule {
-    action        = "drop"
-    source_labels = ["env"]
-    regex         = "dev"
-  }
-
-  forward_to = [prometheus.remote_write.metrics_service.receiver]
 }
 
 prometheus.remote_write "metrics_service" {
