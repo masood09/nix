@@ -73,6 +73,10 @@
         enable = true;
       };
 
+      dell-idrac-fan-controller = {
+        enable = true;
+      };
+
       garage = {
         enable = true;
         s3Domain = "s3.test.mantannest.com";
