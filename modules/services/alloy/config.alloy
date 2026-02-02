@@ -1,3 +1,14 @@
+loki.write "logs_service" {
+  endpoint {
+    url = sys.env("LOKI_URL")
+
+    basic_auth {
+      username = sys.env("LOKI_USERNAME")
+      password = sys.env("LOKI_PASSWORD")
+    }
+  }
+}
+
 prometheus.remote_write "metrics_service" {
   endpoint {
     url = sys.env("PROMETHEUS_URL")
