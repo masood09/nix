@@ -37,7 +37,7 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${authentikCfg.webDomain}" = {
-            useACMEHost = authentikCfg.webDomain;
+            useACMEHost = config.networking.domain;
             extraConfig = ''
               reverse_proxy http://127.0.0.1:9000
             '';
@@ -50,10 +50,6 @@ in {
           "authentik"
         ];
       };
-    };
-
-    security = lib.mkIf caddyEnabled {
-      acme.certs."${authentikCfg.webDomain}".domain = "${authentikCfg.webDomain}";
     };
   };
 }

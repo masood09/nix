@@ -81,17 +81,13 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${uptimeKumaCfg.webDomain}" = {
-            useACMEHost = uptimeKumaCfg.webDomain;
+            useACMEHost = config.networking.domain;
             extraConfig = ''
               reverse_proxy http://127.0.0.1:${toString config.services.uptime-kuma.settings.PORT}
             '';
           };
         };
       };
-    };
-
-    security = lib.mkIf caddyEnabled {
-      acme.certs."${uptimeKumaCfg.webDomain}".domain = "${uptimeKumaCfg.webDomain}";
     };
 
     users = {

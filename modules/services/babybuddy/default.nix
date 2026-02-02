@@ -66,7 +66,7 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${babybuddyCfg.webDomain}" = {
-            useACMEHost = babybuddyCfg.webDomain;
+            useACMEHost = config.networking.domain;
             extraConfig = ''
               reverse_proxy http://${babybuddyCfg.listenAddress}:${toString babybuddyCfg.listenPort}
             '';
@@ -104,10 +104,6 @@ in {
           "babybuddy"
         ];
       };
-    };
-
-    security = lib.mkIf (caddyEnabled && babybuddyCfg.enable) {
-      acme.certs."${babybuddyCfg.webDomain}".domain = "${babybuddyCfg.webDomain}";
     };
 
     users = {

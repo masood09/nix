@@ -107,7 +107,7 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${vaultwardenCfg.webDomain}" = {
-            useACMEHost = vaultwardenCfg.webDomain;
+            useACMEHost = config.networking.domain;
             extraConfig = ''
               reverse_proxy http://${vaultwardenCfg.listenAddress}:${toString vaultwardenCfg.listenPort}
             '';
@@ -133,10 +133,6 @@ in {
           "vaultwarden"
         ];
       };
-    };
-
-    security = lib.mkIf (caddyEnabled && vaultwardenCfg.enable) {
-      acme.certs."${vaultwardenCfg.webDomain}".domain = "${vaultwardenCfg.webDomain}";
     };
 
     users.users = {

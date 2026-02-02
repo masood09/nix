@@ -182,7 +182,7 @@ in {
 
         virtualHosts = {
           "${lokiCfg.webDomain}" = {
-            useACMEHost = lokiCfg.webDomain;
+            useACMEHost = config.networking.domain;
 
             extraConfig = ''
               route {
@@ -203,10 +203,6 @@ in {
           };
         };
       };
-    };
-
-    security = lib.mkIf (caddyEnabled && lokiCfg.enable) {
-      acme.certs."${lokiCfg.webDomain}".domain = "${lokiCfg.webDomain}";
     };
 
     users.users = {

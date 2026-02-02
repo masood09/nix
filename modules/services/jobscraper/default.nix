@@ -46,17 +46,13 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${jobscraperCfg.webDomain}" = {
-            useACMEHost = jobscraperCfg.webDomain;
+            useACMEHost = config.networking.domain;
             extraConfig = ''
               reverse_proxy http://${jobscraperCfg.listenAddress}:${toString jobscraperCfg.listenPort}
             '';
           };
         };
       };
-    };
-
-    security = lib.mkIf (caddyEnabled && jobscraperCfg.enable) {
-      acme.certs."${jobscraperCfg.webDomain}".domain = "${jobscraperCfg.webDomain}";
     };
   };
 }
