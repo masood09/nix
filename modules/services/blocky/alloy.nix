@@ -12,7 +12,7 @@
   blockyExporterPort = toString blockyCfg.metrics.listenPort;
 in {
   config = {
-    environment.etc."alloy/config-blocky.alloy" = lib.mkIf (blockyMetricsEnabled && alloyEnabled) {
+    environment.etc."alloy/blocky.alloy" = lib.mkIf (blockyMetricsEnabled && alloyEnabled) {
       text = ''
         prometheus.scrape "blocky_target" {
           targets = [

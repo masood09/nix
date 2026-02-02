@@ -10,7 +10,7 @@
   authentikExporterPort = "9300";
 in {
   config = {
-    environment.etc."alloy/config-authentik.alloy" = lib.mkIf (enableAuthentik && alloyEnabled) {
+    environment.etc."alloy/authentik.alloy" = lib.mkIf (enableAuthentik && alloyEnabled) {
       text = ''
         prometheus.scrape "authentik_target" {
           targets = [
