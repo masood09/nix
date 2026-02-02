@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   homelabCfg = config.homelab;
@@ -11,6 +12,26 @@
     if b
     then "true"
     else "false";
+
+  ipmiCpuTempProbe = pkgs.writeShellScript "ipmi-cpu-temp-probe" ''
+    set -euo pipefail
+
+    out="$(${pkgs.ipmitool}/bin/ipmitool \
+      -I lanplus \
+      -H ${cfg.idracHost} \
+      -U "$IDRAC_USERNAME" \
+      -P "$IDRAC_PASSWORD" \
+      sdr type temperature 2>/dev/null || true)"
+
+    # Require at least one CPU temp reading (entity 3.x + degrees C)
+    if ! printf "%s\n" "$out" | ${pkgs.gawk}/bin/awk '
+      $0 ~ /degrees C/ && $0 ~ /\|[[:space:]]*3\.[0-9]+[[:space:]]*\|/ { ok=1 }
+      END { exit ok?0:1 }
+    '; then
+      echo "No CPU temperature readings available (host likely off). Skipping fan controller."
+      exit 1
+    fi
+  '';
 in {
   options.homelab.services.dell-idrac-fan-controller = {
     enable = lib.mkEnableOption "Whether to enable Dell iDRAC Fan Controller.";
@@ -73,6 +94,11 @@ in {
       environmentFiles = [
         config.sops.secrets."dell-idrac-fan-controller.env".path
       ];
+    };
+
+    systemd.services.podman-dell-idrac-fan-controller.serviceConfig = {
+      EnvironmentFile = config.sops.secrets."dell-idrac-fan-controller.env".path;
+      ExecCondition = ipmiCpuTempProbe;
     };
   };
 }
