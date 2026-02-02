@@ -209,8 +209,6 @@
         zfs.enable = true;
       };
 
-      rebootRequiredCheck.enable = true;
-
       tailscale = {
         enable = true;
 
