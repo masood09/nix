@@ -24,7 +24,7 @@
 
       clientId = lib.mkOption {
         type = lib.types.str;
-        default = "0i7eoX2Og14H7lL4v3Mh8C2WhSoN2dLCiq7yJgb4";
+        default = "grafana";
       };
 
       scopes = lib.mkOption {

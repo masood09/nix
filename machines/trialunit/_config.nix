@@ -89,7 +89,6 @@
         enable = true;
 
         oauth = {
-          clientId = "grafana";
           roleAttributePath = "contains(groups, 'homelab-admins') && 'Admin' || 'Viewer'";
         };
 
