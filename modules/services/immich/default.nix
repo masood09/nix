@@ -1,61 +1,19 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
-  immichCfg = config.homelab.services.immich;
+  homelabCfg = config.homelab;
+  immichCfg = homelabCfg.services.immich;
   postgresqlEnabled = config.homelab.services.postgresql.enable;
   postgresqlBackupEnabled = config.homelab.services.postgresql.backup.enable;
   caddyEnabled = config.homelab.services.caddy.enable;
   resticEnabled = config.homelab.services.restic.enable;
 in {
-  options.homelab.services.immich = {
-    enable = lib.mkEnableOption "Whether to enable Immich.";
-
-    dataDir = lib.mkOption {
-      type = lib.types.path;
-      default = "/mnt/tank/services/immich";
-    };
-
-    webDomain = lib.mkOption {
-      type = lib.types.str;
-      default = "photos.mantannest.com";
-    };
-
-    userId = lib.mkOption {
-      default = 3001;
-      type = lib.types.ints.u16;
-      description = "User ID of Immich user";
-    };
-
-    groupId = lib.mkOption {
-      default = 3001;
-      type = lib.types.ints.u16;
-      description = "Group ID of Immich group";
-    };
-
-    zfs = {
-      enable = lib.mkEnableOption "Store Immich dataDir on a ZFS dataset.";
-
-      restic = {
-        enable = lib.mkEnableOption "Enable restic backup";
-      };
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "dpool/tank/services/immich";
-        description = "ZFS dataset to create and mount at dataDir.";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          recordsize = "1M";
-        };
-        description = "ZFS properties for the dataset.";
-      };
-    };
-  };
+  imports = [
+    ./options.nix
+  ];
 
   config = lib.mkIf immichCfg.enable {
     # ZFS dataset for dataDir
@@ -100,7 +58,7 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${immichCfg.webDomain}" = {
-            useACMEHost = immichCfg.webDomain;
+            useACMEHost = config.networking.domain;
             extraConfig = ''
               reverse_proxy http://127.0.0.1:${toString config.services.immich.port}
             '';
@@ -115,10 +73,6 @@ in {
       };
     };
 
-    security = lib.mkIf caddyEnabled {
-      acme.certs."${immichCfg.webDomain}".domain = "${immichCfg.webDomain}";
-    };
-
     users.users = {
       immich.uid = immichCfg.userId;
     };
@@ -129,38 +83,77 @@ in {
 
     # Service hardening + mount ordering
     systemd = {
-      services.immich-server = lib.mkMerge [
-        {
-          # Unit-level ordering / mount requirements
-          unitConfig = {
-            RequiresMountsFor = [immichCfg.dataDir];
+      services = {
+        immich-server = lib.mkMerge [
+          {
+            # Unit-level ordering / mount requirements
+            unitConfig = {
+              RequiresMountsFor = [immichCfg.dataDir];
+            };
+          }
+
+          (lib.mkIf immichCfg.zfs.enable {
+            requires = ["zfs-dataset-immich.service"];
+            after = ["zfs-dataset-immich.service"];
+          })
+        ];
+
+        immich-machine-learning = lib.mkMerge [
+          {
+            # Unit-level ordering / mount requirements
+            unitConfig = {
+              RequiresMountsFor = [immichCfg.dataDir];
+            };
+          }
+
+          (lib.mkIf immichCfg.zfs.enable {
+            requires = ["zfs-dataset-immich.service"];
+            after = ["zfs-dataset-immich.service"];
+          })
+        ];
+
+        immich-permissions = {
+          description = "Fix Immich dataDir ownership/permissions";
+          wantedBy = ["multi-user.target"];
+          before = [
+            "immich-server.service"
+            "immich-machine-learning.service"
+          ];
+          after =
+            ["local-fs.target"]
+            ++ lib.optionals immichCfg.zfs.enable [
+              "zfs-dataset-immich.service"
+            ];
+          requires = lib.optionals immichCfg.zfs.enable [
+            "zfs-dataset-immich.service"
+          ];
+
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = ''
+              ${pkgs.coreutils}/bin/chown -R immich:immich ${toString immichCfg.dataDir}
+            '';
           };
-        }
-
-        (lib.mkIf immichCfg.zfs.enable {
-          requires = ["zfs-dataset-immich.service"];
-          after = ["zfs-dataset-immich.service"];
-        })
-      ];
-
-      services.immich-machine-learning = lib.mkMerge [
-        {
-          # Unit-level ordering / mount requirements
-          unitConfig = {
-            RequiresMountsFor = [immichCfg.dataDir];
-          };
-        }
-
-        (lib.mkIf immichCfg.zfs.enable {
-          requires = ["zfs-dataset-immich.service"];
-          after = ["zfs-dataset-immich.service"];
-        })
-      ];
+        };
+      };
 
       tmpfiles.rules = [
         # Ensure base dir exists and is owned correctly
         "d ${immichCfg.dataDir} 0750 immich immich -"
+        "z ${immichCfg.dataDir} 0750 immich immich -"
       ];
     };
+
+    environment =
+      lib.mkIf (
+        homelabCfg.impermanence
+        && !homelabCfg.isRootZFS
+        && !immichCfg.zfs.enable
+      ) {
+        persistence."/nix/persist".directories = [
+          immichCfg.dataDir
+        ];
+      };
   };
 }

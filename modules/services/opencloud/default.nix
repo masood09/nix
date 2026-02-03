@@ -31,14 +31,14 @@ in {
           };
 
           "${collaboraWebDomain}" = {
-            useACMEHost = collaboraWebDomain;
+            useACMEHost = cfg.webDomain;
             extraConfig = ''
               reverse_proxy http://127.0.0.1:${toString cfg.collabora.port}
             '';
           };
 
           "${wopiWebDomain}" = {
-            useACMEHost = wopiWebDomain;
+            useACMEHost = cfg.webDomain;
             extraConfig = ''
               reverse_proxy http://127.0.0.1:${toString cfg.wopi.port}
             '';
@@ -48,10 +48,11 @@ in {
     };
 
     security = lib.mkIf (caddyEnabled && cfg.enable) {
-      acme.certs = {
-        "${cfg.webDomain}".domain = "${cfg.webDomain}";
-        "${collaboraWebDomain}".domain = "${collaboraWebDomain}";
-        "${wopiWebDomain}".domain = "${wopiWebDomain}";
+      acme.certs."${cfg.webDomain}" = {
+        extraDomainNames = [
+          "${cfg.webDomain}"
+          "*.${cfg.webDomain}"
+        ];
       };
     };
   };

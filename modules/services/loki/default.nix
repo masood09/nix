@@ -11,58 +11,9 @@
   lokiDataDir = lib.removeSuffix "/" (toString lokiCfg.dataDir);
   lokiPath = p: "${lokiDataDir}/${p}";
 in {
-  options.homelab.services.loki = {
-    enable = lib.mkEnableOption "Whether to enable Loki.";
-
-    webDomain = lib.mkOption {
-      type = lib.types.str;
-      default = "loki.mantannest.com";
-    };
-
-    dataDir = lib.mkOption {
-      type = lib.types.path;
-      default = "/var/lib/loki/";
-    };
-
-    listenAddress = lib.mkOption {
-      default = "127.0.0.1";
-      type = lib.types.str;
-    };
-
-    listenPort = lib.mkOption {
-      default = 3100;
-      type = lib.types.port;
-    };
-
-    userId = lib.mkOption {
-      default = 3005;
-      type = lib.types.ints.u16;
-    };
-
-    groupId = lib.mkOption {
-      default = 3005;
-      type = lib.types.ints.u16;
-    };
-
-    zfs = {
-      enable = lib.mkEnableOption "Store Loki dataDir on a ZFS dataset.";
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "dpool/tank/services/loki";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          logbias = "latency";
-          recordsize = "16K";
-          relatime = "off";
-          primarycache = "metadata";
-        };
-      };
-    };
-  };
+  imports = [
+    ./options.nix
+  ];
 
   config = lib.mkIf lokiCfg.enable {
     # ZFS dataset for dataDir
@@ -144,28 +95,28 @@ in {
 
           limits_config = {
             # Default for anything that doesn't match a retention_stream selector
-            retention_period = "240h"; # 10d
+            retention_period = lokiCfg.retentionPeriod.default;
 
             retention_stream = [
               {
                 selector = "{level=\"debug\"}";
                 priority = 40;
-                period = "24h"; # 1d
+                period = lokiCfg.retentionPeriod.debug;
               }
               {
                 selector = "{level=\"info\"}";
                 priority = 30;
-                period = "240h"; # 10d (optional since it's the default)
+                period = lokiCfg.retentionPeriod.info;
               }
               {
                 selector = "{level=\"warn\"}";
                 priority = 20;
-                period = "720h"; # 30d
+                period = lokiCfg.retentionPeriod.warn;
               }
               {
                 selector = "{level=\"error\"}";
                 priority = 10;
-                period = "1440h"; # 60d
+                period = lokiCfg.retentionPeriod.error;
               }
             ];
           };
@@ -182,7 +133,7 @@ in {
 
         virtualHosts = {
           "${lokiCfg.webDomain}" = {
-            useACMEHost = lokiCfg.webDomain;
+            useACMEHost = config.networking.domain;
 
             extraConfig = ''
               route {
@@ -203,10 +154,6 @@ in {
           };
         };
       };
-    };
-
-    security = lib.mkIf (caddyEnabled && lokiCfg.enable) {
-      acme.certs."${lokiCfg.webDomain}".domain = "${lokiCfg.webDomain}";
     };
 
     users.users = {
@@ -251,7 +198,7 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/install -d -m 0700 -o loki -g loki ${lokiDataDir}
+              ${pkgs.coreutils}/bin/chown -R loki:loki ${lokiDataDir}
             '';
           };
         };

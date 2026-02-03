@@ -51,13 +51,20 @@ in {
         acceptTerms = true;
 
         defaults = {
-          email = "letsencrypt@mantannest.com";
+          email = "letsencrypt@${config.networking.domain}";
           dnsProvider = "cloudflare";
           dnsPropagationCheck = true;
           dnsResolver = "1.1.1.1:53";
           credentialFiles = {
             "CLOUDFLARE_DNS_API_TOKEN_FILE" = homelabCfg.services.acme.cloudflareAPIKeyPath;
           };
+        };
+
+        certs.${config.networking.domain} = {
+          extraDomainNames = [
+            "${config.networking.domain}"
+            "*.${config.networking.domain}"
+          ];
         };
       };
     };

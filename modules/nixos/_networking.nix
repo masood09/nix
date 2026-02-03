@@ -6,6 +6,11 @@
   networkingCfg = config.homelab.networking;
 in {
   options.homelab.networking = {
+    domain = lib.mkOption {
+      type = lib.types.str;
+      default = "mantannest.com";
+    };
+
     hostName = lib.mkOption {
       type = lib.types.str;
       description = ''
@@ -21,7 +26,8 @@ in {
 
   config = {
     networking = {
-      inherit (networkingCfg) hostName;
+      inherit (networkingCfg) hostName domain;
+
       wireless.enable = networkingCfg.wireless_enable;
       enableIPv6 = false;
       hostId = builtins.substring 0 8 (

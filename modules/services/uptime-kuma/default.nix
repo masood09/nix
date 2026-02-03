@@ -1,59 +1,16 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   homelabCfg = config.homelab;
   uptimeKumaCfg = homelabCfg.services.uptime-kuma;
   caddyEnabled = homelabCfg.services.caddy.enable;
 in {
-  options.homelab.services.uptime-kuma = {
-    enable = lib.mkEnableOption "Whether to enable Uptime Kuma.";
-
-    dataDir = lib.mkOption {
-      type = lib.types.path;
-      default = "/var/lib/uptime-kuma/";
-    };
-
-    webDomain = lib.mkOption {
-      type = lib.types.str;
-      default = "uptime.mantannest.com";
-    };
-
-    userId = lib.mkOption {
-      default = 3002;
-      type = lib.types.ints.u16;
-      description = "User ID of Uptime Kuma user";
-    };
-
-    groupId = lib.mkOption {
-      default = 3002;
-      type = lib.types.ints.u16;
-      description = "Group ID of Uptime Kuma group";
-    };
-
-    zfs = {
-      enable = lib.mkEnableOption "Store Uptime Kuma dataDir on a ZFS dataset.";
-
-      restic = {
-        enable = lib.mkEnableOption "Enable restic backup";
-      };
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "rpool/root/var/lib/uptime-kuma";
-        description = "ZFS dataset to create and mount at dataDir.";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          recordsize = "16K";
-        };
-        description = "ZFS properties for the dataset.";
-      };
-    };
-  };
+  imports = [
+    ./options.nix
+  ];
 
   config = lib.mkIf uptimeKumaCfg.enable {
     # ZFS dataset for dataDir
@@ -81,17 +38,13 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${uptimeKumaCfg.webDomain}" = {
-            useACMEHost = uptimeKumaCfg.webDomain;
+            useACMEHost = config.networking.domain;
             extraConfig = ''
               reverse_proxy http://127.0.0.1:${toString config.services.uptime-kuma.settings.PORT}
             '';
           };
         };
       };
-    };
-
-    security = lib.mkIf caddyEnabled {
-      acme.certs."${uptimeKumaCfg.webDomain}".domain = "${uptimeKumaCfg.webDomain}";
     };
 
     users = {
@@ -112,41 +65,59 @@ in {
 
     # Service hardening + mount ordering
     systemd = {
-      services.uptime-kuma = lib.mkMerge [
-        {
-          # Unit-level ordering / mount requirements
-          unitConfig = {
-            RequiresMountsFor = [uptimeKumaCfg.dataDir];
-          };
+      services = {
+        uptime-kuma = lib.mkMerge [
+          {
+            # Unit-level ordering / mount requirements
+            unitConfig = {
+              RequiresMountsFor = [uptimeKumaCfg.dataDir];
+            };
+
+            serviceConfig = {
+              DynamicUser = lib.mkForce false;
+
+              # stop systemd from trying to manage /var/lib/private + bind-mount behavior
+              StateDirectory = lib.mkForce null;
+              StateDirectoryMode = lib.mkForce null;
+
+              User = "uptime-kuma";
+              Group = "uptime-kuma";
+
+              # with ProtectSystem=strict, you must explicitly allow writes here
+              ReadWritePaths = [uptimeKumaCfg.dataDir];
+            };
+          }
+
+          (lib.mkIf uptimeKumaCfg.zfs.enable {
+            requires = ["zfs-dataset-uptime-kuma.service"];
+            after = ["zfs-dataset-uptime-kuma.service"];
+          })
+        ];
+
+        uptime-kuma-permissions = {
+          description = "Fix Uptime Kuma dataDir ownership/permissions";
+          wantedBy = ["multi-user.target"];
+          before = ["uptime-kuma.service"];
+          after =
+            ["local-fs.target"]
+            ++ lib.optionals uptimeKumaCfg.zfs.enable ["zfs-dataset-uptime-kuma.service"];
+          requires =
+            lib.optionals uptimeKumaCfg.zfs.enable ["zfs-dataset-uptime-kuma.service"];
 
           serviceConfig = {
-            DynamicUser = lib.mkForce false;
-
-            # stop systemd from trying to manage /var/lib/private + bind-mount behavior
-            StateDirectory = lib.mkForce null;
-            StateDirectoryMode = lib.mkForce null;
-
-            User = "uptime-kuma";
-            Group = "uptime-kuma";
-
-            # with ProtectSystem=strict, you must explicitly allow writes here
-            ReadWritePaths = [uptimeKumaCfg.dataDir];
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = ''
+              ${pkgs.coreutils}/bin/chown -R uptime-kuma:uptime-kuma ${uptimeKumaCfg.dataDir}
+            '';
           };
-        }
-
-        (lib.mkIf uptimeKumaCfg.zfs.enable {
-          requires = ["zfs-dataset-uptime-kuma.service"];
-          after = ["zfs-dataset-uptime-kuma.service"];
-        })
-      ];
+        };
+      };
 
       tmpfiles.rules = [
         # Ensure base dir exists and is owned correctly
         "d ${uptimeKumaCfg.dataDir} 0750 uptime-kuma uptime-kuma -"
-
-        # Pre-create subdirs Kuma expects
-        "d ${uptimeKumaCfg.dataDir}/upload 0750 uptime-kuma uptime-kuma -"
-        "d ${uptimeKumaCfg.dataDir}/data 0750 uptime-kuma uptime-kuma -"
+        "z ${uptimeKumaCfg.dataDir} 0750 uptime-kuma uptime-kuma -"
       ];
     };
 
