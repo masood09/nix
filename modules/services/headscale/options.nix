@@ -36,7 +36,7 @@
 
       clientId = lib.mkOption {
         type = lib.types.str;
-        default = "Pjad107mj4JsZRnmbTMzbGiNqIolCMFn2jF3dBeA";
+        default = "headscale";
       };
 
       clientSecretPath = lib.mkOption {
