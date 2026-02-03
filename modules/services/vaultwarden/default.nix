@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   homelabCfg = config.homelab;
@@ -10,58 +11,9 @@
   postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
   resticEnabled = config.homelab.services.restic.enable;
 in {
-  options.homelab.services.vaultwarden = {
-    enable = lib.mkEnableOption "Whether to enable Vaultwarden.";
-
-    webDomain = lib.mkOption {
-      type = lib.types.str;
-      default = "passwords.mantannest.com";
-    };
-
-    dataDir = lib.mkOption {
-      type = lib.types.path;
-      default = "/var/lib/vaultwarden/";
-    };
-
-    listenAddress = lib.mkOption {
-      default = "127.0.0.1";
-      type = lib.types.str;
-    };
-
-    listenPort = lib.mkOption {
-      default = 8222;
-      type = lib.types.port;
-    };
-
-    userId = lib.mkOption {
-      default = 3003;
-      type = lib.types.ints.u16;
-    };
-
-    groupId = lib.mkOption {
-      default = 3003;
-      type = lib.types.ints.u16;
-    };
-
-    zfs = {
-      enable = lib.mkEnableOption "Store Vaultwarden dataDir on a ZFS dataset.";
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "dpool/tank/services/vaultwarden";
-        description = "ZFS dataset to create and mount at dataDir.";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          logbias = "latency";
-          recordsize = "16K";
-        };
-        description = "ZFS properties for the dataset.";
-      };
-    };
-  };
+  imports = [
+    ./options.nix
+  ];
 
   config = lib.mkIf vaultwardenCfg.enable {
     # ZFS dataset for dataDir
@@ -107,7 +59,7 @@ in {
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${vaultwardenCfg.webDomain}" = {
-            useACMEHost = vaultwardenCfg.webDomain;
+            useACMEHost = config.networking.domain;
             extraConfig = ''
               reverse_proxy http://${vaultwardenCfg.listenAddress}:${toString vaultwardenCfg.listenPort}
             '';
@@ -135,10 +87,6 @@ in {
       };
     };
 
-    security = lib.mkIf (caddyEnabled && vaultwardenCfg.enable) {
-      acme.certs."${vaultwardenCfg.webDomain}".domain = "${vaultwardenCfg.webDomain}";
-    };
-
     users.users = {
       vaultwarden.uid = vaultwardenCfg.userId;
     };
@@ -149,23 +97,45 @@ in {
 
     # Service hardening + mount ordering
     systemd = {
-      services.vaultwarden = lib.mkMerge [
-        {
-          # Unit-level ordering / mount requirements
-          unitConfig = {
-            RequiresMountsFor = [vaultwardenCfg.dataDir];
-          };
-        }
+      services = {
+        vaultwarden = lib.mkMerge [
+          {
+            # Unit-level ordering / mount requirements
+            unitConfig = {
+              RequiresMountsFor = [vaultwardenCfg.dataDir];
+            };
+          }
 
-        (lib.mkIf vaultwardenCfg.zfs.enable {
-          requires = ["zfs-dataset-vaultwarden.service"];
-          after = ["zfs-dataset-vaultwarden.service"];
-        })
-      ];
+          (lib.mkIf vaultwardenCfg.zfs.enable {
+            requires = ["zfs-dataset-vaultwarden.service"];
+            after = ["zfs-dataset-vaultwarden.service"];
+          })
+        ];
+
+        vaultwarden-permissions = {
+          description = "Fix Vaultwarden dataDir ownership/permissions";
+          wantedBy = ["multi-user.target"];
+          before = ["vaultwarden.service"];
+          after =
+            ["local-fs.target"]
+            ++ lib.optionals vaultwardenCfg.zfs.enable ["zfs-dataset-vaultwarden.service"];
+          requires =
+            lib.optionals vaultwardenCfg.zfs.enable ["zfs-dataset-vaultwarden.service"];
+
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = ''
+              ${pkgs.coreutils}/bin/chown -R vaultwarden:vaultwarden ${vaultwardenCfg.dataDir}
+            '';
+          };
+        };
+      };
 
       tmpfiles.rules = [
         # Ensure base dir exists and is owned correctly
         "d ${vaultwardenCfg.dataDir} 0700 vaultwarden vaultwarden -"
+        "z ${vaultwardenCfg.dataDir} 0700 vaultwarden vaultwarden -"
       ];
     };
 

@@ -7,6 +7,7 @@
 
     networking = {
       hostName = "trialunit";
+      domain = "test.mantannest.com";
     };
 
     programs = {
@@ -29,12 +30,10 @@
 
       authentik = {
         enable = true;
-        webDomain = "auth.test.mantannest.com";
       };
 
       babybuddy = {
         enable = true;
-        webDomain = "babybuddy.test.mantannest.com";
 
         zfs = {
           enable = true;
@@ -73,9 +72,12 @@
         enable = true;
       };
 
+      dell-idrac-fan-controller = {
+        enable = true;
+      };
+
       garage = {
         enable = true;
-        s3Domain = "s3.test.mantannest.com";
 
         zfs = {
           enable = true;
@@ -85,10 +87,8 @@
 
       grafana = {
         enable = true;
-        webDomain = "grafana.test.mantannest.com";
 
         oauth = {
-          providerHost = "auth.test.mantannest.com";
           clientId = "grafana";
           roleAttributePath = "contains(groups, 'homelab-admins') && 'Admin' || 'Viewer'";
         };
@@ -100,29 +100,20 @@
 
       headscale = {
         enable = true;
-        webDomain = "headscale.test.mantannest.com";
 
         oidc = {
           enable = true;
-          issuer = "https://auth.test.mantannest.com/application/o/headscale/";
-          client_id = "headscale";
+          clientId = "headscale";
         };
 
         zfs = {
           enable = true;
           dataset = "dpool/tank/services/headscale";
-
-          properties = {
-            logbias = "latency";
-            recordsize = "16K";
-            redundant_metadata = "most";
-          };
         };
       };
 
       immich = {
         enable = true;
-        webDomain = "photos.test.mantannest.com";
 
         zfs = {
           enable = true;
@@ -131,20 +122,16 @@
 
       ittools = {
         enable = true;
-        webDomain = "ittools.test.mantannest.com";
       };
 
       jobscraper = {
         enable = true;
-        webDomain = "jobscraper.test.mantannest.com";
       };
 
       karakeep = {
         enable = true;
-        webDomain = "keep.test.mantannest.com";
 
         oauth = {
-          providerHost = "auth.test.mantannest.com";
           clientId = "karakeep";
         };
 
@@ -153,7 +140,13 @@
 
       loki = {
         enable = true;
-        webDomain = "loki.test.mantannest.com";
+
+        retentionPeriod = {
+          default = "24h";
+          debug = "24h";
+          warn = "48h";
+          error = "168h";
+        };
 
         zfs = {
           enable = true;
@@ -162,7 +155,6 @@
 
       opencloud = {
         enable = true;
-        webDomain = "cloud.test.mantannest.com";
 
         zfs = {
           enable = true;
@@ -205,7 +197,6 @@
 
       prometheus = {
         enable = true;
-        webDomain = "prometheus.test.mantannest.com";
         zfs.enable = true;
       };
 
@@ -219,7 +210,6 @@
 
       uptime-kuma = {
         enable = true;
-        webDomain = "uptime.test.mantannest.com";
 
         zfs = {
           enable = true;
@@ -229,7 +219,6 @@
 
       vaultwarden = {
         enable = true;
-        webDomain = "passwords.test.mantannest.com";
 
         zfs = {
           enable = true;

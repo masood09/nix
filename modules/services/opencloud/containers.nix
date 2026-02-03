@@ -169,10 +169,26 @@ in {
 
         log-driver = "journald";
         entrypoint = "/bin/bash";
+        user = "0:0";
 
         cmd = [
           "-lc"
-          "coolconfig generate-proof-key && exec /start-collabora-online.sh"
+          ''
+            set -euo pipefail
+
+            echo "Ensuring /etc/coolwsd is writable..."
+
+            mkdir -p /etc/coolwsd
+            chown -R 1001:1001 /etc/coolwsd
+            mkdir -p /opt/cool/
+            chown -R 1001:1001 /opt/cool
+
+            echo "Generating proof key..."
+            su -s /bin/bash -c "coolconfig generate-proof-key" cool
+
+            echo "Starting Collabora..."
+            exec su -s /bin/bash -c "/start-collabora-online.sh" cool
+          ''
         ];
 
         extraOptions = [
@@ -237,10 +253,6 @@ in {
         };
 
         "podman-opencloud-opencloud" = {
-          serviceConfig = {
-            Restart = lib.mkOverride 90 "always";
-          };
-
           after = [
             "podman-network-opencloud_opencloud-net.service"
             "zfs-dataset-opencloud-root.service"
@@ -278,8 +290,6 @@ in {
 
         "podman-opencloud-wopi" = {
           serviceConfig = {
-            Restart = lib.mkOverride 90 "always";
-
             ExecStartPre = [waitForCollabora];
           };
 
@@ -319,10 +329,6 @@ in {
         };
 
         "podman-opencloud-collabora" = {
-          serviceConfig = {
-            Restart = lib.mkOverride 90 "always";
-          };
-
           after = [
             "podman-network-opencloud_opencloud-net.service"
           ];

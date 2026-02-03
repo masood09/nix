@@ -11,7 +11,10 @@ in {
       headscale = {
         settings = {
           oidc = {
-            inherit (cfg) issuer client_id client_secret_path;
+            inherit (cfg) issuer;
+
+            client_id = cfg.clientId;
+            client_secret_path = cfg.clientSecretPath;
 
             only_start_if_oidc_is_available = true;
 

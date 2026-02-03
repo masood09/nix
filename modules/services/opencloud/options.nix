@@ -1,10 +1,14 @@
-{lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   options.homelab.services.opencloud = {
     enable = lib.mkEnableOption "Whether to enable Open Cloud.";
 
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "cloud.mantannest.com";
+      default = "cloud.${config.networking.domain}";
     };
 
     dataDir = lib.mkOption {
@@ -40,7 +44,7 @@
 
     idpDomain = lib.mkOption {
       type = lib.types.str;
-      default = "auth.mantannest.com";
+      default = "auth.${config.networking.domain}";
     };
 
     collabora = {
