@@ -166,8 +166,8 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/chown -R garage:garage ${toString garageCfg.dataDir}
-              ${pkgs.coreutils}/bin/chown -R garage:garage ${toString garageCfg.metaDir}
+              ${pkgs.coreutils}/bin/chown garage:garage ${toString garageCfg.dataDir}
+              ${pkgs.coreutils}/bin/chown garage:garage ${toString garageCfg.metaDir}
             '';
           };
         };

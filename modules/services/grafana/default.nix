@@ -158,7 +158,7 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/chown -R grafana:grafana ${grafanaDataDir}
+              ${pkgs.coreutils}/bin/chown grafana:grafana ${grafanaDataDir}
             '';
           };
         };

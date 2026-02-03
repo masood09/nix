@@ -142,7 +142,7 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/chown -R babybuddy:babybuddy ${toString babybuddyCfg.dataDir}
+              ${pkgs.coreutils}/bin/chown babybuddy:babybuddy ${toString babybuddyCfg.dataDir}
             '';
           };
         };

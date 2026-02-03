@@ -108,7 +108,7 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/chown -R prometheus:prometheus ${prometheusDataDir}
+              ${pkgs.coreutils}/bin/chown prometheus:prometheus ${prometheusDataDir}
             '';
           };
         };

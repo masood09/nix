@@ -198,7 +198,7 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/chown -R loki:loki ${lokiDataDir}
+              ${pkgs.coreutils}/bin/chown loki:loki ${lokiDataDir}
             '';
           };
         };

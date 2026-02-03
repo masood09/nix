@@ -63,7 +63,7 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/chown -R root:root ${cfg.dataDir}
+              ${pkgs.coreutils}/bin/chown root:root ${cfg.dataDir}
             '';
           };
         };

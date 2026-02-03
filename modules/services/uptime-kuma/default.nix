@@ -108,7 +108,7 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/chown -R uptime-kuma:uptime-kuma ${uptimeKumaCfg.dataDir}
+              ${pkgs.coreutils}/bin/chown uptime-kuma:uptime-kuma ${uptimeKumaCfg.dataDir}
             '';
           };
         };
