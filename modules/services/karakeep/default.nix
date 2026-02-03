@@ -160,7 +160,7 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/chown -R karakeep:karakeep ${cfg.dataDir}
+              ${pkgs.coreutils}/bin/chown karakeep:karakeep ${cfg.dataDir}
             '';
           };
         };

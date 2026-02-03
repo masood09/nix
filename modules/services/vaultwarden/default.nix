@@ -126,7 +126,7 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/chown -R vaultwarden:vaultwarden ${vaultwardenCfg.dataDir}
+              ${pkgs.coreutils}/bin/chown vaultwarden:vaultwarden ${vaultwardenCfg.dataDir}
             '';
           };
         };

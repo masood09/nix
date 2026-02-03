@@ -132,7 +132,7 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/chown -R immich:immich ${toString immichCfg.dataDir}
+              ${pkgs.coreutils}/bin/chown immich:immich ${toString immichCfg.dataDir}
             '';
           };
         };

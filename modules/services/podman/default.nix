@@ -76,7 +76,7 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/chown -R root:root /var/lib/containers
+              ${pkgs.coreutils}/bin/chown root:root /var/lib/containers
             '';
           };
         };

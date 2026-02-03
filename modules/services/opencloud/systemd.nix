@@ -45,7 +45,17 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              ${pkgs.coreutils}/bin/chown -R opencloud:opencloud ${toString cfg.dataDir}
+              set -euo pipefail
+
+              # Ensure top-level ownership
+              ${pkgs.coreutils}/bin/chown opencloud:opencloud ${toString cfg.dataDir}
+
+              ${pkgs.coreutils}/bin/chown opencloud:opencloud \
+                ${toString cfg.dataDir}/etc \
+                ${toString cfg.dataDir}/idm \
+                ${toString cfg.dataDir}/nats \
+                ${toString cfg.dataDir}/search \
+                ${toString cfg.dataDir}/storage
             '';
           };
         };
