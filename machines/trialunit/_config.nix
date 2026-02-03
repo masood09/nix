@@ -102,7 +102,6 @@
 
         oidc = {
           enable = true;
-          clientId = "headscale";
         };
 
         zfs = {
