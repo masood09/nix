@@ -128,11 +128,6 @@
 
       karakeep = {
         enable = true;
-
-        oauth = {
-          clientId = "karakeep";
-        };
-
         zfs.enable = true;
       };
 

@@ -39,7 +39,7 @@
 
       clientId = lib.mkOption {
         type = lib.types.str;
-        default = "LMIokPsj1HsqybAQGh6JOVpF33ChM6eS0EE2JYG0";
+        default = "karakeep";
       };
     };
 
