@@ -42,9 +42,16 @@
       default = 8905;
     };
 
-    idpDomain = lib.mkOption {
-      type = lib.types.str;
-      default = "auth.${config.networking.domain}";
+    oidc = {
+      clientId = lib.mkOption {
+        type = lib.types.str;
+        default = "OpenCloud";
+      };
+
+      idpDomain = lib.mkOption {
+        type = lib.types.str;
+        default = "auth.${config.networking.domain}";
+      };
     };
 
     collabora = {
