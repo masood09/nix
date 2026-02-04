@@ -105,6 +105,10 @@
         };
       };
 
+      opencloud = {
+        enable = true;
+      };
+
       podman = {
         enable = true;
 
