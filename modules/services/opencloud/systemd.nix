@@ -28,6 +28,7 @@ in {
               "zfs-dataset-opencloud-search.service"
               "zfs-dataset-opencloud-storage.service"
               "zfs-dataset-opencloud-storage-metadata.service"
+              "zfs-dataset-opencloud-storage-ocm.service"
               "zfs-dataset-opencloud-storage-users.service"
             ];
           requires = lib.optionals cfg.zfs.enable [
@@ -38,12 +39,12 @@ in {
             "zfs-dataset-opencloud-search.service"
             "zfs-dataset-opencloud-storage.service"
             "zfs-dataset-opencloud-storage-metadata.service"
+            "zfs-dataset-opencloud-storage-ocm.service"
             "zfs-dataset-opencloud-storage-users.service"
           ];
 
           serviceConfig = {
             Type = "oneshot";
-            RemainAfterExit = true;
             ExecStart = ''
               ${pkgs.coreutils}/bin/chown opencloud:opencloud \
                 ${toString cfg.dataDir} \
@@ -53,6 +54,7 @@ in {
                 ${toString cfg.dataDir}/search \
                 ${toString cfg.dataDir}/storage \
                 ${toString cfg.dataDir}/storage/metadata \
+                ${toString cfg.dataDir}/storage/ocm \
                 ${toString cfg.dataDir}/storage/users
             '';
           };
@@ -80,7 +82,6 @@ in {
 
           serviceConfig = {
             Type = "oneshot";
-            RemainAfterExit = true;
           };
 
           script = ''
@@ -102,6 +103,7 @@ in {
         "d ${toString cfg.dataDir}/search 0750 opencloud opencloud -"
         "d ${toString cfg.dataDir}/storage 0750 opencloud opencloud -"
         "d ${toString cfg.dataDir}/storage/metadata 0750 opencloud opencloud -"
+        "d ${toString cfg.dataDir}/storage/ocm 0750 opencloud opencloud -"
         "d ${toString cfg.dataDir}/storage/users 0750 opencloud opencloud -"
         "z ${toString cfg.dataDir} 0750 opencloud opencloud -"
         "z ${toString cfg.dataDir}/etc 0750 opencloud opencloud -"
@@ -110,6 +112,7 @@ in {
         "z ${toString cfg.dataDir}/search 0750 opencloud opencloud -"
         "z ${toString cfg.dataDir}/storage 0750 opencloud opencloud -"
         "z ${toString cfg.dataDir}/storage/metadata 0750 opencloud opencloud -"
+        "z ${toString cfg.dataDir}/storage/ocm 0750 opencloud opencloud -"
         "z ${toString cfg.dataDir}/storage/users 0750 opencloud opencloud -"
       ];
     };

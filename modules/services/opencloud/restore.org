@@ -1,121 +1,227 @@
-#+TITLE: Restoring Baby Buddy Database and Data from Restic Backup
+#+TITLE: Restoring OpenCloud Data from Restic Backup (No /tmp, ZFS Staging Dataset)
 #+AUTHOR: Masood Ahmed
 #+OPTIONS: toc:nil num:nil
 
-This document describes a *safe, repeatable procedure* for restoring the
-Baby Buddy PostgreSQL database and data files from Restic backups staged
-via =/mnt/nightly_backup=.
+This document restores OpenCloud from Restic backups that were staged under:
 
-The workflow:
-- Verifies available backups
-- Restores database dump and data to a temporary location
-- Stops Baby Buddy service
-- Drops and restores the PostgreSQL database
-- Restarts service cleanly
+- =/mnt/nightly_backup/opencloud-etc=
+- =/mnt/nightly_backup/opencloud-idm=
+- =/mnt/nightly_backup/opencloud-storage-metadata=
+- =/mnt/nightly_backup/opencloud-storage-ocm=
+- =/mnt/nightly_backup/opencloud-storage-users=
+
+Because Restic restores files to the same paths captured in the snapshot, it
+cannot directly restore these into =/var/lib/opencloud/...= in one step.
+
+Instead, we restore into a *ZFS staging dataset* (not =/tmp=), then copy into
+place.
 
 * Backup Information
 
-- Database: =babybuddy=
-- Database owner: =babybuddy=
-- Database engine: PostgreSQL
-- Data path: =/var/lib/babybuddy=
+- Service: =OpenCloud=
+- Storage backend: Local filesystem (POSIX, decomposedfs)
+- Live base path: =/var/lib/opencloud=
+
+Stop command:
+
+#+begin_src bash
+sudo systemctl stop podman-compose-opencloud-root.target
+#+end_src
+
+Start command:
+
+#+begin_src bash
+sudo systemctl start podman-compose-opencloud-root.target
+#+end_src
 
 * Verify Available Snapshots
-
-Confirm the snapshot you intend to restore:
 
 #+begin_src bash
 sudo restic-backup snapshots
 #+end_src
 
-* Restore the Latest Snapshot to a Temporary Location
+Pick a snapshot ID or use =latest=.
 
-Restore the PostgreSQL backup and Baby Buddy data into =/tmp=:
+* Create a ZFS Staging Dataset (Avoid /tmp)
+
+We create a staging dataset that will temporarily hold the restored
+=/mnt/nightly_backup/...= tree. This keeps the extra restore space off of =/tmp=.
+
+Choose a mountpoint, for example:
+
+- =/mnt/restore-staging=
 
 #+begin_src bash
-sudo restic-backup restore latest \
-  --include /mnt/nightly_backup/postgresql-backup/babybuddy.sql.gz \
-  --target /tmp
+# Create a staging dataset (adjust pool/dataset name as desired)
+sudo zfs create -o mountpoint=/mnt/restore-staging dpool/tank/restore-staging
 
-sudo restic-backup restore latest \
-  --include /mnt/nightly_backup/babybuddy \
-  --target /tmp
+# Confirm it is mounted
+mount | grep restore-staging || true
+df -h /mnt/restore-staging
 #+end_src
 
-This will create the following directory structure:
+* Stop OpenCloud
+
+#+begin_src bash
+sudo systemctl stop podman-compose-opencloud-root.target
+#+end_src
+
+(Optional) Confirm containers stopped:
+
+#+begin_src bash
+sudo podman ps | grep opencloud || echo "OpenCloud stopped"
+#+end_src
+
+* (Recommended) Take Pre-Restore ZFS Snapshots (Rollback)
+
+These snapshots allow quick rollback if something goes wrong during restore.
+
+#+begin_src bash
+sudo zfs snapshot -r dpool/tank/services/opencloud-etc@pre-restore
+sudo zfs snapshot -r dpool/tank/services/opencloud-idm@pre-restore
+sudo zfs snapshot -r dpool/tank/services/opencloud-storage-meta@pre-restore
+sudo zfs snapshot -r dpool/tank/services/opencloud-storage-ocm@pre-restore
+sudo zfs snapshot -r dpool/tank/services/opencloud-storage-user@pre-restore
+#+end_src
+
+* Clear Existing Live Data
+
+#+begin_src bash
+sudo find /var/lib/opencloud/etc -mindepth 1 -delete
+sudo find /var/lib/opencloud/idm -mindepth 1 -delete
+sudo find /var/lib/opencloud/nats -mindepth 1 -delete
+sudo find /var/lib/opencloud/search -mindepth 1 -delete
+sudo find /var/lib/opencloud/storage/metadata -mindepth 1 -delete
+sudo find /var/lib/opencloud/storage/ocm -mindepth 1 -delete
+sudo find /var/lib/opencloud/storage/users -mindepth 1 -delete
+#+end_src
+
+* Restore Snapshot into ZFS Staging Dataset
+
+This restores the staged backup tree into =/mnt/restore-staging=, producing:
+
+=/mnt/restore-staging/mnt/nightly_backup/opencloud-etc=, etc.
+
+#+begin_src bash
+SNAPSHOT=latest
+
+sudo restic-backup restore "${SNAPSHOT}" \
+  --include /mnt/nightly_backup/opencloud-etc \
+  --include /mnt/nightly_backup/opencloud-idm \
+  --include /mnt/nightly_backup/opencloud-storage-metadata \
+  --include /mnt/nightly_backup/opencloud-storage-ocm \
+  --include /mnt/nightly_backup/opencloud-storage-users \
+  --target /mnt/restore-staging
+#+end_src
+
+Expected layout:
 
 #+begin_example
-/tmp/mnt/nightly_backup/postgresql-backup/babybuddy.sql.gz
-/tmp/mnt/nightly_backup/babybuddy
+/mnt/restore-staging/mnt/nightly_backup/opencloud-etc
+/mnt/restore-staging/mnt/nightly_backup/opencloud-idm
+/mnt/restore-staging/mnt/nightly_backup/opencloud-storage-metadata
+/mnt/restore-staging/mnt/nightly_backup/opencloud-storage-ocm
+/mnt/restore-staging/mnt/nightly_backup/opencloud-storage-users
 #+end_example
 
-* Stop Baby Buddy Service
+* Copy Restored Data into Live OpenCloud Paths
 
-Stop Baby Buddy service before restoring the database:
+We now copy from the staging dataset into =/var/lib/opencloud=.
+
+IMPORTANT:
+- OpenCloud decomposedfs requires extended attributes (xattrs).
+- Always use =rsync -aAX= to preserve xattrs and ACLs.
 
 #+begin_src bash
-sudo systemctl stop podman-babybuddy.service
+sudo rsync -aAX --delete \
+  --chown=opencloud:opencloud \
+  /mnt/restore-staging/mnt/nightly_backup/opencloud-etc/ \
+  /var/lib/opencloud/etc/
+
+sudo rsync -aAX --delete \
+  --chown=opencloud:opencloud \
+  /mnt/restore-staging/mnt/nightly_backup/opencloud-idm/ \
+  /var/lib/opencloud/idm/
+
+sudo rsync -aAX --delete \
+  --chown=opencloud:opencloud \
+  /mnt/restore-staging/mnt/nightly_backup/opencloud-storage-metadata/ \
+  /var/lib/opencloud/storage/metadata/
+
+sudo rsync -aAX --delete \
+  --chown=opencloud:opencloud \
+  /mnt/restore-staging/mnt/nightly_backup/opencloud-storage-ocm/ \
+  /var/lib/opencloud/storage/ocm/
+
+sudo rsync -aAX --delete \
+  --chown=opencloud:opencloud \
+  /mnt/restore-staging/mnt/nightly_backup/opencloud-storage-users/ \
+  /var/lib/opencloud/storage/users/
 #+end_src
 
-* Drop the Existing Database
-
-Remove the existing database before restoring from backup:
+* Start OpenCloud
 
 #+begin_src bash
-sudo -u postgres psql -d postgres -c "DROP DATABASE babybuddy;"
-sudo systemctl restart postgresql
+sudo systemctl start podman-compose-opencloud-root.target
 #+end_src
 
-* Restore the Database
-
-Restore the database from the compressed SQL backup:
+(Optional) Confirm containers are running:
 
 #+begin_src bash
-sudo cp /tmp/mnt/nightly_backup/postgresql-backup/babybuddy.sql.gz /tmp/babybuddy.sql.gz
-sudo chmod 644 /tmp/babybuddy.sql.gz
-
-gunzip -c /tmp/babybuddy.sql.gz | psql -v ON_ERROR_STOP=1 -U babybuddy -d babybuddy
+sudo podman ps | grep opencloud
 #+end_src
 
-* Clear the Existing Data Directory
+* Reindex Search (Recommended After Restore)
 
-Remove all existing contents while preserving the directory itself:
+After restoring OpenCloud storage, rebuild the search index to ensure all
+spaces and files are searchable.
+
+Run the reindex command inside the main OpenCloud container:
 
 #+begin_src bash
-sudo find /var/lib/babybuddy -mindepth 1 -delete
+sudo podman exec -it opencloud-opencloud \
+  opencloud search index --all-spaces
 #+end_src
 
-This approach is:
-- Shell-agnostic (bash/zsh)
-- Safe even if the directory is already empty
-
-* Restore Data Files
-
-Copy the restored data into the live directory:
+You can monitor progress via logs:
 
 #+begin_src bash
-sudo rsync -a --delete \
-  /tmp/mnt/nightly_backup/babybuddy/ \
-  /var/lib/babybuddy/
+sudo podman logs -f opencloud-opencloud
 #+end_src
 
-Fix ownership so the service can read and write all files:
+* Cleanup (Remove Staging Dataset and Pre-Restore Snapshots)
+
+Once satisfied, clean up temporary restore resources.
+
+**1. Destroy the staging dataset:**
 
 #+begin_src bash
-sudo chown -R babybuddy:babybuddy /var/lib/babybuddy
+sudo zfs destroy -r dpool/tank/restore-staging
 #+end_src
 
-* Start Baby Buddy Service
+**2. Remove the pre-restore rollback snapshots:**
 
-Restart the Baby Buddy service:
+These snapshots were only needed as a safety net during restore. Once the
+system is healthy, remove them:
 
 #+begin_src bash
-sudo systemctl start podman-babybuddy.service
+sudo zfs destroy -r dpool/tank/services/opencloud-etc@pre-restore
+sudo zfs destroy -r dpool/tank/services/opencloud-idm@pre-restore
+sudo zfs destroy -r dpool/tank/services/opencloud-storage-meta@pre-restore
+sudo zfs destroy -r dpool/tank/services/opencloud-storage-ocm@pre-restore
+sudo zfs destroy -r dpool/tank/services/opencloud-storage-user@pre-restore
+#+end_src
+
+(Optional) Verify snapshots are gone:
+
+#+begin_src bash
+zfs list -t snapshot | grep pre-restore || echo "Pre-restore snapshots removed"
 #+end_src
 
 * Notes & Best Practices
 
-- Always stop Baby Buddy service before restoring the database.
-- Use =ON_ERROR_STOP= to ensure restore failures abort immediately.
-- Consider taking a *ZFS snapshot* of the PostgreSQL data directory and
-  Baby Buddy data directory before restoring for quick rollback.
+- With your current snapshot layout (=/mnt/nightly_backup/...=), a true one-step restore
+  directly into =/var/lib/opencloud= is not possible with Restic alone.
+- The above approach avoids =/tmp= completely by using ZFS for staging.
+- Always preserve xattrs when copying decomposedfs datasets:
+  - Use =rsync -aAX= (not just =-a=)
