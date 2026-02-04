@@ -5,27 +5,10 @@
 }: let
   alloyCfg = config.homelab.services.alloy;
 in {
-  options.homelab.services.alloy = {
-    enable = lib.mkOption {
-      default = true;
-      type = lib.types.bool;
-      description = ''
-        Whether to enable Grafana Alloy.
-      '';
-    };
-
-    userId = lib.mkOption {
-      default = 3000;
-      type = lib.types.ints.u16;
-      description = "User ID of Alloy user";
-    };
-
-    groupId = lib.mkOption {
-      default = 3000;
-      type = lib.types.ints.u16;
-      description = "Group ID of Alloy group";
-    };
-  };
+  imports = [
+    ./loki-systemd-drop.nix
+    ./options.nix
+  ];
 
   config = lib.mkIf alloyCfg.enable {
     services = {
@@ -68,11 +51,11 @@ in {
       "alloy/config.alloy" = {
         source = ./config.alloy;
       };
-      "alloy/loki.alloy" = {
-        source = ./loki.alloy;
+      "alloy/loki-systemd.alloy" = {
+        source = ./loki-systemd.alloy;
       };
-      "alloy/prometheus.alloy" = {
-        source = ./prometheus.alloy;
+      "alloy/prometheus-node-exporter.alloy" = {
+        source = ./prometheus-node-exporter.alloy;
       };
     };
   };
