@@ -18,6 +18,12 @@ discovery.relabel "systemd" {
 		target_label  = "unit"
 	}
 
+    rule {
+         // Extract systemd hostname information into a label
+         source_labels = ["__journal__hostname"]
+         target_label  = "host"
+    }
+
 	rule {
 		// Extract boot ID information into a label
 		source_labels = ["__journal__boot_id"]
@@ -30,9 +36,30 @@ discovery.relabel "systemd" {
 		target_label  = "transport"
 	}
 
+    rule {
+         // Default severity label derived from journald priority.
+         //
+         // This ensures every log stream has a usable `level` label
+         // even when the application log line does not include its own
+         // structured severity field.
+         //
+         // Later pipeline stages may override this with the application's
+         // own `level=...` or JSON `"level"` value when present.
+         source_labels = ["__journal_priority_keyword"]
+         target_label  = "level"
+    }
+
 	rule {
-		// Keep journald priority keyword, but DON'T call it "level"
-		// so it doesn't override the application's level=... field.
+         // Preserve the raw journald/systemd priority keyword separately.
+         //
+         // This is useful for debugging and auditing because it represents
+         // the transport-level severity assigned by journald itself
+         // (info, warning, err, etc.), independent of any application-
+         // reported log level.
+         //
+         // If the application provides its own structured log level,
+         // the main `level` label will be overwritten, but this value
+         // remains available as `journal_level`.
 		source_labels = ["__journal_priority_keyword"]
 		target_label  = "journal_level"
 	}
