@@ -55,10 +55,7 @@
         zfs destroy "${snap}" 2>/dev/null || true
 
         zfs snapshot "${snap}"
-        mount -t zfs "${snap}" "${mnt}"
-
-        # defensive
-        mount -o remount,ro "${mnt}" 2>/dev/null || true
+        mount -t zfs -o ro "${snap}" "${mnt}"
       '')
       datasetNames)}
   '';
