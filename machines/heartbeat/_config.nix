@@ -107,6 +107,10 @@
 
       opencloud = {
         enable = true;
+
+        zfs = {
+          enable = true;
+        };
       };
 
       podman = {
