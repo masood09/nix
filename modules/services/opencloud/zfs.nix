@@ -23,6 +23,7 @@ in {
             "zfs-dataset-opencloud-search.service"
             "zfs-dataset-opencloud-storage.service"
             "zfs-dataset-opencloud-storage-metadata.service"
+            "zfs-dataset-opencloud-storage-ocm.service"
             "zfs-dataset-opencloud-storage-users.service"
             "podman-compose-opencloud-root.service"
             "podman-opencloud-opencloud.service"
@@ -97,6 +98,7 @@ in {
             "podman-opencloud-opencloud.service"
             "podman-opencloud-wopi.service"
             "zfs-dataset-opencloud-storage-metadata.service"
+            "zfs-dataset-opencloud-storage-ocm.service"
             "zfs-dataset-opencloud-storage-users.service"
           ];
         };
@@ -115,12 +117,26 @@ in {
           ];
         };
 
+        opencloud-storage-ocm = {
+          enable = true;
+          dataset = cfg.zfs.storageOCMDataset;
+          mountpoint = cfg.dataDir + "/storage/ocm";
+          restic.enable = true;
+          properties = cfg.zfs.storageOCMProperties;
+
+          requiredBy = [
+            "podman-compose-opencloud-root.service"
+            "podman-opencloud-opencloud.service"
+            "podman-opencloud-wopi.service"
+          ];
+        };
+
         opencloud-storage-users = {
           enable = true;
-          dataset = cfg.zfs.userStorageDataset;
+          dataset = cfg.zfs.storageUserDataset;
           mountpoint = cfg.dataDir + "/storage/users";
           restic.enable = true;
-          properties = cfg.zfs.userStorageProperties;
+          properties = cfg.zfs.storageUserProperties;
 
           requiredBy = [
             "podman-compose-opencloud-root.service"

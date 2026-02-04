@@ -4,8 +4,10 @@ role_assignment:
     role_claim: groups
     role_mapping:
       - role_name: admin
-        claim_value: opencloud-admin
+        claim_value: homelab-admins
       - role_name: user
-        claim_value: opencloud-user
+        claim_value: parents
+      - role_name: user
+        claim_value: kids
       - role_name: guest
-        claim_value: opencloud-guest
+        claim_value: guest

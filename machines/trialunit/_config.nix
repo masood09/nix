@@ -153,7 +153,8 @@
           natsDataset = "dpool/tank/services/opencloud-nats";
           searchDataset = "dpool/tank/services/opencloud-search";
           storageMetaDataset = "dpool/tank/services/opencloud-storage-meta";
-          userStorageDataset = "dpool/tank/services/opencloud-user-storage";
+          storageOCMDataset = "dpool/tank/services/opencloud-storage-ocm";
+          storageUserDataset = "dpool/tank/services/opencloud-storage-user";
         };
       };
 
