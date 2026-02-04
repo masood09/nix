@@ -11,16 +11,8 @@
 in {
   imports = [
     ./alloy.nix
+    ./options.nix
   ];
-
-  options.homelab.services.authentik = {
-    enable = lib.mkEnableOption "Whether to enable Authentik.";
-
-    webDomain = lib.mkOption {
-      type = lib.types.str;
-      default = "auth.${config.networking.domain}";
-    };
-  };
 
   config = lib.mkIf authentikCfg.enable {
     services = {
