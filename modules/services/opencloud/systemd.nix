@@ -43,7 +43,6 @@ in {
 
           serviceConfig = {
             Type = "oneshot";
-            RemainAfterExit = true;
             ExecStart = ''
               ${pkgs.coreutils}/bin/chown opencloud:opencloud \
                 ${toString cfg.dataDir} \
@@ -80,7 +79,6 @@ in {
 
           serviceConfig = {
             Type = "oneshot";
-            RemainAfterExit = true;
           };
 
           script = ''
