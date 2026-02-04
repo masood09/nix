@@ -34,7 +34,7 @@
 
       roleAttributePath = lib.mkOption {
         type = lib.types.str;
-        default = "contains(groups, 'Homelab Admins') && 'Admin' || 'Viewer'";
+        default = "contains(groups, 'homelab-admins') && 'Admin' || 'Viewer'";
       };
     };
 

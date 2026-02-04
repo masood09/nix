@@ -88,10 +88,6 @@
       grafana = {
         enable = true;
 
-        oauth = {
-          roleAttributePath = "contains(groups, 'homelab-admins') && 'Admin' || 'Viewer'";
-        };
-
         zfs = {
           enable = true;
         };
