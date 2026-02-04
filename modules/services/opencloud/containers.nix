@@ -217,8 +217,10 @@ in {
             "zfs-dataset-opencloud-search.service"
             "zfs-dataset-opencloud-storage.service"
             "zfs-dataset-opencloud-storage-metadata.service"
+            "zfs-dataset-opencloud-storage-ocm.service"
             "zfs-dataset-opencloud-storage-users.service"
             "opencloud-permissions.service"
+            "opencloud-sync-etc.service"
           ];
 
           requires = [
@@ -229,8 +231,10 @@ in {
             "zfs-dataset-opencloud-search.service"
             "zfs-dataset-opencloud-storage.service"
             "zfs-dataset-opencloud-storage-metadata.service"
+            "zfs-dataset-opencloud-storage-ocm.service"
             "zfs-dataset-opencloud-storage-users.service"
             "opencloud-permissions.service"
+            "opencloud-sync-etc.service"
           ];
         };
       };
@@ -263,8 +267,10 @@ in {
             "zfs-dataset-opencloud-search.service"
             "zfs-dataset-opencloud-storage.service"
             "zfs-dataset-opencloud-storage-metadata.service"
+            "zfs-dataset-opencloud-storage-ocm.service"
             "zfs-dataset-opencloud-storage-users.service"
             "opencloud-permissions.service"
+            "opencloud-sync-etc.service"
           ];
 
           requires = [
@@ -276,8 +282,10 @@ in {
             "zfs-dataset-opencloud-search.service"
             "zfs-dataset-opencloud-storage.service"
             "zfs-dataset-opencloud-storage-metadata.service"
+            "zfs-dataset-opencloud-storage-ocm.service"
             "zfs-dataset-opencloud-storage-users.service"
             "opencloud-permissions.service"
+            "opencloud-sync-etc.service"
           ];
 
           partOf = [
@@ -303,8 +311,10 @@ in {
             "zfs-dataset-opencloud-search.service"
             "zfs-dataset-opencloud-storage.service"
             "zfs-dataset-opencloud-storage-metadata.service"
+            "zfs-dataset-opencloud-storage-ocm.service"
             "zfs-dataset-opencloud-storage-users.service"
             "opencloud-permissions.service"
+            "opencloud-sync-etc.service"
           ];
 
           requires = [
@@ -316,8 +326,10 @@ in {
             "zfs-dataset-opencloud-search.service"
             "zfs-dataset-opencloud-storage.service"
             "zfs-dataset-opencloud-storage-metadata.service"
+            "zfs-dataset-opencloud-storage-ocm.service"
             "zfs-dataset-opencloud-storage-users.service"
             "opencloud-permissions.service"
+            "opencloud-sync-etc.service"
           ];
 
           partOf = [

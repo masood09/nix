@@ -101,9 +101,14 @@
         default = "fpool/fast/services/opencloud-storage-meta";
       };
 
-      userStorageDataset = lib.mkOption {
+      storageOCMDataset = lib.mkOption {
         type = lib.types.str;
-        default = "dpool/tank/services/opencloud-user-storage";
+        default = "fpool/fast/services/opencloud-storage-ocm";
+      };
+
+      storageUserDataset = lib.mkOption {
+        type = lib.types.str;
+        default = "dpool/tank/services/opencloud-storage-user";
       };
 
       etcProperties = lib.mkOption {
@@ -152,7 +157,16 @@
         };
       };
 
-      userStorageProperties = lib.mkOption {
+      storageOCMProperties = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+
+        default = {
+          recordsize = "16K";
+          logbias = "latency";
+        };
+      };
+
+      storageUserProperties = lib.mkOption {
         type = lib.types.attrsOf lib.types.str;
 
         default = {
