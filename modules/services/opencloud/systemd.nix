@@ -19,7 +19,7 @@ in {
           wantedBy = ["multi-user.target"];
 
           after =
-            ["local-fs.target"]
+            ["systemd-tmpfiles-setup.service" "local-fs.target"]
             ++ lib.optionals cfg.zfs.enable [
               "zfs-dataset-opencloud-root.service"
               "zfs-dataset-opencloud-etc.service"
@@ -45,17 +45,15 @@ in {
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = ''
-              set -euo pipefail
-
-              # Ensure top-level ownership
-              ${pkgs.coreutils}/bin/chown opencloud:opencloud ${toString cfg.dataDir}
-
               ${pkgs.coreutils}/bin/chown opencloud:opencloud \
+                ${toString cfg.dataDir} \
                 ${toString cfg.dataDir}/etc \
                 ${toString cfg.dataDir}/idm \
                 ${toString cfg.dataDir}/nats \
                 ${toString cfg.dataDir}/search \
-                ${toString cfg.dataDir}/storage
+                ${toString cfg.dataDir}/storage \
+                ${toString cfg.dataDir}/storage/metadata \
+                ${toString cfg.dataDir}/storage/users
             '';
           };
         };
@@ -98,7 +96,21 @@ in {
 
       tmpfiles.rules = [
         "d ${toString cfg.dataDir} 0750 opencloud opencloud -"
+        "d ${toString cfg.dataDir}/etc 0750 opencloud opencloud -"
+        "d ${toString cfg.dataDir}/idm 0750 opencloud opencloud -"
+        "d ${toString cfg.dataDir}/nats 0750 opencloud opencloud -"
+        "d ${toString cfg.dataDir}/search 0750 opencloud opencloud -"
+        "d ${toString cfg.dataDir}/storage 0750 opencloud opencloud -"
+        "d ${toString cfg.dataDir}/storage/metadata 0750 opencloud opencloud -"
+        "d ${toString cfg.dataDir}/storage/users 0750 opencloud opencloud -"
         "z ${toString cfg.dataDir} 0750 opencloud opencloud -"
+        "z ${toString cfg.dataDir}/etc 0750 opencloud opencloud -"
+        "z ${toString cfg.dataDir}/idm 0750 opencloud opencloud -"
+        "z ${toString cfg.dataDir}/nats 0750 opencloud opencloud -"
+        "z ${toString cfg.dataDir}/search 0750 opencloud opencloud -"
+        "z ${toString cfg.dataDir}/storage 0750 opencloud opencloud -"
+        "z ${toString cfg.dataDir}/storage/metadata 0750 opencloud opencloud -"
+        "z ${toString cfg.dataDir}/storage/users 0750 opencloud opencloud -"
       ];
     };
 
