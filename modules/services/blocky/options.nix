@@ -24,10 +24,17 @@
       };
     };
 
-    dnsPort = lib.mkOption {
-      type = lib.types.port;
-      default = 53;
-      description = "DNS port to listen on (usually 53).";
+    dnsListen = lib.mkOption {
+      type = lib.types.listOf (lib.types.oneOf [lib.types.port lib.types.str]);
+      default = [53];
+      description = ''
+        Blocky DNS listen addresses. Each entry can be:
+          - a port: 53
+          - an address+port: "10.0.20.10:53"
+          - wildcard: ":53"
+          - IPv6: "[::1]:53"
+      '';
+      example = [":53" "[::]:53"];
     };
 
     upstreamDefault = lib.mkOption {
