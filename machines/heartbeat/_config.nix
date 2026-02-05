@@ -40,7 +40,6 @@
         enable = true;
 
         serviceUnits = [
-          "garage.service"
           "immich-machine-learning.service"
           "immich-server.service"
           "karakeep-browser.service"
@@ -57,14 +56,6 @@
 
       dell-idrac-fan-controller = {
         enable = true;
-      };
-
-      garage = {
-        enable = true;
-
-        zfs = {
-          enable = true;
-        };
       };
 
       grafana = {
