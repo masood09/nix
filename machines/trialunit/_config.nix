@@ -65,7 +65,12 @@
 
       blocky = {
         enable = true;
-        dnsPort = 54;
+
+        dnsListen = [
+          "127.0.0.1:53"
+          "10.0.20.4:53"
+          "100.64.0.2:53"
+        ];
       };
 
       caddy = {

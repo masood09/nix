@@ -5,6 +5,19 @@
 }: let
   homelabCfg = config.homelab;
   blockyCfg = homelabCfg.services.blocky;
+
+  portFromListen = v:
+    if builtins.isInt v
+    then v
+    else let
+      m = builtins.match ".*:([0-9]+)$" v;
+    in
+      if m == null
+      then lib.toInt v
+      else lib.toInt (builtins.elemAt m 0);
+
+  dnsPorts =
+    lib.unique (map portFromListen blockyCfg.dnsListen);
 in {
   imports = [
     ./alloy.nix
@@ -17,9 +30,7 @@ in {
 
       settings = {
         ports = {
-          dns = [
-            blockyCfg.dnsPort
-          ];
+          dns = blockyCfg.dnsListen;
 
           http = lib.mkIf blockyCfg.metrics.enable "127.0.0.1:${toString blockyCfg.metrics.listenPort}";
         };
@@ -35,13 +46,12 @@ in {
     };
 
     networking.firewall = {
-      allowedUDPPorts = lib.mkIf blockyCfg.openFirewall [
-        blockyCfg.dnsPort
-      ];
-
-      allowedTCPPorts = lib.mkIf (blockyCfg.metrics.enable && blockyCfg.metrics.openFirewall) [
+      allowedUDPPorts = lib.mkIf blockyCfg.openFirewall dnsPorts;
+      allowedTCPPorts = lib.mkIf blockyCfg.openFirewall (
+        dnsPorts
+        ++ lib.optional (blockyCfg.metrics.enable && blockyCfg.metrics.openFirewall)
         blockyCfg.metrics.listenPort
-      ];
+      );
     };
   };
 }
