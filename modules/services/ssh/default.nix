@@ -1,7 +1,4 @@
-{
-  config,
-  ...
-}: let
+{config, ...}: let
   sshCfg = config.homelab.services.ssh;
 in {
   imports = [
@@ -9,21 +6,29 @@ in {
   ];
 
   config = {
-    services = {
-      openssh = {
-        enable = true;
+    services.openssh = {
+      enable = true;
+      ports = [sshCfg.listenPort];
 
-        ports = [
-          sshCfg.listenPort
-        ];
+      settings = {
+        # Block root completely
+        PermitRootLogin = "no";
 
-        settings = {
-          PermitRootLogin = "no";
-          PasswordAuthentication = false;
-        };
+        # Key-only auth: stop PAM/password/interactive attempts
+        PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
 
-        openFirewall = true;
+        PubkeyAuthentication = "yes";
+        AuthenticationMethods = "publickey";
+
+        # Reduce brute-force effectiveness/noise
+        MaxAuthTries = 3;
+        LoginGraceTime = 20;
+
+        AllowUsers = sshCfg.allowUsers;
       };
+
+      openFirewall = true;
     };
   };
 }
