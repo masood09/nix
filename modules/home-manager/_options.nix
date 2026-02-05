@@ -107,6 +107,11 @@
             The userEmail option for git.
           '';
         };
+
+        githubUsername = lib.mkOption {
+          default = "masood09";
+          type = lib.types.str;
+        };
       };
 
       motd = {

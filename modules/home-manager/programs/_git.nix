@@ -52,6 +52,10 @@ in {
         pull = {
           rebase = true;
         };
+
+        github = {
+          user = gitCfg.githubUsername;
+        };
       };
 
       signing = {
