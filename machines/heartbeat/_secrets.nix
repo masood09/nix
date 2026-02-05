@@ -36,11 +36,6 @@
 
     "headscale-preauth.key" = {};
 
-    "garage.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["garage.service"];
-    };
-
     "grafana-authentik-client-secret" = {
       sopsFile = ./secrets.sops.yaml;
       owner = "grafana";
