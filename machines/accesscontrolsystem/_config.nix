@@ -42,6 +42,14 @@
         ];
       };
 
+      blocky = {
+        enable = true;
+
+        dnsListen = [
+          "100.64.0.15:53"
+        ];
+      };
+
       caddy = {
         enable = true;
       };
