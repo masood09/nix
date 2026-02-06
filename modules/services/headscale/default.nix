@@ -8,7 +8,6 @@
   caddyEnabled = homelabCfg.services.caddy.enable;
 in {
   imports = [
-    ./acl.nix
     ./dns.nix
     ./oidc.nix
     ./options.nix
@@ -36,6 +35,7 @@ in {
           logtail.enabled = false;
           server_url = "https://${headscaleCfg.webDomain}";
           metrics_listen_addr = "127.0.0.1:${toString headscaleCfg.metricsPort}";
+          policy.path = config.sops.secrets."headscale-acl.hujson".path;
         };
       };
 
