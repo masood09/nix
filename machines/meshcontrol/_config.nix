@@ -41,6 +41,11 @@
         dnsListen = [
           "100.64.0.4:53"
         ];
+
+        upstreamDefault = [
+          "1.1.1.1"
+          "1.0.0.1"
+        ];
       };
 
       caddy = {
