@@ -10,6 +10,12 @@
 
     "discord-zfs-webhook" = {};
 
+    "headscale-acl.hujson" = {
+      owner = "headscale";
+      sopsFile = ./../../secrets/headscale-acl.sops.yaml;
+      restartUnits = ["headscale.service"];
+    };
+
     "headscale-authentik-client-secret" = {
       owner = "headscale";
       sopsFile = ./secrets.sops.yaml;
@@ -22,7 +28,9 @@
       restartUnits = ["headscale.service"];
     };
 
-    "headscale-preauth.key" = {};
+    "headscale-preauth.key" = {
+      sopsFile = ./secrets.sops.yaml;
+    };
 
     "restic.env" = {
       sopsFile = ./secrets.sops.yaml;

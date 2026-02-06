@@ -17,7 +17,10 @@
     };
 
     "discord-zfs-webhook" = {};
-    "headscale-preauth.key" = {};
+
+    "headscale-preauth.key" = {
+      sopsFile = ./secrets.sops.yaml;
+    };
 
     "restic.env" = {
       sopsFile = ./secrets.sops.yaml;

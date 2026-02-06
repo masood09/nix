@@ -8,8 +8,6 @@
   caddyEnabled = homelabCfg.services.caddy.enable;
 in {
   imports = [
-    ./acl.nix
-    ./dns.nix
     ./oidc.nix
     ./options.nix
   ];
@@ -36,6 +34,28 @@ in {
           logtail.enabled = false;
           server_url = "https://${headscaleCfg.webDomain}";
           metrics_listen_addr = "127.0.0.1:${toString headscaleCfg.metricsPort}";
+          policy.path = config.sops.secrets."headscale-acl.hujson".path;
+
+          log = {
+            level = "info";
+            format = "json";
+          };
+
+          dns = {
+            override_local_dns = true;
+
+            base_domain = "dns.${headscaleCfg.webDomain}";
+
+            nameservers = {
+              global = [
+                "100.64.0.17"
+                "100.64.0.18"
+                "100.64.0.20"
+              ];
+            };
+
+            extra_records_path = config.sops.secrets."headscale-extra-records.json".path;
+          };
         };
       };
 
