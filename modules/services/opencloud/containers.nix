@@ -32,7 +32,7 @@ in {
     virtualisation.oci-containers.containers = {
       "opencloud-opencloud" = {
         # renovate: datasource=docker depName=docker.io/opencloudeu/opencloud
-        image = "docker.io/opencloudeu/opencloud:4.0.1";
+        image = "docker.io/opencloudeu/opencloud:4.0.3";
 
         environment = {
           "COLLABORA_DOMAIN" = collaboraWebDomain;
@@ -106,7 +106,7 @@ in {
 
       "opencloud-wopi" = {
         # renovate: datasource=docker depName=docker.io/opencloudeu/opencloud
-        image = "docker.io/opencloudeu/opencloud:4.0.1";
+        image = "docker.io/opencloudeu/opencloud:4.0.3";
 
         environment = {
           "COLLABORATION_APP_ADDR" = "https://${collaboraWebDomain}";
