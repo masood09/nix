@@ -36,6 +36,11 @@ in {
           metrics_listen_addr = "127.0.0.1:${toString headscaleCfg.metricsPort}";
           policy.path = config.sops.secrets."headscale-acl.hujson".path;
 
+          log = {
+            level = "info";
+            format = "json";
+          };
+
           dns = {
             override_local_dns = true;
 
