@@ -50,7 +50,9 @@
       restartUnits = ["grafana.service"];
     };
 
-    "headscale-preauth.key" = {};
+    "headscale-preauth.key" = {
+      sopsFile = ./secrets.sops.yaml;
+    };
 
     "headscale-acl.hujson" = {
       owner = "headscale";
