@@ -17,6 +17,7 @@ in {
             client_secret_path = cfg.clientSecretPath;
 
             only_start_if_oidc_is_available = true;
+            email_verified_required = false;
 
             scope = [
               "openid"
