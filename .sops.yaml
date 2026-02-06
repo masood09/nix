@@ -33,12 +33,24 @@ creation_rules:
         - *murderbot
         - *trialunit
 
+  - path_regex: ^secrets/headscale-acl\.sops\.yaml$
+    key_groups:
+      - age:
+        - *meshcontrol
+        - *murderbot
+        - *trialunit
+
   - path_regex: ^machines/accesscontrolsystem/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *accesscontrolsystem
         - *murderbot
 
+  - path_regex: ^machines/caretaker/secrets\.sops\.yaml$
+    key_groups:
+      - age:
+        - *caretaker
+        - *murderbot
 
   - path_regex: ^machines/meshcontrol/secrets\.sops\.yaml$
     key_groups:

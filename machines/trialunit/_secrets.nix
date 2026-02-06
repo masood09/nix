@@ -33,12 +33,11 @@
       restartUnits = ["podman-dell-idrac-fan-controller.service"];
     };
 
+    "discord-zfs-webhook" = {};
+
     "dpool_tank_key" = {
       sopsFile = ./secrets.sops.yaml;
     };
-
-    "discord-zfs-webhook" = {};
-    "headscale-preauth.key" = {};
 
     "garage.env" = {
       sopsFile = ./secrets.sops.yaml;
@@ -49,6 +48,16 @@
       sopsFile = ./secrets.sops.yaml;
       owner = "grafana";
       restartUnits = ["grafana.service"];
+    };
+
+    "headscale-preauth.key" = {
+      sopsFile = ./secrets.sops.yaml;
+    };
+
+    "headscale-acl.hujson" = {
+      owner = "headscale";
+      sopsFile = ./../../secrets/headscale-acl.sops.yaml;
+      restartUnits = ["headscale.service"];
     };
 
     "headscale-authentik-client-secret" = {
