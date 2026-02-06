@@ -11,8 +11,8 @@ in {
     ./options.nix
   ];
 
-  config = {
-    homelab.zfs.datasets.tailscale = lib.mkIf (cfg.enable && cfg.zfs.enable) {
+  config = lib.mkIf cfg.enable {
+    homelab.zfs.datasets.tailscale = lib.mkIf cfg.zfs.enable {
       inherit (cfg.zfs) dataset properties;
 
       enable = true;
@@ -20,7 +20,7 @@ in {
       requiredBy = ["tailscaled.service"];
     };
 
-    services = lib.mkIf cfg.enable {
+    services = {
       tailscale = {
         inherit (cfg) enable;
 
@@ -73,7 +73,6 @@ in {
     environment.persistence."/nix/persist" =
       lib.mkIf (
         !homelabCfg.isRootZFS
-        && cfg.enable
         && !cfg.zfs.enable
       ) {
         directories = [
