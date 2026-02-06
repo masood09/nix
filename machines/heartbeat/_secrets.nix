@@ -34,7 +34,9 @@
       sopsFile = ./secrets.sops.yaml;
     };
 
-    "headscale-preauth.key" = {};
+    "headscale-preauth.key" = {
+      sopsFile = ./secrets.sops.yaml;
+    };
 
     "grafana-authentik-client-secret" = {
       sopsFile = ./secrets.sops.yaml;
