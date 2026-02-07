@@ -45,6 +45,47 @@
       };
     };
 
+    headplane = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+      };
+
+      dataDir = lib.mkOption {
+        type = lib.types.path;
+        default = "/var/lib/headplane/";
+      };
+
+      port = lib.mkOption {
+        type = lib.types.port;
+        default = 8909;
+      };
+
+      zfs = {
+        enable = lib.mkEnableOption "Store Headplane dataDir on a ZFS dataset.";
+
+        restic = {
+          enable = lib.mkEnableOption "Enable restic backup";
+        };
+
+        dataset = lib.mkOption {
+          type = lib.types.str;
+          default = "rpool/root/var/lib/headplane";
+          description = "ZFS dataset to create and mount at dataDir.";
+        };
+
+        properties = lib.mkOption {
+          type = lib.types.attrsOf lib.types.str;
+          default = {
+            logbias = "latency";
+            recordsize = "16K";
+            redundant_metadata = "most";
+          };
+          description = "ZFS properties for the dataset.";
+        };
+      };
+    };
+
     zfs = {
       enable = lib.mkEnableOption "Store Headscale dataDir on a ZFS dataset.";
 
