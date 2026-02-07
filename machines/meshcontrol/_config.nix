@@ -39,7 +39,7 @@
         enable = true;
 
         dnsListen = [
-          "100.64.0.4:53"
+          "100.64.0.18:53"
         ];
 
         upstreamDefault = [
