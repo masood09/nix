@@ -34,7 +34,6 @@ in {
           logtail.enabled = false;
           server_url = "https://${headscaleCfg.webDomain}";
           metrics_listen_addr = "127.0.0.1:${toString headscaleCfg.metricsPort}";
-          policy.path = config.sops.secrets."headscale-acl.hujson".path;
 
           log = {
             level = "info";
@@ -52,8 +51,6 @@ in {
                 "100.64.0.22"
               ];
             };
-
-            extra_records_path = config.sops.secrets."headscale-extra-records.json".path;
           };
         };
       };
