@@ -9,6 +9,16 @@
   caddyEnabled = homelabCfg.services.caddy.enable;
 
   dataDir = lib.removeSuffix "/" (toString headscaleCfg.dataDir);
+
+  headscalePermsScript = pkgs.writeShellScript "headscale-fix-permissions" ''
+    set -euo pipefail
+
+    chown ${config.services.headscale.user}:${config.services.headscale.group} ${dataDir}
+
+    touch ${config.services.headscale.settings.dns.extra_records_path}
+    chown ${config.services.headscale.user}:${config.services.headscale.group} \
+      ${config.services.headscale.settings.dns.extra_records_path}
+  '';
 in {
   imports = [
     ./headplane.nix
@@ -46,6 +56,7 @@ in {
 
           dns = {
             override_local_dns = true;
+            extra_records_path = "${dataDir}/extra-records.json";
 
             base_domain = "dns.${headscaleCfg.webDomain}";
 
@@ -113,11 +124,7 @@ in {
           ];
 
           serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = ''
-              ${pkgs.coreutils}/bin/chown ${config.services.headscale.user}:${config.services.headscale.group} ${dataDir}
-            '';
+            ExecStart = headscalePermsScript;
           };
         };
       };
