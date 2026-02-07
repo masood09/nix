@@ -14,7 +14,7 @@ in {
   config = {
     environment.etc."alloy/blocky.alloy" = lib.mkIf (blockyMetricsEnabled && alloyEnabled) {
       text = ''
-        prometheus.scrape "blocky_target" {
+        prometheus.scrape "${config.networking.hostName}_blocky_target" {
           targets = [
             {
               __address__ = "127.0.0.1:${blockyExporterPort}",
