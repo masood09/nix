@@ -73,7 +73,7 @@ discovery.relabel "systemd" {
 loki.process "systemd" {
 
 	// -------------------------
-	// 1) JSON logs: {"level":"info", ...}
+	// JSON logs: {"level":"info", ...}
 	// -------------------------
 	stage.match {
 		selector = "{unit=~\".+\"} |~ \"^{\\\"\""
@@ -97,7 +97,7 @@ loki.process "systemd" {
 	}
 
 	// -------------------------
-	// 2) logfmt logs: level=warn ts=... msg="..."
+	// logfmt logs: level=warn ts=... msg="..."
 	// -------------------------
 	stage.match {
 		selector = "{unit=~\".+\"} |~ \"(^|[[:space:]])level=\""
@@ -120,8 +120,32 @@ loki.process "systemd" {
 		}
 	}
 
+    // -------------------------
+	// Collabora: parse "INF/WRN/ERR/TRC" token and override `level`
+	// Example:
+	// wsd-... 2026-.. [ ... ] WRN  message| file:line
 	// -------------------------
-	// 3) Fallback: only if level still missing/empty
+	stage.match {
+		selector = "{unit=\"podman-opencloud-collabora.service\"}"
+
+		stage.regex {
+			expression = "^[^ ]+\\s+\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\.\\d+\\s+\\+\\d+\\s+\\[.*\\]\\s+(?P<collabora_level>[A-Z]{3})\\s+"
+		}
+
+		stage.template {
+			source   = "collabora_level"
+			template = "{{- $l := .Value -}}{{- if eq $l \"INF\" -}}info{{- else if eq $l \"WRN\" -}}warn{{- else if eq $l \"ERR\" -}}error{{- else if eq $l \"TRC\" -}}trace{{- else if eq $l \"DBG\" -}}debug{{- else if eq $l \"FTL\" -}}fatal{{- else -}}{{ lower $l }}{{- end -}}"
+		}
+
+		stage.labels {
+			values = {
+				level = "collabora_level",
+			}
+		}
+	}
+
+	// -------------------------
+	// Fallback: only if level still missing/empty
 	// -------------------------
 	stage.match {
 		// Use regex-empty; more reliable than {level=""} in many setups
