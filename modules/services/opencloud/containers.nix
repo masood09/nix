@@ -159,7 +159,7 @@ in {
         environment = {
           DONT_GEN_SSL_CERT = "YES";
           "aliasgroup1" = "https://${wopiWebDomain}";
-          extra_params = "--o:ssl.enable=false --o:ssl.ssl_verification=true --o:ssl.termination=true --o:welcome.enable=false --o:net.frame_ancestors=${cfg.webDomain} --o:net.lok_allow.host[14]=${cfg.webDomain} --o:home_mode.enable=false";
+          extra_params = "--o:ssl.enable=false --o:ssl.ssl_verification=true --o:ssl.termination=true --o:welcome.enable=false --o:net.frame_ancestors=${cfg.webDomain} --o:net.lok_allow.host[14]=${cfg.webDomain} --o:home_mode.enable=false --o:logging.level=warning --o:logging.level_startup=warning";
         };
 
         environmentFiles = [
