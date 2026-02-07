@@ -28,14 +28,6 @@
         };
       };
 
-      babybuddy = {
-        enable = true;
-
-        zfs = {
-          enable = true;
-        };
-      };
-
       backup = {
         enable = true;
 
