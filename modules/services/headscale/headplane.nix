@@ -7,6 +7,17 @@
   homelabCfg = config.homelab;
   headscaleCfg = homelabCfg.services.headscale;
   cfg = headscaleCfg.headplane;
+
+  format = pkgs.formats.yaml {};
+
+  # A workaround generate a valid Headscale config accepted by Headplane when `config_strict == true`.
+  settings = lib.recursiveUpdate config.services.headscale.settings {
+    tls_cert_path = "/dev/null";
+    tls_key_path = "/dev/null";
+    policy.path = "/dev/null";
+  };
+
+  headscaleConfig = format.generate "headscale.yml" settings;
 in {
   config = lib.mkIf (headscaleCfg.enable && cfg.enable) {
     homelab.zfs.datasets.headplane = lib.mkIf cfg.zfs.enable {
@@ -34,6 +45,7 @@ in {
 
           headscale = {
             url = "https://${headscaleCfg.webDomain}";
+            config_path = "${headscaleConfig}";
             dns_records_path = config.services.headscale.settings.dns.extra_records_path;
           };
 
