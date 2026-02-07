@@ -53,6 +53,10 @@ in {
               ];
             };
           };
+
+          policy = {
+            mode = "database";
+          };
         };
       };
 
