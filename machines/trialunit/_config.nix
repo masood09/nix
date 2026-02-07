@@ -71,6 +71,10 @@
           "10.0.20.4:53"
           "100.64.0.22:53"
         ];
+
+        unbound = {
+          localDomain = "mantannest.com";
+        };
       };
 
       caddy = {

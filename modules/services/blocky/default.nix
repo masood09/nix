@@ -22,6 +22,7 @@ in {
   imports = [
     ./alloy.nix
     ./options.nix
+    ./unbound.nix
   ];
 
   config = lib.mkIf blockyCfg.enable {

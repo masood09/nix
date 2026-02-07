@@ -1,4 +1,8 @@
-{lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   options.homelab.services.blocky = {
     enable = lib.mkEnableOption "Whether to enable Blocky.";
 
@@ -39,7 +43,10 @@
 
     upstreamDefault = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = ["10.0.20.1"];
+      default =
+        if config.homelab.services.blocky.unbound.enable
+        then ["127.0.0.1:${toString config.homelab.services.blocky.unbound.port}"]
+        else ["10.0.20.1"];
       description = "Default upstream resolver(s) for Blocky.";
     };
 
@@ -107,6 +114,33 @@
         "10.0.200.1/24" = ["suspicious" "ads" "tracking" "malicious" "adult"];
       };
       description = "Blocky clientGroupsBlock mapping (client CIDR/name -> denylist group names).";
+    };
+
+    unbound = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+      };
+
+      userId = lib.mkOption {
+        default = 3009;
+        type = lib.types.ints.u16;
+      };
+
+      groupId = lib.mkOption {
+        default = 3009;
+        type = lib.types.ints.u16;
+      };
+
+      port = lib.mkOption {
+        type = lib.types.port;
+        default = 5335;
+      };
+
+      localDomain = lib.mkOption {
+        type = lib.types.str;
+        default = config.networking.domain;
+      };
     };
   };
 }
