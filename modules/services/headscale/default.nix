@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   homelabCfg = config.homelab;
@@ -83,23 +84,48 @@ in {
 
     # Service hardening + mount ordering
     systemd = {
-      services.headscale = lib.mkMerge [
-        {
-          # Unit-level ordering / mount requirements
-          unitConfig = {
-            RequiresMountsFor = [dataDir];
-          };
-        }
+      services = {
+        headscale = lib.mkMerge [
+          {
+            # Unit-level ordering / mount requirements
+            unitConfig = {
+              RequiresMountsFor = [dataDir];
+            };
+          }
 
-        (lib.mkIf headscaleCfg.zfs.enable {
-          requires = ["zfs-dataset-headscale.service"];
-          after = ["zfs-dataset-headscale.service"];
-        })
-      ];
+          (lib.mkIf headscaleCfg.zfs.enable {
+            requires = ["zfs-dataset-headscale.service"];
+            after = ["zfs-dataset-headscale.service"];
+          })
+        ];
+
+        headscale-permissions = {
+          description = "Fix Headscale dataDir ownership/permissions";
+          wantedBy = ["multi-user.target"];
+          before = ["headscale.service"];
+          after =
+            ["local-fs.target"]
+            ++ lib.optionals headscaleCfg.zfs.enable [
+              "zfs-dataset-headscale.service"
+            ];
+          requires = lib.optionals headscaleCfg.zfs.enable [
+            "zfs-dataset-headscale.service"
+          ];
+
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = ''
+              ${pkgs.coreutils}/bin/chown ${config.services.headscale.user}:${config.services.headscale.group} ${dataDir}
+            '';
+          };
+        };
+      };
 
       tmpfiles.rules = [
         # Ensure base dir exists and is owned correctly
         "d ${dataDir} 0750 headscale headscale -"
+        "z ${dataDir} 0750 headscale headscale -"
       ];
     };
 
