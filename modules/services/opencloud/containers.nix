@@ -190,7 +190,7 @@ in {
             su -s /bin/bash -c "coolconfig generate-proof-key" cool
 
             echo "Starting Collabora..."
-            exec su -s /bin/bash -c "/start-collabora-online.sh" cool
+            exec su -s /bin/bash -c "/start-collabora-online.sh" cool 2>&1
           ''
         ];
 
