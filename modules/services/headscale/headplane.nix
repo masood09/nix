@@ -34,6 +34,7 @@ in {
 
           headscale = {
             url = "https://${headscaleCfg.webDomain}";
+            dns_records_path = config.services.headscale.settings.dns.extra_records_path;
           };
 
           integration.agent = {
