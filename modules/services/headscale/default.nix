@@ -6,6 +6,8 @@
   homelabCfg = config.homelab;
   headscaleCfg = homelabCfg.services.headscale;
   caddyEnabled = homelabCfg.services.caddy.enable;
+
+  dataDir = lib.removeSuffix "/" (toString headscaleCfg.dataDir);
 in {
   imports = [
     ./headplane.nix
@@ -19,7 +21,7 @@ in {
       inherit (headscaleCfg.zfs) dataset properties;
 
       enable = true;
-      mountpoint = headscaleCfg.dataDir;
+      mountpoint = dataDir;
       requiredBy = ["headscale.service"];
 
       restic = {
@@ -85,7 +87,7 @@ in {
         {
           # Unit-level ordering / mount requirements
           unitConfig = {
-            RequiresMountsFor = [headscaleCfg.dataDir];
+            RequiresMountsFor = [dataDir];
           };
         }
 
@@ -97,7 +99,7 @@ in {
 
       tmpfiles.rules = [
         # Ensure base dir exists and is owned correctly
-        "d ${headscaleCfg.dataDir} 0750 headscale headscale -"
+        "d ${dataDir} 0750 headscale headscale -"
       ];
     };
 
@@ -108,7 +110,7 @@ in {
         && !headscaleCfg.zfs.enable
       ) {
         persistence."/nix/persist".directories = [
-          headscaleCfg.dataDir
+          dataDir
         ];
       };
   };
