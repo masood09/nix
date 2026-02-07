@@ -35,19 +35,6 @@
         ];
       };
 
-      blocky = {
-        enable = true;
-
-        dnsListen = [
-          "100.64.0.18:53"
-        ];
-
-        upstreamDefault = [
-          "1.1.1.1"
-          "1.0.0.1"
-        ];
-      };
-
       caddy = {
         enable = true;
       };
