@@ -26,7 +26,14 @@ in {
           "${cfg.webDomain}" = {
             useACMEHost = cfg.webDomain;
             extraConfig = ''
-              reverse_proxy http://127.0.0.1:${toString cfg.port}
+              handle /-/health {
+                rewrite * /healthz
+                reverse_proxy http://127.0.0.1:${toString cfg.metrics.port}
+              }
+
+              handle {
+                reverse_proxy http://127.0.0.1:${toString cfg.port}
+              }
             '';
           };
 
