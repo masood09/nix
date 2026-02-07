@@ -34,6 +34,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | garage      | 3006 | 3006 |
 | karakeep    | 3007 | 3007 |
 | opencloud   | 3008 | 3008 |
+| unbound     | 3009 | 3009 |
 
 
 * Port Registry
@@ -53,6 +54,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | Garage (Admin/Metrics)       | 3903 |
 | Garage (K2 API)              | 3904 |
 | Blocky (Metrics)             | 4000 |
+| Unbound                      | 5335 |
 | Meilisearch                  | 7700 |
 | Headscale                    | 8080 |
 | Vaultwarden                  | 8222 |
