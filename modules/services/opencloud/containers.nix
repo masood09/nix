@@ -78,6 +78,7 @@ in {
           "PROXY_USER_OIDC_CLAIM" = "preferred_username";
           "WEB_OIDC_CLIENT_ID" = cfg.oidc.clientId;
           "WEB_OIDC_SCOPE" = "openid profile email groups offline_access";
+          "PROXY_DEBUG_ADDR" = "0.0.0.0:9205";
         };
 
         environmentFiles = [
@@ -91,6 +92,7 @@ in {
 
         ports = [
           "127.0.0.1:${toString cfg.port}:9200/tcp"
+          "127.0.0.1:${toString cfg.metrics.port}:9205/tcp"
         ];
 
         entrypoint = "/bin/bash";
