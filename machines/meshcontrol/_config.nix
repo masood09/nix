@@ -15,7 +15,6 @@
 
         networkInterfaces = [
           "enp0s6"
-          "tailscale0"
         ];
       };
     };
@@ -31,6 +30,7 @@
         enable = true;
 
         serviceUnits = [
+          "headplane.service"
           "headscale.service"
         ];
       };

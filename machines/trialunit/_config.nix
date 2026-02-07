@@ -48,6 +48,7 @@
           "authentik.service"
           "authentik-worker.service"
           "garage.service"
+          "headplane.service"
           "headscale.service"
           "immich-machine-learning.service"
           "immich-server.service"

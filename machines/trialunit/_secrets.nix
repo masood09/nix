@@ -50,9 +50,6 @@
       restartUnits = ["grafana.service"];
     };
 
-    "headscale-preauth.key" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
 
     "headscale/oidc_client.secret" = {
       owner = "headscale";
@@ -79,12 +76,6 @@
       owner = "headscale";
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["headplane.service"];
-    };
-
-    "headscale-authentik-client-secret" = {
-      owner = "headscale";
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["headscale.service"];
     };
 
     "jobscraper.env" = {
@@ -118,6 +109,10 @@
       sopsFile = ./secrets.sops.yaml;
     };
     "restic-password" = {
+      sopsFile = ./secrets.sops.yaml;
+    };
+
+    "tailscale/preauth.key" = {
       sopsFile = ./secrets.sops.yaml;
     };
 

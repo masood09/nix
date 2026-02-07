@@ -38,11 +38,6 @@
         type = lib.types.str;
         default = "headscale";
       };
-
-      clientSecretPath = lib.mkOption {
-        type = lib.types.path;
-        default = config.sops.secrets."headscale-authentik-client-secret".path;
-      };
     };
 
     headplane = {

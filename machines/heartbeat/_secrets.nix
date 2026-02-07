@@ -29,10 +29,6 @@
       sopsFile = ./secrets.sops.yaml;
     };
 
-    "headscale-preauth.key" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
-
     "grafana-authentik-client-secret" = {
       sopsFile = ./secrets.sops.yaml;
       owner = "grafana";
@@ -70,6 +66,10 @@
       sopsFile = ./secrets.sops.yaml;
     };
     "restic-password" = {
+      sopsFile = ./secrets.sops.yaml;
+    };
+
+    "tailscale/preauth.key" = {
       sopsFile = ./secrets.sops.yaml;
     };
 
