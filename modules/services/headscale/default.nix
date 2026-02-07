@@ -8,6 +8,7 @@
   caddyEnabled = homelabCfg.services.caddy.enable;
 in {
   imports = [
+    ./headplane.nix
     ./oidc.nix
     ./options.nix
   ];
@@ -60,6 +61,13 @@ in {
           "${headscaleCfg.webDomain}" = {
             useACMEHost = config.networking.domain;
             extraConfig = ''
+              ${lib.optionalString headscaleCfg.headplane.enable ''
+                # Headplane admin UI
+                @headplane path /admin /admin/*
+                  reverse_proxy @headplane http://127.0.0.1:${toString headscaleCfg.headplane.port}
+              ''}
+
+              # Headscale main API/UI (everything else)
               reverse_proxy http://127.0.0.1:${toString config.services.headscale.port}
             '';
           };

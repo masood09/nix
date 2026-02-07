@@ -67,6 +67,11 @@
     authentik-nix = {
       url = "github:nix-community/authentik-nix";
     };
+
+    headplane = {
+      url = "github:tale/headplane";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -95,6 +100,11 @@
           inputs.home-manager.nixosModules.home-manager
           inputs.authentik-nix.nixosModules.default
           inputs.impermanence.nixosModules.impermanence
+          inputs.headplane.nixosModules.headplane
+          {
+            # provides `pkgs.headplane`
+            nixpkgs.overlays = [inputs.headplane.overlays.default];
+          }
 
           path
         ];

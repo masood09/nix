@@ -54,6 +54,33 @@
       sopsFile = ./secrets.sops.yaml;
     };
 
+    "headscale/oidc_client.secret" = {
+      owner = "headscale";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = [
+        "headscale.service"
+        "headplane.service"
+      ];
+    };
+
+    "headscale/headplane/headscale_api.key" = {
+      owner = "headscale";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["headplane.service"];
+    };
+
+    "headscale/headplane/integration_agent_pre_auth.key" = {
+      owner = "headscale";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["headplane.service"];
+    };
+
+    "headscale/headplane/server_cookie.secret" = {
+      owner = "headscale";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["headplane.service"];
+    };
+
     "headscale-authentik-client-secret" = {
       owner = "headscale";
       sopsFile = ./secrets.sops.yaml;

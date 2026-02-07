@@ -105,6 +105,13 @@
       headscale = {
         enable = true;
 
+        headplane = {
+          zfs = {
+            enable = true;
+            dataset = "dpool/tank/services/headplane";
+          };
+        };
+
         oidc = {
           enable = true;
         };
