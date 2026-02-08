@@ -25,6 +25,7 @@ in {
         inherit (cfg) enable;
 
         authKeyFile = config.sops.secrets."tailscale/preauth.key".path;
+        disableUpstreamLogging = true;
 
         extraUpFlags = [
           "--login-server=${cfg.loginServer}"
