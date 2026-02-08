@@ -31,7 +31,7 @@ sops-rotate:
     find . -name "*.sops.yaml" -type f ! -name ".sops.yaml" -print0 | xargs -0 -n1 sops --rotate --in-place
 
 sops-update:
-    find . -name "*.sops.yaml" -type f ! -name ".sops.yaml" -print0 | xargs -0 -n1 sops updatekeys
+    while IFS= read -r -d '' f; do echo "Updating keys: $f"; sops updatekeys "$f"; done < <(find . -name "*.sops.yaml" -type f ! -name ".sops.yaml" -print0)
 
 build-iso:
     nix build .#nixosConfigurations.nixiso.config.system.build.isoImage
