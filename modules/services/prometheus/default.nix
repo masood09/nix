@@ -33,9 +33,10 @@ in {
 
     services = {
       prometheus = {
+        inherit (cfg) retentionTime;
+
         enable = true;
         listenAddress = "127.0.0.1";
-        retentionTime = "30d";
         webExternalUrl = "https://${cfg.webDomain}";
 
         extraFlags = [

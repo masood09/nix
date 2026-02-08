@@ -204,6 +204,7 @@
 
       prometheus = {
         enable = true;
+        retentionTime = "2d";
         zfs.enable = true;
       };
 

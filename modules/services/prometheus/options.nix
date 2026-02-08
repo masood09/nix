@@ -11,6 +11,11 @@
       default = "prometheus.${config.networking.domain}";
     };
 
+    retentionTime = lib.mkOption {
+      type = lib.types.str;
+      default = "30d";
+    };
+
     zfs = {
       enable = lib.mkEnableOption "Store Prometheus dataDir on a ZFS dataset.";
 
