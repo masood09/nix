@@ -38,8 +38,9 @@ in {
 
         settings = {
           server = {
+            inherit (cfg) port;
+
             host = "127.0.0.1";
-            port = cfg.port;
             cookie_secret_path = config.sops.secrets."headscale/headplane/server_cookie.secret".path;
           };
 
@@ -55,7 +56,8 @@ in {
           };
 
           oidc = {
-            issuer = headscaleCfg.oidc.issuer;
+            inherit (headscaleCfg.oidc) issuer;
+
             client_id = headscaleCfg.oidc.clientId;
             client_secret_path = config.sops.secrets."headscale/oidc_client.secret".path;
             disable_api_key_login = true;
