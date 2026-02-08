@@ -235,5 +235,17 @@ in {
         "z ${toString cfg.mediaDir} 0750 matrix-synapse matrix-synapse -"
       ];
     };
+
+    environment =
+      lib.mkIf (
+        homelabCfg.impermanence
+        && !homelabCfg.isRootZFS
+        && !cfg.zfs.enable
+      ) {
+        persistence."/nix/persist".directories = [
+          cfg.dataDir
+          cfg.mediaDir
+        ];
+      };
   };
 }
