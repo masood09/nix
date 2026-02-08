@@ -56,6 +56,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | Blocky (Metrics)             | 4000 |
 | Unbound                      | 5335 |
 | Meilisearch                  | 7700 |
+| Matrix Synapse HTTP Listener | 8008 |
 | Headscale                    | 8080 |
 | Vaultwarden                  | 8222 |
 | IT-Tools                     | 8901 |
