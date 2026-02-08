@@ -16,11 +16,6 @@
       default = "headscale.${config.networking.domain}";
     };
 
-    adminUser = lib.mkOption {
-      type = lib.types.str;
-      default = "admin@ahmedmasood.com";
-    };
-
     metricsPort = lib.mkOption {
       default = 9091;
       type = lib.types.port;
