@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   homelabCfg = config.homelab;
@@ -70,6 +71,44 @@ in {
           ];
         };
       };
+    };
+
+    systemd = {
+      services = {
+        matrix-synapse-permissions = {
+          description = "Fix Matrix Synapse dataDir ownership/permissions";
+          wantedBy = ["matrix-synapse.service"];
+          before = ["matrix-synapse.service"];
+
+          after =
+            ["systemd-tmpfiles-setup.service" "local-fs.target"]
+            ++ lib.optionals cfg.zfs.enable [
+              "zfs-dataset-matrix-synapse.service"
+              "zfs-dataset-matrix-synapse-media.service"
+            ];
+          requires = lib.optionals cfg.zfs.enable [
+            "zfs-dataset-matrix-synapse.service"
+            "zfs-dataset-matrix-synapse-media.service"
+          ];
+
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = ''
+              ${pkgs.coreutils}/bin/chown matrix-synapse:matrix-synapse \
+                ${toString cfg.dataDir} \
+                ${toString cfg.mediaDir}
+            '';
+          };
+        };
+      };
+
+      tmpfiles.rules = [
+        "d ${toString cfg.dataDir} 0750 matrix-synapse matrix-synapse -"
+        "d ${toString cfg.mediaDir} 0750 matrix-synapse matrix-synapse -"
+        "z ${toString cfg.dataDir} 0750 matrix-synapse matrix-synapse -"
+        "z ${toString cfg.mediaDir} 0750 matrix-synapse matrix-synapse -"
+      ];
     };
   };
 }
