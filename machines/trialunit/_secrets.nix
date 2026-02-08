@@ -50,26 +50,37 @@
       restartUnits = ["grafana.service"];
     };
 
-    "headscale-preauth.key" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
-
-    "headscale-acl.hujson" = {
-      owner = "headscale";
-      sopsFile = ./../../secrets/headscale-acl.sops.yaml;
-      restartUnits = ["headscale.service"];
-    };
-
-    "headscale-authentik-client-secret" = {
-      owner = "headscale";
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["headscale.service"];
-    };
-
-    "headscale-extra-records.json" = {
+    "headscale/dns-extra-records.json" = {
       owner = "headscale";
       sopsFile = ./../../secrets/headscale-dns.sops.yaml;
       restartUnits = ["headscale.service"];
+    };
+
+    "headscale/oidc_client.secret" = {
+      owner = "headscale";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = [
+        "headscale.service"
+        "headplane.service"
+      ];
+    };
+
+    "headscale/headplane/headscale_api.key" = {
+      owner = "headscale";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["headplane.service"];
+    };
+
+    "headscale/headplane/integration_agent_pre_auth.key" = {
+      owner = "headscale";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["headplane.service"];
+    };
+
+    "headscale/headplane/server_cookie.secret" = {
+      owner = "headscale";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["headplane.service"];
     };
 
     "jobscraper.env" = {
@@ -103,6 +114,10 @@
       sopsFile = ./secrets.sops.yaml;
     };
     "restic-password" = {
+      sopsFile = ./secrets.sops.yaml;
+    };
+
+    "tailscale/preauth.key" = {
       sopsFile = ./secrets.sops.yaml;
     };
 

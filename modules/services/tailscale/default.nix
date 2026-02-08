@@ -24,7 +24,7 @@ in {
       tailscale = {
         inherit (cfg) enable;
 
-        authKeyFile = config.sops.secrets."headscale-preauth.key".path;
+        authKeyFile = config.sops.secrets."tailscale/preauth.key".path;
 
         extraUpFlags = [
           "--login-server=${cfg.loginServer}"
