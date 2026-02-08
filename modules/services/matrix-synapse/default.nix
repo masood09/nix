@@ -6,6 +6,12 @@
 }: let
   homelabCfg = config.homelab;
   cfg = homelabCfg.services.matrix-synapse;
+  pg = config.services.postgresql;
+  postgresqlEnabled = pg.enable;
+  postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
+
+  dbName = "matrix-synapse";
+  dbOwner = "matrix-synapse";
 in {
   imports = [
     ./options.nix
@@ -69,12 +75,99 @@ in {
               ];
             }
           ];
+
+          database = {
+            name = "psycopg2";
+            args = {
+              user = dbOwner;
+              database = dbName;
+              host = "/run/postgresql";
+            };
+          };
         };
+      };
+
+      postgresqlBackup = lib.mkIf (postgresqlEnabled && postgresqlBackupEnabled) {
+        databases = [
+          dbName
+        ];
       };
     };
 
     systemd = {
       services = {
+        matrix-synapse-init-db = lib.mkIf postgresqlEnabled {
+          description = "Matrix Synapse: ensure Postgres database exists with locale C";
+
+          # Tie it to Synapse startup
+          wantedBy = ["matrix-synapse.service"];
+          before = ["matrix-synapse.service"];
+
+          requires = ["postgresql.service"];
+          after = ["postgresql.service"];
+
+          serviceConfig = {
+            User = "postgres";
+            Group = "postgres";
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
+
+          # Provide psql on PATH
+          path = [
+            pg.package
+            pkgs.gnugrep
+            pkgs.coreutils
+          ];
+
+          # Ensure we connect to the right port (in case you customized it)
+          environment.PGPORT = toString (pg.settings.port or 5432);
+
+          script = ''
+            set -euo pipefail
+
+            # If PostgreSQL is in standby mode, don't perform any setup
+            if [[ -f "${pg.dataDir}/standby.signal" ]]; then
+              echo "Skipping DB init because PostgreSQL is in standby mode"
+              exit 0
+            fi
+
+            # Wait for PostgreSQL to accept connections and not be in recovery.
+            while true; do
+              if ! systemctl is-active --quiet postgresql.service; then
+                echo "PostgreSQL stopped while waiting; aborting"
+                exit 1
+              fi
+
+              if psql -d postgres -v ON_ERROR_STOP=1 -tAc "SELECT 1" >/dev/null 2>&1; then
+                if psql -d postgres -v ON_ERROR_STOP=1 -tAc "SELECT pg_is_in_recovery()" | grep -qx f; then
+                  break
+                fi
+              fi
+
+              sleep 0.1
+            done
+
+            # If DB exists, do nothing
+            if psql -tAc "SELECT 1 FROM pg_database WHERE datname = '${dbName}'" | grep -qx 1; then
+              echo "DB '${dbName}' already exists; nothing to do."
+              exit 0
+            fi
+
+            # Ensure role exists (idempotent)
+            if ! psql -tAc "SELECT 1 FROM pg_roles WHERE rolname = '${dbOwner}'" | grep -qx 1; then
+              echo "Creating role '${dbOwner}'"
+              psql -v ON_ERROR_STOP=1 -c "CREATE ROLE \"${dbOwner}\" LOGIN;"
+            fi
+
+            echo "Creating DB '${dbName}' with OWNER '${dbOwner}' and locale C"
+            psql -v ON_ERROR_STOP=1 -c \
+              "CREATE DATABASE \"${dbName}\" WITH OWNER \"${dbOwner}\" TEMPLATE template0 LC_COLLATE 'C' LC_CTYPE 'C';"
+
+            echo "Done."
+          '';
+        };
+
         matrix-synapse-permissions = {
           description = "Fix Matrix Synapse dataDir ownership/permissions";
           wantedBy = ["matrix-synapse.service"];
@@ -101,6 +194,38 @@ in {
             '';
           };
         };
+
+        matrix-synapse = lib.mkMerge [
+          {
+            # Unit-level ordering / mount requirements
+            unitConfig = {
+              RequiresMountsFor = [
+                cfg.dataDir
+                cfg.mediaDir
+              ];
+            };
+          }
+
+          (lib.mkIf cfg.zfs.enable {
+            requires =
+              [
+                "zfs-dataset-matrix-synapse.service"
+                "zfs-dataset-matrix-synapse-media.service"
+              ]
+              ++ lib.optionals postgresqlEnabled [
+                "postgresql.target"
+              ];
+
+            after =
+              [
+                "zfs-dataset-matrix-synapse.service"
+                "zfs-dataset-matrix-synapse-media.service"
+              ]
+              ++ lib.optionals postgresqlEnabled [
+                "postgresql.target"
+              ];
+          })
+        ];
       };
 
       tmpfiles.rules = [
