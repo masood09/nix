@@ -161,6 +161,11 @@
 
       matrix-synapse = {
         enable = true;
+
+        zfs = {
+          enable = true;
+          dataDir.dataset = "dpool/tank/services/matrix-synapse";
+        };
       };
 
       opencloud = {
