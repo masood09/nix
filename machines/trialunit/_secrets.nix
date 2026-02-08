@@ -50,6 +50,11 @@
       restartUnits = ["grafana.service"];
     };
 
+    "headscale/dns-extra-records.json" = {
+      owner = "headscale";
+      sopsFile = ./../../secrets/headscale-dns.sops.yaml;
+      restartUnits = ["headscale.service"];
+    };
 
     "headscale/oidc_client.secret" = {
       owner = "headscale";
