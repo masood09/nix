@@ -66,6 +66,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | OpenCloud Collabora          | 8906 |
 | OpenCloud WOPI               | 8907 |
 | OpenCloud Metrics            | 8908 |
+| Headplane                    | 8909 |
 | Authentik                    | 9000 |
 | Prometheus                   | 9090 |
 | Headscale (Metrics)          | 9091 |

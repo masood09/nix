@@ -48,6 +48,7 @@
           "authentik.service"
           "authentik-worker.service"
           "garage.service"
+          "headplane.service"
           "headscale.service"
           "immich-machine-learning.service"
           "immich-server.service"
@@ -104,6 +105,13 @@
 
       headscale = {
         enable = true;
+
+        headplane = {
+          zfs = {
+            enable = true;
+            dataset = "dpool/tank/services/headplane";
+          };
+        };
 
         oidc = {
           enable = true;

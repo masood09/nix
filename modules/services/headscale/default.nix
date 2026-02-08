@@ -1,13 +1,17 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   homelabCfg = config.homelab;
   headscaleCfg = homelabCfg.services.headscale;
   caddyEnabled = homelabCfg.services.caddy.enable;
+
+  dataDir = lib.removeSuffix "/" (toString headscaleCfg.dataDir);
 in {
   imports = [
+    ./headplane.nix
     ./oidc.nix
     ./options.nix
   ];
@@ -18,7 +22,7 @@ in {
       inherit (headscaleCfg.zfs) dataset properties;
 
       enable = true;
-      mountpoint = headscaleCfg.dataDir;
+      mountpoint = dataDir;
       requiredBy = ["headscale.service"];
 
       restic = {
@@ -34,7 +38,6 @@ in {
           logtail.enabled = false;
           server_url = "https://${headscaleCfg.webDomain}";
           metrics_listen_addr = "127.0.0.1:${toString headscaleCfg.metricsPort}";
-          policy.path = config.sops.secrets."headscale-acl.hujson".path;
 
           log = {
             level = "info";
@@ -43,6 +46,7 @@ in {
 
           dns = {
             override_local_dns = true;
+            extra_records_path = config.sops.secrets."headscale/dns-extra-records.json".path;
 
             base_domain = "dns.${headscaleCfg.webDomain}";
 
@@ -52,8 +56,10 @@ in {
                 "100.64.0.22"
               ];
             };
+          };
 
-            extra_records_path = config.sops.secrets."headscale-extra-records.json".path;
+          policy = {
+            mode = "database";
           };
         };
       };
@@ -63,6 +69,13 @@ in {
           "${headscaleCfg.webDomain}" = {
             useACMEHost = config.networking.domain;
             extraConfig = ''
+              ${lib.optionalString headscaleCfg.headplane.enable ''
+                # Headplane admin UI
+                @headplane path /admin /admin/*
+                  reverse_proxy @headplane http://127.0.0.1:${toString headscaleCfg.headplane.port}
+              ''}
+
+              # Headscale main API/UI (everything else)
               reverse_proxy http://127.0.0.1:${toString config.services.headscale.port}
             '';
           };
@@ -72,23 +85,46 @@ in {
 
     # Service hardening + mount ordering
     systemd = {
-      services.headscale = lib.mkMerge [
-        {
-          # Unit-level ordering / mount requirements
-          unitConfig = {
-            RequiresMountsFor = [headscaleCfg.dataDir];
-          };
-        }
+      services = {
+        headscale = lib.mkMerge [
+          {
+            # Unit-level ordering / mount requirements
+            unitConfig = {
+              RequiresMountsFor = [dataDir];
+            };
+          }
 
-        (lib.mkIf headscaleCfg.zfs.enable {
-          requires = ["zfs-dataset-headscale.service"];
-          after = ["zfs-dataset-headscale.service"];
-        })
-      ];
+          (lib.mkIf headscaleCfg.zfs.enable {
+            requires = ["zfs-dataset-headscale.service"];
+            after = ["zfs-dataset-headscale.service"];
+          })
+        ];
+
+        headscale-permissions = {
+          description = "Fix Headscale dataDir ownership/permissions";
+          wantedBy = ["multi-user.target"];
+          before = ["headscale.service"];
+          after =
+            ["local-fs.target"]
+            ++ lib.optionals headscaleCfg.zfs.enable [
+              "zfs-dataset-headscale.service"
+            ];
+          requires = lib.optionals headscaleCfg.zfs.enable [
+            "zfs-dataset-headscale.service"
+          ];
+
+          serviceConfig = {
+            ExecStart = ''
+              ${pkgs.coreutils}/bin/chown ${config.services.headscale.user}:${config.services.headscale.group} ${dataDir}
+            '';
+          };
+        };
+      };
 
       tmpfiles.rules = [
         # Ensure base dir exists and is owned correctly
-        "d ${headscaleCfg.dataDir} 0750 headscale headscale -"
+        "d ${dataDir} 0750 headscale headscale -"
+        "z ${dataDir} 0750 headscale headscale -"
       ];
     };
 
@@ -99,7 +135,7 @@ in {
         && !headscaleCfg.zfs.enable
       ) {
         persistence."/nix/persist".directories = [
-          headscaleCfg.dataDir
+          dataDir
         ];
       };
   };

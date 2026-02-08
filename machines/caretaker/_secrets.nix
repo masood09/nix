@@ -4,7 +4,7 @@
       restartUnits = ["alloy.service"];
     };
 
-    "headscale-preauth.key" = {
+    "tailscale/preauth.key" = {
       sopsFile = ./secrets.sops.yaml;
     };
   };
