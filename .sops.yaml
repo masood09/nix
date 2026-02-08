@@ -1,6 +1,8 @@
 keys:
   - &accesscontrolsystem
     age1rx9mw350ymp2xwua05peyg0f8s354ad8lxl9kkzwkg7pmwnh2q3qvg3z8e
+  - &commrelay
+    age1p3zgy2putgsdfgvz7uf43crn47ta5gxsw2vvc3uvdjufc83g2a6slwaj7y
   - &meshcontrol
     age1knvvq7pkyyf0c3qsn5thssg2wg3yzvaay9ewxyqzc3gd8xlctyas7jfz3r
   - &watchfulsystem
@@ -19,6 +21,7 @@ creation_rules:
     key_groups:
       - age:
           - *accesscontrolsystem
+          - *commrelay
           - *meshcontrol
           - *watchfulsystem
           - *caretaker
@@ -44,6 +47,12 @@ creation_rules:
     key_groups:
       - age:
         - *accesscontrolsystem
+        - *murderbot
+
+  - path_regex: ^machines/commrelay/secrets\.sops\.yaml$
+    key_groups:
+      - age:
+        - *commrelay
         - *murderbot
 
   - path_regex: ^machines/caretaker/secrets\.sops\.yaml$

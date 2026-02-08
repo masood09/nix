@@ -130,6 +130,7 @@
 
     nixosConfigurations = {
       accesscontrolsystem = mkNixOSConfig ./machines/accesscontrolsystem;
+      commrelay = mkNixOSConfig ./machines/commrelay;
       meshcontrol = mkNixOSConfig ./machines/meshcontrol;
       watchfulsystem = mkNixOSConfig ./machines/watchfulsystem;
 
