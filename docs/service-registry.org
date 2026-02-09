@@ -23,57 +23,60 @@ This file should be consulted *before* adding any new service, container, or sys
 | masoodahmed | 1000 |
 
 ** Service Users
-| Service     |  UID |  GID |
-|-------------+------+------|
-| alloy       | 3000 | 3000 |
-| immich      | 3001 | 3001 |
-| uptime-kuma | 3002 | 3002 |
-| vaultwarden | 3003 | 3003 |
-| babybuddy   | 3004 | 3004 |
-| loki        | 3005 | 3005 |
-| garage      | 3006 | 3006 |
-| karakeep    | 3007 | 3007 |
-| opencloud   | 3008 | 3008 |
-| unbound     | 3009 | 3009 |
+| Service                       |  UID |  GID |
+|-------------------------------+------+------|
+| alloy                         | 3000 | 3000 |
+| immich                        | 3001 | 3001 |
+| uptime-kuma                   | 3002 | 3002 |
+| vaultwarden                   | 3003 | 3003 |
+| babybuddy                     | 3004 | 3004 |
+| loki                          | 3005 | 3005 |
+| garage                        | 3006 | 3006 |
+| karakeep                      | 3007 | 3007 |
+| opencloud                     | 3008 | 3008 |
+| unbound                       | 3009 | 3009 |
+| matrix-authentication-service | 3010 | 3010 |
 
 
 * Port Registry
 
 ** Services
-| Service                      | Port |
-|------------------------------+------|
-| Blocky (DNS)                 |   53 |
-| Immich (Server)              | 2283 |
-| Grafana                      | 3000 |
-| Uptime-Kuma                  | 3001 |
-| Immich (Machine Learning)    | 3003 |
-| Loki                         | 3100 |
-| Garage (S3 API)              | 3900 |
-| Garage (RPC)                 | 3901 |
-| Garage (S3 Web)              | 3902 |
-| Garage (Admin/Metrics)       | 3903 |
-| Garage (K2 API)              | 3904 |
-| Blocky (Metrics)             | 4000 |
-| Unbound                      | 5335 |
-| Meilisearch                  | 7700 |
-| Matrix Synapse HTTP Listener | 8008 |
-| Headscale                    | 8080 |
-| Vaultwarden                  | 8222 |
-| IT-Tools                     | 8901 |
-| Job Scraper                  | 8902 |
-| Baby Buddy                   | 8903 |
-| Karakeep                     | 8904 |
-| OpenCloud                    | 8905 |
-| OpenCloud Collabora          | 8906 |
-| OpenCloud WOPI               | 8907 |
-| OpenCloud Metrics            | 8908 |
-| Headplane                    | 8909 |
-| Authentik                    | 9000 |
-| Prometheus                   | 9090 |
-| Headscale (Metrics)          | 9091 |
-| prometheus-zfs-exporter      | 9134 |
-| prometheus-postgres-exporter | 9187 |
-| google-chrome-stable         | 9222 |
-| Authentik (Metric)           | 9300 |
-| Authentik (Built-in HTTPS)   | 9443 |
-| OpenCloud Collabora          | 9980 |
+| Service                              | Port |
+|--------------------------------------+------|
+| Blocky (DNS)                         |   53 |
+| Immich (Server)                      | 2283 |
+| Grafana                              | 3000 |
+| Uptime-Kuma                          | 3001 |
+| Immich (Machine Learning)            | 3003 |
+| Loki                                 | 3100 |
+| Garage (S3 API)                      | 3900 |
+| Garage (RPC)                         | 3901 |
+| Garage (S3 Web)                      | 3902 |
+| Garage (Admin/Metrics)               | 3903 |
+| Garage (K2 API)                      | 3904 |
+| Blocky (Metrics)                     | 4000 |
+| Unbound                              | 5335 |
+| Meilisearch                          | 7700 |
+| Matrix Synapse HTTP Listener         | 8008 |
+| Headscale                            | 8080 |
+| Vaultwarden                          | 8222 |
+| IT-Tools                             | 8901 |
+| Job Scraper                          | 8902 |
+| Baby Buddy                           | 8903 |
+| Karakeep                             | 8904 |
+| OpenCloud                            | 8905 |
+| OpenCloud Collabora                  | 8906 |
+| OpenCloud WOPI                       | 8907 |
+| OpenCloud Metrics                    | 8908 |
+| Headplane                            | 8909 |
+| Matrix Authentication Service        | 8910 |
+| Matrix Authentication Service Health | 8911 |
+| Authentik                            | 9000 |
+| Prometheus                           | 9090 |
+| Headscale (Metrics)                  | 9091 |
+| prometheus-zfs-exporter              | 9134 |
+| prometheus-postgres-exporter         | 9187 |
+| google-chrome-stable                 | 9222 |
+| Authentik (Metric)                   | 9300 |
+| Authentik (Built-in HTTPS)           | 9443 |
+| OpenCloud Collabora                  | 9980 |
