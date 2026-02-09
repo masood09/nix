@@ -9,9 +9,15 @@
   pg = config.services.postgresql;
   postgresqlEnabled = pg.enable;
   postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
+  caddyEnabled = config.services.caddy.enable;
 
   dbName = "matrix-synapse";
   dbOwner = "matrix-synapse";
+
+  webDomain = "https://${cfg.serverUrl}";
+
+  clientConfig."m.homeserver".base_url = webDomain;
+  serverConfig."m.server" = "${cfg.serverUrl}:443";
 in {
   imports = [
     ./options.nix
@@ -55,7 +61,7 @@ in {
         settings = {
           media_store_path = cfg.mediaDir;
           server_name = cfg.serverName;
-          public_baseurl = cfg.webDomain;
+          public_baseurl = webDomain;
 
           listeners = [
             {
@@ -83,6 +89,24 @@ in {
               database = dbName;
               host = "/run/postgresql";
             };
+          };
+        };
+      };
+
+      caddy = lib.mkIf (caddyEnabled && cfg.enableCaddy) {
+        virtualHosts = {
+          "${cfg.serverName}" = {
+            extraConfig = ''
+              respond /.well-known/matrix/server `${builtins.toJSON serverConfig}`
+              respond /.well-known/matrix/client `${builtins.toJSON clientConfig}`
+            '';
+          };
+
+          "${cfg.serverUrl}" = {
+            useACMEHost = cfg.serverName;
+            extraConfig = ''
+              reverse_proxy http://127.0.0.1:${toString cfg.listenPort}
+            '';
           };
         };
       };
