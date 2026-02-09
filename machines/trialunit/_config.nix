@@ -161,6 +161,7 @@
 
       matrix-synapse = {
         enable = true;
+        enableCaddy = true;
 
         zfs = {
           enable = true;

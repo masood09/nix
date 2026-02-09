@@ -20,6 +20,7 @@
 in {
   options.homelab.services.matrix-synapse = {
     enable = lib.mkEnableOption "Whether to enable Matrix Synapse.";
+    enableCaddy = lib.mkEnableOption "Whether to enable local Caddy";
 
     dataDir = lib.mkOption {
       type = lib.types.path;
@@ -36,9 +37,9 @@ in {
       default = config.networking.domain;
     };
 
-    webDomain = lib.mkOption {
+    serverUrl = lib.mkOption {
       type = lib.types.str;
-      default = "https://matrix.${config.networking.domain}/";
+      default = "matrix.${config.networking.domain}";
     };
 
     listenAddress = lib.mkOption {

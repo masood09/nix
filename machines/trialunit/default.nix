@@ -1,4 +1,8 @@
 {
+  config,
+  lib,
+  ...
+}: {
   imports = [
     ./disko
     ./hardware-configuration.nix
