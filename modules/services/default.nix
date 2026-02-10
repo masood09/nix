@@ -15,7 +15,6 @@
     ./jobscraper
     ./karakeep
     ./loki
-    ./matrix-authentication-service
     ./matrix-synapse
     ./opencloud
     ./podman
