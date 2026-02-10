@@ -194,6 +194,11 @@ in {
               @masAuth path_regexp masAuth ^/_matrix/client/(.*)/(login|logout|refresh)$
               reverse_proxy @masAuth http://127.0.0.1:${toString cfg.mas.http.web.port}
 
+              @health path /-/health
+              reverse_proxy @health http://127.0.0.1:${toString cfg.listenPort} {
+                rewrite /health
+              }
+
               @synapse path /_matrix* /_synapse/client* /_synapse/mas*
               reverse_proxy @synapse http://127.0.0.1:${toString cfg.listenPort}
             '';
@@ -202,6 +207,11 @@ in {
           "${cfg.mas.webDomain}" = {
             useACMEHost = config.networking.domain;
             extraConfig = ''
+              @health path /-/health
+              reverse_proxy @health http://127.0.0.1:${toString cfg.mas.http.health.port} {
+                rewrite /health
+              }
+
               reverse_proxy http://127.0.0.1:${toString cfg.mas.http.web.port}
             '';
           };
