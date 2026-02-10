@@ -4,6 +4,7 @@
   pkgs,
   ...
 }: let
+  caddyEnabled = config.services.caddy.enable;
   postgresqlEnabled = config.services.postgresql.enable;
   postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
 in {
@@ -92,6 +93,17 @@ in {
           config.sops.secrets."matrix-authentication-service/email.config".path
           config.sops.secrets."matrix-authentication-service/secrets.config".path
         ];
+      };
+
+      caddy = lib.mkIf caddyEnabled {
+        virtualHosts = {
+          "mas.${config.networking.domain}" = {
+            useACMEHost = config.networking.domain;
+            extraConfig = ''
+              reverse_proxy http://127.0.0.1:8910
+            '';
+          };
+        };
       };
 
       postgresql = lib.mkIf postgresqlEnabled {
