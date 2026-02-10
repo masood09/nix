@@ -57,6 +57,8 @@ This file should be consulted *before* adding any new service, container, or sys
 | Blocky (Metrics)                     | 4000 |
 | Unbound                              | 5335 |
 | Meilisearch                          | 7700 |
+| livekit (Matrix RTC)                 | 7880 |
+| livekit RTC (Matrix RTC)             | 7881 |
 | Matrix Synapse HTTP Listener         | 8008 |
 | Headscale                            | 8080 |
 | Vaultwarden                          | 8222 |
@@ -71,6 +73,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | Headplane                            | 8909 |
 | Matrix Authentication Service        | 8910 |
 | Matrix Authentication Service Health | 8911 |
+| lk-jwt-service (Matrix RTC)          | 8912 |
 | Authentik                            | 9000 |
 | Prometheus                           | 9090 |
 | Headscale (Metrics)                  | 9091 |
