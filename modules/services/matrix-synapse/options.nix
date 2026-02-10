@@ -52,6 +52,59 @@ in {
       type = lib.types.port;
     };
 
+    mas = {
+      webDomain = lib.mkOption {
+        type = lib.types.str;
+        default = "mas.${config.networking.domain}";
+      };
+
+      userId = lib.mkOption {
+        default = 3010;
+        type = lib.types.ints.u16;
+      };
+
+      groupId = lib.mkOption {
+        default = 3010;
+        type = lib.types.ints.u16;
+      };
+
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+      };
+
+      http = {
+        trusted_proxies = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = ["127.0.0.1"];
+        };
+
+        web = {
+          port = lib.mkOption {
+            type = lib.types.port;
+            default = 8910;
+          };
+
+          bindAddresses = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = ["127.0.0.1"];
+          };
+        };
+
+        health = {
+          port = lib.mkOption {
+            type = lib.types.port;
+            default = 8911;
+          };
+
+          bindAddresses = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = ["127.0.0.1"];
+          };
+        };
+      };
+    };
+
     zfs = {
       enable = lib.mkEnableOption "Store Matrix Synapse data on ZFS dataset.";
 

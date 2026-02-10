@@ -94,7 +94,7 @@ in {
 
           matrix_authentication_service = {
             enabled = true;
-            endpoint = "https://mas.${config.networking.domain}";
+            endpoint = "https://${cfg.mas.webDomain}";
             secret_path = config.sops.secrets."matrix-synapse/matrix-authentication-service.secret".path;
           };
 
@@ -137,11 +137,11 @@ in {
                     name = "assets";
                   }
                 ];
-                binds = [
-                  {
-                    address = "127.0.0.1:8910";
-                  }
-                ];
+
+                binds = map (addr: {
+                  host = addr;
+                  port = cfg.mas.http.web.port;
+                }) cfg.mas.http.web.bindAddresses;
               }
               {
                 name = "internal";
@@ -150,22 +150,20 @@ in {
                     name = "health";
                   }
                 ];
-                binds = [
-                  {
-                    host = "localhost";
-                    port = 8911;
-                  }
-                ];
+                binds = map (addr: {
+                  host = addr;
+                  port = cfg.mas.http.health.port;
+                }) cfg.mas.http.health.bindAddresses;
                 proxy_protocol = false;
               }
             ];
 
-            trusted_proxies = ["127.0.0.1"];
-            public_base = "https://mas.${config.networking.domain}";
+            inherit (cfg.mas.http) trusted_proxies;
+            public_base = "https://${cfg.mas.webDomain}";
           };
 
           matrix = {
-            homeserver = config.networking.domain;
+            homeserver = cfg.serverName;
             endpoint = "http://localhost:${toString config.homelab.services.matrix-synapse.listenPort}";
             secret_file = config.sops.secrets."matrix-authentication-service/matrix.secret".path;
           };
@@ -194,17 +192,17 @@ in {
             useACMEHost = cfg.serverName;
             extraConfig = ''
               @masAuth path_regexp masAuth ^/_matrix/client/(.*)/(login|logout|refresh)$
-              reverse_proxy @masAuth http://127.0.0.1:8910
+              reverse_proxy @masAuth http://127.0.0.1:${toString cfg.mas.http.web.port}
 
               @synapse path /_matrix* /_synapse/client* /_synapse/mas*
               reverse_proxy @synapse http://127.0.0.1:${toString cfg.listenPort}
             '';
           };
 
-          "mas.${config.networking.domain}" = {
+          "${cfg.mas.webDomain}" = {
             useACMEHost = config.networking.domain;
             extraConfig = ''
-              reverse_proxy http://127.0.0.1:8910
+              reverse_proxy http://127.0.0.1:${toString cfg.mas.http.web.port}
             '';
           };
         };
@@ -395,13 +393,13 @@ in {
     users = {
       users = {
         matrix-authentication-service = {
-          uid = 3010;
+          uid = cfg.mas.userId;
         };
       };
 
       groups = {
         matrix-authentication-service = {
-          gid = 3010;
+          gid = cfg.mas.groupId;
         };
       };
     };
