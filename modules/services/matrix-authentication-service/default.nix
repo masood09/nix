@@ -91,6 +91,7 @@ in {
 
         extraConfigFiles = [
           config.sops.secrets."matrix-authentication-service/email.config".path
+          config.sops.secrets."matrix-authentication-service/upstream-oauth2.config".path
           config.sops.secrets."matrix-authentication-service/secrets.config".path
         ];
       };
