@@ -119,7 +119,11 @@ in {
           "${cfg.serverUrl}" = {
             useACMEHost = cfg.serverName;
             extraConfig = ''
-              reverse_proxy http://127.0.0.1:${toString cfg.listenPort}
+              @masAuth path_regexp masAuth ^/_matrix/client/(.*)/(login|logout|refresh)$
+              reverse_proxy @masAuth http://127.0.0.1:8910
+
+              @synapse path /_matrix* /_synapse/client* /_synapse/mas*
+              reverse_proxy @synapse http://127.0.0.1:${toString cfg.listenPort}
             '';
           };
         };
