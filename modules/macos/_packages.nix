@@ -42,6 +42,7 @@ in {
       "balenaetcher"
       "discord"
       "docker-desktop"
+      "element"
       "ghostty"
       "karabiner-elements"
       "obsidian"
