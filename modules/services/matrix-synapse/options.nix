@@ -34,7 +34,7 @@ in {
 
     serverName = lib.mkOption {
       type = lib.types.str;
-      default = config.networking.domain;
+      default = "matrix.${config.networking.domain}";
     };
 
     serverUrl = lib.mkOption {
@@ -53,6 +53,47 @@ in {
     };
 
     openFirewall = lib.mkEnableOption "Open ports in the firewall";
+
+    lk-jwt-service = {
+      port = lib.mkOption {
+        type = lib.types.port;
+        default = 8912;
+      };
+    };
+
+    livekit = {
+      webDomain = lib.mkOption {
+        type = lib.types.str;
+        default = "matrixrtc.${config.networking.domain}";
+      };
+
+      bindAddress = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = ["127.0.0.1"];
+      };
+
+      ports = {
+        port = lib.mkOption {
+          type = lib.types.port;
+          default = 7880;
+        };
+
+        tcpPort = lib.mkOption {
+          type = lib.types.port;
+          default = 7881;
+        };
+
+        rtcPortRangeStart = lib.mkOption {
+          type = lib.types.port;
+          default = 50100;
+        };
+
+        rtcPortRangeEnd = lib.mkOption {
+          type = lib.types.port;
+          default = 50200;
+        };
+      };
+    };
 
     mas = {
       webDomain = lib.mkOption {

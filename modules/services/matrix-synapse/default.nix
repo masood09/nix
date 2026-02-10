@@ -16,7 +16,16 @@
 
   webDomain = "https://${cfg.serverUrl}";
 
-  clientConfig."m.homeserver".base_url = webDomain;
+  clientConfig = {
+    "m.homeserver".base_url = webDomain;
+    "org.matrix.msc4143.rtc_foci" = [
+      {
+        type = "livekit";
+        livekit_service_url = "https://${cfg.livekit.webDomain}";
+      }
+    ];
+  };
+
   serverConfig."m.server" = "${cfg.serverUrl}:443";
 in {
   imports = [
@@ -105,6 +114,61 @@ in {
             exclude_remote_users = false;
             show_locked_users = true;
           };
+
+          experimental_features = {
+            msc3266_enabled = true;
+            msc4222_enabled = true;
+            msc4140_enabled = true;
+          };
+
+          max_event_delay_duration = "24h";
+
+          rc_message = {
+            per_second = 0.5;
+            burst_count = 30;
+          };
+
+          rc_delayed_event_mgmt = {
+            per_second = 1;
+            burst_count = 20;
+          };
+        };
+      };
+
+      lk-jwt-service = {
+        enable = true;
+        keyFile = config.sops.secrets."matrix-synapse/lk-jwt-service/keys.key".path;
+        port = cfg.lk-jwt-service.port;
+        livekitUrl = "wss://${cfg.livekit.webDomain}/livekit/sfu";
+      };
+
+      livekit = {
+        enable = true;
+        keyFile = config.sops.secrets."matrix-synapse/lk-jwt-service/keys.key".path;
+        openFirewall = true;
+
+        settings = {
+          bind_addresses = cfg.livekit.bindAddress;
+          port = cfg.livekit.ports.port;
+
+          rtc = {
+            tcp_port = cfg.livekit.ports.tcpPort;
+            port_range_start = cfg.livekit.ports.rtcPortRangeStart;
+            port_range_end = cfg.livekit.ports.rtcPortRangeEnd;
+            use_external_ip = false;
+          };
+
+          room = {
+            auto_create = false;
+          };
+
+          logging = {
+            level = "info";
+          };
+
+          turn = {
+            enabled = false;
+          };
         };
       };
 
@@ -181,16 +245,29 @@ in {
 
       caddy = lib.mkIf (caddyEnabled && cfg.enableCaddy) {
         virtualHosts = {
-          "${cfg.serverName}" = {
-            extraConfig = ''
-              respond /.well-known/matrix/server `${builtins.toJSON serverConfig}`
-              respond /.well-known/matrix/client `${builtins.toJSON clientConfig}`
-            '';
-          };
-
           "${cfg.serverUrl}" = {
-            useACMEHost = cfg.serverName;
+            useACMEHost = config.networking.domain;
             extraConfig = ''
+              # Server discovery (no CORS required, but harmless)
+              handle /.well-known/matrix/server {
+                header Content-Type application/json
+                respond `${builtins.toJSON serverConfig}` 200
+              }
+
+              # Client discovery: MUST include CORS for some validators / browsers
+              handle /.well-known/matrix/client {
+                header Content-Type application/json
+                header Access-Control-Allow-Origin "*"
+                header Access-Control-Allow-Methods "GET, OPTIONS"
+                header Access-Control-Allow-Headers "Origin, Accept, Content-Type, Authorization"
+
+                # Optional: make preflight happy if anyone ever OPTIONS it
+                @options method OPTIONS
+                respond @options 204
+
+                respond `${builtins.toJSON clientConfig}` 200
+              }
+
               @masAuth path_regexp masAuth ^/_matrix/client/(.*)/(login|logout|refresh)$
               reverse_proxy @masAuth http://127.0.0.1:${toString cfg.mas.http.web.port}
 
@@ -203,6 +280,20 @@ in {
               reverse_proxy @synapse http://127.0.0.1:${toString cfg.listenPort}
             '';
           };
+
+          "${cfg.livekit.webDomain}" = {
+            useACMEHost = config.networking.domain;
+            extraConfig = ''
+              handle /sfu/get* {
+                reverse_proxy 127.0.0.1:${toString cfg.lk-jwt-service.port}
+              }
+
+              handle_path /livekit/sfu* {
+                reverse_proxy 127.0.0.1:${toString cfg.livekit.ports.port}
+              }
+            '';
+          };
+
 
           "${cfg.mas.webDomain}" = {
             useACMEHost = config.networking.domain;
@@ -238,6 +329,12 @@ in {
 
     systemd = {
       services = {
+        lk-jwt-service = {
+          environment = {
+            LIVEKIT_FULL_ACCESS_HOMESERVERS = cfg.serverUrl;
+          };
+        };
+
         matrix-synapse-init-db = lib.mkIf postgresqlEnabled {
           description = "Matrix Synapse: ensure Postgres database exists with locale C";
 

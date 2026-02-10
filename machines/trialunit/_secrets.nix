@@ -115,6 +115,11 @@
       restartUnits = ["matrix-authentication-service.service"];
     };
 
+    "matrix-synapse/lk-jwt-service/keys.key" = {
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["lk-jwt-service.service"];
+    };
+
     "matrix-synapse/matrix-authentication-service.secret" = {
       owner = "matrix-synapse";
       sopsFile = ./secrets.sops.yaml;
