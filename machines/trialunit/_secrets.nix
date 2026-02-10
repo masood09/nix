@@ -109,6 +109,12 @@
       restartUnits = ["matrix-authentication-service.service"];
     };
 
+    "matrix-authentication-service/upstream-oauth2.config" = {
+      owner = "matrix-authentication-service";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["matrix-authentication-service.service"];
+    };
+
     "matrix-authentication-service/secrets.config" = {
       owner = "matrix-authentication-service";
       sopsFile = ./secrets.sops.yaml;
