@@ -112,14 +112,6 @@ in {
         enable = true;
 
         settings = {
-          email = {
-            from = "\"Matrix Authentication Service\" <no-reply@mantannest.com>";
-            reply_to = "\"Masood Ahmed\" <mas@ahmedmasood.com>";
-            transport = "smtp";
-            mode = "starttls";
-            port = 587;
-          };
-
           http = {
             listeners = [
               {
@@ -184,7 +176,6 @@ in {
         };
 
         extraConfigFiles = [
-          config.sops.secrets."matrix-authentication-service/email.config".path
           config.sops.secrets."matrix-authentication-service/upstream-oauth2.config".path
           config.sops.secrets."matrix-authentication-service/secrets.config".path
         ];
