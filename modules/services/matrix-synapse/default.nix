@@ -90,6 +90,14 @@ in {
               host = "/run/postgresql";
             };
           };
+
+          user_directory = {
+            enabled = true;
+            search_all_users = true;
+            prefer_local_users = true;
+            exclude_remote_users = false;
+            show_locked_users = true;
+          };
         };
       };
 
