@@ -390,6 +390,15 @@ in {
         ];
       };
 
+    networking.firewall = lib.mkIf cfg.openFirewall {
+      allowedTCPPorts = [
+        cfg.listenPort
+        cfg.mas.http.web.port
+        cfg.mas.http.health.port
+      ];
+    };
+
+
     users = {
       users = {
         matrix-authentication-service = {

@@ -52,6 +52,8 @@ in {
       type = lib.types.port;
     };
 
+    openFirewall = lib.mkEnableOption "Open ports in the firewall";
+
     mas = {
       webDomain = lib.mkOption {
         type = lib.types.str;
