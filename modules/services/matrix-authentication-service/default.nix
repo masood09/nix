@@ -87,6 +87,10 @@ in {
             endpoint = "http://localhost:${toString config.homelab.services.matrix-synapse.listenPort}";
             secret_file = config.sops.secrets."matrix-authentication-service/matrix.secret".path;
           };
+
+          passwords = {
+            enabled = false;
+          };
         };
 
         extraConfigFiles = [
