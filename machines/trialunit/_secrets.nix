@@ -121,6 +121,12 @@
       restartUnits = ["matrix-authentication-service.service"];
     };
 
+    "matrix-synapse/matrix-authentication-service.secret" = {
+      owner = "matrix-synapse";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["matrix-synapse.service"];
+    };
+
     "opencloud-collabora.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-compose-opencloud-root.target"];

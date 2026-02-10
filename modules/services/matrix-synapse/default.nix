@@ -91,6 +91,12 @@ in {
             };
           };
 
+          matrix_authentication_service = {
+            enabled = true;
+            endpoint = "https://mas.${config.networking.domain}";
+            secret_path = config.sops.secrets."matrix-synapse/matrix-authentication-service.secret".path;
+          };
+
           user_directory = {
             enabled = true;
             search_all_users = true;
