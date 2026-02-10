@@ -97,12 +97,6 @@
       ];
     };
 
-    "matrix-authentication-service/email.config" = {
-      owner = "matrix-authentication-service";
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["matrix-authentication-service.service"];
-    };
-
     "matrix-authentication-service/matrix.secret" = {
       owner = "matrix-authentication-service";
       sopsFile = ./secrets.sops.yaml;
