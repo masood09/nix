@@ -39,6 +39,14 @@
         enable = true;
       };
 
+      matrix = {
+        openFirewall = true;
+
+        rtc = {
+          enable = true;
+        };
+      };
+
       tailscale = {
         enable = true;
 

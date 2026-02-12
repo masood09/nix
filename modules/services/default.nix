@@ -15,6 +15,7 @@
     ./jobscraper
     ./karakeep
     ./loki
+    ./matrix
     ./opencloud
     ./podman
     ./postgresql

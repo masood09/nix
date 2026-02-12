@@ -55,6 +55,8 @@
           "karakeep-browser.service"
           "karakeep-workers.service"
           "karakeep-web.service"
+          "matrix-authentication-service.service"
+          "matrix-synapse.service"
           "podman-babybuddy.service"
           "podman-opencloud-collabora.service"
           "podman-opencloud-opencloud.service"
@@ -155,6 +157,22 @@
         };
 
         zfs = {
+          enable = true;
+        };
+      };
+
+      matrix = {
+        synapse = {
+          enable = true;
+          enableCaddy = true;
+
+          zfs = {
+            enable = true;
+            dataDir.dataset = "dpool/tank/services/matrix-synapse";
+          };
+        };
+
+        rtc = {
           enable = true;
         };
       };

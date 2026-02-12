@@ -37,7 +37,12 @@
           "karakeep-browser.service"
           "karakeep-workers.service"
           "karakeep-web.service"
+          "matrix-authentication-service.service"
+          "matrix-synapse.service"
           "podman-babybuddy.service"
+          "podman-opencloud-collabora.service"
+          "podman-opencloud-opencloud.service"
+          "podman-opencloud-wopi.service"
           "vaultwarden.service"
         ];
       };
@@ -85,6 +90,43 @@
 
         zfs = {
           enable = true;
+        };
+      };
+
+      matrix = {
+        synapse = {
+          enable = true;
+
+          listenAddress = [
+            "127.0.0.1"
+            "100.64.0.21"
+          ];
+
+          zfs = {
+            enable = true;
+          };
+
+          mas = {
+            http = {
+              trusted_proxies = [
+                "100.64.0.14"
+              ];
+
+              web = {
+                bindAddresses = [
+                  "127.0.0.1"
+                  "100.64.0.21"
+                ];
+              };
+
+              health = {
+                bindAddresses = [
+                  "127.0.0.1"
+                  "100.64.0.21"
+                ];
+              };
+            };
+          };
         };
       };
 
