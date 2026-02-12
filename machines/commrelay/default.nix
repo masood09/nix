@@ -8,6 +8,8 @@
 
     ./../../modules/nixos
     ./../../modules/home-manager
+
+    ./_caddy.nix
   ];
 
   homelab.disks = {
