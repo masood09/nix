@@ -24,7 +24,7 @@
     ];
   };
 
-  serverConfig."m.server" = "${cfg.rootDomain}:443";
+  serverConfig."m.server" = "${cfg.webDomain}:443";
 in {
   imports = [
     ./matrix-authentication-service.nix
@@ -68,7 +68,7 @@ in {
 
         settings = {
           media_store_path = cfg.mediaDir;
-          server_name = cfg.rootDomain;
+          server_name = cfg.webDomain;
           public_baseurl = "https://${cfg.webDomain}";
 
           listeners = [
@@ -225,7 +225,7 @@ in {
           };
 
           matrix = {
-            homeserver = cfg.rootDomain;
+            homeserver = cfg.webDomain;
             endpoint = "http://localhost:${toString config.homelab.services.matrix-synapse.listenPort}";
             secret_file = config.sops.secrets."matrix-authentication-service/matrix.secret".path;
           };
@@ -243,10 +243,10 @@ in {
 
       caddy = lib.mkIf (caddyEnabled && cfg.enableCaddy) {
         virtualHosts = {
-          "${cfg.rootDomain}" = {
-            useACMEHost = config.networking.domain;
+          "${cfg.webDomain}" = {
+            useACMEHost = cfg.webDomain;
             extraConfig = ''
-              # Server discovery (no CORS required, but harmless)
+                            # Server discovery (no CORS required, but harmless)
               handle /.well-known/matrix/server {
                 header Content-Type application/json
                 respond `${builtins.toJSON serverConfig}` 200
@@ -265,12 +265,7 @@ in {
 
                 respond `${builtins.toJSON clientConfig}` 200
               }
-            '';
-          };
 
-          "${cfg.webDomain}" = {
-            useACMEHost = config.networking.domain;
-            extraConfig = ''
               @masAuth path_regexp masAuth ^/_matrix/client/(.*)/(login|logout|refresh)$
               reverse_proxy @masAuth http://127.0.0.1:${toString cfg.mas.http.web.port}
 
@@ -285,7 +280,7 @@ in {
           };
 
           "${cfg.livekit.webDomain}" = {
-            useACMEHost = config.networking.domain;
+            useACMEHost = cfg.webDomain;
             extraConfig = ''
               handle /sfu/get* {
                 reverse_proxy 127.0.0.1:${toString cfg.lk-jwt-service.port}
@@ -299,7 +294,7 @@ in {
 
 
           "${cfg.mas.webDomain}" = {
-            useACMEHost = config.networking.domain;
+            useACMEHost = cfg.webDomain;
             extraConfig = ''
               @health path /-/health
               reverse_proxy @health http://127.0.0.1:${toString cfg.mas.http.health.port} {
@@ -330,11 +325,20 @@ in {
       };
     };
 
+    security = lib.mkIf (caddyEnabled && cfg.enableCaddy) {
+      acme.certs."${cfg.webDomain}" = {
+        extraDomainNames = [
+          "${cfg.webDomain}"
+          "*.${cfg.webDomain}"
+        ];
+      };
+    };
+
     systemd = {
       services = {
         lk-jwt-service = {
           environment = {
-            LIVEKIT_FULL_ACCESS_HOMESERVERS = cfg.rootDomain;
+            LIVEKIT_FULL_ACCESS_HOMESERVERS = cfg.webDomain;
           };
         };
 

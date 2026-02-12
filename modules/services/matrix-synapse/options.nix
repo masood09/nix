@@ -33,14 +33,9 @@ in {
     };
 
 
-    rootDomain = lib.mkOption {
-      type = lib.types.str;
-      default = config.networking.domain;
-    };
-
     webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "matrix.${config.homelab.services.matrix-synapse.rootDomain}";
+      default = "chat.${config.networking.domain}";
     };
 
     listenAddress = lib.mkOption {
@@ -65,7 +60,7 @@ in {
     livekit = {
       webDomain = lib.mkOption {
         type = lib.types.str;
-        default = "matrixrtc.${config.homelab.services.matrix-synapse.rootDomain}";
+        default = "rtc.${config.homelab.services.matrix-synapse.webDomain}";
       };
 
       bindAddress = lib.mkOption {
@@ -99,7 +94,7 @@ in {
     mas = {
       webDomain = lib.mkOption {
         type = lib.types.str;
-        default = "mas.${config.homelab.services.matrix-synapse.rootDomain}";
+        default = "mas.${config.homelab.services.matrix-synapse.webDomain}";
       };
 
       userId = lib.mkOption {
