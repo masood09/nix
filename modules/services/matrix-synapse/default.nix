@@ -529,7 +529,7 @@ in {
       ];
     };
 
-    users = {
+    users = lib.mkIf cfg.synapse.enable {
       users = {
         matrix-authentication-service = {
           uid = cfg.synapse.mas.userId;
