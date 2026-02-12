@@ -27,7 +27,7 @@
   serverConfig."m.server" = "${cfg.rootDomain}:443";
 in {
   imports = [
-    ./matrix-authentication-service.nix
+    ./mas-service.nix
     ./options.nix
   ];
 
