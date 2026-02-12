@@ -102,7 +102,7 @@ in {
           matrix_authentication_service = {
             enabled = true;
             endpoint = "https://mas.${cfg.rootDomain}";
-            secret_path = config.sops.secrets."matrix-synapse/matrix-authentication-service.secret".path;
+            secret_path = config.sops.secrets."matrix/synapse/mas.secret".path;
           };
 
           user_directory = {
@@ -135,14 +135,14 @@ in {
 
       "lk-jwt-service" = lib.mkIf cfg.rtc.enable {
         enable = true;
-        keyFile = config.sops.secrets."matrix-synapse/lk-jwt-service/keys.key".path;
+        keyFile = config.sops.secrets."matrix/lk-jwt-service/keys.key".path;
         inherit (cfg.rtc."lk-jwt-service") port;
         livekitUrl = "wss://rtc.${cfg.rootDomain}/livekit/sfu";
       };
 
       livekit = lib.mkIf cfg.rtc.enable {
         enable = true;
-        keyFile = config.sops.secrets."matrix-synapse/lk-jwt-service/keys.key".path;
+        keyFile = config.sops.secrets."matrix/lk-jwt-service/keys.key".path;
         openFirewall = true;
 
         settings = {
@@ -231,7 +231,7 @@ in {
           matrix = {
             homeserver = cfg.rootDomain;
             endpoint = "https://${cfg.rootDomain}";
-            secret_file = config.sops.secrets."matrix-authentication-service/matrix.secret".path;
+            secret_file = config.sops.secrets."matrix/mas/matrix.secret".path;
           };
 
           passwords = {
@@ -240,8 +240,8 @@ in {
         };
 
         extraConfigFiles = [
-          config.sops.secrets."matrix-authentication-service/upstream-oauth2.config".path
-          config.sops.secrets."matrix-authentication-service/secrets.config".path
+          config.sops.secrets."matrix/mas/upstream-oauth2.config".path
+          config.sops.secrets."matrix/mas/secrets.config".path
         ];
       };
 

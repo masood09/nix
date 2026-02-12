@@ -97,30 +97,30 @@
       ];
     };
 
-    "matrix-authentication-service/matrix.secret" = {
+    "matrix/mas/matrix.secret" = {
       owner = "matrix-authentication-service";
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["matrix-authentication-service.service"];
     };
 
-    "matrix-authentication-service/upstream-oauth2.config" = {
+    "matrix/mas/upstream-oauth2.config" = {
       owner = "matrix-authentication-service";
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["matrix-authentication-service.service"];
     };
 
-    "matrix-authentication-service/secrets.config" = {
+    "matrix/mas/secrets.config" = {
       owner = "matrix-authentication-service";
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["matrix-authentication-service.service"];
     };
 
-    "matrix-synapse/lk-jwt-service/keys.key" = {
+    "matrix/lk-jwt-service/keys.key" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["lk-jwt-service.service"];
     };
 
-    "matrix-synapse/matrix-authentication-service.secret" = {
+    "matrix/synapse/mas.secret" = {
       owner = "matrix-synapse";
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["matrix-synapse.service"];
