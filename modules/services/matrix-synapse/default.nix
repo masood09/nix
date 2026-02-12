@@ -339,6 +339,8 @@ in {
         lk-jwt-service = {
           environment = {
             LIVEKIT_FULL_ACCESS_HOMESERVERS = cfg.webDomain;
+            LIVEKIT_JWT_BIND = "127.0.0.1:${toString cfg.lk-jwt-service.port}";
+            LIVEKIT_JWT_PORT = lib.mkForce "";
           };
         };
 
