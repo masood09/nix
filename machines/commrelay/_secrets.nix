@@ -10,6 +10,11 @@
 
     "discord-zfs-webhook" = {};
 
+    "matrix/lk-jwt-service/keys.key" = {
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["lk-jwt-service.service"];
+    };
+
     "restic.env" = {
       sopsFile = ./secrets.sops.yaml;
     };

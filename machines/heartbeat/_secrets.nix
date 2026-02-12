@@ -49,6 +49,30 @@
       ];
     };
 
+    "matrix/mas/matrix.secret" = {
+      owner = "matrix-authentication-service";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["matrix-authentication-service.service"];
+    };
+
+    "matrix/mas/upstream-oauth2.config" = {
+      owner = "matrix-authentication-service";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["matrix-authentication-service.service"];
+    };
+
+    "matrix/mas/secrets.config" = {
+      owner = "matrix-authentication-service";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["matrix-authentication-service.service"];
+    };
+
+    "matrix/synapse/mas.secret" = {
+      owner = "matrix-synapse";
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["matrix-synapse.service"];
+    };
+
     "opencloud-collabora.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-compose-opencloud-root.target"];
