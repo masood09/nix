@@ -32,14 +32,15 @@ in {
       default = "/var/lib/matrix-synapse-media";
     };
 
-    serverName = lib.mkOption {
+
+    rootDomain = lib.mkOption {
       type = lib.types.str;
-      default = "matrix.${config.networking.domain}";
+      default = config.networking.domain;
     };
 
-    serverUrl = lib.mkOption {
+    webDomain = lib.mkOption {
       type = lib.types.str;
-      default = "matrix.${config.networking.domain}";
+      default = "matrix.${config.homelab.services.matrix-synapse.rootDomain}";
     };
 
     listenAddress = lib.mkOption {
@@ -64,7 +65,7 @@ in {
     livekit = {
       webDomain = lib.mkOption {
         type = lib.types.str;
-        default = "matrixrtc.${config.networking.domain}";
+        default = "matrixrtc.${config.homelab.services.matrix-synapse.rootDomain}";
       };
 
       bindAddress = lib.mkOption {
@@ -98,7 +99,7 @@ in {
     mas = {
       webDomain = lib.mkOption {
         type = lib.types.str;
-        default = "mas.${config.networking.domain}";
+        default = "mas.${config.homelab.services.matrix-synapse.rootDomain}";
       };
 
       userId = lib.mkOption {
