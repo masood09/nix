@@ -14,10 +14,8 @@
   dbName = "matrix-synapse";
   dbOwner = "matrix-synapse";
 
-  webDomain = "https://${cfg.serverUrl}";
-
   clientConfig = {
-    "m.homeserver".base_url = webDomain;
+    "m.homeserver".base_url = "https://${cfg.webDomain}";
     "org.matrix.msc4143.rtc_foci" = [
       {
         type = "livekit";
@@ -26,7 +24,7 @@
     ];
   };
 
-  serverConfig."m.server" = "${cfg.serverUrl}:443";
+  serverConfig."m.server" = "${cfg.rootDomain}:443";
 in {
   imports = [
     ./matrix-authentication-service.nix
@@ -70,8 +68,8 @@ in {
 
         settings = {
           media_store_path = cfg.mediaDir;
-          server_name = cfg.serverName;
-          public_baseurl = webDomain;
+          server_name = cfg.rootDomain;
+          public_baseurl = "https://${cfg.webDomain}";
 
           listeners = [
             {
@@ -227,7 +225,7 @@ in {
           };
 
           matrix = {
-            homeserver = cfg.serverName;
+            homeserver = cfg.rootDomain;
             endpoint = "http://localhost:${toString config.homelab.services.matrix-synapse.listenPort}";
             secret_file = config.sops.secrets."matrix-authentication-service/matrix.secret".path;
           };
@@ -245,7 +243,7 @@ in {
 
       caddy = lib.mkIf (caddyEnabled && cfg.enableCaddy) {
         virtualHosts = {
-          "${cfg.serverUrl}" = {
+          "${cfg.rootDomain}" = {
             useACMEHost = config.networking.domain;
             extraConfig = ''
               # Server discovery (no CORS required, but harmless)
@@ -267,7 +265,12 @@ in {
 
                 respond `${builtins.toJSON clientConfig}` 200
               }
+            '';
+          };
 
+          "${cfg.webDomain}" = {
+            useACMEHost = config.networking.domain;
+            extraConfig = ''
               @masAuth path_regexp masAuth ^/_matrix/client/(.*)/(login|logout|refresh)$
               reverse_proxy @masAuth http://127.0.0.1:${toString cfg.mas.http.web.port}
 
@@ -331,7 +334,7 @@ in {
       services = {
         lk-jwt-service = {
           environment = {
-            LIVEKIT_FULL_ACCESS_HOMESERVERS = cfg.serverUrl;
+            LIVEKIT_FULL_ACCESS_HOMESERVERS = cfg.rootDomain;
           };
         };
 
