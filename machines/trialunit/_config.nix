@@ -161,13 +161,19 @@
         };
       };
 
-      matrix-synapse = {
-        enable = true;
-        enableCaddy = true;
-
-        zfs = {
+      matrix = {
+        synapse = {
           enable = true;
-          dataDir.dataset = "dpool/tank/services/matrix-synapse";
+          enableCaddy = true;
+
+          zfs = {
+            enable = true;
+            dataDir.dataset = "dpool/tank/services/matrix-synapse";
+          };
+        };
+
+        rtc = {
+          enable = true;
         };
       };
 

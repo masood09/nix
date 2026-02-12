@@ -5,7 +5,7 @@
   ...
 }: let
   homelabCfg = config.homelab;
-  cfg = homelabCfg.services.matrix-synapse;
+  cfg = homelabCfg.services.matrix;
   pg = config.services.postgresql;
   postgresqlEnabled = pg.enable;
   postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
@@ -15,30 +15,30 @@
   dbOwner = "matrix-synapse";
 
   clientConfig = {
-    "m.homeserver".base_url = "https://${cfg.webDomain}";
+    "m.homeserver".base_url = "https://${cfg.rootDomain}";
     "org.matrix.msc4143.rtc_foci" = [
       {
         type = "livekit";
-        livekit_service_url = "https://${cfg.livekit.webDomain}";
+        livekit_service_url = "https://rtc.${cfg.rootDomain}";
       }
     ];
   };
 
-  serverConfig."m.server" = "${cfg.webDomain}:443";
+  serverConfig."m.server" = "${cfg.rootDomain}:443";
 in {
   imports = [
     ./matrix-authentication-service.nix
     ./options.nix
   ];
 
-  config = lib.mkIf cfg.enable {
-    homelab.zfs.datasets = lib.mkIf cfg.zfs.enable {
+  config = {
+    homelab.zfs.datasets = lib.mkIf (cfg.synapse.enable && cfg.synapse.zfs.enable) {
       matrix-synapse = {
         enable = true;
 
-        inherit (cfg.zfs.dataDir) dataset properties;
+        inherit (cfg.synapse.zfs.dataDir) dataset properties;
 
-        mountpoint = cfg.dataDir;
+        mountpoint = cfg.synapse.dataDir;
         requiredBy = ["matrix-synapse.service"];
 
         restic = {
@@ -49,9 +49,9 @@ in {
       matrix-synapse-media = {
         enable = true;
 
-        inherit (cfg.zfs.mediaDir) dataset properties;
+        inherit (cfg.synapse.zfs.mediaDir) dataset properties;
 
-        mountpoint = cfg.mediaDir;
+        mountpoint = cfg.synapse.mediaDir;
         requiredBy = ["matrix-synapse.service"];
 
         restic = {
@@ -61,20 +61,20 @@ in {
     };
 
     services = {
-      matrix-synapse = {
+      matrix-synapse = lib.mkIf cfg.synapse.enable {
         enable = true;
 
-        inherit (cfg) dataDir;
+        inherit (cfg.synapse) dataDir;
 
         settings = {
-          media_store_path = cfg.mediaDir;
-          server_name = cfg.webDomain;
-          public_baseurl = "https://${cfg.webDomain}";
+          media_store_path = cfg.synapse.mediaDir;
+          server_name = cfg.rootDomain;
+          public_baseurl = "https://${cfg.rootDomain}";
 
           listeners = [
             {
-              port = cfg.listenPort;
-              bind_addresses = cfg.listenAddress;
+              port = cfg.synapse.listenPort;
+              bind_addresses = cfg.synapse.listenAddress;
               type = "http";
               tls = false;
               x_forwarded = true;
@@ -101,7 +101,7 @@ in {
 
           matrix_authentication_service = {
             enabled = true;
-            endpoint = "https://${cfg.mas.webDomain}";
+            endpoint = "https://mas.${cfg.rootDomain}";
             secret_path = config.sops.secrets."matrix-synapse/matrix-authentication-service.secret".path;
           };
 
@@ -133,27 +133,27 @@ in {
         };
       };
 
-      lk-jwt-service = {
+      "lk-jwt-service" = lib.mkIf cfg.rtc.enable {
         enable = true;
         keyFile = config.sops.secrets."matrix-synapse/lk-jwt-service/keys.key".path;
-        port = cfg.lk-jwt-service.port;
-        livekitUrl = "wss://${cfg.livekit.webDomain}/livekit/sfu";
+        inherit (cfg.rtc."lk-jwt-service") port;
+        livekitUrl = "wss://rtc.${cfg.rootDomain}/livekit/sfu";
       };
 
-      livekit = {
+      livekit = lib.mkIf cfg.rtc.enable {
         enable = true;
         keyFile = config.sops.secrets."matrix-synapse/lk-jwt-service/keys.key".path;
         openFirewall = true;
 
         settings = {
-          bind_addresses = cfg.livekit.bindAddress;
-          port = cfg.livekit.ports.port;
+          bind_addresses = cfg.rtc.livekit.bindAddress;
+          inherit (cfg.rtc.livekit.ports) port;
 
           rtc = {
-            tcp_port = cfg.livekit.ports.tcpPort;
-            port_range_start = cfg.livekit.ports.rtcPortRangeStart;
-            port_range_end = cfg.livekit.ports.rtcPortRangeEnd;
-            use_external_ip = false;
+            tcp_port = cfg.rtc.livekit.ports.tcpPort;
+            port_range_start = cfg.rtc.livekit.ports.rtcPortRangeStart;
+            port_range_end = cfg.rtc.livekit.ports.rtcPortRangeEnd;
+            use_external_ip = cfg.rtc.livekit.rtcExternalIP;
           };
 
           room = {
@@ -170,7 +170,7 @@ in {
         };
       };
 
-      matrix-authentication-service = {
+      matrix-authentication-service = lib.mkIf cfg.synapse.enable {
         enable = true;
 
         settings = {
@@ -200,10 +200,12 @@ in {
                   }
                 ];
 
-                binds = map (addr: {
-                  host = addr;
-                  port = cfg.mas.http.web.port;
-                }) cfg.mas.http.web.bindAddresses;
+                binds =
+                  map (addr: {
+                    host = addr;
+                    inherit (cfg.synapse.mas.http.web) port;
+                  })
+                  cfg.synapse.mas.http.web.bindAddresses;
               }
               {
                 name = "internal";
@@ -212,21 +214,23 @@ in {
                     name = "health";
                   }
                 ];
-                binds = map (addr: {
-                  host = addr;
-                  port = cfg.mas.http.health.port;
-                }) cfg.mas.http.health.bindAddresses;
+                binds =
+                  map (addr: {
+                    host = addr;
+                    inherit (cfg.synapse.mas.http.health) port;
+                  })
+                  cfg.synapse.mas.http.health.bindAddresses;
                 proxy_protocol = false;
               }
             ];
 
-            inherit (cfg.mas.http) trusted_proxies;
-            public_base = "https://${cfg.mas.webDomain}";
+            inherit (cfg.synapse.mas.http) trusted_proxies;
+            public_base = "https://mas.${cfg.rootDomain}";
           };
 
           matrix = {
-            homeserver = cfg.webDomain;
-            endpoint = "http://localhost:${toString config.homelab.services.matrix-synapse.listenPort}";
+            homeserver = cfg.rootDomain;
+            endpoint = "https://${cfg.rootDomain}";
             secret_file = config.sops.secrets."matrix-authentication-service/matrix.secret".path;
           };
 
@@ -241,12 +245,12 @@ in {
         ];
       };
 
-      caddy = lib.mkIf (caddyEnabled && cfg.enableCaddy) {
+      caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
-          "${cfg.webDomain}" = {
-            useACMEHost = cfg.webDomain;
+          "${cfg.rootDomain}" = lib.mkIf (cfg.synapse.enable && cfg.synapse.enableCaddy) {
+            useACMEHost = cfg.rootDomain;
             extraConfig = ''
-                            # Server discovery (no CORS required, but harmless)
+              # Server discovery (no CORS required, but harmless)
               handle /.well-known/matrix/server {
                 header Content-Type application/json
                 respond `${builtins.toJSON serverConfig}` 200
@@ -267,47 +271,46 @@ in {
               }
 
               @masAuth path_regexp masAuth ^/_matrix/client/(.*)/(login|logout|refresh)$
-              reverse_proxy @masAuth http://127.0.0.1:${toString cfg.mas.http.web.port}
+              reverse_proxy @masAuth http://127.0.0.1:${toString cfg.synapse.mas.http.web.port}
 
               @health path /-/health
-              reverse_proxy @health http://127.0.0.1:${toString cfg.listenPort} {
+              reverse_proxy @health http://127.0.0.1:${toString cfg.synapse.listenPort} {
                 rewrite /health
               }
 
               @synapse path /_matrix* /_synapse/client* /_synapse/mas*
-              reverse_proxy @synapse http://127.0.0.1:${toString cfg.listenPort}
+              reverse_proxy @synapse http://127.0.0.1:${toString cfg.synapse.listenPort}
             '';
           };
 
-          "${cfg.livekit.webDomain}" = {
-            useACMEHost = cfg.webDomain;
+          "rtc.${cfg.rootDomain}" = lib.mkIf cfg.rtc.enable {
+            useACMEHost = cfg.rootDomain;
             extraConfig = ''
               handle /sfu/get* {
-                reverse_proxy 127.0.0.1:${toString cfg.lk-jwt-service.port}
+                reverse_proxy 127.0.0.1:${toString cfg.rtc."lk-jwt-service".port}
               }
 
               handle_path /livekit/sfu* {
-                reverse_proxy 127.0.0.1:${toString cfg.livekit.ports.port}
+                reverse_proxy 127.0.0.1:${toString cfg.rtc.livekit.ports.port}
               }
             '';
           };
 
-
-          "${cfg.mas.webDomain}" = {
-            useACMEHost = cfg.webDomain;
+          "mas.${cfg.rootDomain}" = lib.mkIf (cfg.synapse.enable && cfg.synapse.enableCaddy) {
+            useACMEHost = cfg.rootDomain;
             extraConfig = ''
               @health path /-/health
-              reverse_proxy @health http://127.0.0.1:${toString cfg.mas.http.health.port} {
+              reverse_proxy @health http://127.0.0.1:${toString cfg.synapse.mas.http.health.port} {
                 rewrite /health
               }
 
-              reverse_proxy http://127.0.0.1:${toString cfg.mas.http.web.port}
+              reverse_proxy http://127.0.0.1:${toString cfg.synapse.mas.http.web.port}
             '';
           };
         };
       };
 
-      postgresql = lib.mkIf postgresqlEnabled {
+      postgresql = lib.mkIf (postgresqlEnabled && cfg.synapse.enable) {
         ensureDatabases = ["matrix-authentication-service"];
         ensureUsers = [
           {
@@ -317,7 +320,7 @@ in {
         ];
       };
 
-      postgresqlBackup = lib.mkIf (postgresqlEnabled && postgresqlBackupEnabled) {
+      postgresqlBackup = lib.mkIf (postgresqlEnabled && postgresqlBackupEnabled && cfg.synapse.enable) {
         databases = [
           dbName
           "matrix-authentication-service"
@@ -325,26 +328,26 @@ in {
       };
     };
 
-    security = lib.mkIf (caddyEnabled && cfg.enableCaddy) {
-      acme.certs."${cfg.webDomain}" = {
+    security = lib.mkIf (caddyEnabled && ((cfg.synapse.enableCaddy && cfg.synapse.enable) || cfg.rtc.enable)) {
+      acme.certs."${cfg.rootDomain}" = {
         extraDomainNames = [
-          "${cfg.webDomain}"
-          "*.${cfg.webDomain}"
+          "${cfg.rootDomain}"
+          "*.${cfg.rootDomain}"
         ];
       };
     };
 
     systemd = {
       services = {
-        lk-jwt-service = {
+        "lk-jwt-service" = lib.mkIf cfg.rtc.enable {
           environment = {
-            LIVEKIT_FULL_ACCESS_HOMESERVERS = cfg.webDomain;
-            LIVEKIT_JWT_BIND = "127.0.0.1:${toString cfg.lk-jwt-service.port}";
+            LIVEKIT_FULL_ACCESS_HOMESERVERS = cfg.rootDomain;
+            LIVEKIT_JWT_BIND = "127.0.0.1:${toString cfg.rtc."lk-jwt-service".port}";
             LIVEKIT_JWT_PORT = lib.mkForce "";
           };
         };
 
-        matrix-synapse-init-db = lib.mkIf postgresqlEnabled {
+        matrix-synapse-init-db = lib.mkIf (postgresqlEnabled && cfg.synapse.enable) {
           description = "Matrix Synapse: ensure Postgres database exists with locale C";
 
           # Tie it to Synapse startup
@@ -416,18 +419,18 @@ in {
           '';
         };
 
-        matrix-synapse-permissions = {
+        matrix-synapse-permissions = lib.mkIf cfg.synapse.enable {
           description = "Fix Matrix Synapse dataDir ownership/permissions";
           wantedBy = ["matrix-synapse.service"];
           before = ["matrix-synapse.service"];
 
           after =
             ["systemd-tmpfiles-setup.service" "local-fs.target"]
-            ++ lib.optionals cfg.zfs.enable [
+            ++ lib.optionals cfg.synapse.zfs.enable [
               "zfs-dataset-matrix-synapse.service"
               "zfs-dataset-matrix-synapse-media.service"
             ];
-          requires = lib.optionals cfg.zfs.enable [
+          requires = lib.optionals cfg.synapse.zfs.enable [
             "zfs-dataset-matrix-synapse.service"
             "zfs-dataset-matrix-synapse-media.service"
           ];
@@ -437,24 +440,24 @@ in {
             RemainAfterExit = true;
             ExecStart = ''
               ${pkgs.coreutils}/bin/chown matrix-synapse:matrix-synapse \
-                ${toString cfg.dataDir} \
-                ${toString cfg.mediaDir}
+                ${toString cfg.synapse.dataDir} \
+                ${toString cfg.synapse.mediaDir}
             '';
           };
         };
 
-        matrix-synapse = lib.mkMerge [
+        matrix-synapse = lib.mkIf cfg.synapse.enable (lib.mkMerge [
           {
             # Unit-level ordering / mount requirements
             unitConfig = {
               RequiresMountsFor = [
-                cfg.dataDir
-                cfg.mediaDir
+                cfg.synapse.dataDir
+                cfg.synapse.mediaDir
               ];
             };
           }
 
-          (lib.mkIf cfg.zfs.enable {
+          (lib.mkIf cfg.synapse.zfs.enable {
             requires =
               [
                 "zfs-dataset-matrix-synapse.service"
@@ -473,9 +476,9 @@ in {
                 "postgresql.target"
               ];
           })
-        ];
+        ]);
 
-        matrix-authentication-service = {
+        matrix-authentication-service = lib.mkIf cfg.synapse.enable {
           after =
             lib.optional postgresqlEnabled "postgresql.service"
             ++ lib.optional config.services.matrix-synapse.enable config.services.matrix-synapse.serviceUnit;
@@ -487,10 +490,10 @@ in {
       };
 
       tmpfiles.rules = [
-        "d ${toString cfg.dataDir} 0750 matrix-synapse matrix-synapse -"
-        "d ${toString cfg.mediaDir} 0750 matrix-synapse matrix-synapse -"
-        "z ${toString cfg.dataDir} 0750 matrix-synapse matrix-synapse -"
-        "z ${toString cfg.mediaDir} 0750 matrix-synapse matrix-synapse -"
+        "d ${toString cfg.synapse.dataDir} 0750 matrix-synapse matrix-synapse -"
+        "d ${toString cfg.synapse.mediaDir} 0750 matrix-synapse matrix-synapse -"
+        "z ${toString cfg.synapse.dataDir} 0750 matrix-synapse matrix-synapse -"
+        "z ${toString cfg.synapse.mediaDir} 0750 matrix-synapse matrix-synapse -"
       ];
     };
 
@@ -498,33 +501,44 @@ in {
       lib.mkIf (
         homelabCfg.impermanence
         && !homelabCfg.isRootZFS
-        && !cfg.zfs.enable
+        && cfg.synapse.enable
+        && !cfg.synapse.zfs.enable
       ) {
         persistence."/nix/persist".directories = [
-          cfg.dataDir
-          cfg.mediaDir
+          cfg.synapse.dataDir
+          cfg.synapse.mediaDir
         ];
       };
 
     networking.firewall = lib.mkIf cfg.openFirewall {
-      allowedTCPPorts = [
-        cfg.listenPort
-        cfg.mas.http.web.port
-        cfg.mas.http.health.port
+      allowedTCPPorts =
+        lib.optionals cfg.synapse.enable [
+          cfg.synapse.listenPort
+          cfg.synapse.mas.http.web.port
+          cfg.synapse.mas.http.health.port
+        ]
+        ++ lib.optionals cfg.rtc.enable [
+          cfg.rtc.livekit.ports.tcpPort
+        ];
+
+      allowedUDPPortRanges = lib.optionals cfg.rtc.enable [
+        {
+          from = cfg.rtc.livekit.ports.rtcPortRangeStart;
+          to = cfg.rtc.livekit.ports.rtcPortRangeEnd;
+        }
       ];
     };
-
 
     users = {
       users = {
         matrix-authentication-service = {
-          uid = cfg.mas.userId;
+          uid = cfg.synapse.mas.userId;
         };
       };
 
       groups = {
         matrix-authentication-service = {
-          gid = cfg.mas.groupId;
+          gid = cfg.synapse.mas.groupId;
         };
       };
     };
