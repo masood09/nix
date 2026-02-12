@@ -40,6 +40,9 @@
           "matrix-authentication-service.service"
           "matrix-synapse.service"
           "podman-babybuddy.service"
+          "podman-opencloud-collabora.service"
+          "podman-opencloud-opencloud.service"
+          "podman-opencloud-wopi.service"
           "vaultwarden.service"
         ];
       };
