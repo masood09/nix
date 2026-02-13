@@ -161,6 +161,15 @@
         };
       };
 
+      mailarchiver = {
+        enable = true;
+
+        zfs = {
+          enable = true;
+          dataset = "dpool/tank/services/mailarchiver";
+        };
+      };
+
       matrix = {
         synapse = {
           enable = true;
