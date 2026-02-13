@@ -26,6 +26,38 @@
       type = lib.types.port;
     };
 
+    oauth = {
+      enable = lib.mkOption {
+        type = lib.types.str;
+        default = "true";
+      };
+
+      providerHost = lib.mkOption {
+        type = lib.types.str;
+        default = "auth.${config.networking.domain}";
+      };
+
+      issuerURL = lib.mkOption {
+        type = lib.types.str;
+        default = "https://${config.homelab.services.mailarchiver.oauth.providerHost}/application/o/mailarchiver";
+      };
+
+      clientID = lib.mkOption {
+        type = lib.types.str;
+        default = "mailarchiver";
+      };
+
+      disablePasswordLogin = lib.mkOption {
+        type = lib.types.str;
+        default = "true";
+      };
+
+      autoRedirect = lib.mkOption {
+        type = lib.types.str;
+        default = "true";
+      };
+    };
+
     zfs = {
       enable = lib.mkEnableOption "Store MailArchiver dataDir on a ZFS dataset.";
 

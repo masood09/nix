@@ -42,6 +42,14 @@ in {
 
       environment = {
         TimeZone__DisplayTimeZoneId = config.time.timeZone;
+        OAuth__Enabled = cfg.oauth.enable;
+        OAuth__Authority = cfg.oauth.issuerURL;
+        OAuth__ClientId = cfg.oauth.clientID;
+        OAuth__ClientScopes__0 = "openid";
+        OAuth__ClientScopes__1 = "profile";
+        OAuth__ClientScopes__2 = "email";
+        OAuth__DisablePasswordLogin = cfg.oauth.disablePasswordLogin;
+        OAuth__AutoRedirect = cfg.oauth.autoRedirect;
       };
 
       environmentFiles = [
