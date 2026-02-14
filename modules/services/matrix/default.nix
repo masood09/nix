@@ -489,7 +489,7 @@ in {
         };
       };
 
-      tmpfiles.rules = [
+      tmpfiles.rules = lib.mkIf cfg.synapse.enable [
         "d ${toString cfg.synapse.dataDir} 0750 matrix-synapse matrix-synapse -"
         "d ${toString cfg.synapse.mediaDir} 0750 matrix-synapse matrix-synapse -"
         "z ${toString cfg.synapse.dataDir} 0750 matrix-synapse matrix-synapse -"
