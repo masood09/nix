@@ -16,49 +16,53 @@ in {
 
   config = lib.mkIf (cfg.enable && podmanEnabled) {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.mailarchiver = lib.mkIf cfg.zfs.enable {
-      inherit (cfg.zfs) dataset properties;
+    homelab.zfs.datasets = {
+      mailarchiver = lib.mkIf cfg.zfs.enable {
+        inherit (cfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = cfg.dataDir;
-
-      requiredBy = [
-        "podman-mailarchiver.service"
-      ];
-
-      restic = {
         enable = true;
+        mountpoint = cfg.dataDir;
+
+        requiredBy = [
+          "podman-mailarchiver.service"
+        ];
+
+        restic = {
+          enable = true;
+        };
       };
     };
 
-    virtualisation.oci-containers.containers.mailarchiver = {
-      # renovate: datasource=docker depName=docker.io/s1t5/mailarchiver
-      image = "docker.io/s1t5/mailarchiver:2602.1";
-      autoStart = true;
+    virtualisation.oci-containers.containers = {
+      mailarchiver = {
+        # renovate: datasource=docker depName=docker.io/s1t5/mailarchiver
+        image = "docker.io/s1t5/mailarchiver:2602.1";
+        autoStart = true;
 
-      ports = [
-        "${cfg.listenAddress}:${toString cfg.listenPort}:5000"
-      ];
+        ports = [
+          "${cfg.listenAddress}:${toString cfg.listenPort}:5000"
+        ];
 
-      environment = {
-        TimeZone__DisplayTimeZoneId = config.time.timeZone;
-        OAuth__Enabled = cfg.oauth.enable;
-        OAuth__Authority = cfg.oauth.issuerURL;
-        OAuth__ClientId = cfg.oauth.clientID;
-        OAuth__ClientScopes__0 = "openid";
-        OAuth__ClientScopes__1 = "profile";
-        OAuth__ClientScopes__2 = "email";
-        OAuth__DisablePasswordLogin = cfg.oauth.disablePasswordLogin;
-        OAuth__AutoRedirect = cfg.oauth.autoRedirect;
+        environment = {
+          TimeZone__DisplayTimeZoneId = config.time.timeZone;
+          OAuth__Enabled = cfg.oauth.enable;
+          OAuth__Authority = cfg.oauth.issuerURL;
+          OAuth__ClientId = cfg.oauth.clientID;
+          OAuth__ClientScopes__0 = "openid";
+          OAuth__ClientScopes__1 = "profile";
+          OAuth__ClientScopes__2 = "email";
+          OAuth__DisablePasswordLogin = cfg.oauth.disablePasswordLogin;
+          OAuth__AutoRedirect = cfg.oauth.autoRedirect;
+        };
+
+        environmentFiles = [
+          config.sops.secrets."mailarchiver/.env".path
+        ];
+
+        volumes = [
+          "${toString cfg.dataDir}:/app/DataProtection-Keys"
+        ];
       };
-
-      environmentFiles = [
-        config.sops.secrets."mailarchiver/.env".path
-      ];
-
-      volumes = [
-        "${toString cfg.dataDir}:/app/DataProtection-Keys"
-      ];
     };
 
     services = {
