@@ -25,8 +25,8 @@
           # babybuddy + applysmart via LAN/Tailnet (password), but ONLY to DB with same name as user
           host    sameuser        applysmart      10.0.20.0/24            scram-sha-256
           host    sameuser        applysmart      100.64.0.0/16           scram-sha-256
-          host    sameuser        babybuddy       10.88.0.0/16            scram-sha-256
-          host    sameuser        mailarchiver    10.88.0.0/16            scram-sha-256
+          host    sameuser        babybuddy       10.0.0.0/8              scram-sha-256
+          host    sameuser        mailarchiver    10.0.0.0/8              scram-sha-256
 
           # Hard-deny for everything else (good for least privilege)
           host    all             all             0.0.0.0/0               reject
