@@ -91,6 +91,12 @@ in {
         _HIHideMenuBar = true;
         "com.apple.mouse.tapBehavior" = 1;
         "com.apple.trackpad.forceClick" = true;
+
+        # Animations
+        NSAutomaticWindowAnimationsEnabled = false;
+        NSScrollAnimationEnabled = false;
+        NSUseAnimatedFocusRing = false;
+        NSWindowResizeTime = 0.001;
       };
 
       SoftwareUpdate.AutomaticallyInstallMacOSUpdates = true;
@@ -105,6 +111,7 @@ in {
 
       dock = {
         autohide = true;
+        expose-animation-duration = 0.001;
         largesize = 64;
         magnification = true;
         minimize-to-application = true;
