@@ -12,6 +12,7 @@ in {
     taps = {
       "d12frosted/homebrew-emacs-plus" = inputs.homebrew-emacs-plus;
       "FelixKratz/homebrew-formulae" = inputs.homebrew-sketchybar-tap;
+      "nikitabobko/homebrew-tap" = inputs.homebrew-nikitabobko-tap;
       "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
       "homebrew/homebrew-core" = inputs.homebrew-core;
@@ -34,6 +35,7 @@ in {
     ];
     taps = builtins.attrNames config.nix-homebrew.taps;
     casks = [
+      "nikitabobko/tap/aerospace"
       "appcleaner"
       "balenaetcher"
       "discord"
