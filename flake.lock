@@ -337,38 +337,6 @@
         "type": "github"
       }
     },
-    "homebrew-jackielii-tap": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1765152816,
-        "narHash": "sha256-kIQYuNcN3NJSH9kbpV0DSAVB7Bo+pH8oiePA2XEGoQY=",
-        "owner": "jackielii",
-        "repo": "homebrew-tap",
-        "rev": "d7ff2d188fdc6a5c061e1f552a57810817661af9",
-        "type": "github"
-      },
-      "original": {
-        "owner": "jackielii",
-        "repo": "homebrew-tap",
-        "type": "github"
-      }
-    },
-    "homebrew-koekeishiya-yabai": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1765321528,
-        "narHash": "sha256-qkvyLtfo1DQv3BJ2aN2QpXM5rsY42jjsdmfF+NCppdw=",
-        "owner": "koekeishiya",
-        "repo": "homebrew-formulae",
-        "rev": "4304ae8d0dd1e3d138d2e2dafb06d77965891b98",
-        "type": "github"
-      },
-      "original": {
-        "owner": "koekeishiya",
-        "repo": "homebrew-formulae",
-        "type": "github"
-      }
-    },
     "homebrew-sketchybar-tap": {
       "flake": false,
       "locked": {
@@ -641,8 +609,6 @@
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
         "homebrew-emacs-plus": "homebrew-emacs-plus",
-        "homebrew-jackielii-tap": "homebrew-jackielii-tap",
-        "homebrew-koekeishiya-yabai": "homebrew-koekeishiya-yabai",
         "homebrew-sketchybar-tap": "homebrew-sketchybar-tap",
         "impermanence": "impermanence",
         "nix-darwin": "nix-darwin",
