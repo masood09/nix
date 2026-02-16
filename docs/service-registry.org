@@ -74,6 +74,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | Matrix Authentication Service        | 8910 |
 | Matrix Authentication Service Health | 8911 |
 | lk-jwt-service (Matrix RTC)          | 8912 |
+| MailArchiver                         | 8913 |
 | Authentik                            | 9000 |
 | Prometheus                           | 9090 |
 | Headscale (Metrics)                  | 9091 |

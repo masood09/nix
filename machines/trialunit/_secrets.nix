@@ -97,6 +97,11 @@
       ];
     };
 
+    "mailarchiver/.env" = {
+      sopsFile = ./secrets.sops.yaml;
+      restartUnits = ["podman-mailarchiver.service"];
+    };
+
     "matrix/mas/matrix.secret" = {
       owner = "matrix-authentication-service";
       sopsFile = ./secrets.sops.yaml;

@@ -58,9 +58,8 @@
           "matrix-authentication-service.service"
           "matrix-synapse.service"
           "podman-babybuddy.service"
-          "podman-opencloud-collabora.service"
-          "podman-opencloud-opencloud.service"
-          "podman-opencloud-wopi.service"
+          "podman-compose-mailarchiver.target"
+          "podman-compose-opencloud-root.target"
           "uptime-kuma.service"
           "vaultwarden.service"
         ];
@@ -158,6 +157,24 @@
 
         zfs = {
           enable = true;
+        };
+      };
+
+      mailarchiver = {
+        enable = true;
+
+        zfs = {
+          enable = true;
+          dataset = "dpool/tank/services/mailarchiver";
+        };
+
+        protonBridge = {
+          enable = true;
+
+          zfs = {
+            enable = true;
+            dataset = "dpool/tank/services/mailarchiver-proton-bridge";
+          };
         };
       };
 
