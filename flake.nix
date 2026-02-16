@@ -27,7 +27,7 @@
       url = "github:zhaofengli-wip/nix-homebrew";
     };
 
-    homebrew-sketchybar-tap = {
+    homebrew-felixkratz-tap = {
       url = "github:FelixKratz/homebrew-formulae";
       flake = false;
     };

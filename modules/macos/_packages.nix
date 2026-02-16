@@ -11,7 +11,7 @@ in {
     mutableTaps = false;
     taps = {
       "d12frosted/homebrew-emacs-plus" = inputs.homebrew-emacs-plus;
-      "FelixKratz/homebrew-formulae" = inputs.homebrew-sketchybar-tap;
+      "FelixKratz/homebrew-formulae" = inputs.homebrew-felixkratz-tap;
       "nikitabobko/homebrew-tap" = inputs.homebrew-nikitabobko-tap;
       "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
@@ -30,6 +30,7 @@ in {
       cleanup = "zap";
     };
     brews = [
+      "borders"
       "d12frosted/emacs-plus/emacs-plus"
       "sketchybar"
     ];
