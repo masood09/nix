@@ -4,7 +4,7 @@
   ...
 }: let
   caddyEnabled = config.services.caddy.enable;
-  matrixCfg = config.homelab.services.matrix;  
+  matrixCfg = config.homelab.services.matrix;
 
   clientConfig = {
     "m.homeserver".base_url = "https://${matrixCfg.rootDomain}";
