@@ -40,9 +40,8 @@
           "matrix-authentication-service.service"
           "matrix-synapse.service"
           "podman-babybuddy.service"
-          "podman-opencloud-collabora.service"
-          "podman-opencloud-opencloud.service"
-          "podman-opencloud-wopi.service"
+          "podman-compose-mailarchiver.target"
+          "podman-compose-opencloud-root.target"
           "vaultwarden.service"
         ];
       };
@@ -90,6 +89,26 @@
 
         zfs = {
           enable = true;
+        };
+      };
+
+      mailarchiver = {
+        enable = true;
+
+        oauth = {
+          disablePasswordLogin = "false";
+        };
+
+        zfs = {
+          enable = true;
+        };
+
+        protonBridge = {
+          enable = true;
+
+          zfs = {
+            enable = true;
+          };
         };
       };
 
