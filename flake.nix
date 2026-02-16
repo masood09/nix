@@ -32,6 +32,12 @@
       flake = false;
     };
 
+    homebrew-nikitabobko-tap = {
+      # For Aerospace.
+      url = "github:nikitabobko/homebrew-tap";
+      flake = false;
+    };
+
     homebrew-emacs-plus = {
       url = "github:d12frosted/homebrew-emacs-plus";
       flake = false;
