@@ -58,9 +58,8 @@
           "matrix-authentication-service.service"
           "matrix-synapse.service"
           "podman-babybuddy.service"
-          "podman-opencloud-collabora.service"
-          "podman-opencloud-opencloud.service"
-          "podman-opencloud-wopi.service"
+          "podman-compose-mailarchiver.target"
+          "podman-compose-opencloud-root.target"
           "uptime-kuma.service"
           "vaultwarden.service"
         ];
