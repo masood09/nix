@@ -53,7 +53,7 @@ in {
     virtualisation.oci-containers.containers = {
       mailarchiver = {
         # renovate: datasource=docker depName=docker.io/s1t5/mailarchiver
-        image = "docker.io/s1t5/mailarchiver:2602.1";
+        image = "docker.io/s1t5/mailarchiver:2602.2";
         autoStart = true;
 
         ports = [
