@@ -37,6 +37,7 @@ in {
     taps = builtins.attrNames config.nix-homebrew.taps;
     casks = [
       "nikitabobko/tap/aerospace"
+      "alfred"
       "appcleaner"
       "balenaetcher"
       "discord"
@@ -47,7 +48,6 @@ in {
       "obsidian"
       "opencloud"
       "pgadmin4"
-      "raycast"
       "tailscale-app"
       "zoom"
       "zen"
