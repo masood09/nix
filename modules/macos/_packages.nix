@@ -45,7 +45,6 @@ in {
       "element"
       "ghostty"
       "karabiner-elements"
-      "obsidian"
       "opencloud"
       "pgadmin4"
       "tailscale-app"
