@@ -95,10 +95,6 @@
       mailarchiver = {
         enable = true;
 
-        oauth = {
-          disablePasswordLogin = "false";
-        };
-
         zfs = {
           enable = true;
         };
