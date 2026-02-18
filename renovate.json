@@ -8,6 +8,13 @@
       "matchStrings": [
         "# renovate: datasource=(?<datasource>[^\\s]+)(?: depName=(?<depName>[^\\s]+))?(?: packageName=(?<packageName>[^\\s]+))?(?: versioning=(?<versioning>[^\\s]+))?\\s*\\n\\s*image\\s*=\\s*\"(?:(?<packageName2>[^\"]+?)):(?<currentValue>[^\"]+)\";"
       ]
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/(^|/).+\\.nix$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[^\\s]+)(?: depName=(?<depName>[^\\s]+))?(?: versioning=(?<versioning>[^\\s]+))?\\s*\\n\\s*rev\\s*=\\s*\"(?<currentValue>[^\"]+)\";"
+      ]
     }
   ]
 }
