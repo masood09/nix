@@ -70,6 +70,7 @@ in {
           OAuth__ClientScopes__2 = "email";
           OAuth__DisablePasswordLogin = cfg.oauth.disablePasswordLogin;
           OAuth__AutoRedirect = cfg.oauth.autoRedirect;
+          OAuth__AutoApproveUsers = "true";
         };
 
         environmentFiles = [
