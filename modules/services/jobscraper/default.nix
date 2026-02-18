@@ -14,8 +14,8 @@ in {
 
   config = lib.mkIf (jobscraperCfg.enable && podmanEnabled) {
     virtualisation.oci-containers.containers.jobscraper = {
-      # renovate: datasource=docker depName=masood09/jobscraper
-      image = "masood09/jobscraper:0.1.3";
+      # renovate: datasource=docker depName=docker.io/masood09/jobscraper
+      image = "docker.io/masood09/jobscraper:0.1.3";
       autoStart = true;
 
       environmentFiles = [
