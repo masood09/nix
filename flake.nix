@@ -99,7 +99,10 @@
           inputs.headplane.nixosModules.headplane
           {
             # provides `pkgs.headplane`
-            nixpkgs.overlays = [inputs.headplane.overlays.default];
+            nixpkgs.overlays = [
+              inputs.headplane.overlays.default
+              (import ./nix/overlays/default.nix)
+            ];
           }
 
           path
@@ -119,6 +122,23 @@
   in {
     # Enables `nix fmt` at root of repo to format all nix files
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
+
+    # Export only repo-local packages (no hardcoding per-package)
+    packages = forAllSystems (
+      system: let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [
+            inputs.headplane.overlays.default
+            (import ./nix/overlays/default.nix)
+          ];
+        };
+      in
+        import ./nix/pkgs {
+          inherit pkgs;
+          inherit (pkgs) lib;
+        }
+    );
 
     darwinConfigurations = {
       murderbot = mkDarwinConfig ./machines/murderbot/configuration.nix;
