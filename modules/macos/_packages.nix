@@ -47,6 +47,7 @@ in {
       "karabiner-elements"
       "opencloud"
       "pgadmin4"
+      "shortcat"
       "tailscale-app"
       "zoom"
       "zen"
