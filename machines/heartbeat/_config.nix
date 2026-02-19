@@ -98,14 +98,6 @@
         zfs = {
           enable = true;
         };
-
-        protonBridge = {
-          enable = true;
-
-          zfs = {
-            enable = true;
-          };
-        };
       };
 
       matrix = {

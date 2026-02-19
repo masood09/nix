@@ -86,31 +86,6 @@
           description = "ZFS properties for the dataset.";
         };
       };
-
-      protonBridge = {
-        enable = lib.mkEnableOption "Run Proton Mail Bridge alongside MailArchiver (containerized).";
-
-        dataDir = lib.mkOption {
-          type = lib.types.path;
-          default = "/var/lib/mailarchiver-proton-bridge";
-        };
-
-        zfs = {
-          enable = lib.mkEnableOption "Store Proton Bridge dataDir on a ZFS dataset.";
-
-          dataset = lib.mkOption {
-            type = lib.types.str;
-            default = "fpool/fast/services/proton-bridge";
-          };
-
-          properties = lib.mkOption {
-            type = lib.types.attrsOf lib.types.str;
-            default = {
-              recordsize = "16K";
-            };
-          };
-        };
-      };
     };
   };
 }
