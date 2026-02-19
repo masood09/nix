@@ -6,7 +6,6 @@
 }: let
   homelabCfg = config.homelab;
   cfg = homelabCfg.services.mailarchiver;
-  podmanEnabled = homelabCfg.services.podman.enable;
   caddyEnabled = config.services.caddy.enable;
   postgresqlEnabled = config.services.postgresql.enable;
   postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
@@ -15,7 +14,7 @@ in {
     ./options.nix
   ];
 
-  config = lib.mkIf (cfg.enable && podmanEnabled) {
+  config = lib.mkIf cfg.enable {
     # ZFS dataset for dataDir
     homelab.zfs.datasets = {
       mailarchiver = lib.mkIf cfg.zfs.enable {
@@ -25,7 +24,7 @@ in {
         mountpoint = cfg.dataDir;
 
         requiredBy = [
-          "podman-mailarchiver.service"
+          "mailarchiver.service"
         ];
 
         restic = {
@@ -34,50 +33,34 @@ in {
       };
     };
 
-    virtualisation.oci-containers.containers = {
-      mailarchiver = {
-        # renovate: datasource=docker depName=docker.io/s1t5/mailarchiver
-        image = "docker.io/s1t5/mailarchiver:2602.2";
-        autoStart = true;
-
-        ports = [
-          "${cfg.listenAddress}:${toString cfg.listenPort}:5000"
-        ];
-
-        environment = {
-          TimeZone__DisplayTimeZoneId = config.time.timeZone;
-          OAuth__Enabled = cfg.oauth.enable;
-          OAuth__Authority = cfg.oauth.issuerURL;
-          OAuth__ClientId = cfg.oauth.clientID;
-          OAuth__ClientScopes__0 = "openid";
-          OAuth__ClientScopes__1 = "profile";
-          OAuth__ClientScopes__2 = "email";
-          OAuth__DisablePasswordLogin = cfg.oauth.disablePasswordLogin;
-          OAuth__AutoRedirect = cfg.oauth.autoRedirect;
-          OAuth__AutoApproveUsers = "true";
-        };
-
-        environmentFiles = [
-          config.sops.secrets."mailarchiver/.env".path
-        ];
-
-        volumes = [
-          "${toString cfg.dataDir}:/app/DataProtection-Keys"
-        ];
-
-        extraOptions = [
-          "--network=mailarchiver-net"
-        ];
-      };
-    };
-
     services = {
+      mailarchiver = {
+        enable = true;
+
+        inherit (cfg) dataDir listenAddress port;
+
+        environmentFile = config.sops.secrets."mailarchiver/.env".path;
+
+        settings = {
+          TimeZone.DisplayTimeZoneId = config.time.timeZone;
+
+          OAuth = {
+            Enabled = true;
+            Authority = cfg.oauth.issuerURL;
+            ClientId = cfg.oauth.clientID;
+            DisablePasswordLogin = true;
+            AutoRedirect = true;
+            AutoApproveUsers = true;
+          };
+        };
+      };
+
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${cfg.webDomain}" = {
             useACMEHost = config.networking.domain;
             extraConfig = ''
-              reverse_proxy http://127.0.0.1:${toString cfg.listenPort}
+              reverse_proxy http://127.0.0.1:${toString cfg.port}
             '';
           };
         };
@@ -105,62 +88,71 @@ in {
 
     # Service hardening + mount ordering
     systemd = {
-      targets = {
-        "podman-compose-mailarchiver" = {
-          unitConfig = {
-            Description = "Root target for MailArchiver.";
-          };
-
-          wantedBy = ["multi-user.target"];
-
-          after = lib.optionals cfg.zfs.enable ["zfs-dataset-mailarchiver.service"];
-          requires = lib.optionals cfg.zfs.enable ["zfs-dataset-mailarchiver.service"];
-        };
-      };
-
       services = {
-        "podman-network-mailarchiver-net" = {
-          description = "Create podman network mailarchiver-net";
-          path = [pkgs.podman];
+        mailarchiver-permissions = {
+          description = "Fix MailArchiver dataDir ownership/permissions";
+          wantedBy = ["mailarchiver.service"];
+          before = ["mailarchiver.service"];
+
+          after =
+            ["systemd-tmpfiles-setup.service" "local-fs.target"]
+            ++ lib.optionals cfg.zfs.enable [
+              "zfs-dataset-mailarchiver.service"
+            ];
+          requires = lib.optionals cfg.zfs.enable [
+            "zfs-dataset-mailarchiver.service"
+          ];
 
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
-            ExecStop = "podman network rm -f mailarchiver-net";
+            ExecStart = ''
+              ${pkgs.coreutils}/bin/chown mailarchiver:mailarchiver \
+                ${toString cfg.dataDir}
+            '';
           };
-
-          script = ''
-            podman network inspect mailarchiver-net || podman network create mailarchiver-net
-          '';
-
-          partOf = ["podman-compose-mailarchiver.target"];
-          wantedBy = ["podman-compose-mailarchiver.target"];
-          after = ["network-online.target"];
-          wants = ["network-online.target"];
         };
 
-        "podman-mailarchiver" = lib.mkMerge [
+        "mailarchiver" = lib.mkMerge [
           {
             # Unit-level ordering / mount requirements
             unitConfig = {
               RequiresMountsFor = [cfg.dataDir];
             };
           }
-          {
-            partOf = ["podman-compose-mailarchiver.target"];
 
-            wantedBy = ["podman-compose-mailarchiver.target"];
-          }
-          {
+          (lib.mkIf cfg.zfs.enable {
             requires =
-              ["podman-network-mailarchiver-net.service"]
-              ++ lib.optionals cfg.zfs.enable ["zfs-dataset-mailarchiver.service"];
+              [
+                "zfs-dataset-mailarchiver.service"
+              ]
+              ++ lib.optionals postgresqlEnabled [
+                "postgresql.target"
+              ];
 
             after =
-              ["podman-network-mailarchiver-net.service"]
-              ++ lib.optionals cfg.zfs.enable ["zfs-dataset-mailarchiver.service"];
-          }
+              [
+                "zfs-dataset-mailarchiver.service"
+              ]
+              ++ lib.optionals postgresqlEnabled [
+                "postgresql.target"
+              ];
+          })
         ];
+      };
+
+      tmpfiles.rules = [
+        "d ${toString cfg.dataDir} 0750 mailarchiver mailarchiver -"
+      ];
+    };
+
+    users = {
+      users.mailarchiver = {
+        uid = cfg.userId;
+      };
+
+      groups.mailarchiver = {
+        gid = cfg.groupId;
       };
     };
 
@@ -169,10 +161,9 @@ in {
         homelabCfg.impermanence
         && !homelabCfg.isRootZFS
       ) {
-        persistence."/nix/persist".directories = lib.optionals (!cfg.zfs.enable)
-          [
-            cfg.dataDir
-          ];
+        persistence."/nix/persist".directories = lib.optionals (!cfg.zfs.enable) [
+          cfg.dataDir
+        ];
       };
   };
 }
