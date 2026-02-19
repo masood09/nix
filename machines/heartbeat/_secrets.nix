@@ -51,7 +51,7 @@
 
     "mailarchiver/.env" = {
       sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["podman-mailarchiver.service"];
+      restartUnits = ["mailarchiver.service"];
     };
 
     "matrix/mas/matrix.secret" = {
