@@ -37,10 +37,10 @@
           "karakeep-browser.service"
           "karakeep-workers.service"
           "karakeep-web.service"
+          "mailarchiver.service"
           "matrix-authentication-service.service"
           "matrix-synapse.service"
           "podman-babybuddy.service"
-          "podman-compose-mailarchiver.target"
           "podman-compose-opencloud-root.target"
           "vaultwarden.service"
         ];

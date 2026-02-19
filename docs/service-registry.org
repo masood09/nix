@@ -36,6 +36,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | opencloud                     | 3008 | 3008 |
 | unbound                       | 3009 | 3009 |
 | matrix-authentication-service | 3010 | 3010 |
+| mailarchiver                  | 3011 | 3011 |
 
 
 * Port Registry
