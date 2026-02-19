@@ -6,7 +6,6 @@
 }: let
   homelabCfg = config.homelab;
   cfg = homelabCfg.services.mailarchiver;
-  bridgeCfg = cfg.protonBridge;
   podmanEnabled = homelabCfg.services.podman.enable;
   caddyEnabled = config.services.caddy.enable;
   postgresqlEnabled = config.services.postgresql.enable;
@@ -27,21 +26,6 @@ in {
 
         requiredBy = [
           "podman-mailarchiver.service"
-        ];
-
-        restic = {
-          enable = true;
-        };
-      };
-
-      "mailarchiver-proton-bridge" = lib.mkIf (bridgeCfg.enable && bridgeCfg.zfs.enable) {
-        inherit (bridgeCfg.zfs) dataset properties;
-
-        enable = true;
-        mountpoint = bridgeCfg.dataDir;
-
-        requiredBy = [
-          "podman-mailarchiver-proton-bridge.service"
         ];
 
         restic = {
@@ -83,22 +67,6 @@ in {
 
         extraOptions = [
           "--network=mailarchiver-net"
-        ];
-      };
-
-      "mailarchiver-proton-bridge" = lib.mkIf bridgeCfg.enable {
-        # renovate: datasource=docker depName=docker.io/shenxn/protonmail-bridge
-        image = "docker.io/shenxn/protonmail-bridge:3.19.0-1";
-        autoStart = true;
-
-        # Persist credentials/cache
-        volumes = [
-          "${toString bridgeCfg.dataDir}:/root"
-        ];
-
-        extraOptions = [
-          "--network=mailarchiver-net"
-          "--network-alias=proton-bridge"
         ];
       };
     };
@@ -145,13 +113,8 @@ in {
 
           wantedBy = ["multi-user.target"];
 
-          after =
-            (lib.optionals cfg.zfs.enable ["zfs-dataset-mailarchiver.service"])
-            ++ (lib.optionals (bridgeCfg.enable && bridgeCfg.zfs.enable) ["zfs-dataset-mailarchiver-proton-bridge.service"]);
-
-          requires =
-            (lib.optionals cfg.zfs.enable ["zfs-dataset-mailarchiver.service"])
-            ++ (lib.optionals (bridgeCfg.enable && bridgeCfg.zfs.enable) ["zfs-dataset-mailarchiver-proton-bridge.service"]);
+          after = lib.optionals cfg.zfs.enable ["zfs-dataset-mailarchiver.service"];
+          requires = lib.optionals cfg.zfs.enable ["zfs-dataset-mailarchiver.service"];
         };
       };
 
@@ -198,28 +161,6 @@ in {
               ++ lib.optionals cfg.zfs.enable ["zfs-dataset-mailarchiver.service"];
           }
         ];
-
-        "podman-mailarchiver-proton-bridge" = lib.mkIf bridgeCfg.enable (lib.mkMerge [
-          {
-            unitConfig = {
-              RequiresMountsFor = [bridgeCfg.dataDir];
-            };
-          }
-          {
-            partOf = ["podman-compose-mailarchiver.target"];
-
-            wantedBy = ["podman-compose-mailarchiver.target"];
-          }
-          {
-            requires =
-              ["podman-network-mailarchiver-net.service"]
-              ++ lib.optionals bridgeCfg.zfs.enable ["zfs-dataset-mailarchiver-proton-bridge.service"];
-
-            after =
-              ["podman-network-mailarchiver-net.service"]
-              ++ lib.optionals bridgeCfg.zfs.enable ["zfs-dataset-mailarchiver-proton-bridge.service"];
-          }
-        ]);
       };
     };
 
@@ -228,9 +169,10 @@ in {
         homelabCfg.impermanence
         && !homelabCfg.isRootZFS
       ) {
-        persistence."/nix/persist".directories =
-          (lib.optionals (!cfg.zfs.enable) [cfg.dataDir])
-          ++ (lib.optionals (bridgeCfg.enable && !bridgeCfg.zfs.enable) [bridgeCfg.dataDir]);
+        persistence."/nix/persist".directories = lib.optionals (!cfg.zfs.enable)
+          [
+            cfg.dataDir
+          ];
       };
   };
 }
