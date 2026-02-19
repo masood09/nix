@@ -167,15 +167,6 @@
           enable = true;
           dataset = "dpool/tank/services/mailarchiver";
         };
-
-        protonBridge = {
-          enable = true;
-
-          zfs = {
-            enable = true;
-            dataset = "dpool/tank/services/mailarchiver-proton-bridge";
-          };
-        };
       };
 
       matrix = {
