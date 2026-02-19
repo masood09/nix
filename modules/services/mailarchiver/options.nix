@@ -22,9 +22,19 @@
         type = lib.types.str;
       };
 
-      listenPort = lib.mkOption {
+      port = lib.mkOption {
         default = 8913;
         type = lib.types.port;
+      };
+
+      userId = lib.mkOption {
+        default = 3011;
+        type = lib.types.ints.u16;
+      };
+
+      groupId = lib.mkOption {
+        default = 3011;
+        type = lib.types.ints.u16;
       };
 
       oauth = {
