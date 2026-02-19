@@ -97,6 +97,9 @@
           inputs.authentik-nix.nixosModules.default
           inputs.impermanence.nixosModules.impermanence
           inputs.headplane.nixosModules.headplane
+
+          (import ./nix/services/default.nix)
+
           {
             # provides `pkgs.headplane`
             nixpkgs.overlays = [
