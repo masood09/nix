@@ -5,14 +5,12 @@
 This document restores MailArchiver from Restic backups staged under:
 
 - =/mnt/nightly_backup/mailarchiver=
-- =/mnt/nightly_backup/mailarchiver-proton-bridge= (if enabled)
 - PostgreSQL database =mailarchiver=
 
 MailArchiver stores critical state in three places:
 
 1. DataProtection keys → =/var/lib/mailarchiver=
-2. Proton Bridge credentials/cache → =/var/lib/mailarchiver-proton-bridge= (if enabled)
-3. PostgreSQL database → =mailarchiver=
+2. PostgreSQL database → =mailarchiver=
 
 Because Restic restores files to the same absolute paths captured in the snapshot,
 we restore into a *ZFS staging dataset* first, then copy into place.
@@ -20,25 +18,23 @@ we restore into a *ZFS staging dataset* first, then copy into place.
 * Backup Information
 
 - Service: =MailArchiver=
-- Container image: =docker.io/s1t5/mailarchiver=
 - Live data paths:
 
 | Component           | Path                                |
 |---------------------+-------------------------------------|
 | DataProtection keys | =/var/lib/mailarchiver=                           |
-| Proton Bridge data  | =/var/lib/mailarchiver-proton-bridge= |
 | PostgreSQL database | =mailarchiver=                        |
 
 Stop command:
 
 #+begin_src bash
-sudo systemctl stop podman-compose-mailarchiver.target
+sudo systemctl stop mailarchiver.service
 #+end_src
 
 Start command:
 
 #+begin_src bash
-sudo systemctl start podman-compose-mailarchiver.target
+sudo systemctl start mailarchiver.service
 #+end_src
 
 
@@ -74,13 +70,7 @@ Expected mountpoint:
 * Stop MailArchiver
 
 #+begin_src bash
-sudo systemctl stop podman-compose-mailarchiver.target
-#+end_src
-
-Confirm stopped:
-
-#+begin_src bash
-sudo podman ps | grep mailarchiver || echo "MailArchiver stopped"
+sudo systemctl stop mailarchiver.service
 #+end_src
 
 
@@ -88,9 +78,6 @@ sudo podman ps | grep mailarchiver || echo "MailArchiver stopped"
 
 #+begin_src bash
 sudo zfs snapshot -r fpool/fast/services/mailarchiver@pre-restore
-
-# Only if Proton Bridge enabled
-sudo zfs snapshot -r fpool/fast/services/mailarchiver-proton-bridge@pre-restore
 #+end_src
 
 PostgreSQL snapshot (optional but recommended):
@@ -102,13 +89,10 @@ sudo zfs snapshot -r dpool/tank/services/postgresql@pre-restore
 
 * Clear Existing Live Data
 
-WARNING: This deletes existing keys and bridge credentials.
+WARNING: This deletes existing data.
 
 #+begin_src bash
 sudo find /var/lib/mailarchiver -mindepth 1 -delete
-
-# Only if Proton Bridge enabled
-sudo find /var/lib/mailarchiver-proton-bridge -mindepth 1 -delete
 #+end_src
 
 
@@ -119,7 +103,6 @@ SNAPSHOT=latest
 
 sudo restic-backup restore "${SNAPSHOT}" \
   --include /mnt/nightly_backup/mailarchiver \
-  --include /mnt/nightly_backup/mailarchiver-proton-bridge \
   --include /mnt/nightly_backup/postgresql-backup/mailarchiver.sql.gz \
   --target /mnt/restore-staging
 #+end_src
@@ -128,7 +111,6 @@ Expected layout:
 
 #+begin_example
 /mnt/restore-staging/mnt/nightly_backup/mailarchiver
-/mnt/restore-staging/mnt/nightly_backup/mailarchiver-proton-bridge
 #+end_example
 
 
@@ -141,24 +123,12 @@ Use =rsync -aAX= to preserve:
 - ACLs
 - extended attributes
 
-These are critical for container and Proton Bridge authentication.
-
-
 ** Restore MailArchiver keys
 
 #+begin_src bash
 sudo rsync -aAX --delete \
   /mnt/restore-staging/mnt/nightly_backup/mailarchiver/ \
   /var/lib/mailarchiver/
-#+end_src
-
-
-** Restore Proton Bridge data (if enabled)
-
-#+begin_src bash
-sudo rsync -aAX --delete \
-  /mnt/restore-staging/mnt/nightly_backup/mailarchiver-proton-bridge/ \
-  /var/lib/mailarchiver-proton-bridge/
 #+end_src
 
 
@@ -193,14 +163,11 @@ sudo chmod 644 /tmp/mailarchiver.sql.gz
 #+end_src
 
 
-Import into =mailarchiver= as the =mailarchiver= user via TCP (host 127.0.0.1):
+Import into =mailarchiver= as the =mailarchiver= user.
 
 #+begin_src bash
-gunzip -c /tmp/mailarchiver.sql.gz | \
-  psql -v ON_ERROR_STOP=1 \
-    --host=127.0.0.1 \
-    --username=mailarchiver \
-    --dbname=mailarchiver
+sudo -u mailarchiver bash -lc \
+    'gunzip -c /tmp/mailarchiver.sql.gz | psql -v ON_ERROR_STOP=1 -d mailarchiver'
 #+end_src
 
 
@@ -214,124 +181,13 @@ sudo rm -f /tmp/mailarchiver.sql.gz
 * Start MailArchiver
 
 #+begin_src bash
-sudo systemctl start podman-compose-mailarchiver.target
-#+end_src
-
-Verify:
-
-#+begin_src bash
-sudo podman ps | grep mailarchiver
+sudo systemctl start mailarchiver.service
 #+end_src
 
 Verify web UI:
 
 #+begin_src bash
 curl -I http://localhost:8913
-#+end_src
-
-
-* Verify Proton Bridge Connectivity
-
-Enter the Proton Bridge container CLI:
-
-#+begin_src bash
-sudo podman exec -it mailarchiver-proton-bridge bridge --cli
-#+end_src
-
-Check account status:
-
-#+begin_src bash
-info
-#+end_src
-
-Expected output should show:
-
-- account present
-- IMAP available
-- SMTP available
-- status: connected
-
-Exit CLI:
-
-#+begin_src bash
-exit
-#+end_src
-
-
-** If Proton Bridge Requires Authentication Again
-
-This can happen if the Proton Bridge dataset was not restored or tokens expired.
-
-Follow these steps to re-authenticate safely.
-
-1. Stop Proton Bridge service
-
-#+begin_src bash
-sudo systemctl stop podman-mailarchiver-proton-bridge.service
-#+end_src
-
-
-2. Run Proton Bridge interactively using the persistent dataset
-
-This uses the same mounted volume so credentials will persist.
-
-#+begin_src bash
-sudo podman run --rm -it \
-  --network=mailarchiver-net \
-  -v /var/lib/mailarchiver-proton-bridge:/root \
-  docker.io/shenxn/protonmail-bridge:3.19.0-1 \
-  init
-#+end_src
-
-
-3. Login to Proton account
-
-Inside CLI:
-
-#+begin_src bash
-login
-#+end_src
-
-Follow prompts:
-
-- enter Proton email
-- enter password
-- enter mailbox password (if prompted)
-- enter 2FA code (if enabled)
-
-
-4. Verify connection
-
-#+begin_src bash
-info
-#+end_src
-
-Confirm:
-
-- account present
-- IMAP available
-- SMTP available
-- status: connected
-
-
-5. Exit CLI
-
-#+begin_src bash
-exit
-#+end_src
-
-
-6. Restart Proton Bridge service
-
-#+begin_src bash
-sudo systemctl start podman-mailarchiver-proton-bridge.service
-#+end_src
-
-
-7. Verify service is running
-
-#+begin_src bash
-sudo podman ps | grep mailarchiver-proton-bridge
 #+end_src
 
 
@@ -348,7 +204,6 @@ sudo zfs destroy -r dpool/tank/restore-staging
 
 #+begin_src bash
 sudo zfs destroy -r fpool/fast/services/mailarchiver@pre-restore
-sudo zfs destroy -r fpool/fast/services/mailarchiver-proton-bridge@pre-restore
 #+end_src
 
 Verify:
@@ -385,21 +240,11 @@ Includes:
 Both DB and DataProtection keys must match.
 
 
-** Proton Bridge dataset contains authentication tokens
-
-Dataset:
-
-=/var/lib/mailarchiver-proton-bridge=
-
-Without it, Proton login must be repeated manually.
-
-
 * Best Practices
 
 Always backup together:
 
 - =mailarchiver dataset=
-- =proton bridge dataset=
 - =postgres database=
 
 Always restore together.
