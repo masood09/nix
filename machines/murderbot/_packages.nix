@@ -5,7 +5,6 @@
       "discord"
       "docker-desktop"
       "element"
-      "karabiner-elements"
       "opencloud"
       "pgadmin4"
       "zoom"
