@@ -1,4 +1,4 @@
-{
+{lib, ...}: {
   imports = [
     ./hardware-configuration.nix
 
@@ -45,6 +45,12 @@
       };
 
       neovim.enable = true;
+    };
+  };
+
+  system = {
+    defaults = {
+      universalaccess.reduceMotion = lib.mkForce null;
     };
   };
 }
