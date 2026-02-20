@@ -145,7 +145,7 @@
 
     darwinConfigurations = {
       "KQ1FYQWP3Q-masoodahmed" = mkDarwinConfig ./machines/KQ1FYQWP3Q-masoodahmed;
-      murderbot = mkDarwinConfig ./machines/murderbot/configuration.nix;
+      murderbot = mkDarwinConfig ./machines/murderbot;
     };
 
     nixosConfigurations = {
