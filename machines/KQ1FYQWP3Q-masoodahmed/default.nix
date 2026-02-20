@@ -1,0 +1,50 @@
+{
+  imports = [
+    ./hardware-configuration.nix
+
+    ./../../modules/macos/base.nix
+    ./../../modules/home-manager
+
+    ./_dock.nix
+    ./_packages.nix
+  ];
+
+  # Host-local override for setproctitle on Darwin
+  nixpkgs.overlays = [
+    (final: prev: {
+      python3Packages = prev.python3Packages.overrideScope (pyFinal: pyPrev: {
+        setproctitle = pyPrev.setproctitle.overridePythonAttrs (old: {
+          disabledTests =
+            (old.disabledTests or [])
+            ++ final.lib.optionals final.stdenv.isDarwin [
+              "test_fork_segfault"
+              "test_thread_fork_segfault"
+            ];
+        });
+      });
+    })
+  ];
+
+  homelab = {
+    role = "desktop";
+
+    networking = {
+      hostName = "KQ1FYQWP3Q-masoodahmed";
+    };
+
+    primaryUser = {
+      sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPACCnG604Keu/TxyHknYuzLhua3i6FpXw1Jz6TkEoH6 masoodahmed@pantheon.io";
+    };
+
+    programs = {
+      emacs.enable = true;
+
+      git = {
+        userEmail = "masoodahmed@pantheon.io";
+        enable = true;
+      };
+
+      neovim.enable = true;
+    };
+  };
+}
