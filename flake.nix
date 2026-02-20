@@ -144,6 +144,7 @@
     );
 
     darwinConfigurations = {
+      "work-pantheon" = mkDarwinConfig ./machines/work-pantheon;
       murderbot = mkDarwinConfig ./machines/murderbot/configuration.nix;
     };
 
