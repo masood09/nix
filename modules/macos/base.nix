@@ -151,11 +151,6 @@ in {
 
       universalaccess.reduceMotion = true;
     };
-
-    keyboard = {
-      enableKeyMapping = true;
-      remapCapsLockToControl = true;
-    };
   };
 
   system.stateVersion = 4;
