@@ -13,13 +13,13 @@ deploy machine='' ip='':
     fi
 
 up:
-    nix flake update
+    nix --extra-experimental-features nix-command --extra-experimental-features flakes flake update
 
 lint:
     statix check .
 
 fmt:
-    nix fmt .
+    nix --extra-experimental-features nix-command --extra-experimental-features flakes fmt .
 
 gc:
     sudo nix-collect-garbage -d && nix-collect-garbage -d
@@ -34,4 +34,4 @@ sops-update:
     while IFS= read -r -d '' f; do echo "Updating keys: $f"; sops updatekeys "$f"; done < <(find . -name "*.sops.yaml" -type f ! -name ".sops.yaml" -print0)
 
 build-iso:
-    nix build .#nixosConfigurations.nixiso.config.system.build.isoImage
+    nix --extra-experimental-features nix-command --extra-experimental-features flakes build .#nixosConfigurations.nixiso.config.system.build.isoImage

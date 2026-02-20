@@ -24,7 +24,7 @@ echo ""
 
 # 2. Flake metadata check
 echo "2️⃣  Validating flake metadata..."
-if ! nix flake metadata --no-write-lock-file > /dev/null 2>&1; then
+if ! nix --extra-experimental-features nix-command --extra-experimental-features flakes flake metadata --no-write-lock-file > /dev/null 2>&1; then
     echo "❌ Flake metadata validation failed"
     ((ERRORS++))
 else
@@ -34,7 +34,7 @@ echo ""
 
 # 3. Flake show (list outputs)
 echo "3️⃣  Verifying flake outputs..."
-if ! nix flake show --no-write-lock-file > /dev/null 2>&1; then
+if ! nix --extra-experimental-features nix-command --extra-experimental-features flakes flake show --no-write-lock-file > /dev/null 2>&1; then
     echo "❌ Flake show failed"
     ((ERRORS++))
 else
@@ -44,9 +44,9 @@ echo ""
 
 # 4. Evaluate all host configurations
 echo "4️⃣  Evaluating host configurations..."
-HOSTS=$(nix eval .#nixosConfigurations --apply 'x: builtins.attrNames x' --json 2>/dev/null | jq -r '.[]')
+HOSTS=$(nix eval --extra-experimental-features nix-command --extra-experimental-features flakes .#nixosConfigurations --apply 'x: builtins.attrNames x' --json 2>/dev/null | jq -r '.[]')
 for host in $HOSTS; do
-    if nix eval --impure ".#nixosConfigurations.${host}.config.system.name" > /dev/null 2>&1; then
+    if nix --extra-experimental-features nix-command --extra-experimental-features flakes eval --impure ".#nixosConfigurations.${host}.config.system.name" > /dev/null 2>&1; then
         echo "✅ ${host} configuration evaluates"
     else
         echo "❌ ${host} configuration evaluation failed"

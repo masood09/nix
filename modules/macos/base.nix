@@ -12,27 +12,9 @@ in {
   ];
 
   nixpkgs.config.allowUnfree = true;
+
   nix = {
-    package = pkgs.nix;
-    gc = {
-      automatic = true;
-      interval = {
-        Weekday = 0;
-        Hour = 0;
-        Minute = 0;
-      };
-      options = "--delete-older-than 7d";
-    };
-    optimise = {
-      automatic = true;
-    };
-    settings = {
-      experimental-features = "nix-command flakes";
-      trusted-users = [
-        "root"
-        "@admin"
-      ];
-    };
+    enable = false;
   };
 
   # inspo: https://github.com/nix-darwin/nix-darwin/issues/1339
