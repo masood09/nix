@@ -40,6 +40,7 @@ in {
       "alfred"
       "appcleaner"
       "ghostty"
+      "karabiner-elements"
       "shortcat"
       "tailscale-app"
       "zen"
