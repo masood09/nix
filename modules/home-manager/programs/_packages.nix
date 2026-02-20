@@ -40,6 +40,7 @@ in {
         nerd-fonts.meslo-lg
         nerd-fonts.symbols-only
         nerd-fonts.hack
+        symbola
       ])
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
         nixos-rebuild
