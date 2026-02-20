@@ -4,6 +4,9 @@
 
     ./../../modules/macos/base.nix
     ./../../modules/home-manager
+
+    ./_dock.nix
+    ./_packages.nix
   ];
 
   # Host-local override for setproctitle on Darwin

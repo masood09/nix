@@ -39,27 +39,14 @@ in {
       "nikitabobko/tap/aerospace"
       "alfred"
       "appcleaner"
-      "balenaetcher"
-      "discord"
-      "docker-desktop"
-      "element"
       "ghostty"
-      "karabiner-elements"
-      "opencloud"
-      "pgadmin4"
       "shortcat"
       "tailscale-app"
-      "zoom"
       "zen"
     ];
     masApps = {
       "Amphetamine" = 937984704;
-      "Bitwarden Desktop" = 1352778147;
-      "Home Assistant" = 1099568401;
-      "Infuse" = 1136220934;
       "Unarchiver" = 425424353;
-      "Windows App" = 1295203466;
-      "Xcode" = 497799835;
     };
   };
 }
