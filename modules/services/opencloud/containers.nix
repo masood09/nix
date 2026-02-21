@@ -82,7 +82,7 @@ in {
         };
 
         environmentFiles = [
-          config.sops.secrets."opencloud-opencloud.env".path
+          config.sops.secrets."opencloud/opencloud/.env".path
         ];
 
         volumes = [
@@ -163,7 +163,7 @@ in {
         };
 
         environmentFiles = [
-          config.sops.secrets."opencloud-collabora.env".path
+          config.sops.secrets."opencloud/collabora/.env".path
         ];
 
         ports = [

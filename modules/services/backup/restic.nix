@@ -26,9 +26,9 @@ in {
 
       initialize = true;
 
-      environmentFile = config.sops.secrets."restic.env".path;
-      repositoryFile = config.sops.secrets."restic-repo".path;
-      passwordFile = config.sops.secrets."restic-password".path;
+      environmentFile = config.sops.secrets."restic/.env".path;
+      repositoryFile = config.sops.secrets."restic/repo".path;
+      passwordFile = config.sops.secrets."restic/password".path;
 
       extraOptions = [
         "s3.connections=10"
