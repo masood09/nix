@@ -92,12 +92,12 @@ in {
         // cfg.extraEnvironment;
 
       environmentFiles = [
-        config.sops.secrets."dell-idrac-fan-controller.env".path
+        config.sops.secrets."dell-idrac-fan-controller/.env".path
       ];
     };
 
     systemd.services.podman-dell-idrac-fan-controller.serviceConfig = {
-      EnvironmentFile = config.sops.secrets."dell-idrac-fan-controller.env".path;
+      EnvironmentFile = config.sops.secrets."dell-idrac-fan-controller/.env".path;
       ExecCondition = ipmiCpuTempProbe;
     };
   };

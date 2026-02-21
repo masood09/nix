@@ -58,7 +58,7 @@ in {
       };
 
       environmentFiles = [
-        config.sops.secrets."babybuddy.env".path
+        config.sops.secrets."babybuddy/.env".path
       ];
     };
 

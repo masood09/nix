@@ -19,7 +19,7 @@ in {
       autoStart = true;
 
       environmentFiles = [
-        config.sops.secrets."jobscraper.env".path
+        config.sops.secrets."jobscraper/.env".path
       ];
 
       ports = [
