@@ -57,7 +57,7 @@ in {
             homelabCfg.primaryUser.sshPublicKey
           ];
 
-          hashedPasswordFile = config.sops.secrets."user-password".path;
+          hashedPasswordFile = config.sops.secrets."user/password".path;
         };
       };
     };

@@ -19,7 +19,7 @@ in {
       authentik = {
         inherit (authentikCfg) enable;
 
-        environmentFile = config.sops.secrets."authentik.env".path;
+        environmentFile = config.sops.secrets."authentik/.env".path;
 
         settings = {
           disable_startup_analytics = true;
