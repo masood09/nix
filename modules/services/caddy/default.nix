@@ -11,7 +11,7 @@ in {
     acme = {
       cloudflareAPIKeyPath = lib.mkOption {
         type = lib.types.path;
-        default = config.sops.secrets."cloudflare-api-key".path;
+        default = config.sops.secrets."cloudflare/api-key".path;
         description = "File containing the Cloudflare API Token.";
       };
 

@@ -15,7 +15,7 @@ in {
       alloy = {
         inherit (alloyCfg) enable;
 
-        environmentFile = config.sops.secrets."alloy.env".path;
+        environmentFile = config.sops.secrets."alloy/.env".path;
 
         extraFlags = [
           "--disable-reporting"

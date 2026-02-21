@@ -14,7 +14,7 @@ in {
             inherit (cfg) issuer;
 
             client_id = cfg.clientId;
-            client_secret_path = config.sops.secrets."headscale/oidc_client.secret".path;
+            client_secret_path = config.sops.secrets."headscale/oidc-client-secret".path;
 
             only_start_if_oidc_is_available = true;
             email_verified_required = false;

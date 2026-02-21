@@ -33,7 +33,7 @@ in {
       karakeep = {
         enable = true;
 
-        environmentFile = config.sops.secrets."karakeep.env".path;
+        environmentFile = config.sops.secrets."karakeep/.env".path;
 
         extraEnvironment = {
           PORT = toString cfg.listenPort;

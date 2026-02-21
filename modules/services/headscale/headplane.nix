@@ -41,7 +41,7 @@ in {
             inherit (cfg) port;
 
             host = "127.0.0.1";
-            cookie_secret_path = config.sops.secrets."headscale/headplane/server_cookie.secret".path;
+            cookie_secret_path = config.sops.secrets."headscale/headplane/server-cookie-secret".path;
           };
 
           headscale = {
@@ -52,16 +52,16 @@ in {
 
           integration.agent = {
             enabled = true;
-            pre_authkey_path = config.sops.secrets."headscale/headplane/integration_agent_pre_auth.key".path;
+            pre_authkey_path = config.sops.secrets."headscale/headplane/integration-agent-pre-auth-key".path;
           };
 
           oidc = {
             inherit (headscaleCfg.oidc) issuer;
 
             client_id = headscaleCfg.oidc.clientId;
-            client_secret_path = config.sops.secrets."headscale/oidc_client.secret".path;
+            client_secret_path = config.sops.secrets."headscale/oidc-client-secret".path;
             disable_api_key_login = true;
-            headscale_api_key_path = config.sops.secrets."headscale/headplane/headscale_api.key".path;
+            headscale_api_key_path = config.sops.secrets."headscale/headplane/headscale-api-key".path;
             redirect_uri = "https://${headscaleCfg.webDomain}/admin/oidc/callback";
           };
         };

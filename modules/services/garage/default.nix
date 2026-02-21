@@ -44,7 +44,7 @@ in {
         enable = true;
 
         package = pkgs.garage_2;
-        environmentFile = config.sops.secrets."garage.env".path;
+        environmentFile = config.sops.secrets."garage/.env".path;
 
         inherit (garageCfg) logLevel;
 

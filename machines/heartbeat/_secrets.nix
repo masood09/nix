@@ -1,20 +1,20 @@
 {
   config.sops.secrets = {
-    "alloy.env" = {
+    "alloy/.env" = {
       restartUnits = ["alloy.service"];
     };
 
-    "caddy.env" = {
+    "caddy/.env" = {
       sopsFile = ./secrets.sops.yaml;
       owner = "caddy";
       restartUnits = ["caddy.service"];
     };
 
-    "cloudflare-api-key" = {
+    "cloudflare/api-key" = {
       restartUnits = ["acme-setup.service"];
     };
 
-    "dell-idrac-fan-controller.env" = {
+    "dell-idrac-fan-controller/.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-dell-idrac-fan-controller.service"];
     };
@@ -23,24 +23,23 @@
       sopsFile = ./secrets.sops.yaml;
     };
 
-    "discord-zfs-webhook" = {};
 
     "fpool_fast_key" = {
       sopsFile = ./secrets.sops.yaml;
     };
 
-    "grafana-authentik-client-secret" = {
+    "grafana/authentik-client-secret" = {
       sopsFile = ./secrets.sops.yaml;
       owner = "grafana";
       restartUnits = ["grafana.service"];
     };
 
-    "jobscraper.env" = {
+    "jobscraper/.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-jobscraper.service"];
     };
 
-    "karakeep.env" = {
+    "karakeep/.env" = {
       sopsFile = ./secrets.sops.yaml;
       owner = "karakeep";
       restartUnits = [
@@ -54,7 +53,7 @@
       restartUnits = ["mailarchiver.service"];
     };
 
-    "matrix/mas/matrix.secret" = {
+    "matrix/mas/matrix-secret" = {
       owner = "matrix-authentication-service";
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["matrix-authentication-service.service"];
@@ -72,39 +71,41 @@
       restartUnits = ["matrix-authentication-service.service"];
     };
 
-    "matrix/synapse/mas.secret" = {
+    "matrix/synapse/mas-secret" = {
       owner = "matrix-synapse";
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["matrix-synapse.service"];
     };
 
-    "opencloud-collabora.env" = {
+    "opencloud/collabora/.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-compose-opencloud-root.target"];
     };
 
-    "opencloud-opencloud.env" = {
+    "opencloud/opencloud/.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-compose-opencloud-root.target"];
     };
 
-    "restic.env" = {
+    "restic/.env" = {
       sopsFile = ./secrets.sops.yaml;
     };
-    "restic-repo" = {
+    "restic/repo" = {
       sopsFile = ./secrets.sops.yaml;
     };
-    "restic-password" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
-
-    "tailscale/preauth.key" = {
+    "restic/password" = {
       sopsFile = ./secrets.sops.yaml;
     };
 
-    "vaultwarden.env" = {
+    "tailscale/preauth-key" = {
+      sopsFile = ./secrets.sops.yaml;
+    };
+
+    "vaultwarden/.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["vaultwarden.service"];
     };
+
+    "zed/discord-zfs-webhook" = {};
   };
 }

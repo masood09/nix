@@ -1,10 +1,10 @@
 {
   config.sops.secrets = {
-    "alloy.env" = {
+    "alloy/.env" = {
       restartUnits = ["alloy.service"];
     };
 
-    "tailscale/preauth.key" = {
+    "tailscale/preauth-key" = {
       sopsFile = ./secrets.sops.yaml;
     };
   };

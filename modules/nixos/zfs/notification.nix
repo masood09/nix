@@ -11,7 +11,7 @@
 
   enableZFS = (homelabCfg.isRootZFS or false) || anyManagedDatasets;
 
-  webhookFile = config.sops.secrets."discord-zfs-webhook".path;
+  webhookFile = config.sops.secrets."zed/discord-zfs-webhook".path;
 
   zedDiscord = pkgs.writeShellScript "zed-discord" ''
       set -euo pipefail

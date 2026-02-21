@@ -91,7 +91,7 @@ in {
           "auth.generic_oauth".enabled = true;
           "auth.generic_oauth".client_id = grafanaCfg.oauth.clientId;
           "auth.generic_oauth".client_secret = "$__file{${
-            config.sops.secrets."grafana-authentik-client-secret".path
+            config.sops.secrets."grafana/authentik-client-secret".path
           }}";
           "auth.generic_oauth".scopes = grafanaCfg.oauth.scopes;
           "auth.generic_oauth".auth_url = "https://${grafanaCfg.oauth.providerHost}/application/o/authorize/";

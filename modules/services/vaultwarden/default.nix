@@ -39,7 +39,7 @@ in {
           if postgresqlEnabled
           then "postgresql"
           else "sqlite";
-        environmentFile = config.sops.secrets."vaultwarden.env".path;
+        environmentFile = config.sops.secrets."vaultwarden/.env".path;
 
         config = {
           DOMAIN = "https://${vaultwardenCfg.webDomain}";

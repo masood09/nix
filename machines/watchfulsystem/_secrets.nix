@@ -1,27 +1,27 @@
 {
   config.sops.secrets = {
-    "alloy.env" = {
+    "alloy/.env" = {
       restartUnits = ["alloy.service"];
     };
 
-    "cloudflare-api-key" = {
+    "cloudflare/api-key" = {
       restartUnits = ["acme-setup.service"];
     };
 
-    "discord-zfs-webhook" = {};
-
-    "restic.env" = {
+    "restic/.env" = {
       sopsFile = ./secrets.sops.yaml;
     };
-    "restic-repo" = {
+    "restic/repo" = {
       sopsFile = ./secrets.sops.yaml;
     };
-    "restic-password" = {
+    "restic/password" = {
       sopsFile = ./secrets.sops.yaml;
     };
 
-    "tailscale/preauth.key" = {
+    "tailscale/preauth-key" = {
       sopsFile = ./secrets.sops.yaml;
     };
+
+    "zed/discord-zfs-webhook" = {};
   };
 }
