@@ -17,6 +17,7 @@
     ./loki
     ./mailarchiver
     ./matrix
+    ./mongodb
     ./opencloud
     ./podman
     ./postgresql

@@ -37,51 +37,53 @@ This file should be consulted *before* adding any new service, container, or sys
 | unbound                       | 3009 | 3009 |
 | matrix-authentication-service | 3010 | 3010 |
 | mailarchiver                  | 3011 | 3011 |
+| mongodb                       | 3012 | 3012 |
 
 
 * Port Registry
 
 ** Services
-| Service                              | Port |
-|--------------------------------------+------|
-| Blocky (DNS)                         |   53 |
-| Immich (Server)                      | 2283 |
-| Grafana                              | 3000 |
-| Uptime-Kuma                          | 3001 |
-| Immich (Machine Learning)            | 3003 |
-| Loki                                 | 3100 |
-| Garage (S3 API)                      | 3900 |
-| Garage (RPC)                         | 3901 |
-| Garage (S3 Web)                      | 3902 |
-| Garage (Admin/Metrics)               | 3903 |
-| Garage (K2 API)                      | 3904 |
-| Blocky (Metrics)                     | 4000 |
-| Unbound                              | 5335 |
-| Meilisearch                          | 7700 |
-| livekit (Matrix RTC)                 | 7880 |
-| livekit RTC (Matrix RTC)             | 7881 |
-| Matrix Synapse HTTP Listener         | 8008 |
-| Headscale                            | 8080 |
-| Vaultwarden                          | 8222 |
-| IT-Tools                             | 8901 |
-| Job Scraper                          | 8902 |
-| Baby Buddy                           | 8903 |
-| Karakeep                             | 8904 |
-| OpenCloud                            | 8905 |
-| OpenCloud Collabora                  | 8906 |
-| OpenCloud WOPI                       | 8907 |
-| OpenCloud Metrics                    | 8908 |
-| Headplane                            | 8909 |
-| Matrix Authentication Service        | 8910 |
-| Matrix Authentication Service Health | 8911 |
-| lk-jwt-service (Matrix RTC)          | 8912 |
-| MailArchiver                         | 8913 |
-| Authentik                            | 9000 |
-| Prometheus                           | 9090 |
-| Headscale (Metrics)                  | 9091 |
-| prometheus-zfs-exporter              | 9134 |
-| prometheus-postgres-exporter         | 9187 |
-| google-chrome-stable                 | 9222 |
-| Authentik (Metric)                   | 9300 |
-| Authentik (Built-in HTTPS)           | 9443 |
-| OpenCloud Collabora                  | 9980 |
+| Service                              |  Port |
+|--------------------------------------+-------|
+| Blocky (DNS)                         |    53 |
+| Immich (Server)                      |  2283 |
+| Grafana                              |  3000 |
+| Uptime-Kuma                          |  3001 |
+| Immich (Machine Learning)            |  3003 |
+| Loki                                 |  3100 |
+| Garage (S3 API)                      |  3900 |
+| Garage (RPC)                         |  3901 |
+| Garage (S3 Web)                      |  3902 |
+| Garage (Admin/Metrics)               |  3903 |
+| Garage (K2 API)                      |  3904 |
+| Blocky (Metrics)                     |  4000 |
+| Unbound                              |  5335 |
+| Meilisearch                          |  7700 |
+| livekit (Matrix RTC)                 |  7880 |
+| livekit RTC (Matrix RTC)             |  7881 |
+| Matrix Synapse HTTP Listener         |  8008 |
+| Headscale                            |  8080 |
+| Vaultwarden                          |  8222 |
+| IT-Tools                             |  8901 |
+| Job Scraper                          |  8902 |
+| Baby Buddy                           |  8903 |
+| Karakeep                             |  8904 |
+| OpenCloud                            |  8905 |
+| OpenCloud Collabora                  |  8906 |
+| OpenCloud WOPI                       |  8907 |
+| OpenCloud Metrics                    |  8908 |
+| Headplane                            |  8909 |
+| Matrix Authentication Service        |  8910 |
+| Matrix Authentication Service Health |  8911 |
+| lk-jwt-service (Matrix RTC)          |  8912 |
+| MailArchiver                         |  8913 |
+| Authentik                            |  9000 |
+| Prometheus                           |  9090 |
+| Headscale (Metrics)                  |  9091 |
+| prometheus-zfs-exporter              |  9134 |
+| prometheus-postgres-exporter         |  9187 |
+| google-chrome-stable                 |  9222 |
+| Authentik (Metric)                   |  9300 |
+| Authentik (Built-in HTTPS)           |  9443 |
+| OpenCloud Collabora                  |  9980 |
+| MongoDB                              | 27017 |
