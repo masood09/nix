@@ -149,5 +149,11 @@ in {
           vaultwardenCfg.dataDir
         ];
       };
+
+    networking.firewall = lib.mkIf vaultwardenCfg.openFirewall {
+      allowedTCPPorts = [
+        vaultwardenCfg.listenPort
+      ];
+    };
   };
 }
