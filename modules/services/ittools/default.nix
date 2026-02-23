@@ -16,7 +16,7 @@ in {
   config = lib.mkIf (ittoolsCfg.enable && podmanEnabled) {
     virtualisation.oci-containers.containers.ittools = {
       # renovate: datasource=docker depName=ghcr.io/willjayyyy/next-tools
-      image = "ghcr.io/willjayyyy/next-tools:1.9.5";
+      image = "ghcr.io/willjayyyy/next-tools:1.9.6";
       autoStart = true;
 
       ports = [
