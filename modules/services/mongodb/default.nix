@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   homelabCfg = config.homelab;
@@ -31,20 +32,53 @@ in {
     };
 
     # Service hardening + mount ordering
-    systemd.services = {
-      mongodb = lib.mkMerge [
-        {
-          # Unit-level ordering / mount requirements
-          unitConfig = {
-            RequiresMountsFor = [cfg.dataDir];
-          };
-        }
+    systemd = {
+      services = {
+        mongodb = lib.mkMerge [
+          {
+            # Unit-level ordering / mount requirements
+            unitConfig = {
+              RequiresMountsFor = [cfg.dataDir];
+            };
 
-        (lib.mkIf cfg.zfs.enable {
-          requires = ["zfs-dataset-mongodb.service"];
-          after = ["zfs-dataset-mongodb.service"];
-        })
+            requires = ["mongodb-permissions.service"];
+            after = ["mongodb-permissions.service"];
+          }
+
+          (lib.mkIf cfg.zfs.enable {
+            requires = ["zfs-dataset-mongodb.service"];
+            after = ["zfs-dataset-mongodb.service"];
+          })
+        ];
+
+        mongodb-permissions = {
+          description = "Fix MongoDB dataDir ownership/permissions";
+          wantedBy = ["multi-user.target"];
+          before = [
+            "mongodb.service"
+          ];
+          after =
+            ["local-fs.target"]
+            ++ lib.optionals cfg.zfs.enable ["zfs-dataset-mongodb.service"];
+          requires =
+            lib.optionals cfg.zfs.enable ["zfs-dataset-mongodb.service"];
+
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = ''
+              ${pkgs.coreutils}/bin/chown mongodb:mongodb ${cfg.dataDir}
+            '';
+          };
+        };
+      };
+
+      tmpfiles.rules = [
+        # Ensure base dir exists and is owned correctly
+        "d ${cfg.dataDir} 0700 mongodb mongodb -"
+        "z ${cfg.dataDir} 0700 mongodb mongodb -"
       ];
+
     };
 
     users = {
