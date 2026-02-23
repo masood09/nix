@@ -36,6 +36,11 @@
       type = lib.types.ints.u16;
     };
 
+    openFirewall = lib.mkOption {
+      default = false;
+      type = lib.types.bool;
+    };
+
     zfs = {
       enable = lib.mkEnableOption "Store Vaultwarden dataDir on a ZFS dataset.";
 
