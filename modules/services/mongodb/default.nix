@@ -19,6 +19,10 @@ in {
       enable = true;
       mountpoint = cfg.dataDir;
       requiredBy = ["mongodb.service"];
+
+      restic = {
+        enable = true;
+      };
     };
 
     services = {
