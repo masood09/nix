@@ -1,5 +1,4 @@
 {
-  inputs,
   homelabCfg,
   lib,
   pkgs,
@@ -21,21 +20,14 @@ in {
       gopls
       gore
       gotests
-      isort
       jsbeautifier
       multimarkdown
       nil
       nixfmt-rfc-style
       nodejs
-      pipenv
       shellcheck
       stylelint
-      texliveFull
       terraform
-      terraform-ls
-      vscode-json-languageserver
-      yaml-language-server
-      yq-go
     ]);
   };
 
