@@ -69,6 +69,16 @@ in {
               reverse_proxy http://100.64.0.21:${toString matrixCfg.synapse.mas.http.web.port}
             '';
           };
+
+          "passwords.${config.networking.domain}" = {
+            useACMEHost = config.networking.domain;
+            extraConfig = ''
+              @admin path /admin /admin/*
+              respond @admin 403
+
+              reverse_proxy http://100.64.0.21:8222
+            '';
+          };
         };
       };
     };
