@@ -80,6 +80,7 @@
 
       karakeep = {
         enable = true;
+        openFirewall = true;
 
         zfs.enable = true;
       };
