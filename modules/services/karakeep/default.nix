@@ -183,5 +183,11 @@ in {
           cfg.dataDir
         ];
       };
+
+    networking.firewall = lib.mkIf cfg.openFirewall {
+      allowedTCPPorts = [
+        cfg.listenPort
+      ];
+    };
   };
 }
