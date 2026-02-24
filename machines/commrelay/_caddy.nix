@@ -70,6 +70,13 @@ in {
             '';
           };
 
+          "keep.${config.networking.domain}" = {
+            useACMEHost = config.networking.domain;
+            extraConfig = ''
+              reverse_proxy http://100.64.0.21:8904
+            '';
+          };
+
           "passwords.${config.networking.domain}" = {
             useACMEHost = config.networking.domain;
             extraConfig = ''
