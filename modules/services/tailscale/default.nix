@@ -29,6 +29,7 @@ in {
 
         extraUpFlags = [
           "--login-server=${cfg.loginServer}"
+          "--accept-routes"
         ];
       };
     };
