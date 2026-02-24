@@ -23,7 +23,6 @@
       sopsFile = ./secrets.sops.yaml;
     };
 
-
     "fpool_fast_key" = {
       sopsFile = ./secrets.sops.yaml;
     };
