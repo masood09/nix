@@ -41,6 +41,18 @@
       type = lib.types.bool;
     };
 
+    oauth = {
+      providerHost = lib.mkOption {
+        type = lib.types.str;
+        default = "auth.${config.networking.domain}";
+      };
+
+      clientId = lib.mkOption {
+        type = lib.types.str;
+        default = "vaultwarden";
+      };
+    };
+
     zfs = {
       enable = lib.mkEnableOption "Store Vaultwarden dataDir on a ZFS dataset.";
 
