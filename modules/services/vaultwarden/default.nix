@@ -45,6 +45,14 @@ in {
           DOMAIN = "https://${vaultwardenCfg.webDomain}";
           ROCKET_ADDRESS = vaultwardenCfg.listenAddress;
           ROCKET_PORT = vaultwardenCfg.listenPort;
+          SSO_ENABLED = "true";
+          SSO_AUTHORITY = "https://${vaultwardenCfg.oauth.providerHost}/application/o/vaultwarden/";
+          SSO_CLIENT_ID = vaultwardenCfg.oauth.clientId;
+          SSO_SCOPES = "email profile offline_access";
+          SSO_ALLOW_UNKNOWN_EMAIL_VERIFICATION = "false";
+          SSO_CLIENT_CACHE_EXPIRATION = 0;
+          SSO_ONLY = "true";
+          SSO_SIGNUPS_MATCH_EMAIL = "true";
         };
       };
 
@@ -149,5 +157,11 @@ in {
           vaultwardenCfg.dataDir
         ];
       };
+
+    networking.firewall = lib.mkIf vaultwardenCfg.openFirewall {
+      allowedTCPPorts = [
+        vaultwardenCfg.listenPort
+      ];
+    };
   };
 }
