@@ -31,6 +31,11 @@
       type = lib.types.ints.u16;
     };
 
+    openFirewall = lib.mkOption {
+      default = false;
+      type = lib.types.bool;
+    };
+
     oauth = {
       providerHost = lib.mkOption {
         type = lib.types.str;
