@@ -5,5 +5,9 @@
       "pinentry-mac"
       "ykman" # Command line Yubikey configuration utility
     ];
+
+    casks = lib.mkAfter [
+      "gcloud-cli"
+    ];
   };
 }
