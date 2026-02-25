@@ -13,6 +13,7 @@ in {
       "d12frosted/homebrew-emacs-plus" = inputs.homebrew-emacs-plus;
       "FelixKratz/homebrew-formulae" = inputs.homebrew-felixkratz-tap;
       "nikitabobko/homebrew-tap" = inputs.homebrew-nikitabobko-tap;
+      "hashicorp/homebrew-tap" = inputs.homebrew-hashicorp-tap;
       "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
       "homebrew/homebrew-core" = inputs.homebrew-core;
