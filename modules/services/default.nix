@@ -18,6 +18,7 @@
     ./mailarchiver
     ./matrix
     ./mongodb
+    ./nightscout
     ./opencloud
     ./podman
     ./postgresql

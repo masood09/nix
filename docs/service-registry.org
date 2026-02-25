@@ -38,6 +38,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | matrix-authentication-service | 3010 | 3010 |
 | mailarchiver                  | 3011 | 3011 |
 | mongodb                       | 3012 | 3012 |
+| nightscout                    | 3013 | 3013 |
 
 
 * Port Registry
@@ -77,6 +78,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | Matrix Authentication Service Health |  8911 |
 | lk-jwt-service (Matrix RTC)          |  8912 |
 | MailArchiver                         |  8913 |
+| Nightscout                           |  8914 |
 | Authentik                            |  9000 |
 | Prometheus                           |  9090 |
 | Headscale (Metrics)                  |  9091 |
