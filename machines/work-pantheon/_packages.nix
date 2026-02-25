@@ -7,6 +7,11 @@
       "hashicorp/tap/vault"
     ];
 
+    taps = lib.mkAfter [
+      "hashicorp/tap"
+      "joemiller/taps"
+    ];
+
     casks = lib.mkAfter [
       "gcloud-cli"
     ];
