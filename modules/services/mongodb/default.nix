@@ -82,7 +82,6 @@ in {
         "d ${cfg.dataDir} 0700 mongodb mongodb -"
         "z ${cfg.dataDir} 0700 mongodb mongodb -"
       ];
-
     };
 
     users = {
