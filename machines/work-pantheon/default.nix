@@ -42,6 +42,15 @@
       git = {
         userEmail = "masoodahmed@pantheon.io";
         enable = true;
+
+        signing = {
+          method = "gpg";
+          gpgKey = "27F12F49A6098D65";
+        };
+      };
+
+      gpg = {
+        enable = true;
       };
 
       neovim.enable = true;
