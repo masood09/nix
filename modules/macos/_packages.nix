@@ -1,23 +1,10 @@
-{
-  config,
-  inputs,
-  ...
-}: let
+{config, ...}: let
   homelabCfg = config.homelab;
 in {
   nix-homebrew = {
     enable = true;
     user = homelabCfg.primaryUser.userName;
-    mutableTaps = false;
-    taps = {
-      "d12frosted/homebrew-emacs-plus" = inputs.homebrew-emacs-plus;
-      "FelixKratz/homebrew-formulae" = inputs.homebrew-felixkratz-tap;
-      "nikitabobko/homebrew-tap" = inputs.homebrew-nikitabobko-tap;
-      "hashicorp/homebrew-tap" = inputs.homebrew-hashicorp-tap;
-      "homebrew/homebrew-bundle" = inputs.homebrew-bundle;
-      "homebrew/homebrew-cask" = inputs.homebrew-cask;
-      "homebrew/homebrew-core" = inputs.homebrew-core;
-    };
+    mutableTaps = true;
   };
 
   homebrew = {
@@ -35,7 +22,11 @@ in {
       "d12frosted/emacs-plus/emacs-plus"
       "sketchybar"
     ];
-    taps = builtins.attrNames config.nix-homebrew.taps;
+    taps = [
+      "d12frosted/emacs-plus"
+      "FelixKratz/formulae"
+      "nikitabobko/tap"
+    ];
     casks = [
       "nikitabobko/tap/aerospace"
       "alfred"

@@ -27,43 +27,6 @@
       url = "github:zhaofengli-wip/nix-homebrew";
     };
 
-    homebrew-felixkratz-tap = {
-      url = "github:FelixKratz/homebrew-formulae";
-      flake = false;
-    };
-
-    homebrew-nikitabobko-tap = {
-      # For Aerospace.
-      url = "github:nikitabobko/homebrew-tap";
-      flake = false;
-    };
-
-    homebrew-hashicorp-tap = {
-      # For Hashicorp Vault.
-      url = "github:hashicorp/homebrew-tap";
-      flake = false;
-    };
-
-    homebrew-emacs-plus = {
-      url = "github:d12frosted/homebrew-emacs-plus";
-      flake = false;
-    };
-
-    homebrew-bundle = {
-      url = "github:homebrew/homebrew-bundle";
-      flake = false;
-    };
-
-    homebrew-core = {
-      url = "github:homebrew/homebrew-core";
-      flake = false;
-    };
-
-    homebrew-cask = {
-      url = "github:homebrew/homebrew-cask";
-      flake = false;
-    };
-
     catppuccin.url = "github:catppuccin/nix/release-25.11";
 
     authentik-nix = {
