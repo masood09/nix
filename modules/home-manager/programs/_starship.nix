@@ -38,6 +38,7 @@ in {
           "$haskell"
           "$python"
           "$terraform"
+          "$gcloud"
           "[](fg:green bg:sapphire)"
           "$conda"
           "[](fg:sapphire bg:lavender)"
@@ -95,6 +96,11 @@ in {
           format = "[ $path ]($style)";
           truncation_length = 3;
           truncation_symbol = "…/";
+        };
+
+        gcloud = {
+          format = "[[ ☁️ $project ](fg:crust bg:green)]($style)";
+          style = "bg:green";
         };
 
         git_branch = {
