@@ -58,7 +58,7 @@
           "mailarchiver.service"
           "matrix-authentication-service.service"
           "matrix-synapse.service"
-          "mongodb.service"
+          "nightscout.service"
           "podman-babybuddy.service"
           "podman-compose-opencloud-root.target"
           "uptime-kuma.service"
