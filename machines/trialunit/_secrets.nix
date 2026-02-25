@@ -134,6 +134,11 @@
       sopsFile = ./secrets.sops.yaml;
     };
 
+    "nightscout/.env" = {
+      owner = "nightscout";
+      sopsFile = ./secrets.sops.yaml;
+    };
+
     "opencloud/collabora/.env" = {
       sopsFile = ./secrets.sops.yaml;
       restartUnits = ["podman-compose-opencloud-root.target"];

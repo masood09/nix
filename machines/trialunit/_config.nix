@@ -195,6 +195,10 @@
         };
       };
 
+      nightscout = {
+        enable = true;
+      };
+
       opencloud = {
         enable = true;
 
