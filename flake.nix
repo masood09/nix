@@ -38,6 +38,12 @@
       flake = false;
     };
 
+    homebrew-hashicorp-tap = {
+      # For Hashicorp Vault.
+      url = "github:hashicorp/homebrew-tap";
+      flake = false;
+    };
+
     homebrew-emacs-plus = {
       url = "github:d12frosted/homebrew-emacs-plus";
       flake = false;

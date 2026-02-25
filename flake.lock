@@ -353,6 +353,22 @@
         "type": "github"
       }
     },
+    "homebrew-hashicorp-tap": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1772031790,
+        "narHash": "sha256-d4rA4rjOQw4KQ6+JR1z99qKP0FDtZQnzPLx9/ey8quk=",
+        "owner": "hashicorp",
+        "repo": "homebrew-tap",
+        "rev": "c0f4b5987ce90845b783df11c3836a9ed1a891c1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hashicorp",
+        "repo": "homebrew-tap",
+        "type": "github"
+      }
+    },
     "homebrew-nikitabobko-tap": {
       "flake": false,
       "locked": {
@@ -626,6 +642,7 @@
         "homebrew-core": "homebrew-core",
         "homebrew-emacs-plus": "homebrew-emacs-plus",
         "homebrew-felixkratz-tap": "homebrew-felixkratz-tap",
+        "homebrew-hashicorp-tap": "homebrew-hashicorp-tap",
         "homebrew-nikitabobko-tap": "homebrew-nikitabobko-tap",
         "impermanence": "impermanence",
         "nix-darwin": "nix-darwin",
