@@ -1,4 +1,13 @@
-{lib, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: {
+  environment.systemPackages = with pkgs; [
+    kubectx
+    k9s
+  ];
+
   homebrew = {
     onActivation = {
       cleanup = lib.mkForce "none";
