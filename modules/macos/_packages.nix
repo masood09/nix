@@ -19,7 +19,6 @@ in {
     };
     brews = [
       "borders"
-      "d12frosted/emacs-plus/emacs-plus"
       "sketchybar"
     ];
     taps = [
@@ -31,6 +30,7 @@ in {
       "nikitabobko/tap/aerospace"
       "alfred"
       "appcleaner"
+      "emacs-plus-app"
       "ghostty"
       "karabiner-elements"
       "shortcat"
