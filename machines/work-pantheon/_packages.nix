@@ -1,5 +1,9 @@
 {lib, ...}: {
   homebrew = {
+    onActivation = {
+      cleanup = lib.mkForce "none";
+    };
+
     brews = lib.mkAfter [
       "hopenpgp-tools" # Key validity checker and linter
       "pinentry-mac"
