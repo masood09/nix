@@ -112,6 +112,30 @@
           default = "masood09";
           type = lib.types.str;
         };
+
+        signing = {
+          method = lib.mkOption {
+            type = lib.types.enum ["ssh" "gpg"];
+            default = "ssh";
+            description = "Git commit signing method. 'ssh' (default) or 'gpg' (OpenPGP).";
+          };
+
+          gpgKey = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "GPG key id or fingerprint to use when signing.method = 'gpg'.";
+          };
+
+          sshKeyFile = lib.mkOption {
+            type = lib.types.nullOr lib.types.path;
+            default = null;
+            description = "SSH public key file to use when signing.method = 'ssh'. Defaults to ~/.ssh/id_ed25519.pub if null.";
+          };
+        };
+      };
+
+      gpg = {
+        enable = lib.mkEnableOption "Whether to enable GPG.";
       };
 
       motd = {

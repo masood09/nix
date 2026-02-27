@@ -31,6 +31,13 @@
 
         [[ -o interactive ]] || return
       '';
+
+      profileExtra = ''
+        # Optional local overrides (not managed by nix)
+        if [ -f "$HOME/.local.zprofile" ]; then
+          source "$HOME/.local.zprofile"
+        fi
+      '';
     };
   };
 }
