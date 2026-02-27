@@ -5,11 +5,7 @@
 }: let
   homelabCfg = config.homelab;
 in {
-  environment.systemPackages = with pkgs; [
-    coreutils
-    coreutils-prefixed
-    fontconfig
-  ];
+  environment.systemPackages = with pkgs; [];
 
   nix-homebrew = {
     enable = true;
