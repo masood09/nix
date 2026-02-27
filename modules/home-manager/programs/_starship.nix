@@ -38,6 +38,8 @@ in {
           "$haskell"
           "$python"
           "$terraform"
+          "$kubernetes"
+          "$gcloud"
           "[](fg:green bg:sapphire)"
           "$conda"
           "[](fg:sapphire bg:lavender)"
@@ -97,6 +99,12 @@ in {
           truncation_symbol = "…/";
         };
 
+        gcloud = {
+          symbol = " ";
+          format = "[[ $symbol$project ](fg:crust bg:green)]($style)";
+          style = "bg:green";
+        };
+
         git_branch = {
           symbol = "";
           style = "bg:yellow";
@@ -106,6 +114,13 @@ in {
         git_status = {
           style = "bg:yellow";
           format = "[[($all_status$ahead_behind )](fg:crust bg:yellow)]($style)";
+        };
+
+        kubernetes = {
+          disabled = false;
+          symbol = "󱃾 ";
+          style = "fg:crust bg:green";
+          format = "[ $symbol$context( \\($namespace\\)) ]($style)";
         };
 
         nodejs = {

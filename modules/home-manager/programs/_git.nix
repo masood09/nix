@@ -13,6 +13,9 @@
   signersFile = pkgs.writeText "git-allowed-signers" ''
     ${email} namespaces="git" ${key}
   '';
+
+  usingGpg = gitCfg.signing.method == "gpg";
+  inherit (gitCfg.signing) gpgKey;
 in {
   config = lib.mkIf gitCfg.enable {
     xdg.configFile."git/allowed_signers".source = signersFile;
@@ -25,6 +28,7 @@ in {
         user = {
           inherit email;
           name = gitCfg.userName;
+          signingkey = lib.mkIf (usingGpg && gpgKey != null) gpgKey;
         };
 
         delta = {
@@ -36,10 +40,16 @@ in {
           colorMoved = "default";
         };
 
-        gpg = {
-          format = "ssh";
-          ssh.allowedSignersFile = toString signersFile;
-        };
+        gpg =
+          if usingGpg
+          then {
+            format = "openpgp";
+            program = "${pkgs.gnupg}/bin/gpg";
+          }
+          else {
+            format = "ssh";
+            ssh.allowedSignersFile = toString signersFile;
+          };
 
         init = {
           defaultBranch = "main";
