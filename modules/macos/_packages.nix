@@ -1,6 +1,16 @@
-{config, ...}: let
+{
+  config,
+  pkgs,
+  ...
+}: let
   homelabCfg = config.homelab;
 in {
+  environment.systemPackages = with pkgs; [
+    coreutils
+    coreutils-prefixed
+    fontconfig
+  ];
+
   nix-homebrew = {
     enable = true;
     user = homelabCfg.primaryUser.userName;
