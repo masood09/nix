@@ -21,7 +21,17 @@ in {
         environmentFile = config.sops.secrets."nightscout/.env".path;
 
         environment = {
-          ENABLE = "careportal basal dbsize rawbg iob maker cob bwp cage iage sage boluscalc pushover treatmentnotify loop pump profile food openaps bage alexa override speech cors";
+          ENABLE = "loop pump iob cob basal careportal sage cage bage override dbsize";
+          DEVICESTATUS_ADVANCED = "true";
+          PUMP_FIELDS = "battery reservoir clock status";
+          PUMP_RETRO_FIELDS = "battery reservoir clock status";
+          SHOW_FORECAST = "loop";
+          SHOW_PLUGINS = "loop pump cob iob sage cage careportal basal override dbsize";
+          LOOP_ENABLE_ALERTS = "true";
+          LOOP_WARN = "20";
+          LOOP_URGENT = "60";
+          BASAL_RENDER = "default";
+
           BASE_URL = "https://${cfg.webDomain}";
           TIME_FORMAT = "24h";
           THEME = "colors";
