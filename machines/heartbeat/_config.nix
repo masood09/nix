@@ -40,6 +40,7 @@
           "mailarchiver.service"
           "matrix-authentication-service.service"
           "matrix-synapse.service"
+          "nightscout.service"
           "podman-babybuddy.service"
           "podman-compose-opencloud-root.target"
           "vaultwarden.service"
@@ -136,6 +137,20 @@
             };
           };
         };
+      };
+
+      mongodb = {
+        enable = true;
+
+        zfs = {
+          enable = true;
+        };
+      };
+
+      nightscout = {
+        enable = true;
+        listenAddress = "0.0.0.0";
+        openFirewall = true;
       };
 
       opencloud = {
