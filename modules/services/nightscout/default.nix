@@ -69,5 +69,11 @@ in {
         gid = cfg.groupId;
       };
     };
+
+    networking.firewall = lib.mkIf cfg.openFirewall {
+      allowedTCPPorts = [
+        cfg.port
+      ];
+    };
   };
 }

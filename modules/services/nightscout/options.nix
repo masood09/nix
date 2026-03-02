@@ -22,6 +22,11 @@
         type = lib.types.port;
       };
 
+      openFirewall = lib.mkOption {
+        default = false;
+        type = lib.types.bool;
+      };
+
       userId = lib.mkOption {
         default = 3013;
         type = lib.types.ints.u16;
