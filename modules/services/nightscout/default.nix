@@ -21,21 +21,30 @@ in {
         environmentFile = config.sops.secrets."nightscout/.env".path;
 
         environment = {
-          ENABLE = "loop pump iob cob basal careportal sage cage bage override dbsize";
+          ENABLE = "loop pump iob basal careportal sage cage bage override";
           DEVICESTATUS_ADVANCED = "true";
           PUMP_FIELDS = "battery reservoir clock status";
           PUMP_RETRO_FIELDS = "battery reservoir clock status";
           SHOW_FORECAST = "loop";
-          SHOW_PLUGINS = "loop pump cob iob sage cage careportal basal override dbsize";
-          LOOP_ENABLE_ALERTS = "true";
+          SHOW_PLUGINS = "loop pump iob sage cage careportal basal override";
+          LOOP_ENABLE_ALERTS = "false";
           LOOP_WARN = "20";
           LOOP_URGENT = "60";
           BASAL_RENDER = "default";
+
+          ALARM_URGENT_HIGH = "off";
+          ALARM_HIGH = "off";
+          ALARM_LOW = "off";
+          ALARM_URGENT_LOW = "off";
+          ALARM_TIMEAGO_WARN = "off";
+          ALARM_TIMEAGO_URGENT = "off";
 
           BASE_URL = "https://${cfg.webDomain}";
           TIME_FORMAT = "24h";
           THEME = "colors";
           HOSTNAME = cfg.listenAddress;
+
+          CUSTOM_TITLE = "Masood Ahmed";
         };
       };
 
