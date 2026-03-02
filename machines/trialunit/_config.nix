@@ -58,6 +58,7 @@
           "mailarchiver.service"
           "matrix-authentication-service.service"
           "matrix-synapse.service"
+          "nightscout.service"
           "podman-babybuddy.service"
           "podman-compose-opencloud-root.target"
           "uptime-kuma.service"
@@ -183,6 +184,19 @@
         rtc = {
           enable = true;
         };
+      };
+
+      mongodb = {
+        enable = true;
+
+        zfs = {
+          enable = true;
+          dataset = "dpool/tank/services/mongodb";
+        };
+      };
+
+      nightscout = {
+        enable = true;
       };
 
       opencloud = {
