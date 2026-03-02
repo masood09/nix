@@ -39,7 +39,6 @@ in {
           "$python"
           "$terraform"
           "$kubernetes"
-          "$gcloud"
           "[](fg:green bg:sapphire)"
           "$conda"
           "[](fg:sapphire bg:lavender)"
@@ -120,7 +119,7 @@ in {
           disabled = false;
           symbol = "󱃾 ";
           style = "fg:crust bg:green";
-          format = "[ $symbol$context( \\($namespace\\)) ]($style)";
+          format = "[ $symbol$context ]($style)";
         };
 
         nodejs = {
