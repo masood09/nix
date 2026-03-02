@@ -150,6 +150,7 @@
       nightscout = {
         enable = true;
         listenAddress = "0.0.0.0";
+        openFirewall = true;
       };
 
       opencloud = {
