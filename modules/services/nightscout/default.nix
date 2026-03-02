@@ -21,12 +21,12 @@ in {
         environmentFile = config.sops.secrets."nightscout/.env".path;
 
         environment = {
-          ENABLE = "loop pump iob basal careportal sage cage bage override";
+          ENABLE = "loop pump iob basal sage cage bage override";
           DEVICESTATUS_ADVANCED = "true";
           PUMP_FIELDS = "battery reservoir clock status";
           PUMP_RETRO_FIELDS = "battery reservoir clock status";
           SHOW_FORECAST = "loop";
-          SHOW_PLUGINS = "loop pump iob sage cage careportal basal override";
+          SHOW_PLUGINS = "loop pump iob sage cage basal override";
           LOOP_ENABLE_ALERTS = "false";
           LOOP_WARN = "20";
           LOOP_URGENT = "60";
