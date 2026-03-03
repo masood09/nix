@@ -26,6 +26,7 @@ in {
     brews = [
       "borders"
       "sketchybar"
+      "kanata"
     ];
     taps = [
       "d12frosted/emacs-plus"
