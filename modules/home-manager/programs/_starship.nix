@@ -19,13 +19,10 @@ in {
         format = lib.concatStrings [
           "[](red)"
           "$os"
-          "$username"
           "$hostname"
           "[](bg:peach fg:red)"
           "$directory"
           "[](bg:yellow fg:peach)"
-          "$git_branch"
-          "$git_status"
           "[](fg:yellow bg:green)"
           "$c"
           "$rust"
