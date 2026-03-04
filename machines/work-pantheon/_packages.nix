@@ -6,6 +6,7 @@
   environment.systemPackages = with pkgs; [
     kubectx
     k9s
+    shellcheck
   ];
 
   homebrew = {
