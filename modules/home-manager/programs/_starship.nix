@@ -38,7 +38,6 @@ in {
           "$haskell"
           "$python"
           "$terraform"
-          "$kubernetes"
           "[](fg:green bg:sapphire)"
           "$conda"
           "[](fg:sapphire bg:lavender)"
