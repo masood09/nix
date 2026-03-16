@@ -32,7 +32,7 @@
       };
 
       claude-code = {
-        enable = lib.mkEnableOption "Enable Claude Code";
+        enable = lib.mkEnableOption "Whether to enable Claude Code.";
       };
 
       direnv = {
