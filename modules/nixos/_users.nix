@@ -48,10 +48,16 @@ in {
           isNormalUser = true;
           description = homelabCfg.primaryUser.userName;
 
-          extraGroups = [
-            "networkmanager"
-            "wheel"
-          ];
+          extraGroups =
+            [
+              "networkmanager"
+              "wheel"
+            ]
+            ++ lib.optionals (homelabCfg.role == "desktop") [
+              "audio"
+              "input"
+              "video"
+            ];
 
           openssh.authorizedKeys.keys = [
             homelabCfg.primaryUser.sshPublicKey
