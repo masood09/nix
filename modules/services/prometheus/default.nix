@@ -9,6 +9,19 @@
   caddyEnabled = config.services.caddy.enable;
 
   prometheusDataDir = "/var/lib/${config.services.prometheus.stateDir}";
+
+  systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
+  permSvc = systemdHelpers.mkPermissionService {
+    name = "prometheus";
+    dataDir = prometheusDataDir;
+    user = "prometheus";
+    group = "prometheus";
+    mainServices = ["prometheus"];
+    zfs = {
+      inherit (cfg.zfs) enable;
+      datasetServiceName = "zfs-dataset-prometheus";
+    };
+  };
 in {
   imports = [
     ./options.nix
@@ -75,52 +88,7 @@ in {
       };
     };
 
-    # Service hardening + mount ordering
-    systemd = {
-      services = {
-        prometheus = lib.mkMerge [
-          {
-            # Unit-level ordering / mount requirements
-            unitConfig = {
-              RequiresMountsFor = [prometheusDataDir];
-            };
-
-            requires = ["prometheus-permissions.service"];
-            after = ["prometheus-permissions.service"];
-          }
-
-          (lib.mkIf cfg.zfs.enable {
-            requires = ["zfs-dataset-prometheus.service"];
-            after = ["zfs-dataset-prometheus.service"];
-          })
-        ];
-
-        prometheus-permissions = {
-          description = "Fix Prometheus dataDir ownership/permissions";
-          wantedBy = ["multi-user.target"];
-          before = ["prometheus.service"];
-          after =
-            ["local-fs.target"]
-            ++ lib.optionals cfg.zfs.enable ["zfs-dataset-prometheus.service"];
-          requires =
-            lib.optionals cfg.zfs.enable ["zfs-dataset-prometheus.service"];
-
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = ''
-              ${pkgs.coreutils}/bin/chown prometheus:prometheus ${prometheusDataDir}
-            '';
-          };
-        };
-      };
-
-      tmpfiles.rules = [
-        # Ensure base dir exists and is owned correctly
-        "d ${prometheusDataDir} 0700 prometheus prometheus -"
-        "z ${prometheusDataDir} 0700 prometheus prometheus -"
-      ];
-    };
+    inherit (permSvc) systemd;
 
     environment =
       lib.mkIf (

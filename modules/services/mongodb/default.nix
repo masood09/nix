@@ -6,6 +6,19 @@
 }: let
   homelabCfg = config.homelab;
   cfg = homelabCfg.services.mongodb;
+
+  systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
+  permSvc = systemdHelpers.mkPermissionService {
+    name = "mongodb";
+    inherit (cfg) dataDir;
+    user = "mongodb";
+    group = "mongodb";
+    mainServices = ["mongodb"];
+    zfs = {
+      inherit (cfg.zfs) enable;
+      datasetServiceName = "zfs-dataset-mongodb";
+    };
+  };
 in {
   imports = [
     ./options.nix
@@ -35,54 +48,7 @@ in {
       };
     };
 
-    # Service hardening + mount ordering
-    systemd = {
-      services = {
-        mongodb = lib.mkMerge [
-          {
-            # Unit-level ordering / mount requirements
-            unitConfig = {
-              RequiresMountsFor = [cfg.dataDir];
-            };
-
-            requires = ["mongodb-permissions.service"];
-            after = ["mongodb-permissions.service"];
-          }
-
-          (lib.mkIf cfg.zfs.enable {
-            requires = ["zfs-dataset-mongodb.service"];
-            after = ["zfs-dataset-mongodb.service"];
-          })
-        ];
-
-        mongodb-permissions = {
-          description = "Fix MongoDB dataDir ownership/permissions";
-          wantedBy = ["multi-user.target"];
-          before = [
-            "mongodb.service"
-          ];
-          after =
-            ["local-fs.target"]
-            ++ lib.optionals cfg.zfs.enable ["zfs-dataset-mongodb.service"];
-          requires =
-            lib.optionals cfg.zfs.enable ["zfs-dataset-mongodb.service"];
-
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = ''
-              ${pkgs.coreutils}/bin/chown mongodb:mongodb ${cfg.dataDir}
-            '';
-          };
-        };
-      };
-
-      tmpfiles.rules = [
-        # Ensure base dir exists and is owned correctly
-        "d ${cfg.dataDir} 0700 mongodb mongodb -"
-        "z ${cfg.dataDir} 0700 mongodb mongodb -"
-      ];
-    };
+    inherit (permSvc) systemd;
 
     users = {
       users = {
