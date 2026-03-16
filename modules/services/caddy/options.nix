@@ -12,7 +12,7 @@
       };
 
       zfs = {
-        enable = lib.mkEnableOption "Store /var/lib/acme on a ZFS dataset.";
+        enable = lib.mkEnableOption "Whether to store /var/lib/acme on a ZFS dataset.";
 
         dataset = lib.mkOption {
           type = lib.types.str;
