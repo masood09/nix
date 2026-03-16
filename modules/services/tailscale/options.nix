@@ -1,6 +1,6 @@
 {lib, ...}: {
   options.homelab.services.tailscale = {
-    enable = lib.mkEnableOption "Enable Tailscale.";
+    enable = lib.mkEnableOption "Whether to enable Tailscale.";
 
     loginServer = lib.mkOption {
       type = lib.types.str;
