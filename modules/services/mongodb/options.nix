@@ -5,16 +5,19 @@
     dataDir = lib.mkOption {
       type = lib.types.path;
       default = "/var/lib/mongodb";
+      description = "Directory for MongoDB data storage.";
     };
 
     userId = lib.mkOption {
       default = 3012;
       type = lib.types.ints.u16;
+      description = "UID for the MongoDB service user.";
     };
 
     groupId = lib.mkOption {
       default = 3012;
       type = lib.types.ints.u16;
+      description = "GID for the MongoDB service group.";
     };
 
     zfs = {
