@@ -36,6 +36,12 @@
         default = 3013;
         type = lib.types.ints.u16;
       };
+
+      customTitle = lib.mkOption {
+        type = lib.types.str;
+        default = "Masood Ahmed";
+        description = "Custom title displayed in the Nightscout web UI.";
+      };
     };
   };
 }
