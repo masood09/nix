@@ -115,6 +115,7 @@
         githubUsername = lib.mkOption {
           default = "masood09";
           type = lib.types.str;
+          description = "GitHub username used for git configuration.";
         };
 
         signing = {
@@ -148,11 +149,13 @@
         networkInterfaces = lib.mkOption {
           type = lib.types.listOf lib.types.str;
           default = [];
+          description = "Network interfaces to display IP addresses for in the MOTD.";
         };
 
         zshInitOrder = lib.mkOption {
           type = lib.types.int;
           default = 650;
+          description = "Order value for the MOTD in zsh initialization (lower runs earlier).";
         };
       };
 
