@@ -25,7 +25,7 @@
     };
 
     oidc = {
-      enable = lib.mkEnableOption "Enable OIDC";
+      enable = lib.mkEnableOption "Whether to enable OIDC.";
 
       issuer = lib.mkOption {
         type = lib.types.str;
