@@ -44,7 +44,7 @@ in {
           THEME = "colors";
           HOSTNAME = cfg.listenAddress;
 
-          CUSTOM_TITLE = "Masood Ahmed";
+          CUSTOM_TITLE = cfg.customTitle;
         };
       };
 
