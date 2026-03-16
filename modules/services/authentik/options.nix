@@ -9,6 +9,7 @@
     webDomain = lib.mkOption {
       type = lib.types.str;
       default = "auth.${config.networking.domain}";
+      description = "Domain name for the Authentik web interface.";
     };
 
     metricsPort = lib.mkOption {
