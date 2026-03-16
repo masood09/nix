@@ -9,6 +9,20 @@
   caddyEnabled = config.services.caddy.enable;
   postgresqlEnabled = config.services.postgresql.enable;
   postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
+
+  systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
+  permSvc = systemdHelpers.mkPermissionService {
+    name = "mailarchiver";
+    dataDir = cfg.dataDir;
+    user = "mailarchiver";
+    group = "mailarchiver";
+    mode = "0750";
+    mainServices = ["mailarchiver"];
+    zfs = {
+      enable = cfg.zfs.enable;
+      datasetServiceName = "zfs-dataset-mailarchiver";
+    };
+  };
 in {
   imports = [
     ./options.nix
@@ -86,64 +100,12 @@ in {
       };
     };
 
-    # Service hardening + mount ordering
-    systemd = {
-      services = {
-        mailarchiver-permissions = {
-          description = "Fix MailArchiver dataDir ownership/permissions";
-          wantedBy = ["mailarchiver.service"];
-          before = ["mailarchiver.service"];
+    inherit (permSvc) systemd;
 
-          after =
-            ["systemd-tmpfiles-setup.service" "local-fs.target"]
-            ++ lib.optionals cfg.zfs.enable [
-              "zfs-dataset-mailarchiver.service"
-            ];
-          requires = lib.optionals cfg.zfs.enable [
-            "zfs-dataset-mailarchiver.service"
-          ];
-
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = ''
-              ${pkgs.coreutils}/bin/chown mailarchiver:mailarchiver \
-                ${toString cfg.dataDir}
-            '';
-          };
-        };
-
-        "mailarchiver" = lib.mkMerge [
-          {
-            # Unit-level ordering / mount requirements
-            unitConfig = {
-              RequiresMountsFor = [cfg.dataDir];
-            };
-          }
-
-          (lib.mkIf cfg.zfs.enable {
-            requires =
-              [
-                "zfs-dataset-mailarchiver.service"
-              ]
-              ++ lib.optionals postgresqlEnabled [
-                "postgresql.target"
-              ];
-
-            after =
-              [
-                "zfs-dataset-mailarchiver.service"
-              ]
-              ++ lib.optionals postgresqlEnabled [
-                "postgresql.target"
-              ];
-          })
-        ];
-      };
-
-      tmpfiles.rules = [
-        "d ${toString cfg.dataDir} 0750 mailarchiver mailarchiver -"
-      ];
+    # PostgreSQL ordering (separate from permission service concerns)
+    systemd.services.mailarchiver = lib.mkIf postgresqlEnabled {
+      requires = ["postgresql.target"];
+      after = ["postgresql.target"];
     };
 
     users = {
