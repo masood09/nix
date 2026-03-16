@@ -9,16 +9,19 @@
     dataDir = lib.mkOption {
       type = lib.types.path;
       default = "/var/lib/headscale/";
+      description = "Directory for Headscale data storage.";
     };
 
     webDomain = lib.mkOption {
       type = lib.types.str;
       default = "headscale.${config.networking.domain}";
+      description = "Domain name for the Headscale web interface.";
     };
 
     metricsPort = lib.mkOption {
       default = 9091;
       type = lib.types.port;
+      description = "Port for the Headscale metrics endpoint.";
     };
 
     oidc = {
@@ -27,11 +30,13 @@
       issuer = lib.mkOption {
         type = lib.types.str;
         default = "https://auth.${config.networking.domain}/application/o/headscale/";
+        description = "OIDC issuer URL for Headscale authentication.";
       };
 
       clientId = lib.mkOption {
         type = lib.types.str;
         default = "headscale";
+        description = "OIDC client ID for Headscale authentication.";
       };
     };
 
@@ -39,16 +44,19 @@
       enable = lib.mkOption {
         type = lib.types.bool;
         default = true;
+        description = "Whether to enable the Headplane admin UI for Headscale.";
       };
 
       dataDir = lib.mkOption {
         type = lib.types.path;
         default = "/var/lib/headplane/";
+        description = "Directory for Headplane data storage.";
       };
 
       port = lib.mkOption {
         type = lib.types.port;
         default = 8909;
+        description = "Port for the Headplane admin UI.";
       };
 
       zfs = {
