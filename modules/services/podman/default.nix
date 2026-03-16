@@ -6,6 +6,21 @@
 }: let
   homelabCfg = config.homelab;
   podmanCfg = homelabCfg.services.podman;
+
+  dataDir = "/var/lib/containers";
+
+  systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
+  permSvc = systemdHelpers.mkPermissionService {
+    name = "podman";
+    inherit dataDir;
+    user = "root";
+    group = "root";
+    mainServices = ["podman"];
+    zfs = {
+      enable = podmanCfg.zfs.enable;
+      datasetServiceName = "zfs-dataset-podman";
+    };
+  };
 in {
   imports = [
     ./options.nix
@@ -17,7 +32,7 @@ in {
       inherit (podmanCfg.zfs) dataset properties;
 
       enable = true;
-      mountpoint = "/var/lib/containers";
+      mountpoint = dataDir;
 
       requiredBy = [
         "podman.service"
@@ -42,52 +57,7 @@ in {
       "${matchAll}".allowedUDPPorts = [53];
     };
 
-    # Service hardening + mount ordering
-    systemd = {
-      services = {
-        podman = lib.mkMerge [
-          {
-            # Unit-level ordering / mount requirements
-            unitConfig = {
-              RequiresMountsFor = ["/var/lib/containers"];
-            };
-          }
-
-          (lib.mkIf podmanCfg.zfs.enable {
-            requires = ["zfs-dataset-podman.service"];
-            after = ["zfs-dataset-podman.service"];
-          })
-        ];
-
-        podman-permissions = {
-          description = "Fix Podman /var/lib/containers ownership/permissions";
-          wantedBy = ["multi-user.target"];
-          before = ["podman.service"];
-          after =
-            ["local-fs.target"]
-            ++ lib.optionals podmanCfg.zfs.enable [
-              "zfs-dataset-podman.service"
-            ];
-          requires = lib.optionals podmanCfg.zfs.enable [
-            "zfs-dataset-podman.service"
-          ];
-
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = ''
-              ${pkgs.coreutils}/bin/chown root:root /var/lib/containers
-            '';
-          };
-        };
-      };
-
-      tmpfiles.rules = [
-        # Ensure base dir exists and is owned correctly
-        "d /var/lib/containers 0700 root root -"
-        "z /var/lib/containers 0700 root root -"
-      ];
-    };
+    inherit (permSvc) systemd;
 
     environment =
       lib.mkIf (
@@ -96,7 +66,7 @@ in {
         && !podmanCfg.zfs.enable
       ) {
         persistence."/nix/persist".directories = [
-          "/var/lib/containers"
+          dataDir
         ];
       };
   };
