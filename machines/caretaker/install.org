@@ -1,0 +1,163 @@
+#+TITLE: Installing NixOS on caretaker
+#+AUTHOR: Masood Ahmed
+#+OPTIONS: toc:nil num:nil
+
+This document describes the end-to-end process for installing NixOS on the
+=caretaker= physical server using:
+
+- NixOS Live ISO (booted via USB)
+- LUKS-encrypted ext4 root (no ZFS)
+- tmpfs root with persistence at =/nix=
+- Flake-based configuration
+- Impermanence + secrets management
+
+* Overview
+
+The installation flow:
+- Boot the NixOS Live ISO via USB
+- Partition and format the NVMe disk (GPT + LUKS + ext4)
+- Generate SSH + age keys
+- Install NixOS using the flake
+- Reboot into the installed system
+
+Unlike the other servers, caretaker does *not use ZFS*. It uses a tmpfs root
+with LUKS-encrypted ext4 for =/nix= (which includes =/nix/persist=).
+
+* Prerequisites
+
+- Physical access or remote KVM to the server
+- NixOS Live ISO on USB (built via =just build-iso=)
+- GitHub repo with NixOS flake (=github:masood09/nix=)
+
+* 1. Boot NixOS Live ISO
+
+Boot the server from the NixOS USB drive. Once booted, enable SSH access:
+
+#+begin_src bash
+mkdir -p ~/.ssh
+curl "https://github.com/masood09.keys" > ~/.ssh/authorized_keys
+#+end_src
+
+From your local machine, connect and switch to root:
+
+#+begin_src bash
+ssh nixos@IP_ADDRESS
+#+end_src
+
+#+begin_src bash
+sudo su - root
+#+end_src
+
+* 2. Partition the Disk
+
+The disk layout for caretaker:
+- =p1=: EFI System Partition (FAT32, ~/512MB)
+- =p2=: LUKS-encrypted partition (ext4, remainder)
+
+#+begin_src bash
+DISK=/dev/nvme0n1
+
+# Create GPT partition table
+parted -s "$DISK" mklabel gpt
+
+# EFI partition
+parted -s "$DISK" mkpart ESP fat32 1MiB 512MiB
+parted -s "$DISK" set 1 esp on
+
+# Root partition (LUKS)
+parted -s "$DISK" mkpart primary 512MiB 100%
+#+end_src
+
+* 3. Format Partitions
+
+Format the EFI partition:
+
+#+begin_src bash
+mkfs.fat -F32 /dev/nvme0n1p1
+#+end_src
+
+Create the LUKS volume and format with ext4:
+
+#+begin_src bash
+cryptsetup luksFormat /dev/nvme0n1p2
+cryptsetup luksOpen /dev/nvme0n1p2 cryptroot
+mkfs.ext4 /dev/mapper/cryptroot
+#+end_src
+
+* 4. Mount Filesystems
+
+Mount the filesystems matching caretaker's tmpfs root layout:
+
+#+begin_src bash
+mount -t tmpfs -o defaults,size=20G,mode=0755 none /mnt
+mkdir -p /mnt/{boot,nix}
+mount /dev/nvme0n1p1 /mnt/boot
+mount /dev/mapper/cryptroot /mnt/nix
+#+end_src
+
+* 5. Prepare Persistent and Secret Directories
+
+Create the directory structure required by impermanence and secret handling:
+
+#+begin_src bash
+mkdir -pv /mnt/nix/{secret/{initrd,age},persist/etc/ssh}
+chmod 0700 /mnt/nix/secret
+#+end_src
+
+* 6. Generate SSH and age Keys
+
+Generate the SSH host key used in initrd:
+
+#+begin_src bash
+ssh-keygen -t ed25519 -N "" -C "" \
+  -f /mnt/nix/secret/initrd/ssh_host_ed25519_key
+#+end_src
+
+Generate an SSH keypair used for age encryption:
+
+#+begin_src bash
+ssh-keygen -t ed25519 -N "" -C "" \
+  -f /mnt/nix/secret/age/ssh_ed25519_key
+#+end_src
+
+Convert the SSH public key to age format:
+
+#+begin_src bash
+nix-shell --extra-experimental-features flakes \
+  -p ssh-to-age \
+  --run 'cat /mnt/nix/secret/age/ssh_ed25519_key.pub | ssh-to-age'
+#+end_src
+
+Save the resulting age public key -- it must be added to =.sops.yaml= in
+the flake repository.
+
+* 7. Install NixOS
+
+Install NixOS using the flake configuration for =caretaker=:
+
+#+begin_src bash
+nixos-install \
+  --no-root-passwd \
+  --root /mnt \
+  --flake github:masood09/nix#caretaker \
+  --option tarball-ttl 0
+#+end_src
+
+* 8. Cleanup and Reboot
+
+Unmount all filesystems and reboot into the installed system:
+
+#+begin_src bash
+umount -Rl /mnt
+reboot
+#+end_src
+
+* Post-Install Notes
+
+After reboot:
+
+- Verify LUKS unlock and ext4 mount at =/nix=.
+- Confirm tmpfs root is working (=/= should show as tmpfs).
+- Verify networking (static IP 10.0.20.2/24), SSH access, and persistence.
+- The age public key from step 6 must be added to =.sops.yaml= and secrets
+  re-encrypted before the first deploy.
