@@ -28,5 +28,15 @@ in {
         "/etc/ssh/ssh_host_rsa_key"
       ];
     };
+
+    # ZFS datasets need neededForBoot so they mount early enough for impermanence
+    fileSystems = lib.mkIf homelabCfg.isRootZFS {
+      "/".neededForBoot = true;
+      "/nix".neededForBoot = true;
+      "/nix/persist".neededForBoot = true;
+      "/var/backup".neededForBoot = true;
+      "/var/lib/nixos".neededForBoot = true;
+      "/var/log".neededForBoot = true;
+    };
   };
 }
