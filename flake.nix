@@ -27,10 +27,14 @@
       url = "github:zhaofengli-wip/nix-homebrew";
     };
 
-    catppuccin.url = "github:catppuccin/nix/release-25.11";
+    catppuccin = {
+      url = "github:catppuccin/nix/release-25.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     authentik-nix = {
       url = "github:nix-community/authentik-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     headplane = {
