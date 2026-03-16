@@ -87,7 +87,7 @@
     };
 
     zfs = {
-      enable = lib.mkEnableOption "Create ZFS datasets for OpenCloud data/meta.";
+      enable = lib.mkEnableOption "Whether to create ZFS datasets for OpenCloud data/meta.";
 
       rootDataset = lib.mkOption {
         type = lib.types.str;
