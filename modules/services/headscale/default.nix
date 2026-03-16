@@ -11,6 +11,7 @@
   dataDir = lib.removeSuffix "/" (toString headscaleCfg.dataDir);
 in {
   imports = [
+    ./alloy.nix
     ./headplane.nix
     ./oidc.nix
     ./options.nix
