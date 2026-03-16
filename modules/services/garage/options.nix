@@ -109,7 +109,7 @@
     };
 
     zfs = {
-      enable = lib.mkEnableOption "Create ZFS datasets for Garage data/meta.";
+      enable = lib.mkEnableOption "Whether to create ZFS datasets for Garage data/meta.";
 
       datasetMeta = lib.mkOption {
         type = lib.types.str;
