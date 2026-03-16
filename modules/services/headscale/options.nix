@@ -63,7 +63,7 @@
         enable = lib.mkEnableOption "Store Headplane dataDir on a ZFS dataset.";
 
         restic = {
-          enable = lib.mkEnableOption "Enable restic backup";
+          enable = lib.mkEnableOption "Whether to enable restic backup.";
         };
 
         dataset = lib.mkOption {
@@ -88,7 +88,7 @@
       enable = lib.mkEnableOption "Store Headscale dataDir on a ZFS dataset.";
 
       restic = {
-        enable = lib.mkEnableOption "Enable restic backup";
+        enable = lib.mkEnableOption "Whether to enable restic backup.";
       };
 
       dataset = lib.mkOption {

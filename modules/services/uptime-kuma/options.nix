@@ -32,7 +32,7 @@
       enable = lib.mkEnableOption "Store Uptime Kuma dataDir on a ZFS dataset.";
 
       restic = {
-        enable = lib.mkEnableOption "Enable restic backup";
+        enable = lib.mkEnableOption "Whether to enable restic backup.";
       };
 
       dataset = lib.mkOption {
