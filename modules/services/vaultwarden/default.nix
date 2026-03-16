@@ -10,6 +10,19 @@
   postgresqlEnabled = config.services.postgresql.enable;
   postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
   resticEnabled = config.homelab.services.restic.enable;
+
+  systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
+  permSvc = systemdHelpers.mkPermissionService {
+    name = "vaultwarden";
+    dataDir = vaultwardenCfg.dataDir;
+    user = "vaultwarden";
+    group = "vaultwarden";
+    mainServices = ["vaultwarden"];
+    zfs = {
+      enable = vaultwardenCfg.zfs.enable;
+      datasetServiceName = "zfs-dataset-vaultwarden";
+    };
+  };
 in {
   imports = [
     ./options.nix
@@ -103,49 +116,7 @@ in {
       vaultwarden.gid = vaultwardenCfg.groupId;
     };
 
-    # Service hardening + mount ordering
-    systemd = {
-      services = {
-        vaultwarden = lib.mkMerge [
-          {
-            # Unit-level ordering / mount requirements
-            unitConfig = {
-              RequiresMountsFor = [vaultwardenCfg.dataDir];
-            };
-          }
-
-          (lib.mkIf vaultwardenCfg.zfs.enable {
-            requires = ["zfs-dataset-vaultwarden.service"];
-            after = ["zfs-dataset-vaultwarden.service"];
-          })
-        ];
-
-        vaultwarden-permissions = {
-          description = "Fix Vaultwarden dataDir ownership/permissions";
-          wantedBy = ["multi-user.target"];
-          before = ["vaultwarden.service"];
-          after =
-            ["local-fs.target"]
-            ++ lib.optionals vaultwardenCfg.zfs.enable ["zfs-dataset-vaultwarden.service"];
-          requires =
-            lib.optionals vaultwardenCfg.zfs.enable ["zfs-dataset-vaultwarden.service"];
-
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = ''
-              ${pkgs.coreutils}/bin/chown vaultwarden:vaultwarden ${vaultwardenCfg.dataDir}
-            '';
-          };
-        };
-      };
-
-      tmpfiles.rules = [
-        # Ensure base dir exists and is owned correctly
-        "d ${vaultwardenCfg.dataDir} 0700 vaultwarden vaultwarden -"
-        "z ${vaultwardenCfg.dataDir} 0700 vaultwarden vaultwarden -"
-      ];
-    };
+    inherit (permSvc) systemd;
 
     environment =
       lib.mkIf (

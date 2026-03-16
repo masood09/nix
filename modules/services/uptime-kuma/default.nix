@@ -7,6 +7,20 @@
   homelabCfg = config.homelab;
   uptimeKumaCfg = homelabCfg.services.uptime-kuma;
   caddyEnabled = homelabCfg.services.caddy.enable;
+
+  systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
+  permSvc = systemdHelpers.mkPermissionService {
+    name = "uptime-kuma";
+    dataDir = uptimeKumaCfg.dataDir;
+    user = "uptime-kuma";
+    group = "uptime-kuma";
+    mode = "0750";
+    mainServices = ["uptime-kuma"];
+    zfs = {
+      enable = uptimeKumaCfg.zfs.enable;
+      datasetServiceName = "zfs-dataset-uptime-kuma";
+    };
+  };
 in {
   imports = [
     ./options.nix
@@ -63,63 +77,19 @@ in {
       };
     };
 
-    # Service hardening + mount ordering
-    systemd = {
-      services = {
-        uptime-kuma = lib.mkMerge [
-          {
-            # Unit-level ordering / mount requirements
-            unitConfig = {
-              RequiresMountsFor = [uptimeKumaCfg.dataDir];
-            };
-
-            serviceConfig = {
-              DynamicUser = lib.mkForce false;
-
-              # stop systemd from trying to manage /var/lib/private + bind-mount behavior
-              StateDirectory = lib.mkForce null;
-              StateDirectoryMode = lib.mkForce null;
-
-              User = "uptime-kuma";
-              Group = "uptime-kuma";
-
-              # with ProtectSystem=strict, you must explicitly allow writes here
-              ReadWritePaths = [uptimeKumaCfg.dataDir];
-            };
-          }
-
-          (lib.mkIf uptimeKumaCfg.zfs.enable {
-            requires = ["zfs-dataset-uptime-kuma.service"];
-            after = ["zfs-dataset-uptime-kuma.service"];
-          })
-        ];
-
-        uptime-kuma-permissions = {
-          description = "Fix Uptime Kuma dataDir ownership/permissions";
-          wantedBy = ["multi-user.target"];
-          before = ["uptime-kuma.service"];
-          after =
-            ["local-fs.target"]
-            ++ lib.optionals uptimeKumaCfg.zfs.enable ["zfs-dataset-uptime-kuma.service"];
-          requires =
-            lib.optionals uptimeKumaCfg.zfs.enable ["zfs-dataset-uptime-kuma.service"];
-
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = ''
-              ${pkgs.coreutils}/bin/chown uptime-kuma:uptime-kuma ${uptimeKumaCfg.dataDir}
-            '';
-          };
+    systemd = lib.mkMerge [
+      permSvc.systemd
+      {
+        services.uptime-kuma.serviceConfig = {
+          DynamicUser = lib.mkForce false;
+          StateDirectory = lib.mkForce null;
+          StateDirectoryMode = lib.mkForce null;
+          User = "uptime-kuma";
+          Group = "uptime-kuma";
+          ReadWritePaths = [uptimeKumaCfg.dataDir];
         };
-      };
-
-      tmpfiles.rules = [
-        # Ensure base dir exists and is owned correctly
-        "d ${uptimeKumaCfg.dataDir} 0750 uptime-kuma uptime-kuma -"
-        "z ${uptimeKumaCfg.dataDir} 0750 uptime-kuma uptime-kuma -"
-      ];
-    };
+      }
+    ];
 
     environment =
       lib.mkIf (

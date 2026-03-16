@@ -18,6 +18,7 @@
     user,
     group,
     mainServices,
+    mode ? "0700",
     zfs ? {
       enable = false;
       datasetServiceName = "zfs-dataset-${name}";
@@ -67,8 +68,8 @@
         };
 
       tmpfiles.rules = [
-        "d ${dataDir} 0700 ${user} ${group} -"
-        "z ${dataDir} 0700 ${user} ${group} -"
+        "d ${dataDir} ${mode} ${user} ${group} -"
+        "z ${dataDir} ${mode} ${user} ${group} -"
       ];
     };
   };

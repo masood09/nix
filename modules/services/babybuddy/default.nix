@@ -11,6 +11,20 @@
   postgresqlEnabled = config.services.postgresql.enable;
   postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
   resticEnabled = config.homelab.services.restic.enable;
+
+  systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
+  permSvc = systemdHelpers.mkPermissionService {
+    name = "babybuddy";
+    dataDir = babybuddyCfg.dataDir;
+    user = "babybuddy";
+    group = "babybuddy";
+    mode = "0750";
+    mainServices = ["podman-babybuddy"];
+    zfs = {
+      enable = babybuddyCfg.zfs.enable;
+      datasetServiceName = "zfs-dataset-babybuddy";
+    };
+  };
 in {
   imports = [
     ./options.nix
@@ -122,51 +136,7 @@ in {
       };
     };
 
-    # Service hardening + mount ordering
-    systemd = {
-      services = {
-        babybuddy-permissions = {
-          description = "Fix Babybuddy dataDir ownership/permissions";
-          wantedBy = ["multi-user.target"];
-
-          after =
-            ["local-fs.target"]
-            ++ lib.optionals babybuddyCfg.zfs.enable [
-              "zfs-dataset-babybuddy.service"
-            ];
-          requires = lib.optionals babybuddyCfg.zfs.enable [
-            "zfs-dataset-babybuddy.service"
-          ];
-
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = ''
-              ${pkgs.coreutils}/bin/chown babybuddy:babybuddy ${toString babybuddyCfg.dataDir}
-            '';
-          };
-        };
-
-        podman-babybuddy = lib.mkMerge [
-          {
-            # Unit-level ordering / mount requirements
-            unitConfig = {
-              RequiresMountsFor = [babybuddyCfg.dataDir];
-            };
-          }
-
-          (lib.mkIf babybuddyCfg.zfs.enable {
-            requires = ["zfs-dataset-babybuddy.service"];
-            after = ["zfs-dataset-babybuddy.service"];
-          })
-        ];
-      };
-
-      tmpfiles.rules = [
-        "d ${babybuddyCfg.dataDir} 0750 babybuddy babybuddy -"
-        "z ${babybuddyCfg.dataDir} 0750 babybuddy babybuddy -"
-      ];
-    };
+    inherit (permSvc) systemd;
 
     environment =
       lib.mkIf (

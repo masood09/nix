@@ -10,6 +10,20 @@
   postgresqlBackupEnabled = config.homelab.services.postgresql.backup.enable;
   caddyEnabled = config.homelab.services.caddy.enable;
   resticEnabled = config.homelab.services.restic.enable;
+
+  systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
+  permSvc = systemdHelpers.mkPermissionService {
+    name = "immich";
+    dataDir = immichCfg.dataDir;
+    user = "immich";
+    group = "immich";
+    mode = "0750";
+    mainServices = ["immich-server" "immich-machine-learning"];
+    zfs = {
+      enable = immichCfg.zfs.enable;
+      datasetServiceName = "zfs-dataset-immich";
+    };
+  };
 in {
   imports = [
     ./options.nix
@@ -81,69 +95,7 @@ in {
       immich.gid = immichCfg.groupId;
     };
 
-    # Service hardening + mount ordering
-    systemd = {
-      services = {
-        immich-server = lib.mkMerge [
-          {
-            # Unit-level ordering / mount requirements
-            unitConfig = {
-              RequiresMountsFor = [immichCfg.dataDir];
-            };
-          }
-
-          (lib.mkIf immichCfg.zfs.enable {
-            requires = ["zfs-dataset-immich.service"];
-            after = ["zfs-dataset-immich.service"];
-          })
-        ];
-
-        immich-machine-learning = lib.mkMerge [
-          {
-            # Unit-level ordering / mount requirements
-            unitConfig = {
-              RequiresMountsFor = [immichCfg.dataDir];
-            };
-          }
-
-          (lib.mkIf immichCfg.zfs.enable {
-            requires = ["zfs-dataset-immich.service"];
-            after = ["zfs-dataset-immich.service"];
-          })
-        ];
-
-        immich-permissions = {
-          description = "Fix Immich dataDir ownership/permissions";
-          wantedBy = ["multi-user.target"];
-          before = [
-            "immich-server.service"
-            "immich-machine-learning.service"
-          ];
-          after =
-            ["local-fs.target"]
-            ++ lib.optionals immichCfg.zfs.enable [
-              "zfs-dataset-immich.service"
-            ];
-          requires = lib.optionals immichCfg.zfs.enable [
-            "zfs-dataset-immich.service"
-          ];
-
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = ''
-              ${pkgs.coreutils}/bin/chown immich:immich ${toString immichCfg.dataDir}
-            '';
-          };
-        };
-      };
-
-      tmpfiles.rules = [
-        # Ensure base dir exists and is owned correctly
-        "d ${immichCfg.dataDir} 0750 immich immich -"
-        "z ${immichCfg.dataDir} 0750 immich immich -"
-      ];
-    };
+    inherit (permSvc) systemd;
 
     environment =
       lib.mkIf (
