@@ -6,6 +6,19 @@
 }: let
   homelabCfg = config.homelab;
   cfg = homelabCfg.services.tailscale;
+
+  systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
+  permSvc = systemdHelpers.mkPermissionService {
+    name = "tailscale";
+    dataDir = cfg.dataDir;
+    user = "root";
+    group = "root";
+    mainServices = ["tailscaled"];
+    zfs = {
+      enable = cfg.zfs.enable;
+      datasetServiceName = "zfs-dataset-tailscale";
+    };
+  };
 in {
   imports = [
     ./options.nix
@@ -34,43 +47,7 @@ in {
       };
     };
 
-    # Service hardening + mount ordering
-    systemd = {
-      services = {
-        tailscaled = lib.mkMerge [
-          {
-            # Unit-level ordering / mount requirements
-            unitConfig = {
-              RequiresMountsFor = [cfg.dataDir];
-            };
-          }
-
-          (lib.mkIf cfg.zfs.enable {
-            requires = ["zfs-dataset-tailscale.service"];
-            after = ["zfs-dataset-tailscale.service"];
-          })
-        ];
-
-        tailscaled-permissions = {
-          description = "Fix Tailscale dataDir ownership/permissions";
-          wantedBy = ["multi-user.target"];
-          before = ["tailscaled.service"];
-          after =
-            ["local-fs.target"]
-            ++ lib.optionals cfg.zfs.enable ["zfs-dataset-tailscale.service"];
-          requires =
-            lib.optionals cfg.zfs.enable ["zfs-dataset-tailscale.service"];
-
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = ''
-              ${pkgs.coreutils}/bin/chown root:root ${cfg.dataDir}
-            '';
-          };
-        };
-      };
-    };
+    inherit (permSvc) systemd;
 
     environment.persistence."/nix/persist" =
       lib.mkIf (
