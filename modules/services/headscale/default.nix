@@ -115,6 +115,8 @@ in {
           ];
 
           serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
             ExecStart = ''
               ${pkgs.coreutils}/bin/chown ${config.services.headscale.user}:${config.services.headscale.group} ${dataDir}
             '';
