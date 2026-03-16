@@ -9,11 +9,13 @@
     logLevel = lib.mkOption {
       type = lib.types.str;
       default = "info";
+      description = "Log verbosity level for Garage.";
     };
 
     replicationFactor = lib.mkOption {
       type = lib.types.int;
       default = 1;
+      description = "Number of copies of each data block to store across the cluster.";
     };
 
     webDomain = lib.mkOption {
@@ -25,37 +27,44 @@
     metaDir = lib.mkOption {
       type = lib.types.path;
       default = "/var/lib/garage_meta";
+      description = "Directory for Garage metadata storage.";
     };
 
     dataDir = lib.mkOption {
       type = lib.types.path;
       default = "/var/lib/garage_data";
+      description = "Directory for Garage object data storage.";
     };
 
     userId = lib.mkOption {
       default = 3006;
       type = lib.types.ints.u16;
+      description = "UID for the Garage service user.";
     };
 
     groupId = lib.mkOption {
       default = 3006;
       type = lib.types.ints.u16;
+      description = "GID for the Garage service group.";
     };
 
     rpc = {
       listenAddress = lib.mkOption {
         type = lib.types.str;
         default = "127.0.0.1";
+        description = "Address for the Garage RPC server to bind to.";
       };
 
       port = lib.mkOption {
         type = lib.types.port;
         default = 3901;
+        description = "Port for the Garage RPC server.";
       };
 
       publicAddress = lib.mkOption {
         type = lib.types.str;
         default = "127.0.0.1:3901";
+        description = "Public address advertised to other Garage nodes.";
       };
     };
 
@@ -63,16 +72,19 @@
       listenAddress = lib.mkOption {
         type = lib.types.str;
         default = "127.0.0.1";
+        description = "Address for the S3 API server to bind to.";
       };
 
       port = lib.mkOption {
         type = lib.types.port;
         default = 3900;
+        description = "Port for the S3 API server.";
       };
 
       region = lib.mkOption {
         type = lib.types.str;
         default = "homelab";
+        description = "S3 region name for this Garage cluster.";
       };
     };
 
@@ -80,10 +92,12 @@
       listenAddress = lib.mkOption {
         type = lib.types.str;
         default = "127.0.0.1";
+        description = "Address for the Garage admin API to bind to.";
       };
       port = lib.mkOption {
         type = lib.types.port;
         default = 3903;
+        description = "Port for the Garage admin API.";
       };
     };
 
@@ -100,11 +114,13 @@
       datasetMeta = lib.mkOption {
         type = lib.types.str;
         default = "fpool/fast/services/garage_meta";
+        description = "ZFS dataset for Garage metadata storage.";
       };
 
       datasetData = lib.mkOption {
         type = lib.types.str;
         default = "dpool/tank/services/garage_data";
+        description = "ZFS dataset for Garage object data storage.";
       };
 
       propertiesMeta = lib.mkOption {
