@@ -205,7 +205,7 @@
           default = true;
           type = lib.types.bool;
           description = ''
-            Whether to enable bat.
+            Whether to enable zsh.
           '';
         };
       };
