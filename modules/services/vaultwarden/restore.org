@@ -1,4 +1,4 @@
-#+TITLE: Restoring Vaulwarden Database and Data from Restic Backup
+#+TITLE: Restoring Vaultwarden from Restic Backup
 #+AUTHOR: Masood Ahmed
 #+OPTIONS: toc:nil num:nil
 
@@ -8,12 +8,11 @@ via =/mnt/nightly_backup=.
 
 The workflow:
 - Verifies available backups
-- Restores database dump and media to a temporary location
-- Stops all Authentik services
+- Restores database dump and data to a temporary location
+- Stops Vaultwarden service
 - Drops and restores the PostgreSQL database
-- Fixes ownership of database objects
 - Restores data files with correct permissions
-- Restarts services cleanly
+- Restarts service cleanly
 
 * Backup Information
 
@@ -22,7 +21,7 @@ The workflow:
 - Database engine: PostgreSQL
 - Data path: =/var/lib/vaultwarden=
 
-* Verify Available Snapshots
+* 1. Verify Available Snapshots
 
 Confirm the snapshot you intend to restore:
 
@@ -30,7 +29,7 @@ Confirm the snapshot you intend to restore:
 sudo restic-backup snapshots
 #+end_src
 
-* Restore the Latest Snapshot to a Temporary Location
+* 2. Restore the Latest Snapshot to a Temporary Location
 
 Restore the PostgreSQL backup and Vaultwarden data into =/tmp=:
 
@@ -48,27 +47,34 @@ This will create the following directory structure:
 
 #+begin_example
 /tmp/mnt/nightly_backup/postgresql-backup/vaultwarden.sql.gz
-/tmp/mnt/nightly_backup/vaultwarden
+/tmp/mnt/nightly_backup/vaultwarden/
 #+end_example
 
-* Stop Vaultwarden Service
+* 3. Stop Vaultwarden Service
 
-Stop all Vaultwarden service before restoring the database:
+Stop the Vaultwarden service before restoring the database:
 
 #+begin_src bash
 sudo systemctl stop vaultwarden.service
 #+end_src
 
-* Drop the Existing Database
+* 4. (Recommended) Take Pre-Restore ZFS Snapshot
 
-Remove the existing database before restoring from backup:
+Take a ZFS snapshot for quick rollback if something goes wrong:
+
+#+begin_src bash
+sudo zfs snapshot -r rpool/encrypted/services/vaultwarden@pre-restore
+sudo zfs snapshot -r dpool/tank/services/postgresql@pre-restore
+#+end_src
+
+* 5. Drop and Restore the Database
+
+Remove the existing database and restore from backup:
 
 #+begin_src bash
 sudo -u postgres psql -d postgres -c "DROP DATABASE vaultwarden;"
 sudo systemctl restart postgresql
 #+end_src
-
-* Restore the Database
 
 Restore the database from the compressed SQL backup:
 
@@ -80,7 +86,7 @@ sudo -u vaultwarden bash -lc \
   'gunzip -c /tmp/vaultwarden.sql.gz | psql -v ON_ERROR_STOP=1 -d vaultwarden'
 #+end_src
 
-* Clear the Existing Data Directory
+* 6. Clear the Existing Data Directory
 
 Remove all existing contents while preserving the directory itself:
 
@@ -88,18 +94,14 @@ Remove all existing contents while preserving the directory itself:
 sudo find /var/lib/vaultwarden -mindepth 1 -delete
 #+end_src
 
-This approach is:
-- Shell-agnostic (bash/zsh)
-- Safe even if the directory is already empty
-
-* Restore Data Files
+* 7. Restore Data Files
 
 Copy the restored data into the live directory:
 
 #+begin_src bash
 sudo rsync -a --delete \
-  /tmp/mnt/nightly_backup/vaultwarden \
-  /var/lib/vaultwarden
+  /tmp/mnt/nightly_backup/vaultwarden/ \
+  /var/lib/vaultwarden/
 #+end_src
 
 Fix ownership so the service can read and write all files:
@@ -108,7 +110,7 @@ Fix ownership so the service can read and write all files:
 sudo chown -R vaultwarden:vaultwarden /var/lib/vaultwarden
 #+end_src
 
-* Start Vaultwarden Service
+* 8. Start Vaultwarden Service
 
 Restart the Vaultwarden service:
 
@@ -116,9 +118,31 @@ Restart the Vaultwarden service:
 sudo systemctl start vaultwarden.service
 #+end_src
 
+Verify service status:
+
+#+begin_src bash
+sudo systemctl status vaultwarden.service
+#+end_src
+
+* 9. Clean Up Temporary Files
+
+Remove the temporary restore files:
+
+#+begin_src bash
+sudo rm -f /tmp/vaultwarden.sql.gz
+sudo rm -rf /tmp/mnt/nightly_backup/vaultwarden
+sudo rm -f /tmp/mnt/nightly_backup/postgresql-backup/vaultwarden.sql.gz
+#+end_src
+
+Once the service is verified healthy, remove the pre-restore snapshots:
+
+#+begin_src bash
+sudo zfs destroy -r rpool/encrypted/services/vaultwarden@pre-restore
+sudo zfs destroy -r dpool/tank/services/postgresql@pre-restore
+#+end_src
+
 * Notes & Best Practices
 
-- Always stop all Vaultwarden service before restoring the database.
+- Always stop Vaultwarden service before restoring the database.
 - Use =ON_ERROR_STOP= to ensure restore failures abort immediately.
-- Consider taking a *ZFS snapshot* of the PostgreSQL data directory and
-  Vaultwarden data directory before restoring for quick rollback.
+- The pre-restore ZFS snapshot allows instant rollback if the restore fails.

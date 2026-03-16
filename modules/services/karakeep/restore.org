@@ -1,4 +1,4 @@
-#+TITLE: Restoring Karakeep Data from Restic Backup
+#+TITLE: Restoring Karakeep from Restic Backup
 #+AUTHOR: Masood Ahmed
 #+OPTIONS: toc:nil num:nil
 
@@ -8,7 +8,7 @@ Karakeep data files from Restic backups staged via =/mnt/nightly_backup=.
 The workflow:
 - Verifies available backups
 - Restores data to a temporary location
-- Stops Karakeep services
+- Stops Karakeep service
 - Restores data files with correct permissions
 - Restarts service cleanly
 
@@ -16,7 +16,7 @@ The workflow:
 
 - Data path: =/var/lib/karakeep=
 
-* Verify Available Snapshots
+* 1. Verify Available Snapshots
 
 Confirm the snapshot you intend to restore:
 
@@ -24,7 +24,7 @@ Confirm the snapshot you intend to restore:
 sudo restic-backup snapshots
 #+end_src
 
-* Restore the Latest Snapshot to a Temporary Location
+* 2. Restore the Latest Snapshot to a Temporary Location
 
 Restore the Karakeep data into =/tmp=:
 
@@ -37,18 +37,26 @@ sudo restic-backup restore latest \
 This will create the following directory structure:
 
 #+begin_example
-/tmp/mnt/nightly_backup/karakeep
+/tmp/mnt/nightly_backup/karakeep/
 #+end_example
 
-* Stop Karakeep Service
+* 3. Stop Karakeep Service
 
-Stop Karakeep service before restoring the data:
+Stop the Karakeep service before restoring data:
 
 #+begin_src bash
 sudo systemctl stop karakeep.service
 #+end_src
 
-* Clear the Existing Data Directory
+* 4. (Recommended) Take Pre-Restore ZFS Snapshot
+
+Take a ZFS snapshot for quick rollback if something goes wrong:
+
+#+begin_src bash
+sudo zfs snapshot -r rpool/encrypted/services/karakeep@pre-restore
+#+end_src
+
+* 5. Clear the Existing Data Directory
 
 Remove all existing contents while preserving the directory itself:
 
@@ -56,11 +64,7 @@ Remove all existing contents while preserving the directory itself:
 sudo find /var/lib/karakeep -mindepth 1 -delete
 #+end_src
 
-This approach is:
-- Shell-agnostic (bash/zsh)
-- Safe even if the directory is already empty
-
-* Restore Data Files
+* 6. Restore Data Files
 
 Copy the restored data into the live directory:
 
@@ -76,7 +80,7 @@ Fix ownership so the service can read and write all files:
 sudo chown -R karakeep:karakeep /var/lib/karakeep
 #+end_src
 
-* Start Karakeep Service
+* 7. Start Karakeep Service
 
 Restart the Karakeep service:
 
@@ -84,7 +88,28 @@ Restart the Karakeep service:
 sudo systemctl start karakeep.service
 #+end_src
 
+Verify service status:
+
+#+begin_src bash
+sudo systemctl status karakeep.service
+#+end_src
+
+* 8. Clean Up Temporary Files
+
+Remove the temporary restore files:
+
+#+begin_src bash
+sudo rm -rf /tmp/mnt/nightly_backup/karakeep
+#+end_src
+
+Once the service is verified healthy, remove the pre-restore snapshot:
+
+#+begin_src bash
+sudo zfs destroy -r rpool/encrypted/services/karakeep@pre-restore
+#+end_src
+
 * Notes & Best Practices
 
-- Always stop the Karakeep service before restoring the datab.
-- Consider taking a *ZFS snapshot* of the Karakeep data directory before restoring for quick rollback.
+- Always stop the Karakeep service before restoring data.
+- =rsync --delete= ensures the restored state exactly matches the backup.
+- The pre-restore ZFS snapshot allows instant rollback if the restore fails.

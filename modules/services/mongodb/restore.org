@@ -1,37 +1,19 @@
-#+TITLE: Restoring MongoDB Data from Restic Backup (ZFS Dataset)
+#+TITLE: Restoring MongoDB from Restic Backup
 #+AUTHOR: Masood Ahmed
 #+OPTIONS: toc:nil num:nil
 
-This document restores MongoDB from Restic backups that were staged under:
+This document restores MongoDB from Restic backups staged under
+=/mnt/nightly_backup/mongodb=.
 
-- =/mnt/nightly_backup/mongodb=
-
-Because Restic restores files to the same paths captured in the snapshot, it
-cannot directly restore these into =/var/lib/mongodb/...= in one step.
-
-Instead, we restore into a *ZFS staging dataset* (not =/tmp=), then copy into
-place.
+Because Restic restores files to the same absolute paths captured in the
+snapshot, we restore into a *ZFS staging dataset* first, then copy into place.
 
 * Backup Information
 
 - Service: =MongoDB=
 - Live base path: =/var/lib/mongodb=
 
-Stop command:
-
-#+begin_src bash
-sudo systemctl stop nightscout.service
-sudo systemctl stop mongodb.service
-#+end_src
-
-Start command:
-
-#+begin_src bash
-sudo systemctl start mongodb.service
-sudo systemctl start nightscout.service
-#+end_src
-
-* Verify Available Snapshots
+* 1. Verify Available Snapshots
 
 #+begin_src bash
 sudo restic-backup snapshots
@@ -39,30 +21,20 @@ sudo restic-backup snapshots
 
 Select a snapshot ID or use =latest=.
 
-* Create a ZFS Staging Dataset (Avoid /tmp)
+* 2. Create a ZFS Staging Dataset
 
-We create a staging dataset that will temporarily hold the restored
-=/mnt/nightly_backup/...= tree. This keeps the extra restore space off of =/tmp=.
-
-Choose a mountpoint, for example:
-
-- =/mnt/restore-staging=
+Create a staging dataset to temporarily hold the restored files:
 
 #+begin_src bash
-# Create a staging dataset (adjust pool/dataset name as desired)
 sudo zfs create -o mountpoint=/mnt/restore-staging dpool/tank/restore-staging
 
-# Confirm it is mounted
 mount | grep restore-staging || true
 df -h /mnt/restore-staging
 #+end_src
 
+* 3. Stop MongoDB and Dependent Services
 
-* Stop MongoDB and any services using MongoDB.
-
-*IMPORTANT:* Clean Shutdown Required
-
-MongoDB must be cleanly stopped before restoring.
+*IMPORTANT:* MongoDB must be cleanly stopped before restoring.
 
 #+begin_src bash
 sudo systemctl stop nightscout.service
@@ -76,11 +48,9 @@ Confirm no running mongod process:
 ps aux | grep mongod | grep -v grep || echo "MongoDB stopped"
 #+end_src
 
-* (Recommended) Take Pre-Restore ZFS Snapshot
+* 4. (Recommended) Take Pre-Restore ZFS Snapshot
 
-This allows instant rollback.
-
-Replace dataset if different in your config.
+This allows instant rollback:
 
 #+begin_src bash
 sudo zfs snapshot -r fpool/fast/services/mongodb@pre-restore
@@ -92,48 +62,37 @@ Verify:
 zfs list -t snapshot | grep mongodb@pre-restore
 #+end_src
 
-* Clear Existing MongoDB Data
-
-*WARNING:* Only do this after snapshotting.
+* 5. Clear Existing MongoDB Data
 
 #+begin_src bash
 sudo find /var/lib/mongodb -mindepth 1 -delete
 #+end_src
 
-* Restore Snapshot into Staging Dataset
-
-Because Restic restores to the original path, restoring into
-=/mnt/restore-staging= will create:
-
-=/mnt/restore-staging/mnt/nightly_backup/mongodb=
+* 6. Restore Snapshot into Staging Dataset
 
 #+begin_src bash
 SNAPSHOT=latest
 
 sudo restic-backup restore "${SNAPSHOT}" \
---include /mnt/nightly_backup/mongodb \
---target /mnt/restore-staging
+  --include /mnt/nightly_backup/mongodb \
+  --target /mnt/restore-staging
 #+end_src
 
 Expected layout:
 
 #+begin_example
-/mnt/mongodb-restore/mnt/nightly_backup/mongodb
+/mnt/restore-staging/mnt/nightly_backup/mongodb/
 #+end_example
 
-* Copy Restored Data into Live Dataset
+* 7. Copy Restored Data into Live Dataset
 
-MongoDB requires correct ownership and permissions. Use rsync to preserve:
-- Permissions
-- Hardlinks
-- xattrs
-- ACLs
+Use =rsync -aAX= to preserve permissions, ACLs, and extended attributes:
 
 #+begin_src bash
 sudo rsync -aAX --delete \
---chown=mongodb:mongodb \
-/mnt/restore-staging/mnt/nightly_backup/mongodb/ \
-/var/lib/mongodb/
+  --chown=mongodb:mongodb \
+  /mnt/restore-staging/mnt/nightly_backup/mongodb/ \
+  /var/lib/mongodb/
 #+end_src
 
 Verify ownership:
@@ -142,13 +101,7 @@ Verify ownership:
 ls -ld /var/lib/mongodb
 #+end_src
 
-Should show:
-
-#+begin_example
-mongodb mongodb
-#+end_example
-
-* Start MongoDB
+* 8. Start MongoDB
 
 #+begin_src bash
 sudo systemctl start mongodb.service
@@ -158,15 +111,10 @@ Verify:
 
 #+begin_src bash
 sudo systemctl status mongodb.service
-#+end_src
-
-Check logs:
-
-#+begin_src bash
 sudo journalctl -u mongodb -f
 #+end_src
 
-Validate Database Integrity
+* 9. Validate Database Integrity
 
 Connect locally:
 
@@ -182,19 +130,23 @@ use admin
 db.runCommand({ connectionStatus: 1 })
 #+end_src
 
-If authentication is enabled (as in your config), verify root login works.
+* 10. Start Dependent Services
 
-* Cleanup
+Start any services that depend on MongoDB:
 
-Once satisfied:
+#+begin_src bash
+sudo systemctl start nightscout.service
+#+end_src
 
-*1. Destroy staging dataset*
+* 11. Clean Up
+
+*1. Destroy the staging dataset:*
 
 #+begin_src bash
 sudo zfs destroy -r dpool/tank/restore-staging
 #+end_src
 
-*2. Remove pre-restore snapshot*
+*2. Remove the pre-restore snapshot:*
 
 #+begin_src bash
 sudo zfs destroy -r fpool/fast/services/mongodb@pre-restore
@@ -216,10 +168,8 @@ sudo zfs rollback -r fpool/fast/services/mongodb@pre-restore
 sudo systemctl start mongodb.service
 #+end_src
 
-* Start other services
+* Notes & Best Practices
 
-Start any other services dependent on =MongoDB=
-
-#+begin_src bash
-sudo systemctl start nightscout.service
-#+end_src
+- Always cleanly stop MongoDB before restoring to avoid journal corruption.
+- =rsync -aAX= preserves extended attributes required by MongoDB.
+- The pre-restore ZFS snapshot allows instant rollback if the restore fails.

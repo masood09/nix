@@ -2,23 +2,22 @@
 #+AUTHOR: Masood Ahmed
 #+OPTIONS: toc:nil num:nil
 
-This document describes a *safe, repeatable process* for restoring the
+This document describes a *safe, repeatable procedure* for restoring the
 Uptime Kuma data directory from a Restic backup staged via
 =/mnt/nightly_backup=.
 
-The procedure:
-- Restores the latest snapshot
+The workflow:
+- Verifies available backups
+- Restores the latest snapshot to a temporary location
 - Stops the service before modifying data
-- Replaces the data directory atomically
+- Replaces the data directory
 - Ensures correct ownership
-- Cleans up temporary restore artifacts
+- Restarts service cleanly
 
-* Prerequisites
+* Backup Information
 
-- Restic repository configured (=restic-backup=)
-- Sufficient disk space in =/tmp=
-- =uptime-kuma= system user and group exist
-- Service managed via systemd
+- Data path: =/var/lib/uptime-kuma=
+- Service user: =uptime-kuma:uptime-kuma=
 
 * 1. Verify Available Snapshots
 
@@ -52,7 +51,15 @@ Ensure the service is fully stopped before modifying its data directory:
 sudo systemctl stop uptime-kuma.service
 #+end_src
 
-* 4. Clear the Existing Data Directory
+* 4. (Recommended) Take Pre-Restore ZFS Snapshot
+
+Take a ZFS snapshot for quick rollback if something goes wrong:
+
+#+begin_src bash
+sudo zfs snapshot -r rpool/encrypted/services/uptime-kuma@pre-restore
+#+end_src
+
+* 5. Clear the Existing Data Directory
 
 Remove all existing contents while preserving the directory itself:
 
@@ -60,11 +67,7 @@ Remove all existing contents while preserving the directory itself:
 sudo find /var/lib/uptime-kuma -mindepth 1 -delete
 #+end_src
 
-This approach is:
-- Shell-agnostic (bash/zsh)
-- Safe even if the directory is already empty
-
-* 5. Promote Restored Data into Place
+* 6. Restore Data Files
 
 Copy the restored contents into the live data directory:
 
@@ -80,7 +83,7 @@ Fix ownership so the service can read and write all files:
 sudo chown -R uptime-kuma:uptime-kuma /var/lib/uptime-kuma
 #+end_src
 
-* 6. Start the Uptime Kuma Service
+* 7. Start the Uptime Kuma Service
 
 Bring the service back online:
 
@@ -94,17 +97,22 @@ Verify service status:
 sudo systemctl status uptime-kuma.service
 #+end_src
 
-* 7. Clean Up Temporary Restore Files
+* 8. Clean Up Temporary Files
 
-Remove the temporary restore directory:
+Remove the temporary restore files:
 
 #+begin_src bash
 sudo rm -rf /tmp/mnt/nightly_backup/uptime-kuma
+#+end_src
+
+Once the service is verified healthy, remove the pre-restore snapshot:
+
+#+begin_src bash
+sudo zfs destroy -r rpool/encrypted/services/uptime-kuma@pre-restore
 #+end_src
 
 * Notes & Best Practices
 
 - Always stop the service before restoring data to avoid corruption.
 - =rsync --delete= ensures the restored state exactly matches the backup.
-- Consider taking a *ZFS snapshot* of =/var/lib/uptime-kuma= before restoring
-  for quick rollback.
+- The pre-restore ZFS snapshot allows instant rollback if the restore fails.

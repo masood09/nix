@@ -1,4 +1,4 @@
-#+TITLE: Restoring Authentik Database and Media from Restic Backup
+#+TITLE: Restoring Authentik from Restic Backup
 #+AUTHOR: Masood Ahmed
 #+OPTIONS: toc:nil num:nil
 
@@ -61,7 +61,16 @@ sudo systemctl stop authentik-worker.service
 sudo systemctl stop authentik-migrate.service
 #+end_src
 
-* 4. Drop the Existing Database
+* 4. (Recommended) Take Pre-Restore ZFS Snapshot
+
+Take a ZFS snapshot for quick rollback if something goes wrong:
+
+#+begin_src bash
+sudo zfs snapshot -r rpool/encrypted/services/authentik@pre-restore
+sudo zfs snapshot -r dpool/tank/services/postgresql@pre-restore
+#+end_src
+
+* 5. Drop and Restore the Database
 
 Remove the existing database before restoring from backup:
 
@@ -69,8 +78,6 @@ Remove the existing database before restoring from backup:
 sudo -u postgres psql -d postgres -c "DROP DATABASE authentik;"
 sudo systemctl restart postgresql
 #+end_src
-
-* 5. Restore the Database
 
 Restore the database from the compressed SQL backup:
 
@@ -187,10 +194,6 @@ Remove all existing contents while preserving the directory itself:
 sudo find /var/lib/private/authentik/media -mindepth 1 -delete
 #+end_src
 
-This approach is:
-- Shell-agnostic (bash/zsh)
-- Safe even if the directory is already empty
-
 * 10. Restore Media Files
 
 Copy the restored media into the live directory:
@@ -215,11 +218,34 @@ Restart the Authentik services:
 sudo systemctl start authentik.service
 #+end_src
 
+Verify service status:
+
+#+begin_src bash
+sudo systemctl status authentik.service
+sudo systemctl status authentik-worker.service
+#+end_src
+
+* 12. Clean Up Temporary Files
+
+Remove the temporary restore files:
+
+#+begin_src bash
+sudo rm -f /tmp/authentik.sql.gz
+sudo rm -rf /tmp/var/lib/private/authentik
+sudo rm -rf /tmp/mnt/nightly_backup/postgresql-backup
+#+end_src
+
+Once the service is verified healthy, remove the pre-restore snapshots:
+
+#+begin_src bash
+sudo zfs destroy -r rpool/encrypted/services/authentik@pre-restore
+sudo zfs destroy -r dpool/tank/services/postgresql@pre-restore
+#+end_src
+
 * Notes & Best Practices
 
 - Always stop all Authentik services before restoring the database.
 - Use =ON_ERROR_STOP= to ensure restore failures abort immediately.
-- Ownership fixes are required because dumps restored by =postgres=
-  default ownership to the restoring role.
-- Consider taking a *ZFS snapshot* of the PostgreSQL data directory and
-  media directory before restoring for quick rollback.
+- Ownership fixes (steps 6-8) are required because dumps restored by
+  =postgres= default ownership to the restoring role.
+- The pre-restore ZFS snapshot allows instant rollback if the restore fails.

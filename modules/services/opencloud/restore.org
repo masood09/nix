@@ -1,20 +1,12 @@
-#+TITLE: Restoring OpenCloud Data from Restic Backup (No /tmp, ZFS Staging Dataset)
+#+TITLE: Restoring OpenCloud from Restic Backup
 #+AUTHOR: Masood Ahmed
 #+OPTIONS: toc:nil num:nil
 
-This document restores OpenCloud from Restic backups that were staged under:
+This document restores OpenCloud from Restic backups staged under
+=/mnt/nightly_backup=.
 
-- =/mnt/nightly_backup/opencloud-etc=
-- =/mnt/nightly_backup/opencloud-idm=
-- =/mnt/nightly_backup/opencloud-storage-metadata=
-- =/mnt/nightly_backup/opencloud-storage-ocm=
-- =/mnt/nightly_backup/opencloud-storage-users=
-
-Because Restic restores files to the same paths captured in the snapshot, it
-cannot directly restore these into =/var/lib/opencloud/...= in one step.
-
-Instead, we restore into a *ZFS staging dataset* (not =/tmp=), then copy into
-place.
+Because Restic restores files to the same absolute paths captured in the
+snapshot, we restore into a *ZFS staging dataset* first, then copy into place.
 
 * Backup Information
 
@@ -22,19 +14,15 @@ place.
 - Storage backend: Local filesystem (POSIX, decomposedfs)
 - Live base path: =/var/lib/opencloud=
 
-Stop command:
+| Component        | Backup path                                 |
+|------------------+---------------------------------------------|
+| etc              | =/mnt/nightly_backup/opencloud-etc=           |
+| idm              | =/mnt/nightly_backup/opencloud-idm=           |
+| storage-metadata | =/mnt/nightly_backup/opencloud-storage-metadata= |
+| storage-ocm      | =/mnt/nightly_backup/opencloud-storage-ocm=   |
+| storage-users    | =/mnt/nightly_backup/opencloud-storage-users=  |
 
-#+begin_src bash
-sudo systemctl stop podman-compose-opencloud-root.target
-#+end_src
-
-Start command:
-
-#+begin_src bash
-sudo systemctl start podman-compose-opencloud-root.target
-#+end_src
-
-* Verify Available Snapshots
+* 1. Verify Available Snapshots
 
 #+begin_src bash
 sudo restic-backup snapshots
@@ -42,39 +30,32 @@ sudo restic-backup snapshots
 
 Pick a snapshot ID or use =latest=.
 
-* Create a ZFS Staging Dataset (Avoid /tmp)
+* 2. Create a ZFS Staging Dataset
 
-We create a staging dataset that will temporarily hold the restored
-=/mnt/nightly_backup/...= tree. This keeps the extra restore space off of =/tmp=.
-
-Choose a mountpoint, for example:
-
-- =/mnt/restore-staging=
+Create a staging dataset to temporarily hold the restored files:
 
 #+begin_src bash
-# Create a staging dataset (adjust pool/dataset name as desired)
 sudo zfs create -o mountpoint=/mnt/restore-staging dpool/tank/restore-staging
 
-# Confirm it is mounted
 mount | grep restore-staging || true
 df -h /mnt/restore-staging
 #+end_src
 
-* Stop OpenCloud
+* 3. Stop OpenCloud
 
 #+begin_src bash
 sudo systemctl stop podman-compose-opencloud-root.target
 #+end_src
 
-(Optional) Confirm containers stopped:
+Confirm containers stopped:
 
 #+begin_src bash
 sudo podman ps | grep opencloud || echo "OpenCloud stopped"
 #+end_src
 
-* (Recommended) Take Pre-Restore ZFS Snapshots (Rollback)
+* 4. (Recommended) Take Pre-Restore ZFS Snapshots
 
-These snapshots allow quick rollback if something goes wrong during restore.
+These snapshots allow quick rollback if something goes wrong:
 
 #+begin_src bash
 sudo zfs snapshot -r dpool/tank/services/opencloud-etc@pre-restore
@@ -84,7 +65,7 @@ sudo zfs snapshot -r dpool/tank/services/opencloud-storage-ocm@pre-restore
 sudo zfs snapshot -r dpool/tank/services/opencloud-storage-user@pre-restore
 #+end_src
 
-* Clear Existing Live Data
+* 5. Clear Existing Live Data
 
 #+begin_src bash
 sudo find /var/lib/opencloud/etc -mindepth 1 -delete
@@ -96,11 +77,7 @@ sudo find /var/lib/opencloud/storage/ocm -mindepth 1 -delete
 sudo find /var/lib/opencloud/storage/users -mindepth 1 -delete
 #+end_src
 
-* Restore Snapshot into ZFS Staging Dataset
-
-This restores the staged backup tree into =/mnt/restore-staging=, producing:
-
-=/mnt/restore-staging/mnt/nightly_backup/opencloud-etc=, etc.
+* 6. Restore Snapshot into ZFS Staging Dataset
 
 #+begin_src bash
 SNAPSHOT=latest
@@ -117,20 +94,17 @@ sudo restic-backup restore "${SNAPSHOT}" \
 Expected layout:
 
 #+begin_example
-/mnt/restore-staging/mnt/nightly_backup/opencloud-etc
-/mnt/restore-staging/mnt/nightly_backup/opencloud-idm
-/mnt/restore-staging/mnt/nightly_backup/opencloud-storage-metadata
-/mnt/restore-staging/mnt/nightly_backup/opencloud-storage-ocm
-/mnt/restore-staging/mnt/nightly_backup/opencloud-storage-users
+/mnt/restore-staging/mnt/nightly_backup/opencloud-etc/
+/mnt/restore-staging/mnt/nightly_backup/opencloud-idm/
+/mnt/restore-staging/mnt/nightly_backup/opencloud-storage-metadata/
+/mnt/restore-staging/mnt/nightly_backup/opencloud-storage-ocm/
+/mnt/restore-staging/mnt/nightly_backup/opencloud-storage-users/
 #+end_example
 
-* Copy Restored Data into Live OpenCloud Paths
+* 7. Copy Restored Data into Live Paths
 
-We now copy from the staging dataset into =/var/lib/opencloud=.
-
-IMPORTANT:
-- OpenCloud decomposedfs requires extended attributes (xattrs).
-- Always use =rsync -aAX= to preserve xattrs and ACLs.
+OpenCloud decomposedfs requires extended attributes (xattrs). Always use
+=rsync -aAX= to preserve xattrs and ACLs.
 
 #+begin_src bash
 sudo rsync -aAX --delete \
@@ -159,50 +133,43 @@ sudo rsync -aAX --delete \
   /var/lib/opencloud/storage/users/
 #+end_src
 
-* Start OpenCloud
+* 8. Start OpenCloud
 
 #+begin_src bash
 sudo systemctl start podman-compose-opencloud-root.target
 #+end_src
 
-(Optional) Confirm containers are running:
+Confirm containers are running:
 
 #+begin_src bash
 sudo podman ps | grep opencloud
 #+end_src
 
-* Reindex Search (Recommended After Restore)
+* 9. Reindex Search
 
-After restoring OpenCloud storage, rebuild the search index to ensure all
-spaces and files are searchable.
-
-Run the reindex command inside the main OpenCloud container:
+After restoring storage, rebuild the search index to ensure all spaces and
+files are searchable:
 
 #+begin_src bash
 sudo podman exec -it opencloud-opencloud \
   opencloud search index --all-spaces
 #+end_src
 
-You can monitor progress via logs:
+Monitor progress via logs:
 
 #+begin_src bash
 sudo podman logs -f opencloud-opencloud
 #+end_src
 
-* Cleanup (Remove Staging Dataset and Pre-Restore Snapshots)
+* 10. Clean Up
 
-Once satisfied, clean up temporary restore resources.
-
-**1. Destroy the staging dataset:**
+*1. Destroy the staging dataset:*
 
 #+begin_src bash
 sudo zfs destroy -r dpool/tank/restore-staging
 #+end_src
 
-**2. Remove the pre-restore rollback snapshots:**
-
-These snapshots were only needed as a safety net during restore. Once the
-system is healthy, remove them:
+*2. Remove the pre-restore snapshots:*
 
 #+begin_src bash
 sudo zfs destroy -r dpool/tank/services/opencloud-etc@pre-restore
@@ -212,7 +179,7 @@ sudo zfs destroy -r dpool/tank/services/opencloud-storage-ocm@pre-restore
 sudo zfs destroy -r dpool/tank/services/opencloud-storage-user@pre-restore
 #+end_src
 
-(Optional) Verify snapshots are gone:
+Verify:
 
 #+begin_src bash
 zfs list -t snapshot | grep pre-restore || echo "Pre-restore snapshots removed"
@@ -220,8 +187,6 @@ zfs list -t snapshot | grep pre-restore || echo "Pre-restore snapshots removed"
 
 * Notes & Best Practices
 
-- With your current snapshot layout (=/mnt/nightly_backup/...=), a true one-step restore
-  directly into =/var/lib/opencloud= is not possible with Restic alone.
-- The above approach avoids =/tmp= completely by using ZFS for staging.
-- Always preserve xattrs when copying decomposedfs datasets:
-  - Use =rsync -aAX= (not just =-a=)
+- Always use =rsync -aAX= (not just =-a=) to preserve xattrs required by decomposedfs.
+- Reindex search after every restore to avoid stale or missing results.
+- The pre-restore ZFS snapshots allow instant rollback if the restore fails.
