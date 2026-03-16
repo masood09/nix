@@ -1,7 +1,7 @@
 {lib, ...}: {
   options.homelab.services = {
     backup = {
-      enable = lib.mkEnableOption "Homelab backup orchestration";
+      enable = lib.mkEnableOption "Whether to enable homelab backup orchestration.";
 
       extraPaths = lib.mkOption {
         type = lib.types.listOf lib.types.str;
