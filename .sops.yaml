@@ -73,12 +73,6 @@ creation_rules:
         - *murderbot
         - *watchfulsystem
 
-  - path_regex: ^machines/caretaker/secrets\.sops\.yaml$
-    key_groups:
-      - age:
-        - *murderbot
-        - *caretaker
-
   - path_regex: ^machines/heartbeat/secrets\.sops\.yaml$
     key_groups:
       - age:
