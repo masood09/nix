@@ -60,7 +60,7 @@ in {
         ];
 
         podman-permissions = {
-          description = "Fix Babybuddy dataDir ownership/permissions";
+          description = "Fix Podman /var/lib/containers ownership/permissions";
           wantedBy = ["multi-user.target"];
           before = ["podman.service"];
           after =
