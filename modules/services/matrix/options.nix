@@ -25,11 +25,11 @@ in {
       description = "Root domain for the Matrix deployment.";
     };
 
-    openFirewall = lib.mkEnableOption "Open ports in the firewall";
+    openFirewall = lib.mkEnableOption "Whether to open ports in the firewall.";
 
     synapse = {
       enable = lib.mkEnableOption "Whether to enable Matrix Synapse.";
-      enableCaddy = lib.mkEnableOption "Whether to enable local Caddy";
+      enableCaddy = lib.mkEnableOption "Whether to enable local Caddy.";
 
       dataDir = lib.mkOption {
         type = lib.types.path;
@@ -62,7 +62,7 @@ in {
       };
 
       zfs = {
-        enable = lib.mkEnableOption "Store Matrix Synapse data on ZFS dataset.";
+        enable = lib.mkEnableOption "Whether to store Matrix Synapse data on a ZFS dataset.";
 
         dataDir = lib.mkOption {
           type = zfsDatasetOpts;
@@ -149,7 +149,7 @@ in {
     };
 
     rtc = {
-      enable = lib.mkEnableOption "Whether to enable RTC services";
+      enable = lib.mkEnableOption "Whether to enable RTC services.";
 
       lk-jwt-service = {
         port = lib.mkOption {
