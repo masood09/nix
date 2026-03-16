@@ -6,8 +6,9 @@
   homelabCfg = config.homelab;
   alloyEnabled = homelabCfg.services.alloy.enable;
 
-  enableAuthentik = homelabCfg.services.authentik.enable;
-  authentikExporterPort = "9300";
+  cfg = homelabCfg.services.authentik;
+  enableAuthentik = cfg.enable;
+  authentikExporterPort = toString cfg.metricsPort;
 in {
   config = {
     environment.etc."alloy/authentik.alloy" = lib.mkIf (enableAuthentik && alloyEnabled) {

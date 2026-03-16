@@ -10,5 +10,11 @@
       type = lib.types.str;
       default = "auth.${config.networking.domain}";
     };
+
+    metricsPort = lib.mkOption {
+      type = lib.types.port;
+      default = 9300;
+      description = "Port for Authentik metrics exporter.";
+    };
   };
 }
