@@ -1,15 +1,10 @@
-#+TITLE: Installing NixOS on an OCI VM (Netboot + Disko)
+#+TITLE: Installing NixOS on accesscontrolsystem
 #+AUTHOR: Masood Ahmed
 #+OPTIONS: toc:nil num:nil
 
 This document describes the *manual, repeatable procedure* for installing
-NixOS on an Oracle Cloud Infrastructure (OCI) VM using =netboot.xyz=,
-UEFI shell boot, and =disko= with a pre-built NixOS system closure.
-
-⚠️ *Important:*  
-Several steps below use *hard-coded store paths and hostnames*. These must
-be updated when re-running the procedure for a different host or after
-rebuilding the system.
+NixOS on the =accesscontrolsystem= OCI VM using =netboot.xyz=, UEFI shell
+boot, and =disko= with a pre-built NixOS system closure.
 
 * Overview
 
@@ -53,7 +48,7 @@ install --owner=root --group=root --mode=664 \
 
 1. Log in to the *Oracle Cloud Console*
 2. Navigate to:
-   - Instance → OS Management → Remote Cloud Connection
+   - Instance -> OS Management -> Remote Cloud Connection
 3. Reboot the instance
 
 During boot (in Remote Cloud Connection):
@@ -86,6 +81,11 @@ From your local machine:
 #+begin_src bash
 ssh-keygen -R accesscontrolsystem.oci.mantannest.com
 ssh nixos@accesscontrolsystem.oci.mantannest.com
+#+end_src
+
+Switch to root:
+
+#+begin_src bash
 sudo su - root
 #+end_src
 
@@ -129,6 +129,9 @@ nix-shell --extra-experimental-features flakes \
     --run 'cat /mnt/nix/secret/age/ssh_ed25519_key.pub | ssh-to-age'
 #+end_src
 
+Save the resulting age public key -- it must be added to =.sops.yaml= in
+the flake repository.
+
 * 9. Generate User SSH Key
 
 Generate a user SSH key (if not already present):
@@ -137,21 +140,15 @@ Generate a user SSH key (if not already present):
 ssh-keygen -t ed25519 -N "" -C ""
 #+end_src
 
-Copy the contents of:
-
-#+begin_example
-~/.ssh/id_ed25519.pub
-#+end_example
+Copy the contents of =~/.ssh/id_ed25519.pub= for use in the next step.
 
 * 10. Configure Remote Builder Access
 
-On the *builder machine*:
+On the *builder machine*, add the public key from step 9:
 
 #+begin_src bash
 vi ~/.ssh/authorized_keys
 #+end_src
-
-Paste the public key generated in the previous step.
 
 * 11. Build the NixOS System on the Builder
 
@@ -162,11 +159,11 @@ sudo nix build --refresh \
   github:masood09/nix#nixosConfigurations.accesscontrolsystem.config.system.build.toplevel
 #+end_src
 
-⚠️ This produces a *hard-coded store path* that must match the next steps.
+Note the resulting store path from the build output.
 
 * 12. Copy the System Closure to the Target
 
-On the target machine:
+On the target machine, replace =<STORE_PATH>= with the path from step 11:
 
 #+begin_src bash
 nix --extra-experimental-features 'nix-command flakes' \
@@ -174,10 +171,8 @@ nix --extra-experimental-features 'nix-command flakes' \
   --option require-sigs false \
   --from 'ssh-ng://masoodahmed@aarm64builder.oci.mantannest.com' \
   --to 'local?root=/mnt' \
-  /nix/store/817zc9za4lb8m7lf0xvi56lvjl11cx91-nixos-system-accesscontrolsystem-25.11.20260113.2c3e5ec
+  <STORE_PATH>
 #+end_src
-
-⚠️ Replace the store path with the one produced by your build.
 
 * 13. Install NixOS
 
@@ -188,7 +183,7 @@ NIX_REMOTE='local?root=/mnt' \
   nixos-install \
   --no-root-passwd \
   --root /mnt \
-  --system /nix/store/817zc9za4lb8m7lf0xvi56lvjl11cx91-nixos-system-accesscontrolsystem-25.11.20260113.2c3e5ec
+  --system <STORE_PATH>
 #+end_src
 
 * 14. Cleanup and Reboot
@@ -201,16 +196,9 @@ zpool export -a
 reboot
 #+end_src
 
-* Notes & Caveats
+* Notes & Best Practices
 
-- Store paths are *hard-coded* and must be updated per build.
+- Replace =<STORE_PATH>= in steps 12-13 with the actual path from the build.
 - This process assumes ZFS + Disko-managed disks.
-- Strongly recommended to automate store path resolution in the future.
-- Suitable for OCI ARM64 VMs using UEFI boot.
-
-* Future Improvements
-
-- Automate system closure discovery
-- Replace manual copy with =nixos-anywhere=
-- Template host-specific steps
-- Wrap in a Makefile or deployment script
+- The age public key from step 8 must be added to =.sops.yaml= and secrets
+  re-encrypted before the first deploy.
