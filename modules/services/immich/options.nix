@@ -2,7 +2,9 @@
   config,
   lib,
   ...
-}: {
+}: let
+  zfsOpts = (import ../../../lib/zfs-options.nix {inherit lib;}).mkZfsOptions;
+in {
   options.homelab.services.immich = {
     enable = lib.mkEnableOption "Whether to enable Immich.";
 
@@ -28,26 +30,13 @@
       description = "Group ID of Immich group";
     };
 
-    zfs = {
-      enable = lib.mkEnableOption "Store Immich dataDir on a ZFS dataset.";
-
-      restic = {
-        enable = lib.mkEnableOption "Whether to enable restic backup.";
+    zfs = zfsOpts {
+      serviceName = "Immich";
+      dataset = "dpool/tank/services/immich";
+      properties = {
+        recordsize = "1M";
       };
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "dpool/tank/services/immich";
-        description = "ZFS dataset to create and mount at dataDir.";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          recordsize = "1M";
-        };
-        description = "ZFS properties for the dataset.";
-      };
+      withRestic = true;
     };
   };
 }

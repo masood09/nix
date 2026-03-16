@@ -2,7 +2,9 @@
   config,
   lib,
   ...
-}: {
+}: let
+  zfsOpts = (import ../../../lib/zfs-options.nix {inherit lib;}).mkZfsOptions;
+in {
   options.homelab.services.prometheus = {
     enable = lib.mkEnableOption "Whether to enable Prometheus.";
 
@@ -18,25 +20,15 @@
       description = "How long to retain metrics data.";
     };
 
-    zfs = {
-      enable = lib.mkEnableOption "Store Prometheus dataDir on a ZFS dataset.";
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "dpool/tank/services/prometheus";
-        description = "ZFS dataset to create and mount at dataDir.";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          logbias = "throughput";
-          recordsize = "16K";
-          redundant_metadata = "most";
-          relatime = "off";
-          primarycache = "all";
-        };
-        description = "ZFS properties to apply to the dataset.";
+    zfs = zfsOpts {
+      serviceName = "Prometheus";
+      dataset = "dpool/tank/services/prometheus";
+      properties = {
+        logbias = "throughput";
+        recordsize = "16K";
+        redundant_metadata = "most";
+        relatime = "off";
+        primarycache = "all";
       };
     };
   };

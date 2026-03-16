@@ -2,7 +2,9 @@
   config,
   lib,
   ...
-}: {
+}: let
+  zfsOpts = (import ../../../lib/zfs-options.nix {inherit lib;}).mkZfsOptions;
+in {
   options.homelab.services.karakeep = {
     enable = lib.mkEnableOption "Whether to enable Karakeep.";
 
@@ -56,24 +58,14 @@
       };
     };
 
-    zfs = {
-      enable = lib.mkEnableOption "Store Karakeep dataDir on a ZFS dataset.";
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "dpool/tank/services/karakeep";
-        description = "ZFS dataset to create and mount at dataDir.";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          logbias = "latency";
-          recordsize = "16K";
-          relatime = "off";
-          primarycache = "all";
-        };
-        description = "ZFS properties to apply to the dataset.";
+    zfs = zfsOpts {
+      serviceName = "Karakeep";
+      dataset = "dpool/tank/services/karakeep";
+      properties = {
+        logbias = "latency";
+        recordsize = "16K";
+        relatime = "off";
+        primarycache = "all";
       };
     };
   };

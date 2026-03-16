@@ -1,4 +1,6 @@
-{lib, ...}: {
+{lib, ...}: let
+  zfsOpts = (import ../../../lib/zfs-options.nix {inherit lib;}).mkZfsOptions;
+in {
   options.homelab.services.mongodb = {
     enable = lib.mkEnableOption "Whether to enable MongoDB.";
 
@@ -20,32 +22,19 @@
       description = "GID for the MongoDB service group.";
     };
 
-    zfs = {
-      enable = lib.mkEnableOption "Store MongoDB dataDir on a ZFS dataset.";
-
-      restic = {
-        enable = lib.mkEnableOption "Whether to enable restic backup.";
+    zfs = zfsOpts {
+      serviceName = "MongoDB";
+      dataset = "fpool/fast/services/mongodb";
+      properties = {
+        atime = "off";
+        compression = "zstd";
+        logbias = "latency";
+        recordsize = "16K";
+        redundant_metadata = "most";
+        primarycache = "all";
+        xattr = "sa";
       };
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "fpool/fast/services/mongodb";
-        description = "ZFS dataset to create and mount at dataDir.";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          atime = "off";
-          compression = "zstd";
-          logbias = "latency";
-          recordsize = "16K";
-          redundant_metadata = "most";
-          primarycache = "all";
-          xattr = "sa";
-        };
-        description = "ZFS properties optimized for MongoDB.";
-      };
+      withRestic = true;
     };
   };
 }
