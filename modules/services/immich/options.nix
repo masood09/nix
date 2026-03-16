@@ -11,11 +11,13 @@ in {
     dataDir = lib.mkOption {
       type = lib.types.path;
       default = "/var/lib/immich";
+      description = "Directory for Immich data storage.";
     };
 
     webDomain = lib.mkOption {
       type = lib.types.str;
       default = "photos.${config.networking.domain}";
+      description = "Domain name for the Immich web interface.";
     };
 
     userId = lib.mkOption {
