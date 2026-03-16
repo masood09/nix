@@ -100,13 +100,17 @@ in {
       };
     };
 
-    inherit (permSvc) systemd;
+    systemd = lib.mkMerge [
+      permSvc.systemd
 
-    # PostgreSQL ordering (separate from permission service concerns)
-    systemd.services.mailarchiver = lib.mkIf postgresqlEnabled {
-      requires = ["postgresql.target"];
-      after = ["postgresql.target"];
-    };
+      # PostgreSQL ordering (separate from permission service concerns)
+      (lib.mkIf postgresqlEnabled {
+        services.mailarchiver = {
+          requires = ["postgresql.target"];
+          after = ["postgresql.target"];
+        };
+      })
+    ];
 
     users = {
       users.mailarchiver = {
