@@ -45,11 +45,11 @@ in {
           TimeZone.DisplayTimeZoneId = config.time.timeZone;
 
           OAuth = {
-            Enabled = true;
+            Enabled = cfg.oauth.enable;
             Authority = cfg.oauth.issuerURL;
             ClientId = cfg.oauth.clientID;
-            DisablePasswordLogin = true;
-            AutoRedirect = true;
+            DisablePasswordLogin = cfg.oauth.disablePasswordLogin;
+            AutoRedirect = cfg.oauth.autoRedirect;
             AutoApproveUsers = true;
           };
         };
