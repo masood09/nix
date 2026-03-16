@@ -2,7 +2,9 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  zfsOpts = (import ../../../lib/zfs-options.nix {inherit lib;}).mkZfsOptions;
+in {
   options.homelab.services.postgresql = {
     enable = lib.mkEnableOption "Whether to enable PostgreSQL database.";
     package = lib.mkPackageOption pkgs "postgresql_17" {};
@@ -21,52 +23,26 @@
         default = "/var/backup/postgresql";
       };
 
-      zfs = {
-        enable = lib.mkEnableOption "Store backup dataDir on a ZFS dataset.";
-
-        restic = {
-          enable = lib.mkEnableOption "Whether to enable restic backup.";
+      zfs = zfsOpts {
+        serviceName = "PostgreSQL backup";
+        dataset = "fpool/fast/backup/postgresql";
+        properties = {
+          recordsize = "1M";
         };
-
-        dataset = lib.mkOption {
-          type = lib.types.str;
-          default = "fpool/fast/backup/postgresql";
-          description = "ZFS dataset to create and mount at dataDir.";
-        };
-
-        properties = lib.mkOption {
-          type = lib.types.attrsOf lib.types.str;
-          default = {
-            recordsize = "1M";
-          };
-          description = "ZFS properties for the dataset.";
-        };
+        withRestic = true;
       };
     };
 
-    zfs = {
-      enable = lib.mkEnableOption "Store Postgresql dataDir on a ZFS dataset.";
-
-      restic = {
-        enable = lib.mkEnableOption "Whether to enable restic backup.";
+    zfs = zfsOpts {
+      serviceName = "PostgreSQL";
+      dataset = "fpool/fast/services/postgresql_17";
+      properties = {
+        compression = "lz4";
+        logbias = "latency";
+        recordsize = "8K";
+        redundant_metadata = "most";
       };
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "fpool/fast/services/postgresql_17";
-        description = "ZFS dataset to create and mount at dataDir.";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          compression = "lz4";
-          logbias = "latency";
-          recordsize = "8K";
-          redundant_metadata = "most";
-        };
-        description = "ZFS properties for the dataset.";
-      };
+      withRestic = true;
     };
   };
 }

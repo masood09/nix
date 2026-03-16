@@ -2,7 +2,9 @@
   config,
   lib,
   ...
-}: {
+}: let
+  zfsOpts = (import ../../../lib/zfs-options.nix {inherit lib;}).mkZfsOptions;
+in {
   options.homelab.services.headscale = {
     enable = lib.mkEnableOption "Whether to enable Headscale.";
 
@@ -59,53 +61,27 @@
         description = "Port for the Headplane admin UI.";
       };
 
-      zfs = {
-        enable = lib.mkEnableOption "Store Headplane dataDir on a ZFS dataset.";
-
-        restic = {
-          enable = lib.mkEnableOption "Whether to enable restic backup.";
-        };
-
-        dataset = lib.mkOption {
-          type = lib.types.str;
-          default = "rpool/root/var/lib/headplane";
-          description = "ZFS dataset to create and mount at dataDir.";
-        };
-
-        properties = lib.mkOption {
-          type = lib.types.attrsOf lib.types.str;
-          default = {
-            logbias = "latency";
-            recordsize = "16K";
-            redundant_metadata = "most";
-          };
-          description = "ZFS properties for the dataset.";
-        };
-      };
-    };
-
-    zfs = {
-      enable = lib.mkEnableOption "Store Headscale dataDir on a ZFS dataset.";
-
-      restic = {
-        enable = lib.mkEnableOption "Whether to enable restic backup.";
-      };
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "rpool/root/var/lib/headscale";
-        description = "ZFS dataset to create and mount at dataDir.";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
+      zfs = zfsOpts {
+        serviceName = "Headplane";
+        dataset = "rpool/root/var/lib/headplane";
+        properties = {
           logbias = "latency";
           recordsize = "16K";
           redundant_metadata = "most";
         };
-        description = "ZFS properties for the dataset.";
+        withRestic = true;
       };
+    };
+
+    zfs = zfsOpts {
+      serviceName = "Headscale";
+      dataset = "rpool/root/var/lib/headscale";
+      properties = {
+        logbias = "latency";
+        recordsize = "16K";
+        redundant_metadata = "most";
+      };
+      withRestic = true;
     };
   };
 }

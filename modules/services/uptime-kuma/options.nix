@@ -2,7 +2,9 @@
   config,
   lib,
   ...
-}: {
+}: let
+  zfsOpts = (import ../../../lib/zfs-options.nix {inherit lib;}).mkZfsOptions;
+in {
   options.homelab.services.uptime-kuma = {
     enable = lib.mkEnableOption "Whether to enable Uptime Kuma.";
 
@@ -28,26 +30,13 @@
       description = "Group ID of Uptime Kuma group";
     };
 
-    zfs = {
-      enable = lib.mkEnableOption "Store Uptime Kuma dataDir on a ZFS dataset.";
-
-      restic = {
-        enable = lib.mkEnableOption "Whether to enable restic backup.";
+    zfs = zfsOpts {
+      serviceName = "Uptime Kuma";
+      dataset = "rpool/root/var/lib/uptime-kuma";
+      properties = {
+        recordsize = "16K";
       };
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "rpool/root/var/lib/uptime-kuma";
-        description = "ZFS dataset to create and mount at dataDir.";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          recordsize = "16K";
-        };
-        description = "ZFS properties for the dataset.";
-      };
+      withRestic = true;
     };
   };
 }

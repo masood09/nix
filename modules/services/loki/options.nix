@@ -2,7 +2,9 @@
   config,
   lib,
   ...
-}: {
+}: let
+  zfsOpts = (import ../../../lib/zfs-options.nix {inherit lib;}).mkZfsOptions;
+in {
   options.homelab.services.loki = {
     enable = lib.mkEnableOption "Whether to enable Loki.";
 
@@ -74,24 +76,14 @@
       };
     };
 
-    zfs = {
-      enable = lib.mkEnableOption "Store Loki dataDir on a ZFS dataset.";
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "dpool/tank/services/loki";
-        description = "ZFS dataset to create and mount at dataDir.";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          logbias = "latency";
-          recordsize = "16K";
-          relatime = "off";
-          primarycache = "metadata";
-        };
-        description = "ZFS properties for the dataset.";
+    zfs = zfsOpts {
+      serviceName = "Loki";
+      dataset = "dpool/tank/services/loki";
+      properties = {
+        logbias = "latency";
+        recordsize = "16K";
+        relatime = "off";
+        primarycache = "metadata";
       };
     };
   };

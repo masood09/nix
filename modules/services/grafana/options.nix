@@ -2,7 +2,9 @@
   config,
   lib,
   ...
-}: {
+}: let
+  zfsOpts = (import ../../../lib/zfs-options.nix {inherit lib;}).mkZfsOptions;
+in {
   options.homelab.services.grafana = {
     enable = lib.mkEnableOption "Whether to enable Grafana.";
 
@@ -44,24 +46,14 @@
       };
     };
 
-    zfs = {
-      enable = lib.mkEnableOption "Store Grafana dataDir on a ZFS dataset.";
-
-      dataset = lib.mkOption {
-        type = lib.types.str;
-        default = "dpool/tank/services/grafana";
-        description = "ZFS dataset to create and mount at dataDir.";
-      };
-
-      properties = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = {
-          logbias = "latency";
-          recordsize = "16K";
-          relatime = "off";
-          primarycache = "all";
-        };
-        description = "ZFS properties to apply to the dataset.";
+    zfs = zfsOpts {
+      serviceName = "Grafana";
+      dataset = "dpool/tank/services/grafana";
+      properties = {
+        logbias = "latency";
+        recordsize = "16K";
+        relatime = "off";
+        primarycache = "all";
       };
     };
   };
