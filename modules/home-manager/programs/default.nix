@@ -4,6 +4,7 @@
     ./_bat.nix
     ./_btop.nix
     ./_catppuccin.nix
+    ./_claude-code.nix
     ./_direnv.nix
     ./_emacs.nix
     ./_eza.nix

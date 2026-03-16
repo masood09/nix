@@ -33,6 +33,7 @@
     };
 
     programs = {
+      claude-code.enable = true;
       emacs.enable = true;
       git.enable = true;
       neovim.enable = true;
