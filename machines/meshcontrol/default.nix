@@ -16,12 +16,4 @@
     ];
   };
 
-  fileSystems = {
-    "/".neededForBoot = true;
-    "/nix".neededForBoot = true;
-    "/nix/persist".neededForBoot = true;
-    "/var/backup".neededForBoot = true;
-    "/var/lib/nixos".neededForBoot = true;
-    "/var/log".neededForBoot = true;
-  };
 }
