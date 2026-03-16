@@ -1,8 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}: {
+{lib, ...}: {
   options.homelab.services.postgresql = {
     enable = lib.mkEnableOption "Whether to enable PostgreSQL database.";
     package = lib.mkPackageOption pkgs "postgresql_17" {};
