@@ -9,11 +9,13 @@
     webDomain = lib.mkOption {
       type = lib.types.str;
       default = "prometheus.${config.networking.domain}";
+      description = "Domain name for the Prometheus web interface.";
     };
 
     retentionTime = lib.mkOption {
       type = lib.types.str;
       default = "30d";
+      description = "How long to retain metrics data.";
     };
 
     zfs = {
@@ -22,6 +24,7 @@
       dataset = lib.mkOption {
         type = lib.types.str;
         default = "dpool/tank/services/prometheus";
+        description = "ZFS dataset to create and mount at dataDir.";
       };
 
       properties = lib.mkOption {
@@ -33,6 +36,7 @@
           relatime = "off";
           primarycache = "all";
         };
+        description = "ZFS properties to apply to the dataset.";
       };
     };
   };

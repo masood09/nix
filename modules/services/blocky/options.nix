@@ -9,22 +9,26 @@
     openFirewall = lib.mkOption {
       type = lib.types.bool;
       default = true;
+      description = "Whether to open DNS ports in the firewall.";
     };
 
     metrics = {
       enable = lib.mkOption {
         type = lib.types.bool;
         default = true;
+        description = "Whether to enable Prometheus metrics endpoint.";
       };
 
       listenPort = lib.mkOption {
         type = lib.types.port;
         default = 4000;
+        description = "Port for the Prometheus metrics endpoint.";
       };
 
       openFirewall = lib.mkOption {
         type = lib.types.bool;
         default = false;
+        description = "Whether to open the metrics port in the firewall.";
       };
     };
 
@@ -120,26 +124,31 @@
       enable = lib.mkOption {
         type = lib.types.bool;
         default = true;
+        description = "Whether to enable Unbound as a recursive DNS resolver upstream.";
       };
 
       userId = lib.mkOption {
         default = 3009;
         type = lib.types.ints.u16;
+        description = "UID for the Unbound service user.";
       };
 
       groupId = lib.mkOption {
         default = 3009;
         type = lib.types.ints.u16;
+        description = "GID for the Unbound service group.";
       };
 
       port = lib.mkOption {
         type = lib.types.port;
         default = 5335;
+        description = "Port for Unbound to listen on.";
       };
 
       localDomain = lib.mkOption {
         type = lib.types.str;
         default = config.networking.domain;
+        description = "Local domain for Unbound private address resolution.";
       };
     };
   };
