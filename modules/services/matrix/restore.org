@@ -1,0 +1,222 @@
+#+TITLE: Restoring Matrix Synapse from Restic Backup
+#+AUTHOR: Masood Ahmed
+#+OPTIONS: toc:nil num:nil
+
+This document describes a *safe, repeatable procedure* for restoring the
+Matrix Synapse and Matrix Authentication Service (MAS) from Restic backups
+staged via =/mnt/nightly_backup=.
+
+Matrix stores critical state in four places:
+
+1. Synapse data directory (=/var/lib/matrix-synapse=)
+2. Synapse media directory (=/var/lib/matrix-synapse-media=)
+3. PostgreSQL database =matrix-synapse=
+4. PostgreSQL database =matrix-authentication-service=
+
+All four must be restored together to maintain consistency.
+
+* Backup Information
+
+| Component                      | Path / Database                     |
+|--------------------------------+-------------------------------------|
+| Synapse data                   | =/var/lib/matrix-synapse=             |
+| Synapse media                  | =/var/lib/matrix-synapse-media=       |
+| Synapse PostgreSQL database    | =matrix-synapse=                      |
+| MAS PostgreSQL database        | =matrix-authentication-service=       |
+
+* 1. Verify Available Snapshots
+
+#+begin_src bash
+sudo restic-backup snapshots
+#+end_src
+
+Choose a snapshot ID or use =latest=.
+
+* 2. Create a ZFS Staging Dataset
+
+Create a staging dataset to temporarily hold the restored files:
+
+#+begin_src bash
+sudo zfs create -o mountpoint=/mnt/restore-staging dpool/tank/restore-staging
+
+mount | grep restore-staging || true
+df -h /mnt/restore-staging
+#+end_src
+
+* 3. Stop Matrix Services
+
+Stop all Matrix-related services before restoring:
+
+#+begin_src bash
+sudo systemctl stop matrix-authentication-service.service
+sudo systemctl stop matrix-synapse.service
+#+end_src
+
+* 4. (Recommended) Take Pre-Restore ZFS Snapshots
+
+#+begin_src bash
+sudo zfs snapshot -r fpool/fast/services/matrix-synapse@pre-restore
+sudo zfs snapshot -r dpool/tank/services/matrix-synapse-media@pre-restore
+sudo zfs snapshot -r dpool/tank/services/postgresql@pre-restore
+#+end_src
+
+* 5. Clear Existing Data
+
+#+begin_src bash
+sudo find /var/lib/matrix-synapse -mindepth 1 -delete
+sudo find /var/lib/matrix-synapse-media -mindepth 1 -delete
+#+end_src
+
+* 6. Restore Files into ZFS Staging Dataset
+
+#+begin_src bash
+SNAPSHOT=latest
+
+sudo restic-backup restore "${SNAPSHOT}" \
+  --include /mnt/nightly_backup/matrix-synapse \
+  --include /mnt/nightly_backup/matrix-synapse-media \
+  --include /mnt/nightly_backup/postgresql-backup/matrix-synapse.sql.gz \
+  --include /mnt/nightly_backup/postgresql-backup/matrix-authentication-service.sql.gz \
+  --target /mnt/restore-staging
+#+end_src
+
+Expected layout:
+
+#+begin_example
+/mnt/restore-staging/mnt/nightly_backup/matrix-synapse/
+/mnt/restore-staging/mnt/nightly_backup/matrix-synapse-media/
+/mnt/restore-staging/mnt/nightly_backup/postgresql-backup/matrix-synapse.sql.gz
+/mnt/restore-staging/mnt/nightly_backup/postgresql-backup/matrix-authentication-service.sql.gz
+#+end_example
+
+* 7. Restore Synapse Data and Media
+
+Use =rsync -aAX= to preserve permissions, ACLs, and extended attributes:
+
+#+begin_src bash
+sudo rsync -aAX --delete \
+  --chown=matrix-synapse:matrix-synapse \
+  /mnt/restore-staging/mnt/nightly_backup/matrix-synapse/ \
+  /var/lib/matrix-synapse/
+
+sudo rsync -aAX --delete \
+  --chown=matrix-synapse:matrix-synapse \
+  /mnt/restore-staging/mnt/nightly_backup/matrix-synapse-media/ \
+  /var/lib/matrix-synapse-media/
+#+end_src
+
+* 8. Restore PostgreSQL Databases
+
+** Restore Synapse Database
+
+#+begin_src bash
+sudo -u postgres psql -d postgres -c "DROP DATABASE IF EXISTS \"matrix-synapse\";"
+sudo -u postgres psql -d postgres \
+  -c "CREATE DATABASE \"matrix-synapse\" WITH OWNER \"matrix-synapse\" TEMPLATE template0 LC_COLLATE 'C' LC_CTYPE 'C';"
+#+end_src
+
+#+begin_src bash
+sudo cp \
+  /mnt/restore-staging/mnt/nightly_backup/postgresql-backup/matrix-synapse.sql.gz \
+  /tmp/matrix-synapse.sql.gz
+
+sudo chmod 644 /tmp/matrix-synapse.sql.gz
+
+sudo -u matrix-synapse bash -lc \
+  'gunzip -c /tmp/matrix-synapse.sql.gz | psql -v ON_ERROR_STOP=1 -d matrix-synapse'
+
+sudo rm -f /tmp/matrix-synapse.sql.gz
+#+end_src
+
+** Restore MAS Database
+
+#+begin_src bash
+sudo -u postgres psql -d postgres -c "DROP DATABASE IF EXISTS \"matrix-authentication-service\";"
+sudo systemctl restart postgresql
+#+end_src
+
+#+begin_src bash
+sudo cp \
+  /mnt/restore-staging/mnt/nightly_backup/postgresql-backup/matrix-authentication-service.sql.gz \
+  /tmp/matrix-authentication-service.sql.gz
+
+sudo chmod 644 /tmp/matrix-authentication-service.sql.gz
+
+sudo -u matrix-authentication-service bash -lc \
+  'gunzip -c /tmp/matrix-authentication-service.sql.gz | psql -v ON_ERROR_STOP=1 -d matrix-authentication-service'
+
+sudo rm -f /tmp/matrix-authentication-service.sql.gz
+#+end_src
+
+* 9. Start Matrix Services
+
+#+begin_src bash
+sudo systemctl start matrix-synapse.service
+sudo systemctl start matrix-authentication-service.service
+#+end_src
+
+Verify service status:
+
+#+begin_src bash
+sudo systemctl status matrix-synapse.service
+sudo systemctl status matrix-authentication-service.service
+#+end_src
+
+* 10. Clean Up
+
+*1. Destroy the staging dataset:*
+
+#+begin_src bash
+sudo zfs destroy -r dpool/tank/restore-staging
+#+end_src
+
+*2. Remove pre-restore snapshots:*
+
+#+begin_src bash
+sudo zfs destroy -r fpool/fast/services/matrix-synapse@pre-restore
+sudo zfs destroy -r dpool/tank/services/matrix-synapse-media@pre-restore
+sudo zfs destroy -r dpool/tank/services/postgresql@pre-restore
+#+end_src
+
+Verify:
+
+#+begin_src bash
+zfs list -t snapshot | grep pre-restore || echo "Snapshots removed"
+#+end_src
+
+* Rollback (If Something Goes Wrong)
+
+If Matrix fails to start or data is corrupt, rollback to the pre-restore
+snapshots:
+
+#+begin_src bash
+sudo systemctl stop matrix-authentication-service.service
+sudo systemctl stop matrix-synapse.service
+sudo zfs rollback -r fpool/fast/services/matrix-synapse@pre-restore
+sudo zfs rollback -r dpool/tank/services/matrix-synapse-media@pre-restore
+sudo zfs rollback -r dpool/tank/services/postgresql@pre-restore
+sudo systemctl start matrix-synapse.service
+sudo systemctl start matrix-authentication-service.service
+#+end_src
+
+* Critical Notes
+
+** Synapse database requires locale C
+
+The =matrix-synapse= database must be created with =LC_COLLATE 'C'= and
+=LC_CTYPE 'C'=. The restore procedure above handles this with
+=TEMPLATE template0= and the correct locale flags.
+
+** All four components must be restored together
+
+The Synapse data directory, media directory, Synapse database, and MAS
+database are tightly coupled. Restoring only a subset will result in
+inconsistencies (e.g., media references pointing to missing files, or
+authentication state mismatching Synapse state).
+
+* Notes & Best Practices
+
+- Always stop both Matrix Synapse and MAS before restoring.
+- Use =ON_ERROR_STOP= to ensure restore failures abort immediately.
+- The pre-restore ZFS snapshots allow instant rollback if the restore fails.
+- Restore all four components from the same snapshot to maintain consistency.
