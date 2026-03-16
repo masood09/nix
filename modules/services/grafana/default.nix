@@ -11,6 +11,19 @@
   prometheusEnabled = config.services.prometheus.enable;
 
   grafanaDataDir = lib.removeSuffix "/" (toString grafanaCfg.dataDir);
+
+  systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
+  permSvc = systemdHelpers.mkPermissionService {
+    name = "grafana";
+    dataDir = grafanaDataDir;
+    user = "grafana";
+    group = "grafana";
+    mainServices = ["grafana"];
+    zfs = {
+      inherit (grafanaCfg.zfs) enable;
+      datasetServiceName = "zfs-dataset-grafana";
+    };
+  };
 in {
   imports = [
     ./options.nix
@@ -124,52 +137,7 @@ in {
       };
     };
 
-    # Service hardening + mount ordering
-    systemd = {
-      services = {
-        grafana = lib.mkMerge [
-          {
-            # Unit-level ordering / mount requirements
-            unitConfig = {
-              RequiresMountsFor = [grafanaDataDir];
-            };
-
-            requires = ["grafana-permissions.service"];
-            after = ["grafana-permissions.service"];
-          }
-
-          (lib.mkIf grafanaCfg.zfs.enable {
-            requires = ["zfs-dataset-grafana.service"];
-            after = ["zfs-dataset-grafana.service"];
-          })
-        ];
-
-        grafana-permissions = {
-          description = "Fix Grafana dataDir ownership/permissions";
-          wantedBy = ["multi-user.target"];
-          before = ["grafana.service"];
-          after =
-            ["local-fs.target"]
-            ++ lib.optionals grafanaCfg.zfs.enable ["zfs-dataset-grafana.service"];
-          requires =
-            lib.optionals grafanaCfg.zfs.enable ["zfs-dataset-grafana.service"];
-
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = ''
-              ${pkgs.coreutils}/bin/chown grafana:grafana ${grafanaDataDir}
-            '';
-          };
-        };
-      };
-
-      tmpfiles.rules = [
-        # Ensure base dir exists and is owned correctly
-        "d ${grafanaDataDir} 0700 grafana grafana -"
-        "z ${grafanaDataDir} 0700 grafana grafana -"
-      ];
-    };
+    inherit (permSvc) systemd;
 
     environment =
       lib.mkIf (

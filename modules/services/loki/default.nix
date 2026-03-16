@@ -10,6 +10,19 @@
 
   lokiDataDir = lib.removeSuffix "/" (toString lokiCfg.dataDir);
   lokiPath = p: "${lokiDataDir}/${p}";
+
+  systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
+  permSvc = systemdHelpers.mkPermissionService {
+    name = "loki";
+    dataDir = lokiDataDir;
+    user = "loki";
+    group = "loki";
+    mainServices = ["loki"];
+    zfs = {
+      inherit (lokiCfg.zfs) enable;
+      datasetServiceName = "zfs-dataset-loki";
+    };
+  };
 in {
   imports = [
     ./options.nix
@@ -164,52 +177,7 @@ in {
       loki.gid = lokiCfg.groupId;
     };
 
-    # Service hardening + mount ordering
-    systemd = {
-      services = {
-        loki = lib.mkMerge [
-          {
-            # Unit-level ordering / mount requirements
-            unitConfig = {
-              RequiresMountsFor = [lokiDataDir];
-            };
-
-            requires = ["loki-permissions.service"];
-            after = ["loki-permissions.service"];
-          }
-
-          (lib.mkIf lokiCfg.zfs.enable {
-            requires = ["zfs-dataset-loki.service"];
-            after = ["zfs-dataset-loki.service"];
-          })
-        ];
-
-        loki-permissions = {
-          description = "Fix Loki dataDir ownership/permissions";
-          wantedBy = ["multi-user.target"];
-          before = ["loki.service"];
-          after =
-            ["local-fs.target"]
-            ++ lib.optionals lokiCfg.zfs.enable ["zfs-dataset-loki.service"];
-          requires =
-            lib.optionals lokiCfg.zfs.enable ["zfs-dataset-loki.service"];
-
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = ''
-              ${pkgs.coreutils}/bin/chown loki:loki ${lokiDataDir}
-            '';
-          };
-        };
-      };
-
-      tmpfiles.rules = [
-        # Ensure base dir exists and is owned correctly
-        "d ${lokiDataDir} 0700 loki loki -"
-        "z ${lokiDataDir} 0700 loki loki -"
-      ];
-    };
+    inherit (permSvc) systemd;
 
     environment =
       lib.mkIf (
