@@ -1,59 +1,36 @@
-#+TITLE: Restoring MailArchiver Data from Restic Backup (ZFS Staging Dataset)
+#+TITLE: Restoring MailArchiver from Restic Backup
 #+AUTHOR: Masood Ahmed
 #+OPTIONS: toc:nil num:nil
 
-This document restores MailArchiver from Restic backups staged under:
+This document restores MailArchiver from Restic backups staged under
+=/mnt/nightly_backup=.
 
-- =/mnt/nightly_backup/mailarchiver=
-- PostgreSQL database =mailarchiver=
+MailArchiver stores critical state in two places:
 
-MailArchiver stores critical state in three places:
+1. DataProtection keys in =/var/lib/mailarchiver=
+2. PostgreSQL database =mailarchiver=
 
-1. DataProtection keys → =/var/lib/mailarchiver=
-2. PostgreSQL database → =mailarchiver=
-
-Because Restic restores files to the same absolute paths captured in the snapshot,
-we restore into a *ZFS staging dataset* first, then copy into place.
+Because Restic restores files to the same absolute paths captured in the
+snapshot, we restore into a *ZFS staging dataset* first, then copy into place.
 
 * Backup Information
 
-- Service: =MailArchiver=
-- Live data paths:
+| Component           | Path                   |
+|---------------------+------------------------|
+| DataProtection keys | =/var/lib/mailarchiver=  |
+| PostgreSQL database | =mailarchiver=           |
 
-| Component           | Path                                |
-|---------------------+-------------------------------------|
-| DataProtection keys | =/var/lib/mailarchiver=                           |
-| PostgreSQL database | =mailarchiver=                        |
-
-Stop command:
-
-#+begin_src bash
-sudo systemctl stop mailarchiver.service
-#+end_src
-
-Start command:
-
-#+begin_src bash
-sudo systemctl start mailarchiver.service
-#+end_src
-
-
-* Verify Available Restic Snapshots
+* 1. Verify Available Snapshots
 
 #+begin_src bash
 sudo restic-backup snapshots
 #+end_src
 
-Choose snapshot ID or use:
+Choose a snapshot ID or use =latest=.
 
-#+begin_src bash
-SNAPSHOT=latest
-#+end_src
+* 2. Create a ZFS Staging Dataset
 
-
-* Create ZFS Staging Dataset
-
-This dataset temporarily holds restored files.
+Create a staging dataset to temporarily hold the restored files:
 
 #+begin_src bash
 sudo zfs create -o mountpoint=/mnt/restore-staging dpool/tank/restore-staging
@@ -62,19 +39,13 @@ mount | grep restore-staging || true
 df -h /mnt/restore-staging
 #+end_src
 
-Expected mountpoint:
-
-=/mnt/restore-staging=
-
-
-* Stop MailArchiver
+* 3. Stop MailArchiver
 
 #+begin_src bash
 sudo systemctl stop mailarchiver.service
 #+end_src
 
-
-* Take Pre-Restore ZFS Snapshots (Rollback Safety)
+* 4. (Recommended) Take Pre-Restore ZFS Snapshots
 
 #+begin_src bash
 sudo zfs snapshot -r fpool/fast/services/mailarchiver@pre-restore
@@ -86,17 +57,13 @@ PostgreSQL snapshot (optional but recommended):
 sudo zfs snapshot -r dpool/tank/services/postgresql@pre-restore
 #+end_src
 
-
-* Clear Existing Live Data
-
-WARNING: This deletes existing data.
+* 5. Clear Existing Live Data
 
 #+begin_src bash
 sudo find /var/lib/mailarchiver -mindepth 1 -delete
 #+end_src
 
-
-* Restore Files into ZFS Staging Dataset
+* 6. Restore Files into ZFS Staging Dataset
 
 #+begin_src bash
 SNAPSHOT=latest
@@ -110,20 +77,14 @@ sudo restic-backup restore "${SNAPSHOT}" \
 Expected layout:
 
 #+begin_example
-/mnt/restore-staging/mnt/nightly_backup/mailarchiver
+/mnt/restore-staging/mnt/nightly_backup/mailarchiver/
+/mnt/restore-staging/mnt/nightly_backup/postgresql-backup/mailarchiver.sql.gz
 #+end_example
 
+* 7. Restore MailArchiver Data
 
-* Copy Restored Files into Live Paths
-
-Use =rsync -aAX= to preserve:
-
-- ownership
-- permissions
-- ACLs
-- extended attributes
-
-** Restore MailArchiver keys
+Use =rsync -aAX= to preserve ownership, permissions, ACLs, and extended
+attributes:
 
 #+begin_src bash
 sudo rsync -aAX --delete \
@@ -131,28 +92,16 @@ sudo rsync -aAX --delete \
   /var/lib/mailarchiver/
 #+end_src
 
+* 8. Restore PostgreSQL Database
 
-* Restore PostgreSQL Database
-
-MailArchiver requires restoring the PostgreSQL database dump from Restic.
-This must be done while MailArchiver service is stopped.
-
-** Drop and Recreate Database (Owned by mailarchiver)
-
-Drop the existing database (if it exists), then recreate it with the correct owner:
+** Drop and Recreate Database
 
 #+begin_src bash
-# Drop existing DB (ignore error if it doesn't exist)
 sudo -u postgres psql -d postgres -c "DROP DATABASE IF EXISTS mailarchiver;"
-
-# Recreate DB with correct owner
 sudo -u postgres psql -d postgres -c "CREATE DATABASE mailarchiver OWNER mailarchiver;"
 #+end_src
 
-
 ** Restore Database from Backup
-
-Copy backup to a temporary location and set safe permissions:
 
 #+begin_src bash
 sudo cp \
@@ -160,47 +109,35 @@ sudo cp \
   /tmp/mailarchiver.sql.gz
 
 sudo chmod 644 /tmp/mailarchiver.sql.gz
-#+end_src
 
-
-Import into =mailarchiver= as the =mailarchiver= user.
-
-#+begin_src bash
 sudo -u mailarchiver bash -lc \
     'gunzip -c /tmp/mailarchiver.sql.gz | psql -v ON_ERROR_STOP=1 -d mailarchiver'
-#+end_src
 
-
-** Clean Up Temporary File
-
-#+begin_src bash
 sudo rm -f /tmp/mailarchiver.sql.gz
 #+end_src
 
-
-* Start MailArchiver
+* 9. Start MailArchiver
 
 #+begin_src bash
 sudo systemctl start mailarchiver.service
 #+end_src
 
-Verify web UI:
+Verify:
 
 #+begin_src bash
+sudo systemctl status mailarchiver.service
 curl -I http://localhost:8913
 #+end_src
 
+* 10. Clean Up
 
-* Cleanup Staging Dataset
-
-Once verified:
+*1. Destroy the staging dataset:*
 
 #+begin_src bash
 sudo zfs destroy -r dpool/tank/restore-staging
 #+end_src
 
-
-* Remove Pre-Restore Snapshots
+*2. Remove pre-restore snapshots:*
 
 #+begin_src bash
 sudo zfs destroy -r fpool/fast/services/mailarchiver@pre-restore
@@ -212,39 +149,24 @@ Verify:
 zfs list -t snapshot | grep pre-restore || echo "Snapshots removed"
 #+end_src
 
-
 * Critical Notes
 
 ** MailArchiver DataProtection keys are REQUIRED
 
 If lost:
 
-- existing encrypted emails become unreadable
+- Existing encrypted emails become unreadable
 - OAuth sessions become invalid
-
-Dataset:
-
-=/var/lib/mailarchiver=
 
 This is the most critical dataset.
 
-
 ** PostgreSQL contains archive metadata
 
-Includes:
+Includes indexed emails, metadata, and user associations.
+Both DB and DataProtection keys must match -- always restore together.
 
-- indexed emails
-- metadata
-- user associations
+* Notes & Best Practices
 
-Both DB and DataProtection keys must match.
-
-
-* Best Practices
-
-Always backup together:
-
-- =mailarchiver dataset=
-- =postgres database=
-
-Always restore together.
+- Always backup and restore DataProtection keys and PostgreSQL database together.
+- Use =ON_ERROR_STOP= to ensure restore failures abort immediately.
+- The pre-restore ZFS snapshot allows instant rollback if the restore fails.

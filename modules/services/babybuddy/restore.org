@@ -1,4 +1,4 @@
-#+TITLE: Restoring Baby Buddy Database and Data from Restic Backup
+#+TITLE: Restoring Baby Buddy from Restic Backup
 #+AUTHOR: Masood Ahmed
 #+OPTIONS: toc:nil num:nil
 
@@ -11,6 +11,7 @@ The workflow:
 - Restores database dump and data to a temporary location
 - Stops Baby Buddy service
 - Drops and restores the PostgreSQL database
+- Restores data files with correct permissions
 - Restarts service cleanly
 
 * Backup Information
@@ -20,7 +21,7 @@ The workflow:
 - Database engine: PostgreSQL
 - Data path: =/var/lib/babybuddy=
 
-* Verify Available Snapshots
+* 1. Verify Available Snapshots
 
 Confirm the snapshot you intend to restore:
 
@@ -28,7 +29,7 @@ Confirm the snapshot you intend to restore:
 sudo restic-backup snapshots
 #+end_src
 
-* Restore the Latest Snapshot to a Temporary Location
+* 2. Restore the Latest Snapshot to a Temporary Location
 
 Restore the PostgreSQL backup and Baby Buddy data into =/tmp=:
 
@@ -46,18 +47,27 @@ This will create the following directory structure:
 
 #+begin_example
 /tmp/mnt/nightly_backup/postgresql-backup/babybuddy.sql.gz
-/tmp/mnt/nightly_backup/babybuddy
+/tmp/mnt/nightly_backup/babybuddy/
 #+end_example
 
-* Stop Baby Buddy Service
+* 3. Stop Baby Buddy Service
 
-Stop Baby Buddy service before restoring the database:
+Stop the Baby Buddy service before restoring the database:
 
 #+begin_src bash
 sudo systemctl stop podman-babybuddy.service
 #+end_src
 
-* Drop the Existing Database
+* 4. (Recommended) Take Pre-Restore ZFS Snapshot
+
+Take a ZFS snapshot for quick rollback if something goes wrong:
+
+#+begin_src bash
+sudo zfs snapshot -r rpool/encrypted/services/babybuddy@pre-restore
+sudo zfs snapshot -r dpool/tank/services/postgresql@pre-restore
+#+end_src
+
+* 5. Drop and Restore the Database
 
 Remove the existing database before restoring from backup:
 
@@ -66,18 +76,17 @@ sudo -u postgres psql -d postgres -c "DROP DATABASE babybuddy;"
 sudo systemctl restart postgresql
 #+end_src
 
-* Restore the Database
-
 Restore the database from the compressed SQL backup:
 
 #+begin_src bash
 sudo cp /tmp/mnt/nightly_backup/postgresql-backup/babybuddy.sql.gz /tmp/babybuddy.sql.gz
 sudo chmod 644 /tmp/babybuddy.sql.gz
 
-gunzip -c /tmp/babybuddy.sql.gz | psql -v ON_ERROR_STOP=1 -U babybuddy -d babybuddy
+sudo -u babybuddy bash -lc \
+  'gunzip -c /tmp/babybuddy.sql.gz | psql -v ON_ERROR_STOP=1 -d babybuddy'
 #+end_src
 
-* Clear the Existing Data Directory
+* 6. Clear the Existing Data Directory
 
 Remove all existing contents while preserving the directory itself:
 
@@ -85,11 +94,7 @@ Remove all existing contents while preserving the directory itself:
 sudo find /var/lib/babybuddy -mindepth 1 -delete
 #+end_src
 
-This approach is:
-- Shell-agnostic (bash/zsh)
-- Safe even if the directory is already empty
-
-* Restore Data Files
+* 7. Restore Data Files
 
 Copy the restored data into the live directory:
 
@@ -105,7 +110,7 @@ Fix ownership so the service can read and write all files:
 sudo chown -R babybuddy:babybuddy /var/lib/babybuddy
 #+end_src
 
-* Start Baby Buddy Service
+* 8. Start Baby Buddy Service
 
 Restart the Baby Buddy service:
 
@@ -113,9 +118,31 @@ Restart the Baby Buddy service:
 sudo systemctl start podman-babybuddy.service
 #+end_src
 
+Verify service status:
+
+#+begin_src bash
+sudo systemctl status podman-babybuddy.service
+#+end_src
+
+* 9. Clean Up Temporary Files
+
+Remove the temporary restore files:
+
+#+begin_src bash
+sudo rm -f /tmp/babybuddy.sql.gz
+sudo rm -rf /tmp/mnt/nightly_backup/babybuddy
+sudo rm -f /tmp/mnt/nightly_backup/postgresql-backup/babybuddy.sql.gz
+#+end_src
+
+Once the service is verified healthy, remove the pre-restore snapshots:
+
+#+begin_src bash
+sudo zfs destroy -r rpool/encrypted/services/babybuddy@pre-restore
+sudo zfs destroy -r dpool/tank/services/postgresql@pre-restore
+#+end_src
+
 * Notes & Best Practices
 
 - Always stop Baby Buddy service before restoring the database.
 - Use =ON_ERROR_STOP= to ensure restore failures abort immediately.
-- Consider taking a *ZFS snapshot* of the PostgreSQL data directory and
-  Baby Buddy data directory before restoring for quick rollback.
+- The pre-restore ZFS snapshot allows instant rollback if the restore fails.
