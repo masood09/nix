@@ -62,7 +62,6 @@ in {
             client_secret_path = config.sops.secrets."headscale/oidc-client-secret".path;
             disable_api_key_login = true;
             headscale_api_key_path = config.sops.secrets."headscale/headplane/headscale-api-key".path;
-            redirect_uri = "https://${headscaleCfg.webDomain}/admin/oidc/callback";
           };
         };
       };
