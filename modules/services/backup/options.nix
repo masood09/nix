@@ -18,7 +18,7 @@
     };
 
     restic = {
-      enable = lib.mkEnableOption "Enable restic backups";
+      enable = lib.mkEnableOption "Whether to enable restic backups.";
 
       pruneOpts = lib.mkOption {
         type = lib.types.listOf lib.types.str;

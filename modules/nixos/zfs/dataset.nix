@@ -11,7 +11,7 @@
       enable = lib.mkEnableOption "Ensure this ZFS dataset exists and is mounted.";
 
       restic = {
-        enable = lib.mkEnableOption "Enable restic backup";
+        enable = lib.mkEnableOption "Whether to enable restic backup.";
       };
 
       dataset = lib.mkOption {
