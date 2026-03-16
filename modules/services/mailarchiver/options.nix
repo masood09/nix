@@ -41,8 +41,8 @@ in {
 
       oauth = {
         enable = lib.mkOption {
-          type = lib.types.str;
-          default = "true";
+          type = lib.types.bool;
+          default = true;
         };
 
         providerHost = lib.mkOption {
@@ -61,13 +61,13 @@ in {
         };
 
         disablePasswordLogin = lib.mkOption {
-          type = lib.types.str;
-          default = "true";
+          type = lib.types.bool;
+          default = true;
         };
 
         autoRedirect = lib.mkOption {
-          type = lib.types.str;
-          default = "true";
+          type = lib.types.bool;
+          default = true;
         };
       };
 
