@@ -21,6 +21,7 @@ in {
           "/var/lib/nixos"
         ])
         (lib.mkIf (homelabCfg.role == "desktop") [
+          "/var/lib/bluetooth"
           "/var/lib/NetworkManager"
           "/etc/NetworkManager/system-connections"
         ])
