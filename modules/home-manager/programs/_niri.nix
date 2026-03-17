@@ -8,6 +8,10 @@
   niriEnabled = (homelabCfg.desktop.niri.enable or false) && pkgs.stdenv.isLinux;
 in {
   config = lib.mkIf niriEnabled {
+    dconf.settings."org/gnome/desktop/interface" = {
+      color-scheme = "prefer-dark";
+    };
+
     programs = {
       fuzzel = {
         enable = true;
