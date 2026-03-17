@@ -26,13 +26,10 @@ in {
       serviceName = "MongoDB";
       dataset = "fpool/fast/services/mongodb";
       properties = {
-        atime = "off";
-        compression = "zstd";
         logbias = "latency";
         recordsize = "32K";
         redundant_metadata = "most";
         primarycache = "metadata";
-        xattr = "sa";
       };
       withRestic = true;
     };
