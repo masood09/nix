@@ -69,12 +69,8 @@ in {
           default = {
             dataset = "fpool/fast/services/matrix-synapse";
             properties = {
-              atime = "off";
-              compression = "zstd";
               recordsize = "16K";
               logbias = "latency";
-              xattr = "sa";
-              acltype = "posixacl";
               redundant_metadata = "most";
             };
           };
