@@ -39,6 +39,9 @@ in {
       TTYVTDisallocate = true;
     };
 
+    # Auto-unlock GNOME Keyring on login via PAM
+    security.pam.services.greetd.enableGnomeKeyring = true;
+
     # Font discovery
     fonts.fontconfig.enable = true;
 
