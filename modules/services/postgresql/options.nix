@@ -39,6 +39,7 @@ in {
       properties = {
         compression = "lz4";
         logbias = "latency";
+        primarycache = "metadata";
         recordsize = "8K";
         redundant_metadata = "most";
       };
