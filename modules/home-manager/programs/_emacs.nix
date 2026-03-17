@@ -13,22 +13,25 @@
   };
 in {
   home = {
-    packages = lib.optionals emacsEnabled (with pkgs; [
-      cmake
-      fontconfig
-      gomodifytags
-      gopls
-      gore
-      gotests
-      jsbeautifier
-      multimarkdown
-      nil
-      nixfmt-rfc-style
-      nodejs
-      shellcheck
-      stylelint
-      terraform
-    ]);
+    packages = lib.optionals emacsEnabled (
+      lib.optional pkgs.stdenv.isLinux pkgs.emacs
+      ++ (with pkgs; [
+        cmake
+        fontconfig
+        gomodifytags
+        gopls
+        gore
+        gotests
+        jsbeautifier
+        multimarkdown
+        nil
+        nixfmt-rfc-style
+        nodejs
+        shellcheck
+        stylelint
+        terraform
+      ])
+    );
   };
 
   programs = {
