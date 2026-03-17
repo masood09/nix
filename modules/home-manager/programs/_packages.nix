@@ -1,5 +1,6 @@
 {
   homelabCfg,
+  inputs,
   lib,
   pkgs,
   ...
@@ -42,6 +43,9 @@ in {
         nerd-fonts.hack
         symbola
       ])
+      ++ lib.optionals (role == "desktop" && pkgs.stdenv.isLinux) [
+        inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+      ]
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
         nixos-rebuild
       ]);
