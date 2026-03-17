@@ -86,8 +86,7 @@ in {
           default = {
             dataset = "dpool/tank/services/matrix-synapse-media";
             properties = {
-              atime = "off";
-              compression = "zstd";
+              compression = "lz4";
               recordsize = "1M";
               logbias = "throughput";
               redundant_metadata = "most";

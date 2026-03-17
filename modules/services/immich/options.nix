@@ -36,6 +36,7 @@ in {
       serviceName = "Immich";
       dataset = "dpool/tank/services/immich";
       properties = {
+        compression = "lz4";
         recordsize = "1M";
       };
       withRestic = true;

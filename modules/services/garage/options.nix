@@ -135,6 +135,7 @@
       propertiesData = lib.mkOption {
         type = lib.types.attrsOf lib.types.str;
         default = {
+          compression = "lz4";
           recordsize = "1M";
           logbias = "throughput";
         };
