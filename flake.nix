@@ -133,6 +133,7 @@
       watchfulsystem = mkNixOSConfig ./machines/watchfulsystem;
 
       caretaker = mkNixOSConfig ./machines/caretaker;
+      commandmodule = mkNixOSConfig ./machines/commandmodule;
       heartbeat = mkNixOSConfig ./machines/heartbeat;
       trialunit = mkNixOSConfig ./machines/trialunit;
 
