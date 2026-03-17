@@ -89,7 +89,6 @@ in {
         compression = "zstd";
         dnodesize = "auto";
         normalization = "formD";
-        relatime = "on";
         xattr = "sa";
         "com.sun:auto-snapshot" = "false";
       };
