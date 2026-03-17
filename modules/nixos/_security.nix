@@ -1,6 +1,6 @@
-{
+{config, ...}: {
   security = {
-    sudo.wheelNeedsPassword = false;
+    sudo.wheelNeedsPassword = config.homelab.role == "desktop";
 
     # Increase system-wide file descriptor limit
     pam.loginLimits = [
