@@ -15,8 +15,6 @@ in {
   home = {
     packages = lib.optionals emacsEnabled (with pkgs; [
       cmake
-      coreutils
-      coreutils-prefixed
       fontconfig
       gomodifytags
       gopls

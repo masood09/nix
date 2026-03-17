@@ -47,6 +47,8 @@ in {
         inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
       ]
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
+        coreutils
+        coreutils-prefixed
         nixos-rebuild
       ]);
   };
