@@ -93,6 +93,15 @@ in {
         "fast/services" = mkLegacy "/mnt/fast/services" {};
 
         "fast/users" = mkLegacy "/mnt/fast/users" {};
+
+        "fast/reserved" = {
+          type = "zfs_fs";
+          options = {
+            canmount = "off";
+            mountpoint = "none";
+            refreservation = "10G";
+          };
+        };
       };
     };
   };
