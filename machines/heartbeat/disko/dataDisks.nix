@@ -55,7 +55,7 @@ in {
 
       options = {
         ashift = "12";
-        autotrim = "on";
+        autotrim = "off";
       };
 
       # Defaults inherited by datasets in this pool
