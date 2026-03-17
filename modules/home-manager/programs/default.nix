@@ -21,6 +21,7 @@
     ./_starship.nix
     ./_tmux.nix
     ./_zoxide.nix
+    ./_zen.nix
     ./_zsh.nix
 
     ./_packages.nix
