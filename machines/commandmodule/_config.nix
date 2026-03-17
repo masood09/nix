@@ -11,6 +11,8 @@
       wireless_enable = true;
     };
 
+    desktop.niri.enable = true;
+
     hardware.bluetooth.enable = true;
     hardware.fingerprint.enable = true;
 

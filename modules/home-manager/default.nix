@@ -22,6 +22,7 @@ in {
       users = {
         ${homelabCfg.primaryUser.userName} = {
           imports = [
+            inputs.dms.homeModules.dank-material-shell
             ./home.nix
           ];
         };

@@ -21,6 +21,7 @@ in {
           "/var/lib/nixos"
         ])
         (lib.mkIf (homelabCfg.role == "desktop") [
+          "/var/cache/tuigreet"
           "/var/lib/bluetooth"
           "/var/lib/fprint"
           "/var/lib/NetworkManager"

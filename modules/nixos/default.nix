@@ -5,6 +5,7 @@
     ./_desktop-hardware.nix
     ./_disks.nix
     ./_impermanence.nix
+    ./_niri.nix
     ./_networking.nix
     ./_nixpkgs.nix
     ./_packages.nix

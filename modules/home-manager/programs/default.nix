@@ -16,6 +16,7 @@
     ./_gpg.nix
     ./_motd.nix
     ./_neovim.nix
+    ./_niri.nix
     ./_ripgrep.nix
     ./_starship.nix
     ./_tmux.nix
