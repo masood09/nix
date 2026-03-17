@@ -17,6 +17,11 @@
     hardware.fingerprint.enable = true;
 
     programs = {
+      claude-code.enable = true;
+      emacs.enable = true;
+      git.enable = true;
+      neovim.enable = true;
+
       motd = {
         enable = true;
 
