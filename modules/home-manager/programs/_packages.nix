@@ -48,6 +48,7 @@ in {
         pkgs.element-desktop
         pkgs.ghostty
         pkgs.opencloud-desktop
+        pkgs.zoom-us
         inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
       ])
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
