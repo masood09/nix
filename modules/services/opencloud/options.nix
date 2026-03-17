@@ -203,6 +203,7 @@
         description = "ZFS properties for the user file storage dataset.";
 
         default = {
+          compression = "lz4";
           recordsize = "1M";
           primarycache = "all";
         };
