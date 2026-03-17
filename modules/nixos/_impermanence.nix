@@ -22,6 +22,7 @@ in {
         ])
         (lib.mkIf (homelabCfg.role == "desktop") [
           "/var/lib/bluetooth"
+          "/var/lib/fprint"
           "/var/lib/NetworkManager"
           "/etc/NetworkManager/system-connections"
         ])
