@@ -11,6 +11,9 @@
       wireless_enable = true;
     };
 
+    hardware.bluetooth.enable = true;
+    hardware.fingerprint.enable = true;
+
     programs = {
       motd = {
         enable = true;
