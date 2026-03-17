@@ -43,7 +43,8 @@
     };
 
     headplane = {
-      url = "github:tale/headplane";
+      # Pinned to avoid pnpm hash mismatch - see https://github.com/tale/headplane/issues/496
+      url = "github:tale/headplane/a26faab";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
