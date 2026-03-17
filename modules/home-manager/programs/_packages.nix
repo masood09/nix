@@ -45,6 +45,7 @@ in {
       ])
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isLinux) ([
         pkgs.bitwarden-desktop
+        pkgs.element-desktop
         pkgs.ghostty
         pkgs.opencloud-desktop
         inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
