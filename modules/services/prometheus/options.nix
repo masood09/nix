@@ -27,7 +27,6 @@ in {
         logbias = "throughput";
         recordsize = "16K";
         redundant_metadata = "most";
-        relatime = "off";
         primarycache = "all";
       };
     };
