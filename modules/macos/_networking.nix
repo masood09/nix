@@ -20,11 +20,14 @@ in {
         description = "Primary User of the system";
       };
 
-      sshPublicKey = lib.mkOption {
-        default = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfTOXZ6W+DhUQcytGQ1ob+eFPQwbyiTB8wXnRSiYqpK";
-        type = lib.types.str;
+      sshPublicKeys = lib.mkOption {
+        default = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfTOXZ6W+DhUQcytGQ1ob+eFPQwbyiTB8wXnRSiYqpK"
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBv3kEMJd555u7Rb8ofRfC3K2k5v9qjnz9tsbxli9tp8 me@ahmedmasood.com"
+        ];
+        type = lib.types.listOf lib.types.str;
         description = ''
-          Public SSH key to be added to authrorized keys
+          Public SSH keys to be added to authorized keys and git allowed signers
         '';
       };
     };
