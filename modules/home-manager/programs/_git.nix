@@ -7,12 +7,12 @@
 }: let
   gitCfg = homelabCfg.programs.git;
 
-  key = homelabCfg.primaryUser.sshPublicKey;
+  keys = homelabCfg.primaryUser.sshPublicKeys;
   email = gitCfg.userEmail;
 
-  signersFile = pkgs.writeText "git-allowed-signers" ''
-    ${email} namespaces="git" ${key}
-  '';
+  signersFile = pkgs.writeText "git-allowed-signers" (
+    lib.concatMapStringsSep "\n" (key: ''${email} namespaces="git" ${key}'') keys
+  );
 
   usingGpg = gitCfg.signing.method == "gpg";
   inherit (gitCfg.signing) gpgKey;

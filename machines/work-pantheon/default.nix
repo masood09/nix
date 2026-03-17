@@ -21,7 +21,9 @@
     };
 
     primaryUser = {
-      sshPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPACCnG604Keu/TxyHknYuzLhua3i6FpXw1Jz6TkEoH6 masoodahmed@pantheon.io";
+      sshPublicKeys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPACCnG604Keu/TxyHknYuzLhua3i6FpXw1Jz6TkEoH6 masoodahmed@pantheon.io"
+      ];
     };
 
     programs = {
