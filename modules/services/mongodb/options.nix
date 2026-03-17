@@ -29,9 +29,9 @@ in {
         atime = "off";
         compression = "zstd";
         logbias = "latency";
-        recordsize = "16K";
+        recordsize = "32K";
         redundant_metadata = "most";
-        primarycache = "all";
+        primarycache = "metadata";
         xattr = "sa";
       };
       withRestic = true;
