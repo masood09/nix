@@ -14,10 +14,16 @@ in {
       # Hide these mounts from the sidebar of file managers
       hideMounts = true;
 
-      directories = lib.mkIf (!homelabCfg.isRootZFS) [
-        "/var/log"
-        # inspo: https://github.com/nix-community/impermanence/issues/178
-        "/var/lib/nixos"
+      directories = lib.mkMerge [
+        (lib.mkIf (!homelabCfg.isRootZFS) [
+          "/var/log"
+          # inspo: https://github.com/nix-community/impermanence/issues/178
+          "/var/lib/nixos"
+        ])
+        (lib.mkIf (homelabCfg.role == "desktop") [
+          "/var/lib/NetworkManager"
+          "/etc/NetworkManager/system-connections"
+        ])
       ];
 
       files = [
