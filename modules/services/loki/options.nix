@@ -82,7 +82,6 @@ in {
       properties = {
         logbias = "latency";
         recordsize = "16K";
-        relatime = "off";
         primarycache = "metadata";
       };
     };
