@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers and 2 macOS machines with home-manager, sops-nix secrets, ZFS, and impermanence.
+Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 1 NixOS desktop/laptop, and 2 macOS machines with home-manager, sops-nix secrets, ZFS, and impermanence.
 
 ## Commands
 
@@ -16,6 +16,7 @@ just up                              # Update flake.lock
 just lint                            # Check with statix
 just fmt                             # Format with alejandra (or: nix fmt)
 just gc                              # Garbage collect
+just repair                          # Verify and repair nix store
 just build-iso                       # Build NixOS installer ISO
 just sops-rotate                     # Rotate all sops keys
 just sops-update                     # Update sops key files
@@ -27,10 +28,10 @@ just sops-update                     # Update sops key files
 - `flake.nix` - Entry point defining all NixOS and Darwin configurations
 - `machines/` - Per-machine configs (each has `default.nix`, `_config.nix`, `hardware-configuration.nix`)
 - `modules/` - Reusable modules split by concern:
-  - `modules/home-manager/` - User environment (programs in `programs/` subdirectory)
+  - `modules/home-manager/` - User environment (programs as `_<name>.nix` files in `programs/`)
   - `modules/nixos/` - NixOS system config (boot, networking, users, impermanence, zfs)
   - `modules/macos/` - nix-darwin system config
-  - `modules/services/` - 30+ declarative services (each in own directory)
+  - `modules/services/` - 27 declarative services (each in own directory)
 - `nix/pkgs/` - Custom package definitions (auto-discovered)
 - `nix/overlays/` - Package overlays
 - `nix/services/` - Custom NixOS service modules
@@ -81,9 +82,10 @@ Before adding services, check `docs/service-registry.org` for:
 - nixpkgs: `nixos-25.11`
 - home-manager: `release-25.11`
 - nix-darwin: `nix-darwin-25.11`
-- Other inputs: disko, impermanence, sops-nix, authentik-nix, catppuccin, headplane
+- Other inputs: disko, impermanence, sops-nix, nix-homebrew, authentik-nix, catppuccin, headplane
 
 ## Machines
 
-**NixOS**: accesscontrolsystem, commrelay, meshcontrol, watchfulsystem, caretaker, heartbeat, trialunit
+**NixOS servers**: accesscontrolsystem, commrelay, meshcontrol, watchfulsystem, caretaker, heartbeat, trialunit
+**NixOS desktop**: commandmodule (laptop)
 **macOS**: murderbot (primary dev), work-pantheon
