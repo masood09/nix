@@ -1,3 +1,6 @@
+# PostgreSQL — shared database server. Peer auth only (no passwords); each
+# service gets its own DB via ensureDatabases. Includes Prometheus exporter
+# and optional nightly pg_dump backups to a separate ZFS dataset.
 {
   config,
   lib,

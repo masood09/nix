@@ -1,3 +1,4 @@
+# Homelab options — primary server (NAS + shared services on Dell R730xd).
 {
   config.homelab = {
     purpose = "Primary Homelab Core (NAS + Shared Services)";

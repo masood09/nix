@@ -1,3 +1,4 @@
+# Options — Alloy telemetry agent (Loki log shipping, systemd drop rules).
 {lib, ...}: let
   dropRuleType = lib.types.submodule (_: {
     options = {

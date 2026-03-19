@@ -1,3 +1,5 @@
+# Tailscale — mesh VPN client connecting to the self-hosted Headscale server.
+# Auto-authenticates via sops-managed pre-auth key with --accept-routes.
 {
   config,
   lib,

@@ -1,3 +1,4 @@
+# Options — Matrix messaging (Synapse, MAS, LiveKit RTC, domains, ZFS).
 {
   config,
   lib,

@@ -1,3 +1,5 @@
+# macOS networking — sets hostname/computerName/localHostName.
+# Also defines the homelab options needed on Darwin (primaryUser, role, networking).
 {
   config,
   lib,

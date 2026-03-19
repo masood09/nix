@@ -1,3 +1,4 @@
+# Options — Podman container runtime (ZFS-backed storage).
 {lib, ...}: let
   zfsOpts = (import ../../../lib/zfs-options.nix {inherit lib;}).mkZfsOptions;
 in {

@@ -1,3 +1,5 @@
+# IT-Tools — web-based developer utilities (JSON formatter, hash generator, etc.).
+# Stateless Podman container behind Caddy.
 {
   config,
   lib,

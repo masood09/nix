@@ -1,3 +1,5 @@
+# Zsh — primary interactive shell with autosuggestion and syntax highlighting.
+# Includes a dumb-terminal guard (for Emacs TRAMP) and optional local overrides.
 {
   homelabCfg,
   lib,
@@ -10,6 +12,7 @@
       autosuggestion.enable = true;
       syntaxHighlighting.enable = true;
 
+      # Dumb terminal guard — disable ZLE and fancy prompts for TRAMP/scp
       initContent = lib.mkOrder 500 ''
         if [[ "$TERM" == "dumb" ]]
         then

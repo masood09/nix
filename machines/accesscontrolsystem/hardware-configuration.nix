@@ -1,3 +1,4 @@
+# Auto-generated hardware config — do not edit manually (nixos-generate-config).
 {
   lib,
   modulesPath,

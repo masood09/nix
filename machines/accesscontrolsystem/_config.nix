@@ -1,3 +1,4 @@
+# Homelab options — identity & access control server (Authentik SSO).
 {
   config.homelab = {
     purpose = "Identity & Access Control (SSO / Authentik)";

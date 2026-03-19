@@ -1,3 +1,6 @@
+# Loki — log aggregation with per-level retention (debug→short, error→long).
+# Receives logs from Alloy agents across the fleet. Protected by basic auth
+# via Caddy (except /ready health endpoint).
 {
   config,
   lib,

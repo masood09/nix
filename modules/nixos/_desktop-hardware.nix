@@ -1,3 +1,6 @@
+# Desktop hardware — audio, GPU, bluetooth, and fingerprint reader.
+# Only active on machines with role == "desktop". Bluetooth and fingerprint
+# are individually gated behind their own enable flags.
 {
   config,
   lib,
@@ -9,7 +12,7 @@ in {
   options.homelab = {
     hardware.bluetooth.enable = lib.mkEnableOption "bluetooth support";
     hardware.fingerprint.enable = lib.mkEnableOption "fingerprint reader support (fprintd)";
-};
+  };
 
   config = lib.mkIf isDesktop {
     hardware = {
@@ -18,12 +21,14 @@ in {
         powerOnBoot = true;
       };
 
+      # GPU acceleration (mesa)
       graphics.enable = true;
     };
 
+    # RealtimeKit gives PipeWire realtime scheduling priority
     security.rtkit.enable = true;
 
-    # Audio (PipeWire)
+    # PipeWire replaces PulseAudio + ALSA with a single unified daemon
     services.pipewire = {
       enable = true;
       alsa.enable = true;
@@ -31,8 +36,6 @@ in {
       pulse.enable = true;
     };
 
-    # Fingerprint reader
     services.fprintd.enable = homelabCfg.hardware.fingerprint.enable;
-
   };
 }

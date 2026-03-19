@@ -1,3 +1,5 @@
+# Backup sub-module — ZFS snapshot + restic orchestration (stop services,
+# snapshot, mount, backup, unmount, restart).
 {
   config,
   lib,

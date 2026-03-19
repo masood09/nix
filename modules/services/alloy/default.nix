@@ -1,3 +1,5 @@
+# Alloy — Grafana's telemetry agent. Ships logs to Loki and metrics to Prometheus.
+# Runs with hostname-aware env var for instance labelling.
 {
   config,
   lib,

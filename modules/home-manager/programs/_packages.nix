@@ -1,3 +1,6 @@
+# User packages — role-based package lists for servers, Linux desktops, and macOS.
+# Desktop tools (dev CLIs, fonts) are shared across Linux and macOS;
+# GUI apps and platform-specific packages are split by stdenv.
 {
   homelabCfg,
   inputs,
@@ -8,17 +11,17 @@
   inherit (homelabCfg) role;
 
   globalPkgs = with pkgs; [
-    # Packages that are global.
+    # Packages installed on every machine
   ];
 in {
   home = {
     packages =
       globalPkgs
       ++ lib.optionals (role == "server") (with pkgs; [
-        # Packages to be installed only on servers
+        # Server-only packages
       ])
       ++ lib.optionals (role == "desktop") (with pkgs; [
-        # Packages to be installed only on desktops (laptops/macs)
+        # Dev tools and CLIs (shared across Linux and macOS desktops)
         age
         alejandra
         findutils
@@ -43,6 +46,7 @@ in {
         nerd-fonts.hack
         symbola
       ])
+      # Linux desktop GUI apps
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isLinux) ([
         pkgs.bitwarden-desktop
         pkgs.element-desktop
@@ -50,6 +54,7 @@ in {
         pkgs.opencloud-desktop
         pkgs.zoom-us
       ])
+      # macOS-specific (coreutils for GNU compat, nixos-rebuild for remote deploys)
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
         coreutils
         coreutils-prefixed

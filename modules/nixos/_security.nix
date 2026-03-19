@@ -1,11 +1,12 @@
+# Security — sudo policy, PAM, and system limits.
+# Desktops require a password (or fingerprint) for sudo; servers are passwordless.
 {config, ...}: {
   security = {
     sudo.wheelNeedsPassword = config.homelab.role == "desktop";
 
-    # Allow fingerprint for sudo on desktops with fingerprint enabled
     pam.services.sudo.fprintAuth = config.homelab.hardware.fingerprint.enable;
 
-    # Increase system-wide file descriptor limit
+    # Raise file descriptor limit for services like databases and containers
     pam.loginLimits = [
       {
         domain = "*";

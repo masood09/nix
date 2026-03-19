@@ -1,11 +1,13 @@
+# Root NixOS module — shared by all NixOS machines.
+# Imports every sub-module and defines the top-level homelab options
+# (role, purpose) that other modules key off of.
 {lib, ...}: {
   imports = [
+    # System-level modules
     ./_auto-update.nix
     ./_boot.nix
-    ./_desktop-hardware.nix
     ./_disks.nix
     ./_impermanence.nix
-    ./_niri.nix
     ./_networking.nix
     ./_nixpkgs.nix
     ./_packages.nix
@@ -15,8 +17,14 @@
     ./_sops.nix
     ./_users.nix
 
+    # Desktop modules (gated on role == "desktop" internally)
+    ./_desktop-hardware.nix
+    ./_niri.nix
+
+    # ZFS pool management
     ./zfs
 
+    # Declarative service modules (each has its own enable flag)
     ./../services
   ];
 
@@ -44,6 +52,7 @@
         experimental-features = "nix-command flakes";
         auto-optimise-store = true;
 
+        # nix-community cache for faster builds of community flake inputs
         substituters = [
           "https://cache.nixos.org/?priority=10"
           "https://nix-community.cachix.org"
@@ -55,6 +64,7 @@
       };
     };
 
+    # Shorter timeouts so failed services don't block boot/shutdown
     systemd.settings.Manager = {
       DefaultTimeoutStartSec = "20s";
       DefaultTimeoutStopSec = "10s";

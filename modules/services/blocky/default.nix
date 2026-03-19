@@ -1,3 +1,5 @@
+# Blocky — DNS proxy with ad/tracker blocking, custom upstream resolvers,
+# and optional Prometheus metrics. Listens on configurable addresses/ports.
 {
   config,
   lib,

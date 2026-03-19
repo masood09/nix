@@ -1,3 +1,4 @@
+# accesscontrolsystem — Identity & access control server (Authentik SSO).
 {
   imports = [
     ./disko

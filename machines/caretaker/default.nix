@@ -1,3 +1,5 @@
+# caretaker — core network services (DNS filtering + UPS monitoring).
+# Non-ZFS: uses tmpfs root with LUKS-encrypted ext4 /nix for impermanence.
 {
   imports = [
     ./hardware-configuration.nix
@@ -15,6 +17,7 @@
     ];
   };
 
+  # tmpfs root — wiped on every reboot (impermanence without ZFS)
   fileSystems = {
     "/" = {
       device = "none";

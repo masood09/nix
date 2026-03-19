@@ -1,3 +1,6 @@
+# GPG — smartcard-backed key management with gpg-agent as SSH agent.
+# When enabled, gpg-agent replaces ssh-agent for local sessions while
+# preserving forwarded SSH_AUTH_SOCK over SSH connections.
 {
   homelabCfg,
   lib,

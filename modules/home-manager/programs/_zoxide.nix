@@ -1,3 +1,4 @@
+# Zoxide — smarter cd that learns frequently used directories. Aliases cd → z.
 {
   homelabCfg,
   lib,

@@ -1,3 +1,4 @@
+# Options — MongoDB document database (data dir, ZFS).
 {lib, ...}: let
   zfsOpts = (import ../../../lib/zfs-options.nix {inherit lib;}).mkZfsOptions;
 in {

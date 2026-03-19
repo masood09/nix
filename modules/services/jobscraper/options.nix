@@ -1,3 +1,4 @@
+# Options — Job Scraper (domain, port, OAuth).
 {
   config,
   lib,

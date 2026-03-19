@@ -1,3 +1,4 @@
+# Blocky sub-module — Unbound recursive resolver as upstream for Blocky.
 {
   config,
   lib,

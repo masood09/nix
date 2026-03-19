@@ -1,3 +1,5 @@
+# commandmodule — ThinkPad laptop, NixOS desktop with Niri compositor.
+# Single NVMe root, encrypted ZFS, impermanence.
 {
   imports = [
     ./disko

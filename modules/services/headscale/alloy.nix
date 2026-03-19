@@ -1,3 +1,4 @@
+# Headscale sub-module — Alloy metrics scraping for the VPN control plane.
 {
   config,
   lib,

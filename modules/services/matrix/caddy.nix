@@ -1,3 +1,4 @@
+# Matrix sub-module — Caddy reverse proxy for Synapse, MAS, and Element Web.
 {
   config,
   lib,

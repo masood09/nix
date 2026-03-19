@@ -1,3 +1,4 @@
+# Options — Immich photo management (domain, port, ZFS, OAuth).
 {
   config,
   lib,

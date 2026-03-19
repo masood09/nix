@@ -1,3 +1,4 @@
+# Options — PostgreSQL database (package, data dir, backup, ZFS).
 {
   lib,
   pkgs,

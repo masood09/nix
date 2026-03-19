@@ -1,3 +1,4 @@
+# meshcontrol — mesh networking control plane (Headscale + Headplane).
 {
   imports = [
     ./disko
@@ -15,5 +16,4 @@
       "scsi-360be897f1a3847ccb8118a239ec26e56"
     ];
   };
-
 }

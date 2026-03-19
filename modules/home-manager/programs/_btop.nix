@@ -1,3 +1,4 @@
+# Btop — resource monitor. Aliases top/htop → btop.
 {
   homelabCfg,
   lib,

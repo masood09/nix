@@ -1,3 +1,4 @@
+# Options — OpenCloud file sync (domain, port, ZFS, OAuth).
 {
   config,
   lib,

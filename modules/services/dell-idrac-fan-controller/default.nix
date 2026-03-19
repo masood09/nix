@@ -1,3 +1,6 @@
+# Dell iDRAC fan controller — runs a Podman container that manages fan speed
+# via IPMI based on CPU temperature thresholds. Only starts if the iDRAC host
+# is reachable and reporting CPU temperatures (ExecCondition probe).
 {
   config,
   lib,

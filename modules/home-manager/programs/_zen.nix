@@ -1,3 +1,6 @@
+# Zen Browser — Firefox-based browser wrapped with declarative settings.
+# Uses wrapFirefox to bake in privacy prefs, extensions, and Brave as
+# default search engine. Extensions are auto-installed from AMO on first launch.
 {
   homelabCfg,
   inputs,
@@ -7,6 +10,7 @@
 }: let
   zenEnabled = (homelabCfg.desktop.niri.enable or false) && pkgs.stdenv.isLinux;
 
+  # Helper to declare a Firefox/Zen extension by its AMO short-id and GUID
   extension = shortId: guid: {
     name = guid;
     value = {
@@ -15,34 +19,30 @@
     };
   };
 
+  # Locked preferences — applied via autoconfig and cannot be changed in about:config
   prefs = {
-    # Auto-enable extensions without prompting
     "extensions.autoDisableScopes" = 0;
 
-    # Privacy: strict
     "browser.contentblocking.category" = "strict";
 
-    # Tell websites not to sell/share data (GPC)
+    # Global Privacy Control (GPC)
     "privacy.globalprivacycontrol.enabled" = true;
     "privacy.globalprivacycontrol.functionality.enabled" = true;
     "privacy.donottrackheader.enabled" = true;
 
-    # Disable saving passwords
+    # Bitwarden handles passwords — disable built-in password manager
     "signon.rememberSignons" = false;
-
-    # Disable autofill payments and addresses
     "extensions.formautofill.creditCards.enabled" = false;
     "extensions.formautofill.addresses.enabled" = false;
 
-    # Disable DNS over HTTPS
+    # DNS over HTTPS off (handled at network level)
     "network.trr.mode" = 5;
 
-    # Telemetry off
+    # No telemetry
     "toolkit.telemetry.enabled" = false;
     "datareporting.healthreport.uploadEnabled" = false;
     "datareporting.policy.dataSubmissionEnabled" = false;
 
-    # Disable Pocket
     "extensions.pocket.enabled" = false;
   };
 
@@ -63,6 +63,7 @@ in {
       (pkgs.wrapFirefox
         inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped
         {
+          # Lock prefs so they persist across profile resets
           extraPrefs = lib.concatLines (
             lib.mapAttrsToList (
               name: value: ''lockPref(${lib.strings.toJSON name}, ${lib.strings.toJSON value});''
@@ -76,6 +77,7 @@ in {
 
             ExtensionSettings = builtins.listToAttrs extensions;
 
+            # Brave Search as default (privacy-respecting, no Google)
             SearchEngines = {
               Default = "Brave";
               Add = [

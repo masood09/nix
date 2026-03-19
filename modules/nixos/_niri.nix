@@ -1,3 +1,5 @@
+# Niri compositor — system-level setup: greetd login, keyring unlock,
+# Bitwarden polkit, font discovery, and Wayland session variables.
 {
   config,
   lib,

@@ -1,3 +1,6 @@
+# Caddy — reverse proxy with automatic HTTPS via ACME (Cloudflare DNS challenge).
+# Provisions a wildcard cert for *.domain and individual service virtualHosts
+# are added by each service module when caddy is enabled.
 {
   config,
   lib,

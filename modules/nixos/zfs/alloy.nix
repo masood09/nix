@@ -1,3 +1,5 @@
+# ZFS Alloy config — generates an Alloy scrape config fragment for the
+# ZFS Prometheus exporter so metrics flow to the central Prometheus.
 {
   config,
   lib,
@@ -6,7 +8,6 @@
   homelabCfg = config.homelab;
   alloyEnabled = homelabCfg.services.alloy.enable;
 
-  # Any datasets with enable = true?
   anyManagedDatasets = (lib.attrNames (lib.filterAttrs (_: v: v.enable or false) homelabCfg.zfs.datasets)) != [];
 
   enableZFS = (homelabCfg.isRootZFS or false) || anyManagedDatasets;

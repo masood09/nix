@@ -1,3 +1,4 @@
+# commrelay — federated messaging server (Matrix Synapse).
 {
   imports = [
     ./disko
@@ -17,5 +18,4 @@
       "scsi-3600eccee132b4016afad1991ab86365f"
     ];
   };
-
 }

@@ -1,3 +1,5 @@
+# Prometheus — time-series metrics store. Receives remote-write from Alloy
+# agents across the fleet. Protected by basic auth via Caddy.
 {
   config,
   lib,

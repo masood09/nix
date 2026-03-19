@@ -1,3 +1,4 @@
+# OpenCloud sub-module — systemd service ordering and permissions.
 {
   config,
   lib,

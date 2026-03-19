@@ -1,3 +1,4 @@
+# Options — Karakeep bookmark manager (domain, port, ZFS, OAuth).
 {
   config,
   lib,

@@ -1,3 +1,5 @@
+# BabyBuddy — baby tracking app running as a Podman OCI container.
+# Backed by PostgreSQL with ZFS dataset for persistent data.
 {
   config,
   lib,

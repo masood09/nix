@@ -1,3 +1,4 @@
+# Options — Headscale mesh VPN (domain, ports, OIDC, Headplane UI, ZFS).
 {
   config,
   lib,

@@ -1,3 +1,4 @@
+# Options — Blocky DNS proxy (ports, upstream resolvers, Unbound).
 {
   config,
   lib,

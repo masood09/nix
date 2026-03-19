@@ -1,3 +1,4 @@
+# Options — SSH server (listen port, authorized keys).
 {
   config,
   lib,

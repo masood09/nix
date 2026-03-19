@@ -1,3 +1,4 @@
+# murderbot — primary macOS dev machine (personal).
 {
   imports = [
     ./hardware-configuration.nix

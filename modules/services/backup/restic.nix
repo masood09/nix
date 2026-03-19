@@ -1,3 +1,4 @@
+# Backup sub-module — restic repository configuration and systemd service.
 {
   config,
   lib,

@@ -1,3 +1,4 @@
+# Options — Tailscale VPN client (login server, ZFS).
 {lib, ...}: let
   zfsOpts = (import ../../../lib/zfs-options.nix {inherit lib;}).mkZfsOptions;
 in {

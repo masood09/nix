@@ -1,3 +1,4 @@
+# Options — Caddy reverse proxy and ACME wildcard certs (Cloudflare DNS).
 {
   config,
   lib,

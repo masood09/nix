@@ -1,3 +1,4 @@
+# macOS Dock layout — work apps (browser, editor, Slack, Zoom).
 {config, ...}: let
   homelabCfg = config.homelab;
 in {

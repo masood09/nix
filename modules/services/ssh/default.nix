@@ -1,3 +1,4 @@
+# SSH — hardened OpenSSH server. Key-only auth, no root login, max 3 attempts.
 {config, ...}: let
   sshCfg = config.homelab.services.ssh;
 in {

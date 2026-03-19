@@ -1,3 +1,4 @@
+# Alloy sub-module — generates Loki pipeline rules to drop noisy journal logs.
 {
   config,
   lib,

@@ -1,3 +1,6 @@
+# Podman — rootless container runtime with auto-pruning.
+# Used by services that run OCI containers (BabyBuddy, IT-Tools, etc.).
+# Opens DNS port on podman bridge interfaces for container name resolution.
 {
   config,
   lib,

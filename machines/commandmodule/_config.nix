@@ -1,3 +1,4 @@
+# Homelab options — ThinkPad laptop with Niri desktop, bluetooth, fingerprint.
 {
   config.homelab = {
     role = "desktop";

@@ -1,10 +1,12 @@
+# Dock management — declaratively set macOS Dock entries via dockutil.
+# Only resets the Dock when entries differ from the desired state.
+# Adapted from: https://github.com/dustinlyons/nixos-config/blob/main/modules/darwin/dock/default.nix
 {
   config,
   pkgs,
   lib,
   ...
 }:
-# inspo: https://github.com/dustinlyons/nixos-config/blob/main/modules/darwin/dock/default.nix
 with lib; let
   cfg = config.local.dock;
   inherit (pkgs) stdenv dockutil;

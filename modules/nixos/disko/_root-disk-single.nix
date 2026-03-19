@@ -1,3 +1,5 @@
+# Disko layout for single-disk ZFS root — EFI + encrypted rpool with
+# impermanence datasets. Desktop role adds a persistent /home dataset.
 {
   config,
   lib,
@@ -87,6 +89,7 @@ in {
           };
         };
 
+        # Impermanence: root is rolled back to this blank snapshot on every boot
         "root/empty" = mkLegacy "/" {
           postCreateHook = "zfs snapshot rpool/root/empty@start";
         };
@@ -101,6 +104,7 @@ in {
 
         "root/var/log" = mkLegacy "/var/log" {};
 
+        # 10G reservation prevents pool from filling completely (ZFS needs free space)
         "root/reserved" = {
           type = "zfs_fs";
           options = {

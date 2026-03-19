@@ -1,3 +1,4 @@
+# Options — Nightscout CGM dashboard (domain, port, title).
 {
   config,
   lib,

@@ -1,29 +1,42 @@
+# Program modules — each _<name>.nix configures one program/tool.
+# All are imported unconditionally; each module guards itself internally
+# with lib.mkIf based on its homelab.programs.<name>.enable flag.
 {
   imports = [
+    # Shell & terminal
     ./_bash.nix
+    ./_fish.nix
+    ./_zsh.nix
+    ./_tmux.nix
+    ./_starship.nix
+
+    # CLI tools
     ./_bat.nix
     ./_btop.nix
-    ./_catppuccin.nix
-    ./_claude-code.nix
     ./_direnv.nix
-    ./_emacs.nix
     ./_eza.nix
     ./_fastfetch.nix
     ./_fd.nix
-    ./_fish.nix
     ./_fzf.nix
+    ./_ripgrep.nix
+    ./_zoxide.nix
+
+    # Development
+    ./_claude-code.nix
+    ./_emacs.nix
     ./_git.nix
     ./_gpg.nix
-    ./_motd.nix
     ./_neovim.nix
-    ./_niri.nix
-    ./_ripgrep.nix
-    ./_starship.nix
-    ./_tmux.nix
-    ./_zoxide.nix
-    ./_zen.nix
-    ./_zsh.nix
 
+    # Desktop (Linux only, gated on niri.enable)
+    ./_niri.nix
+    ./_zen.nix
+
+    # Theming & UX
+    ./_catppuccin.nix
+    ./_motd.nix
+
+    # Per-role package lists
     ./_packages.nix
   ];
 }

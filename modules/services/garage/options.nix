@@ -1,3 +1,4 @@
+# Options — Garage S3-compatible object storage (ports, domain, ZFS).
 {
   config,
   lib,

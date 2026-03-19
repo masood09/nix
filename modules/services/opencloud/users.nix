@@ -1,3 +1,4 @@
+# OpenCloud sub-module — system user and group for the container.
 {
   config,
   lib,

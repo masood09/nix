@@ -1,3 +1,5 @@
+# MongoDB — document database used by Nightscout. Auth enabled with
+# root password from sops. ZFS-backed data directory.
 {
   config,
   lib,

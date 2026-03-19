@@ -1,3 +1,5 @@
+# Authentik — identity provider (SSO/OIDC) for all homelab services.
+# Integrates with Caddy reverse proxy, PostgreSQL, and Alloy log filtering.
 {
   config,
   lib,

@@ -1,3 +1,5 @@
+# work-pantheon — work macOS machine. Uses GPG signing (not SSH) and
+# work-only SSH keys (no personal keys on this machine).
 {lib, ...}: {
   imports = [
     ./hardware-configuration.nix
@@ -20,6 +22,7 @@
       hostName = "work-pantheon";
     };
 
+    # Work-only SSH key — personal keys excluded from this machine
     primaryUser = {
       sshPublicKeys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPACCnG604Keu/TxyHknYuzLhua3i6FpXw1Jz6TkEoH6 masoodahmed@pantheon.io"
@@ -33,6 +36,7 @@
         userEmail = "masoodahmed@pantheon.io";
         enable = true;
 
+        # GPG signing with hardware key for work commits
         signing = {
           method = "gpg";
           gpgKey = "27F12F49A6098D65";
