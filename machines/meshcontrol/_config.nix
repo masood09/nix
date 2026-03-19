@@ -44,10 +44,6 @@
         headscale = {
           enable = true;
 
-          headplane = {
-            enable = false; # Temporarily disabled - pnpm hash mismatch upstream
-          };
-
           oidc = {
             enable = true;
           };
