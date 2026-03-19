@@ -1,3 +1,4 @@
+# MailArchiver — .NET email archival app built with buildDotnetModule.
 {
   lib,
   buildDotnetModule,

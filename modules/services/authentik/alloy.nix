@@ -1,3 +1,4 @@
+# Authentik sub-module — Alloy metrics scraping for the SSO server.
 {
   config,
   lib,

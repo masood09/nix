@@ -1,3 +1,5 @@
+# Nightscout — CGM (continuous glucose monitor) dashboard for diabetes management.
+# Configured for Loop pump integration with 24h time format.
 {
   config,
   lib,
@@ -61,19 +63,25 @@ in {
     };
 
     users = {
-      users.nightscout = {
-        uid = cfg.userId;
+      users = {
+        nightscout = {
+          uid = cfg.userId;
+        };
       };
 
-      groups.nightscout = {
-        gid = cfg.groupId;
+      groups = {
+        nightscout = {
+          gid = cfg.groupId;
+        };
       };
     };
 
-    networking.firewall = lib.mkIf cfg.openFirewall {
-      allowedTCPPorts = [
-        cfg.port
-      ];
+    networking = {
+      firewall = lib.mkIf cfg.openFirewall {
+        allowedTCPPorts = [
+          cfg.port
+        ];
+      };
     };
   };
 }

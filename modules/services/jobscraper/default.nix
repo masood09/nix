@@ -1,3 +1,4 @@
+# JobScraper — custom job board aggregator running as a Podman container.
 {
   config,
   lib,
@@ -13,18 +14,24 @@ in {
   ];
 
   config = lib.mkIf (jobscraperCfg.enable && podmanEnabled) {
-    virtualisation.oci-containers.containers.jobscraper = {
-      # renovate: datasource=docker depName=docker.io/masood09/jobscraper
-      image = "docker.io/masood09/jobscraper:0.1.3";
-      autoStart = true;
+    virtualisation = {
+      oci-containers = {
+        containers = {
+          jobscraper = {
+            # renovate: datasource=docker depName=docker.io/masood09/jobscraper
+            image = "docker.io/masood09/jobscraper:0.1.3";
+            autoStart = true;
 
-      environmentFiles = [
-        config.sops.secrets."jobscraper/.env".path
-      ];
+            environmentFiles = [
+              config.sops.secrets."jobscraper/.env".path
+            ];
 
-      ports = [
-        "${jobscraperCfg.listenAddress}:${toString jobscraperCfg.listenPort}:8080"
-      ];
+            ports = [
+              "${jobscraperCfg.listenAddress}:${toString jobscraperCfg.listenPort}:8080"
+            ];
+          };
+        };
+      };
     };
 
     services = {

@@ -1,3 +1,5 @@
+# BabyBuddy — baby tracking app running as a Podman OCI container.
+# Backed by PostgreSQL with ZFS dataset for persistent data.
 {
   config,
   lib,
@@ -15,13 +17,13 @@
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "babybuddy";
-    dataDir = babybuddyCfg.dataDir;
+    inherit (babybuddyCfg) dataDir;
     user = "babybuddy";
     group = "babybuddy";
     mode = "0750";
     mainServices = ["podman-babybuddy"];
     zfs = {
-      enable = babybuddyCfg.zfs.enable;
+      inherit (babybuddyCfg.zfs) enable;
       datasetServiceName = "zfs-dataset-babybuddy";
     };
   };
@@ -32,48 +34,60 @@ in {
 
   config = lib.mkIf (babybuddyCfg.enable && podmanEnabled) {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.babybuddy = lib.mkIf babybuddyCfg.zfs.enable {
-      inherit (babybuddyCfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          babybuddy = lib.mkIf babybuddyCfg.zfs.enable {
+            inherit (babybuddyCfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = babybuddyCfg.dataDir;
+            enable = true;
+            mountpoint = babybuddyCfg.dataDir;
 
-      requiredBy = [
-        "podman-babybuddy.service"
-      ];
+            requiredBy = [
+              "podman-babybuddy.service"
+            ];
 
-      restic = {
-        enable = true;
+            restic = {
+              enable = true;
+            };
+          };
+        };
       };
     };
 
-    virtualisation.oci-containers.containers.babybuddy = {
-      # renovate: datasource=docker depName=lscr.io/linuxserver/babybuddy
-      image = "lscr.io/linuxserver/babybuddy:2.7.1";
-      autoStart = true;
+    virtualisation = {
+      oci-containers = {
+        containers = {
+          babybuddy = {
+            # renovate: datasource=docker depName=lscr.io/linuxserver/babybuddy
+            image = "lscr.io/linuxserver/babybuddy:2.7.1";
+            autoStart = true;
 
-      volumes = [
-        "${toString babybuddyCfg.dataDir}:/config"
-      ];
+            volumes = [
+              "${toString babybuddyCfg.dataDir}:/config"
+            ];
 
-      ports = [
-        "${babybuddyCfg.listenAddress}:${toString babybuddyCfg.listenPort}:8000"
-      ];
+            ports = [
+              "${babybuddyCfg.listenAddress}:${toString babybuddyCfg.listenPort}:8000"
+            ];
 
-      environment = {
-        TZ = config.time.timeZone;
-        PUID = toString babybuddyCfg.userId;
-        PGID = toString babybuddyCfg.groupId;
-        ALLOWED_HOSTS = babybuddyCfg.webDomain;
-        SESSION_COOKIE_SECURE = "True";
-        CSRF_COOKIE_SECURE = "True";
-        CSRF_TRUSTED_ORIGINS = "https://${babybuddyCfg.webDomain}";
-        CORS_ALLOWED_ORIGINS = "https://${babybuddyCfg.webDomain}";
+            environment = {
+              TZ = config.time.timeZone;
+              PUID = toString babybuddyCfg.userId;
+              PGID = toString babybuddyCfg.groupId;
+              ALLOWED_HOSTS = babybuddyCfg.webDomain;
+              SESSION_COOKIE_SECURE = "True";
+              CSRF_COOKIE_SECURE = "True";
+              CSRF_TRUSTED_ORIGINS = "https://${babybuddyCfg.webDomain}";
+              CORS_ALLOWED_ORIGINS = "https://${babybuddyCfg.webDomain}";
+            };
+
+            environmentFiles = [
+              config.sops.secrets."babybuddy/.env".path
+            ];
+          };
+        };
       };
-
-      environmentFiles = [
-        config.sops.secrets."babybuddy/.env".path
-      ];
     };
 
     services = {
@@ -90,13 +104,15 @@ in {
 
       restic = lib.mkIf (resticEnabled && babybuddyCfg.zfs.enable) {
         backups = {
-          backup.exclude = [
-            "/mnt/nightly_backup/babybuddy/keys"
-            "/mnt/nightly_backup/babybuddy/log"
-            "/mnt/nightly_backup/babybuddy/nginx"
-            "/mnt/nightly_backup/babybuddy/php"
-            "/mnt/nightly_backup/babybuddy/www"
-          ];
+          backup = {
+            exclude = [
+              "/mnt/nightly_backup/babybuddy/keys"
+              "/mnt/nightly_backup/babybuddy/log"
+              "/mnt/nightly_backup/babybuddy/nginx"
+              "/mnt/nightly_backup/babybuddy/php"
+              "/mnt/nightly_backup/babybuddy/www"
+            ];
+          };
         };
       };
 
@@ -144,9 +160,13 @@ in {
         && !homelabCfg.isRootZFS
         && !babybuddyCfg.zfs.enable
       ) {
-        persistence."/nix/persist".directories = [
-          babybuddyCfg.dataDir
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = [
+              babybuddyCfg.dataDir
+            ];
+          };
+        };
       };
   };
 }

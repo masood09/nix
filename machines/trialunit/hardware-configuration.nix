@@ -1,3 +1,4 @@
+# Hardware config — Proxmox QEMU/KVM virtual machine (x86_64) with ZFS data pool.
 {
   config,
   lib,
@@ -22,18 +23,24 @@
       kernelModules = [];
     };
 
+    # Static IP for initrd SSH (remote ZFS unlock)
     kernelParams = [
       "ip=10.0.20.4::10.0.20.1:255.255.255.0:${config.homelab.networking.hostName}:ens18:"
     ];
 
-    zfs.extraPools = [
-      "dpool"
-    ];
+    zfs = {
+      # Additional data pool imported at boot
+      extraPools = [
+        "dpool"
+      ];
+    };
 
     kernelModules = [];
 
     extraModulePackages = [];
   };
 
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  nixpkgs = {
+    hostPlatform = lib.mkDefault "x86_64-linux";
+  };
 }

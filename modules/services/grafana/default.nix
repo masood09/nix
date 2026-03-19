@@ -1,3 +1,6 @@
+# Grafana — observability dashboards with Loki + Prometheus datasources.
+# Authenticates via Authentik OIDC. Provisions Node Exporter and PostgreSQL
+# dashboards as read-only on activation.
 {
   config,
   lib,
@@ -31,18 +34,24 @@ in {
 
   config = lib.mkIf grafanaCfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.grafana = lib.mkIf grafanaCfg.zfs.enable {
-      inherit (grafanaCfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          grafana = lib.mkIf grafanaCfg.zfs.enable {
+            inherit (grafanaCfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = grafanaDataDir;
+            enable = true;
+            mountpoint = grafanaDataDir;
 
-      requiredBy = [
-        "grafana.service"
-      ];
+            requiredBy = [
+              "grafana.service"
+            ];
 
-      restic = {
-        enable = false;
+            restic = {
+              enable = false;
+            };
+          };
+        };
       };
     };
 
@@ -53,66 +62,84 @@ in {
         provision = {
           enable = true;
 
-          datasources.settings.datasources =
-            lib.optionals lokiCfg.enable [
-              {
-                name = "Loki";
-                type = "loki";
-                access = "proxy";
-                url = "http://127.0.0.1:${toString lokiCfg.listenPort}";
-              }
-            ]
-            ++ lib.optionals prometheusEnabled [
-              {
-                name = "Prometheus";
-                type = "prometheus";
-                access = "proxy";
-                url = "http://127.0.0.1:${toString config.services.prometheus.port}";
-              }
-            ];
+          datasources = {
+            settings = {
+              datasources =
+                lib.optionals lokiCfg.enable [
+                  {
+                    name = "Loki";
+                    type = "loki";
+                    access = "proxy";
+                    url = "http://127.0.0.1:${toString lokiCfg.listenPort}";
+                  }
+                ]
+                ++ lib.optionals prometheusEnabled [
+                  {
+                    name = "Prometheus";
+                    type = "prometheus";
+                    access = "proxy";
+                    url = "http://127.0.0.1:${toString config.services.prometheus.port}";
+                  }
+                ];
+            };
+          };
 
-          dashboards.settings.providers = let
-            makeReadOnly = x:
-              lib.pipe x [
-                builtins.readFile
-                builtins.fromJSON
-                (x: x // {editable = false;})
-                builtins.toJSON
-                (pkgs.writeText (builtins.baseNameOf x))
+          dashboards = {
+            settings = {
+              providers = let
+                makeReadOnly = x:
+                  lib.pipe x [
+                    builtins.readFile
+                    builtins.fromJSON
+                    (x: x // {editable = false;})
+                    builtins.toJSON
+                    (pkgs.writeText (builtins.baseNameOf x))
+                  ];
+              in [
+                {
+                  name = "Node Exporter Full";
+                  type = "file";
+                  url = "https://grafana.com/api/dashboards/1860/revisions/42/download";
+                  options = {
+                    path = makeReadOnly ./dashboards/node-exporter-full.json;
+                  };
+                }
+                {
+                  name = "PostgreSQL";
+                  type = "file";
+                  url = "https://grafana.com/api/dashboards/9628/revisions/8/download";
+                  options = {
+                    path = makeReadOnly ./dashboards/postgresql.json;
+                  };
+                }
               ];
-          in [
-            {
-              name = "Node Exporter Full";
-              type = "file";
-              url = "https://grafana.com/api/dashboards/1860/revisions/42/download";
-              options.path = makeReadOnly ./dashboards/node-exporter-full.json;
-            }
-            {
-              name = "PostgreSQL";
-              type = "file";
-              url = "https://grafana.com/api/dashboards/9628/revisions/8/download";
-              options.path = makeReadOnly ./dashboards/postgresql.json;
-            }
-          ];
+            };
+          };
         };
 
         settings = {
-          auth.signout_redirect_url = "https://${grafanaCfg.oauth.providerHost}/application/o/grafana/end-session/";
-          auth.oauth_auto_login = true;
+          auth = {
+            signout_redirect_url = "https://${grafanaCfg.oauth.providerHost}/application/o/grafana/end-session/";
+            oauth_auto_login = true;
+          };
 
-          "auth.generic_oauth".name = "authentik";
-          "auth.generic_oauth".enabled = true;
-          "auth.generic_oauth".client_id = grafanaCfg.oauth.clientId;
-          "auth.generic_oauth".client_secret = "$__file{${
-            config.sops.secrets."grafana/authentik-client-secret".path
-          }}";
-          "auth.generic_oauth".scopes = grafanaCfg.oauth.scopes;
-          "auth.generic_oauth".auth_url = "https://${grafanaCfg.oauth.providerHost}/application/o/authorize/";
-          "auth.generic_oauth".token_url = "https://${grafanaCfg.oauth.providerHost}/application/o/token/";
-          "auth.generic_oauth".api_url = "https://${grafanaCfg.oauth.providerHost}/application/o/userinfo/";
-          "auth.generic_oauth".role_attribute_path = grafanaCfg.oauth.roleAttributePath;
+          "auth.generic_oauth" = {
+            name = "authentik";
+            enabled = true;
+            client_id = grafanaCfg.oauth.clientId;
+            client_secret = "$__file{${
+              config.sops.secrets."grafana/authentik-client-secret".path
+            }}";
+            inherit (grafanaCfg.oauth) scopes;
+            auth_url = "https://${grafanaCfg.oauth.providerHost}/application/o/authorize/";
+            token_url = "https://${grafanaCfg.oauth.providerHost}/application/o/token/";
+            api_url = "https://${grafanaCfg.oauth.providerHost}/application/o/userinfo/";
+            role_attribute_path = grafanaCfg.oauth.roleAttributePath;
+          };
 
-          analytics.reporting_enabled = false;
+          analytics = {
+            reporting_enabled = false;
+          };
 
           server = {
             enforce_domain = true;
@@ -145,9 +172,13 @@ in {
         && !homelabCfg.isRootZFS
         && !grafanaCfg.zfs.enable
       ) {
-        persistence."/nix/persist".directories = [
-          grafanaDataDir
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = [
+              grafanaDataDir
+            ];
+          };
+        };
       };
   };
 }

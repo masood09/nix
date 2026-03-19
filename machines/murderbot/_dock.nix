@@ -1,3 +1,4 @@
+# macOS Dock layout — personal apps (browser, editor, chat, media).
 {config, ...}: let
   homelabCfg = config.homelab;
 in {

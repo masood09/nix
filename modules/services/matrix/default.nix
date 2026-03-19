@@ -1,3 +1,5 @@
+# Matrix — federated messaging (Synapse homeserver + LiveKit RTC for calls).
+# Sub-modules: synapse.nix (homeserver), rtc.nix (voice/video), caddy.nix (proxy).
 {
   config,
   lib,
@@ -14,23 +16,25 @@ in {
   ];
 
   config = {
-    networking.firewall = lib.mkIf cfg.openFirewall {
-      allowedTCPPorts =
-        lib.optionals cfg.synapse.enable [
-          cfg.synapse.listenPort
-          cfg.synapse.mas.http.web.port
-          cfg.synapse.mas.http.health.port
-        ]
-        ++ lib.optionals cfg.rtc.enable [
-          cfg.rtc.livekit.ports.tcpPort
-        ];
+    networking = {
+      firewall = lib.mkIf cfg.openFirewall {
+        allowedTCPPorts =
+          lib.optionals cfg.synapse.enable [
+            cfg.synapse.listenPort
+            cfg.synapse.mas.http.web.port
+            cfg.synapse.mas.http.health.port
+          ]
+          ++ lib.optionals cfg.rtc.enable [
+            cfg.rtc.livekit.ports.tcpPort
+          ];
 
-      allowedUDPPortRanges = lib.optionals cfg.rtc.enable [
-        {
-          from = cfg.rtc.livekit.ports.rtcPortRangeStart;
-          to = cfg.rtc.livekit.ports.rtcPortRangeEnd;
-        }
-      ];
+        allowedUDPPortRanges = lib.optionals cfg.rtc.enable [
+          {
+            from = cfg.rtc.livekit.ports.rtcPortRangeStart;
+            to = cfg.rtc.livekit.ports.rtcPortRangeEnd;
+          }
+        ];
+      };
     };
   };
 }

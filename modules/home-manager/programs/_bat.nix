@@ -1,3 +1,4 @@
+# Bat — cat replacement with syntax highlighting. Aliases cat → bat.
 {
   homelabCfg,
   lib,

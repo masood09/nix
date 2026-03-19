@@ -1,3 +1,4 @@
+# Data pool (dpool) — RAIDZ1 HDD array for bulk storage (media, backups).
 {
   config,
   lib,

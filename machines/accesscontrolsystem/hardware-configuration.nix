@@ -1,3 +1,4 @@
+# Hardware config — QEMU/KVM virtual machine (aarch64).
 {
   lib,
   modulesPath,
@@ -23,5 +24,7 @@
     extraModulePackages = [];
   };
 
-  nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
+  nixpkgs = {
+    hostPlatform = lib.mkDefault "aarch64-linux";
+  };
 }

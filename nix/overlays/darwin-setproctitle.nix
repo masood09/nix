@@ -1,3 +1,4 @@
+# Overlay — disables setproctitle fork/segfault tests that fail on macOS.
 final: prev: {
   python3Packages = prev.python3Packages.overrideScope (pyFinal: pyPrev: {
     setproctitle = pyPrev.setproctitle.overridePythonAttrs (old: {

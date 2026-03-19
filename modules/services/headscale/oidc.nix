@@ -1,3 +1,4 @@
+# Headscale sub-module — OIDC integration with Authentik for VPN login.
 {
   config,
   lib,

@@ -1,3 +1,5 @@
+# Blocky — DNS proxy with ad/tracker blocking, custom upstream resolvers,
+# and optional Prometheus metrics. Listens on configurable addresses/ports.
 {
   config,
   lib,
@@ -26,33 +28,43 @@ in {
   ];
 
   config = lib.mkIf blockyCfg.enable {
-    services.blocky = {
-      enable = true;
+    services = {
+      blocky = {
+        enable = true;
 
-      settings = {
-        ports = {
-          dns = blockyCfg.dnsListen;
+        settings = {
+          ports = {
+            dns = blockyCfg.dnsListen;
 
-          http = lib.mkIf blockyCfg.metrics.enable "127.0.0.1:${toString blockyCfg.metrics.listenPort}";
-        };
+            http = lib.mkIf blockyCfg.metrics.enable "127.0.0.1:${toString blockyCfg.metrics.listenPort}";
+          };
 
-        upstreams.groups.default = blockyCfg.upstreamDefault;
+          upstreams = {
+            groups = {
+              default = blockyCfg.upstreamDefault;
+            };
+          };
 
-        prometheus.enable = blockyCfg.metrics.enable;
+          prometheus = {
+            inherit (blockyCfg.metrics) enable;
+          };
 
-        blocking = {
-          inherit (blockyCfg) denylists allowlists clientGroupsBlock;
+          blocking = {
+            inherit (blockyCfg) denylists allowlists clientGroupsBlock;
+          };
         };
       };
     };
 
-    networking.firewall = {
-      allowedUDPPorts = lib.mkIf blockyCfg.openFirewall dnsPorts;
-      allowedTCPPorts = lib.mkIf blockyCfg.openFirewall (
-        dnsPorts
-        ++ lib.optional (blockyCfg.metrics.enable && blockyCfg.metrics.openFirewall)
-        blockyCfg.metrics.listenPort
-      );
+    networking = {
+      firewall = {
+        allowedUDPPorts = lib.mkIf blockyCfg.openFirewall dnsPorts;
+        allowedTCPPorts = lib.mkIf blockyCfg.openFirewall (
+          dnsPorts
+          ++ lib.optional (blockyCfg.metrics.enable && blockyCfg.metrics.openFirewall)
+          blockyCfg.metrics.listenPort
+        );
+      };
     };
   };
 }

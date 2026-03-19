@@ -1,3 +1,5 @@
+# MailArchiver — email archival service with OAuth login via Authentik.
+# Backed by PostgreSQL with ZFS dataset for persistent storage.
 {
   config,
   lib,
@@ -13,13 +15,13 @@
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "mailarchiver";
-    dataDir = cfg.dataDir;
+    inherit (cfg) dataDir;
     user = "mailarchiver";
     group = "mailarchiver";
     mode = "0750";
     mainServices = ["mailarchiver"];
     zfs = {
-      enable = cfg.zfs.enable;
+      inherit (cfg.zfs) enable;
       datasetServiceName = "zfs-dataset-mailarchiver";
     };
   };
@@ -30,19 +32,23 @@ in {
 
   config = lib.mkIf cfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets = {
-      mailarchiver = lib.mkIf cfg.zfs.enable {
-        inherit (cfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          mailarchiver = lib.mkIf cfg.zfs.enable {
+            inherit (cfg.zfs) dataset properties;
 
-        enable = true;
-        mountpoint = cfg.dataDir;
+            enable = true;
+            mountpoint = cfg.dataDir;
 
-        requiredBy = [
-          "mailarchiver.service"
-        ];
+            requiredBy = [
+              "mailarchiver.service"
+            ];
 
-        restic = {
-          enable = true;
+            restic = {
+              enable = true;
+            };
+          };
         };
       };
     };
@@ -56,7 +62,9 @@ in {
         environmentFile = config.sops.secrets."mailarchiver/.env".path;
 
         settings = {
-          TimeZone.DisplayTimeZoneId = config.time.timeZone;
+          TimeZone = {
+            DisplayTimeZoneId = config.time.timeZone;
+          };
 
           OAuth = {
             Enabled = cfg.oauth.enable;
@@ -105,20 +113,26 @@ in {
 
       # PostgreSQL ordering (separate from permission service concerns)
       (lib.mkIf postgresqlEnabled {
-        services.mailarchiver = {
-          requires = ["postgresql.target"];
-          after = ["postgresql.target"];
+        services = {
+          mailarchiver = {
+            requires = ["postgresql.target"];
+            after = ["postgresql.target"];
+          };
         };
       })
     ];
 
     users = {
-      users.mailarchiver = {
-        uid = cfg.userId;
+      users = {
+        mailarchiver = {
+          uid = cfg.userId;
+        };
       };
 
-      groups.mailarchiver = {
-        gid = cfg.groupId;
+      groups = {
+        mailarchiver = {
+          gid = cfg.groupId;
+        };
       };
     };
 
@@ -127,9 +141,13 @@ in {
         homelabCfg.impermanence
         && !homelabCfg.isRootZFS
       ) {
-        persistence."/nix/persist".directories = lib.optionals (!cfg.zfs.enable) [
-          cfg.dataDir
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = lib.optionals (!cfg.zfs.enable) [
+              cfg.dataDir
+            ];
+          };
+        };
       };
   };
 }

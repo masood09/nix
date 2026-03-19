@@ -1,3 +1,4 @@
+# Options — Alloy telemetry agent (Loki log shipping, systemd drop rules).
 {lib, ...}: let
   dropRuleType = lib.types.submodule (_: {
     options = {
@@ -21,43 +22,49 @@
     };
   });
 in {
-  options.homelab.services.alloy = {
-    enable = lib.mkOption {
-      default = true;
-      type = lib.types.bool;
-      description = ''
-        Whether to enable Grafana Alloy.
-      '';
-    };
+  options = {
+    homelab = {
+      services = {
+        alloy = {
+          enable = lib.mkOption {
+            default = true;
+            type = lib.types.bool;
+            description = ''
+              Whether to enable Grafana Alloy.
+            '';
+          };
 
-    userId = lib.mkOption {
-      default = 3000;
-      type = lib.types.ints.u16;
-      description = "User ID of Alloy user";
-    };
+          userId = lib.mkOption {
+            default = 3000;
+            type = lib.types.ints.u16;
+            description = "User ID of Alloy user";
+          };
 
-    groupId = lib.mkOption {
-      default = 3000;
-      type = lib.types.ints.u16;
-      description = "Group ID of Alloy group";
-    };
+          groupId = lib.mkOption {
+            default = 3000;
+            type = lib.types.ints.u16;
+            description = "Group ID of Alloy group";
+          };
 
-    loki = {
-      systemd = {
-        dropEnable = lib.mkOption {
-          type = lib.types.bool;
-          default = true;
-          description = "Enable the systemd_drop Loki pipeline (noise filtering).";
-        };
+          loki = {
+            systemd = {
+              dropEnable = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+                description = "Enable the systemd_drop Loki pipeline (noise filtering).";
+              };
 
-        dropRules = lib.mkOption {
-          type = lib.types.listOf dropRuleType;
-          default = [];
-          description = ''
-            List of log drop rules rendered into a `loki.process "systemd_drop"` pipeline.
+              dropRules = lib.mkOption {
+                type = lib.types.listOf dropRuleType;
+                default = [];
+                description = ''
+                  List of log drop rules rendered into a `loki.process "systemd_drop"` pipeline.
 
-            Each rule becomes: stage.match { selector = "..."; stage.drop { expression = "..." } }
-          '';
+                  Each rule becomes: stage.match { selector = "..."; stage.drop { expression = "..." } }
+                '';
+              };
+            };
+          };
         };
       };
     };

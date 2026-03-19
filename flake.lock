@@ -122,6 +122,26 @@
         "type": "github"
       }
     },
+    "dgop": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1771868032,
+        "narHash": "sha256-l8+LOd+QJuapv/21+juetZeedrlYY1QNXwcI27ACgiI=",
+        "owner": "AvengeMedia",
+        "repo": "dgop",
+        "rev": "361b4f7041cd27381ee3eeb36774faf10747e0c3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "repo": "dgop",
+        "type": "github"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -139,6 +159,28 @@
       "original": {
         "owner": "nix-community",
         "repo": "disko",
+        "type": "github"
+      }
+    },
+    "dms": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "quickshell": "quickshell"
+      },
+      "locked": {
+        "lastModified": 1772034342,
+        "narHash": "sha256-InX8kRyrpVL+MP/gW1qhH9tGtDx2z2gmJ9NfmvUJ35I=",
+        "owner": "AvengeMedia",
+        "repo": "DankMaterialShell",
+        "rev": "47b12d09fc8526f9c231de60848a41b5990b4a37",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "ref": "stable",
+        "repo": "DankMaterialShell",
         "type": "github"
       }
     },
@@ -224,16 +266,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1773515865,
-        "narHash": "sha256-qoQ/iFsNpnlPtu71CFCInmUf5KwsqPX+/0jgO9X1fzw=",
+        "lastModified": 1773718869,
+        "narHash": "sha256-iCKZD++gUwD1fWY0bkeShVLGHQOcWSFBr7XdHdliuqw=",
         "owner": "tale",
         "repo": "headplane",
-        "rev": "a26faab13982c75b112411fdc235ac0f9a958746",
+        "rev": "8f6fe05c8320dcdf8f86c6dea0960b8bfaf523cc",
         "type": "github"
       },
       "original": {
         "owner": "tale",
-        "ref": "a26faab",
         "repo": "headplane",
         "type": "github"
       }
@@ -447,18 +488,43 @@
         "type": "github"
       }
     },
+    "quickshell": {
+      "inputs": {
+        "nixpkgs": [
+          "dms",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1766725085,
+        "narHash": "sha256-O2aMFdDUYJazFrlwL7aSIHbUSEm3ADVZjmf41uBJfHs=",
+        "ref": "refs/heads/master",
+        "rev": "41828c4180fb921df7992a5405f5ff05d2ac2fff",
+        "revCount": 715,
+        "type": "git",
+        "url": "https://git.outfoxxed.me/quickshell/quickshell"
+      },
+      "original": {
+        "rev": "41828c4180fb921df7992a5405f5ff05d2ac2fff",
+        "type": "git",
+        "url": "https://git.outfoxxed.me/quickshell/quickshell"
+      }
+    },
     "root": {
       "inputs": {
         "authentik-nix": "authentik-nix",
         "catppuccin": "catppuccin",
+        "dgop": "dgop",
         "disko": "disko",
+        "dms": "dms",
         "headplane": "headplane",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs",
-        "sops-nix": "sops-nix"
+        "sops-nix": "sops-nix",
+        "zen-browser": "zen-browser"
       }
     },
     "sops-nix": {
@@ -533,6 +599,26 @@
       "original": {
         "owner": "pyproject-nix",
         "repo": "uv2nix",
+        "type": "github"
+      }
+    },
+    "zen-browser": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1773722260,
+        "narHash": "sha256-U8MsSiqqYZHR3oKE+cCZ2AJt3b4LcXs+oQuNLipaO78=",
+        "owner": "youwen5",
+        "repo": "zen-browser-flake",
+        "rev": "0e6e43342fb3e9a3439fafa777d8cdf98e4ffc49",
+        "type": "github"
+      },
+      "original": {
+        "owner": "youwen5",
+        "repo": "zen-browser-flake",
         "type": "github"
       }
     }

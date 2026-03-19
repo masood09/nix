@@ -1,35 +1,40 @@
+# Sops secret declarations — paths, owners, and restart triggers for this machine.
 {
-  config.sops.secrets = {
-    "alloy/.env" = {
-      restartUnits = ["alloy.service"];
-    };
+  config = {
+    sops = {
+      secrets = {
+        "alloy/.env" = {
+          restartUnits = ["alloy.service"];
+        };
 
-    "authentik/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = [
-        "authentik.service"
-        "authentik-worker.service"
-      ];
-    };
+        "authentik/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = [
+            "authentik.service"
+            "authentik-worker.service"
+          ];
+        };
 
-    "cloudflare/api-key" = {
-      restartUnits = ["acme-setup.service"];
-    };
+        "cloudflare/api-key" = {
+          restartUnits = ["acme-setup.service"];
+        };
 
-    "restic/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
-    "restic/repo" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
-    "restic/password" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
+        "restic/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
+        "restic/repo" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
+        "restic/password" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
 
-    "tailscale/preauth-key" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
+        "tailscale/preauth-key" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
 
-    "zed/discord-zfs-webhook" = {};
+        "zed/discord-zfs-webhook" = {};
+      };
+    };
   };
 }

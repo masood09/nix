@@ -1,3 +1,6 @@
+# Backup orchestration — nightly pipeline that stops services, runs PostgreSQL
+# dumps, snapshots ZFS datasets, performs restic backups, and restarts services.
+# Runs at 2 AM daily via systemd timer.
 {
   config,
   lib,
@@ -197,7 +200,13 @@ in {
   ];
 
   config = lib.mkIf cfg.enable {
-    homelab.services.restic.enable = true;
+    homelab = {
+      services = {
+        restic = {
+          enable = true;
+        };
+      };
+    };
 
     systemd = {
       services = {

@@ -1,3 +1,6 @@
+# macOS base — shared nix-darwin config for all macOS machines.
+# Sets system defaults (dark mode, dock, finder, keyboard), Touch ID sudo,
+# and Homebrew integration for GUI apps not available in nixpkgs.
 {
   config,
   pkgs,
@@ -11,29 +14,52 @@ in {
     ./_packages.nix
   ];
 
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs = {
+    config = {
+      allowUnfree = true;
+    };
+  };
 
+  # Nix daemon managed externally (Determinate Systems installer)
   nix = {
     enable = false;
   };
 
-  # inspo: https://github.com/nix-darwin/nix-darwin/issues/1339
-  ids.gids.nixbld = 350;
-
-  security.pam.services.sudo_local = {
-    enable = true;
-    touchIdAuth = true;
-    reattach = true;
+  # https://github.com/nix-darwin/nix-darwin/issues/1339
+  ids = {
+    gids = {
+      nixbld = 350;
+    };
   };
 
-  users.users.${homelabCfg.primaryUser.userName} = {
-    home = "/Users/${homelabCfg.primaryUser.userName}";
-    shell = pkgs.bash;
+  security = {
+    pam = {
+      services = {
+        # Touch ID for sudo in terminal (reattach keeps it working in tmux)
+        sudo_local = {
+          enable = true;
+          touchIdAuth = true;
+          reattach = true;
+        };
+      };
+    };
+  };
+
+  users = {
+    users = {
+      ${homelabCfg.primaryUser.userName} = {
+        home = "/Users/${homelabCfg.primaryUser.userName}";
+        shell = pkgs.bash;
+      };
+    };
   };
 
   system = {
     primaryUser = homelabCfg.primaryUser.userName;
-    startup.chime = false;
+
+    startup = {
+      chime = false;
+    };
 
     defaults = {
       CustomUserPreferences = {
@@ -42,7 +68,10 @@ in {
         };
       };
 
-      LaunchServices.LSQuarantine = true; # Whether to enable quarantine for downloaded applications. The default is true.
+      LaunchServices = {
+        # Whether to enable quarantine for downloaded applications
+        LSQuarantine = true;
+      };
 
       NSGlobalDomain = {
         AppleEnableMouseSwipeNavigateWithScrolls = true;
@@ -81,7 +110,9 @@ in {
         NSWindowResizeTime = 0.001;
       };
 
-      SoftwareUpdate.AutomaticallyInstallMacOSUpdates = true;
+      SoftwareUpdate = {
+        AutomaticallyInstallMacOSUpdates = true;
+      };
 
       WindowManager = {
         StageManagerHideWidgets = true;
@@ -89,7 +120,9 @@ in {
         EnableStandardClickToShowDesktop = false;
       };
 
-      controlcenter.BatteryShowPercentage = true;
+      controlcenter = {
+        BatteryShowPercentage = true;
+      };
 
       dock = {
         autohide = true;
@@ -128,7 +161,9 @@ in {
         GuestEnabled = false;
       };
 
-      magicmouse.MouseButtonMode = "TwoButton";
+      magicmouse = {
+        MouseButtonMode = "TwoButton";
+      };
 
       menuExtraClock = {
         Show24Hour = true;
@@ -149,9 +184,11 @@ in {
         TrackpadRightClick = true;
       };
 
-      universalaccess.reduceMotion = true;
+      universalaccess = {
+        reduceMotion = true;
+      };
     };
-  };
 
-  system.stateVersion = 4;
+    stateVersion = 4;
+  };
 }

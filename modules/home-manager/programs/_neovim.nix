@@ -1,3 +1,4 @@
+# Neovim — opt-in editor with vi/vim aliases.
 {homelabCfg, ...}: {
   programs = {
     neovim = {

@@ -1,3 +1,4 @@
+# Machine-specific Homebrew casks and Mac App Store apps (personal).
 {lib, ...}: {
   homebrew = {
     casks = lib.mkAfter [

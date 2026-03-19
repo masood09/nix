@@ -1,3 +1,5 @@
+# trialunit — test & integration environment (Proxmox VM).
+# Mirrors production services for staging. Mirrored root, 6-disk data pool.
 {
   config,
   lib,
@@ -15,20 +17,21 @@
     ./../../modules/home-manager
   ];
 
-  homelab.disks = {
-    root = [
-      "scsi-0QEMU_QEMU_HARDDISK_drive-scsi0"
-      "scsi-0QEMU_QEMU_HARDDISK_drive-scsi1"
-    ];
+  homelab = {
+    disks = {
+      root = [
+        "scsi-0QEMU_QEMU_HARDDISK_drive-scsi0"
+        "scsi-0QEMU_QEMU_HARDDISK_drive-scsi1"
+      ];
 
-    data = [
-      "scsi-0QEMU_QEMU_HARDDISK_drive-scsi2"
-      "scsi-0QEMU_QEMU_HARDDISK_drive-scsi3"
-      "scsi-0QEMU_QEMU_HARDDISK_drive-scsi4"
-      "scsi-0QEMU_QEMU_HARDDISK_drive-scsi5"
-      "scsi-0QEMU_QEMU_HARDDISK_drive-scsi6"
-      "scsi-0QEMU_QEMU_HARDDISK_drive-scsi7"
-    ];
+      data = [
+        "scsi-0QEMU_QEMU_HARDDISK_drive-scsi2"
+        "scsi-0QEMU_QEMU_HARDDISK_drive-scsi3"
+        "scsi-0QEMU_QEMU_HARDDISK_drive-scsi4"
+        "scsi-0QEMU_QEMU_HARDDISK_drive-scsi5"
+        "scsi-0QEMU_QEMU_HARDDISK_drive-scsi6"
+        "scsi-0QEMU_QEMU_HARDDISK_drive-scsi7"
+      ];
+    };
   };
-
 }

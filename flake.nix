@@ -1,9 +1,11 @@
+# Flake entry point — multi-machine homelab (NixOS + nix-darwin + home-manager).
 {
   description = "Masood's NixOS Configuration";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
 
+    # NixOS infrastructure
     impermanence = {
       url = "github:nix-community/impermanence";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -12,39 +14,51 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nix-homebrew = {
-      url = "github:zhaofengli-wip/nix-homebrew";
+    # User environment
+    home-manager = {
+      url = "github:nix-community/home-manager/release-25.11";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
-
     catppuccin = {
       url = "github:catppuccin/nix/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # macOS
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nix-homebrew = {
+      url = "github:zhaofengli-wip/nix-homebrew";
+    };
+
+    # Services
     authentik-nix = {
       url = "github:nix-community/authentik-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     headplane = {
-      # Pinned to avoid pnpm hash mismatch - see https://github.com/tale/headplane/issues/496
-      url = "github:tale/headplane/a26faab";
+      url = "github:tale/headplane";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Desktop (Niri + DankMaterialShell)
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell/stable";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    dgop = {
+      url = "github:AvengeMedia/dgop";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    zen-browser = {
+      url = "github:youwen5/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -65,6 +79,9 @@
 
     forAllSystems = nixpkgs.lib.genAttrs systems;
 
+    # Shared NixOS configuration builder. Each machine provides its own
+    # path (e.g. ./machines/heartbeat) which is appended to the common
+    # module list containing disko, sops, home-manager, etc.
     mkNixOSConfig = path:
       nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
@@ -80,7 +97,6 @@
           (import ./nix/services/default.nix)
 
           {
-            # provides `pkgs.headplane`
             nixpkgs.overlays = [
               inputs.headplane.overlays.default
               (import ./nix/overlays/default.nix)
@@ -91,6 +107,7 @@
         ];
       };
 
+    # Shared nix-darwin configuration builder for macOS machines.
     mkDarwinConfig = path:
       nix-darwin.lib.darwinSystem {
         specialArgs = {inherit inputs outputs;};
@@ -102,10 +119,9 @@
         ];
       };
   in {
-    # Enables `nix fmt` at root of repo to format all nix files
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
-    # Export only repo-local packages (no hardcoding per-package)
+    # Custom packages defined in nix/pkgs/ (auto-discovered)
     packages = forAllSystems (
       system: let
         pkgs = import nixpkgs {
@@ -122,11 +138,13 @@
         }
     );
 
+    # macOS machines
     darwinConfigurations = {
       "work-pantheon" = mkDarwinConfig ./machines/work-pantheon;
       murderbot = mkDarwinConfig ./machines/murderbot;
     };
 
+    # NixOS servers and desktops
     nixosConfigurations = {
       accesscontrolsystem = mkNixOSConfig ./machines/accesscontrolsystem;
       commrelay = mkNixOSConfig ./machines/commrelay;
@@ -138,6 +156,7 @@
       heartbeat = mkNixOSConfig ./machines/heartbeat;
       trialunit = mkNixOSConfig ./machines/trialunit;
 
+      # Minimal NixOS installer ISO with SSH key baked in
       nixiso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {inherit inputs outputs;};

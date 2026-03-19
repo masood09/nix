@@ -1,3 +1,4 @@
+# Hardware config — bare-metal Intel server (NAS) with multiple ZFS pools.
 {
   config,
   lib,
@@ -17,20 +18,24 @@
         "usbhid"
         "usb_storage"
         "sd_mod"
-        "igb"
+        "igb" # Intel gigabit ethernet
       ];
 
       kernelModules = [];
     };
 
+    # Static IP for initrd SSH (remote ZFS unlock)
     kernelParams = [
       "ip=10.0.1.14::10.0.1.1:255.255.255.0:${config.homelab.networking.hostName}:eno2:"
     ];
 
-    zfs.extraPools = [
-      "dpool"
-      "fpool"
-    ];
+    zfs = {
+      # Additional data pools imported at boot
+      extraPools = [
+        "dpool"
+        "fpool"
+      ];
+    };
 
     kernelModules = [
       "kvm-intel"
@@ -39,6 +44,15 @@
     extraModulePackages = [];
   };
 
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  nixpkgs = {
+    hostPlatform = lib.mkDefault "x86_64-linux";
+  };
+
+  hardware = {
+    cpu = {
+      intel = {
+        updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+      };
+    };
+  };
 }

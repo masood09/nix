@@ -1,3 +1,5 @@
+# Authentik — identity provider (SSO/OIDC) for all homelab services.
+# Integrates with Caddy reverse proxy, PostgreSQL, and Alloy log filtering.
 {
   config,
   lib,
@@ -48,17 +50,27 @@ in {
     # -------------------------
     # Loki drop rules (Alloy)
     # -------------------------
-    homelab.services.alloy.loki.systemd.dropRules = lib.mkIf alloyEnabled (lib.mkAfter [
-      {
-        name = "authentik: drop /-/health/live/ 200";
-        unit = "authentik.service";
-        expression = ".*\"event\"\\s*:\\s*\"/-/health/live/\".*\"status\"\\s*:\\s*200.*";
-      }
-      {
-        name = "authentik: drop /-/metrics/ 200";
-        unit = "authentik.service";
-        expression = ".*\"event\"\\s*:\\s*\"/-/metrics/\".*\"status\"\\s*:\\s*200.*";
-      }
-    ]);
+    homelab = {
+      services = {
+        alloy = {
+          loki = {
+            systemd = {
+              dropRules = lib.mkIf alloyEnabled (lib.mkAfter [
+                {
+                  name = "authentik: drop /-/health/live/ 200";
+                  unit = "authentik.service";
+                  expression = ".*\"event\"\\s*:\\s*\"/-/health/live/\".*\"status\"\\s*:\\s*200.*";
+                }
+                {
+                  name = "authentik: drop /-/metrics/ 200";
+                  unit = "authentik.service";
+                  expression = ".*\"event\"\\s*:\\s*\"/-/metrics/\".*\"status\"\\s*:\\s*200.*";
+                }
+              ]);
+            };
+          };
+        };
+      };
+    };
   };
 }

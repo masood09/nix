@@ -1,57 +1,60 @@
+# Homelab options — federated messaging server (Matrix Synapse + LiveKit RTC).
 {
-  config.homelab = {
-    purpose = "Secure, federated real-time messaging and identity-aware communication hub (Matrix Synapse).";
-    isRootZFS = true;
-    isEncryptedRoot = true;
-    impermanence = true;
+  config = {
+    homelab = {
+      purpose = "Secure, federated real-time messaging and identity-aware communication hub (Matrix Synapse).";
+      isRootZFS = true;
+      isEncryptedRoot = true;
+      impermanence = true;
 
-    networking = {
-      hostName = "commrelay";
-    };
-
-    programs = {
-      motd = {
-        enable = true;
-
-        networkInterfaces = [
-          "enp0s6"
-          "tailscale0"
-        ];
+      networking = {
+        hostName = "commrelay";
       };
-    };
 
-    services = {
-      acme = {
-        zfs = {
+      programs = {
+        motd = {
           enable = true;
+
+          networkInterfaces = [
+            "enp0s6"
+            "tailscale0"
+          ];
         };
       };
 
-      backup = {
-        enable = true;
+      services = {
+        acme = {
+          zfs = {
+            enable = true;
+          };
+        };
 
-        serviceUnits = [
-          "uptime-kuma.service"
-        ];
-      };
+        backup = {
+          enable = true;
 
-      caddy = {
-        enable = true;
-      };
+          serviceUnits = [
+            "uptime-kuma.service"
+          ];
+        };
 
-      matrix = {
-        openFirewall = true;
-
-        rtc = {
+        caddy = {
           enable = true;
         };
-      };
 
-      tailscale = {
-        enable = true;
+        matrix = {
+          openFirewall = true;
 
-        zfs = {
+          rtc = {
+            enable = true;
+          };
+        };
+
+        tailscale = {
           enable = true;
+
+          zfs = {
+            enable = true;
+          };
         };
       };
     };
