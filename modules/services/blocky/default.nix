@@ -46,7 +46,7 @@ in {
           };
 
           prometheus = {
-            enable = blockyCfg.metrics.enable;
+            inherit (blockyCfg.metrics) enable;
           };
 
           blocking = {

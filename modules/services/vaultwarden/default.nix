@@ -17,12 +17,12 @@
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "vaultwarden";
-    dataDir = vaultwardenCfg.dataDir;
+    inherit (vaultwardenCfg) dataDir;
     user = "vaultwarden";
     group = "vaultwarden";
     mainServices = ["vaultwarden"];
     zfs = {
-      enable = vaultwardenCfg.zfs.enable;
+      inherit (vaultwardenCfg.zfs) enable;
       datasetServiceName = "zfs-dataset-vaultwarden";
     };
   };

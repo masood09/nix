@@ -20,7 +20,7 @@
     group = "root";
     mainServices = ["podman"];
     zfs = {
-      enable = podmanCfg.zfs.enable;
+      inherit (podmanCfg.zfs) enable;
       datasetServiceName = "zfs-dataset-podman";
     };
   };

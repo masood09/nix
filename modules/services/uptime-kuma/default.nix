@@ -13,13 +13,13 @@
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "uptime-kuma";
-    dataDir = uptimeKumaCfg.dataDir;
+    inherit (uptimeKumaCfg) dataDir;
     user = "uptime-kuma";
     group = "uptime-kuma";
     mode = "0750";
     mainServices = ["uptime-kuma"];
     zfs = {
-      enable = uptimeKumaCfg.zfs.enable;
+      inherit (uptimeKumaCfg.zfs) enable;
       datasetServiceName = "zfs-dataset-uptime-kuma";
     };
   };

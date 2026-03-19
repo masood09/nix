@@ -12,12 +12,12 @@
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "tailscale";
-    dataDir = cfg.dataDir;
+    inherit (cfg) dataDir;
     user = "root";
     group = "root";
     mainServices = ["tailscaled"];
     zfs = {
-      enable = cfg.zfs.enable;
+      inherit (cfg.zfs) enable;
       datasetServiceName = "zfs-dataset-tailscale";
     };
   };

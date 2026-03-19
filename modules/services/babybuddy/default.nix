@@ -17,13 +17,13 @@
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "babybuddy";
-    dataDir = babybuddyCfg.dataDir;
+    inherit (babybuddyCfg) dataDir;
     user = "babybuddy";
     group = "babybuddy";
     mode = "0750";
     mainServices = ["podman-babybuddy"];
     zfs = {
-      enable = babybuddyCfg.zfs.enable;
+      inherit (babybuddyCfg.zfs) enable;
       datasetServiceName = "zfs-dataset-babybuddy";
     };
   };
