@@ -130,7 +130,7 @@ in {
             client_secret = "$__file{${
               config.sops.secrets."grafana/authentik-client-secret".path
             }}";
-            scopes = grafanaCfg.oauth.scopes;
+            inherit (grafanaCfg.oauth) scopes;
             auth_url = "https://${grafanaCfg.oauth.providerHost}/application/o/authorize/";
             token_url = "https://${grafanaCfg.oauth.providerHost}/application/o/token/";
             api_url = "https://${grafanaCfg.oauth.providerHost}/application/o/userinfo/";

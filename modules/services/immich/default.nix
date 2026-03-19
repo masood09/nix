@@ -16,13 +16,13 @@
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "immich";
-    dataDir = immichCfg.dataDir;
+    inherit (immichCfg) dataDir;
     user = "immich";
     group = "immich";
     mode = "0750";
     mainServices = ["immich-server" "immich-machine-learning"];
     zfs = {
-      enable = immichCfg.zfs.enable;
+      inherit (immichCfg.zfs) enable;
       datasetServiceName = "zfs-dataset-immich";
     };
   };

@@ -21,7 +21,7 @@
     mode = "0750";
     mainServices = ["headscale"];
     zfs = {
-      enable = headscaleCfg.zfs.enable;
+      inherit (headscaleCfg.zfs) enable;
       datasetServiceName = "zfs-dataset-headscale";
     };
   };

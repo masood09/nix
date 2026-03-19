@@ -15,13 +15,13 @@
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "mailarchiver";
-    dataDir = cfg.dataDir;
+    inherit (cfg) dataDir;
     user = "mailarchiver";
     group = "mailarchiver";
     mode = "0750";
     mainServices = ["mailarchiver"];
     zfs = {
-      enable = cfg.zfs.enable;
+      inherit (cfg.zfs) enable;
       datasetServiceName = "zfs-dataset-mailarchiver";
     };
   };

@@ -61,7 +61,7 @@ in {
 
       # Fingerprint authentication daemon
       fprintd = {
-        enable = homelabCfg.hardware.fingerprint.enable;
+        inherit (homelabCfg.hardware.fingerprint) enable;
       };
     };
   };
