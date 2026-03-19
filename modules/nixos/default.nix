@@ -18,8 +18,7 @@
     ./_users.nix
 
     # Desktop modules (gated on role == "desktop" internally)
-    ./_desktop-hardware.nix
-    ./_niri.nix
+    ./desktop
 
     # ZFS pool management
     ./zfs
