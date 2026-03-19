@@ -1,3 +1,6 @@
+# Impermanence — ephemeral root filesystem with explicit persistence.
+# Root is rolled back to a blank ZFS snapshot on every boot (see _boot.nix).
+# Only paths listed here survive reboots; everything else is wiped.
 {
   config,
   lib,
@@ -11,15 +14,16 @@ in {
 
   config = lib.mkIf homelabCfg.impermanence {
     environment.persistence."/nix/persist" = {
-      # Hide these mounts from the sidebar of file managers
       hideMounts = true;
 
       directories = lib.mkMerge [
+        # Non-ZFS machines need explicit persistence for logs and NixOS state
         (lib.mkIf (!homelabCfg.isRootZFS) [
           "/var/log"
-          # inspo: https://github.com/nix-community/impermanence/issues/178
+          # https://github.com/nix-community/impermanence/issues/178
           "/var/lib/nixos"
         ])
+        # Desktop-specific state (login manager, bluetooth pairings, fingerprints, WiFi)
         (lib.mkIf (homelabCfg.role == "desktop") [
           "/var/cache/tuigreet"
           "/var/lib/bluetooth"
@@ -29,6 +33,7 @@ in {
         ])
       ];
 
+      # Machine identity and SSH host keys must persist across reboots
       files = [
         "/etc/machine-id"
         "/etc/ssh/ssh_host_ed25519_key.pub"

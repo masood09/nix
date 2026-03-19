@@ -1,3 +1,4 @@
+# Data pool (dpool) — single-disk ZFS for service data (test environment).
 {
   config,
   lib,

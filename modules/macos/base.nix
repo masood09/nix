@@ -1,3 +1,6 @@
+# macOS base — shared nix-darwin config for all macOS machines.
+# Sets system defaults (dark mode, dock, finder, keyboard), Touch ID sudo,
+# and Homebrew integration for GUI apps not available in nixpkgs.
 {
   config,
   pkgs,
@@ -13,11 +16,12 @@ in {
 
   nixpkgs.config.allowUnfree = true;
 
+  # Nix daemon managed externally (Determinate Systems installer)
   nix = {
     enable = false;
   };
 
-  # inspo: https://github.com/nix-darwin/nix-darwin/issues/1339
+  # https://github.com/nix-darwin/nix-darwin/issues/1339
   ids.gids.nixbld = 350;
 
   security.pam.services.sudo_local = {

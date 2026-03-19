@@ -1,3 +1,4 @@
+# Machine-specific packages — work tools (k8s, GPG/YubiKey, work casks).
 {
   lib,
   pkgs,

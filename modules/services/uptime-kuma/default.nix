@@ -1,3 +1,5 @@
+# Uptime Kuma — service health monitoring with status pages and notifications.
+# Runs as a dedicated user (not DynamicUser) for ZFS dataset compatibility.
 {
   config,
   lib,

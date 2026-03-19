@@ -1,3 +1,5 @@
+# Nightscout — CGM (continuous glucose monitor) dashboard for diabetes management.
+# Configured for Loop pump integration with 24h time format.
 {
   config,
   lib,

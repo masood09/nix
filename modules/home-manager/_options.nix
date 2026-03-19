@@ -1,3 +1,7 @@
+# Homelab program options — central registry of homelab.programs.* enable flags.
+# Each program module reads its flag from here to decide whether to activate.
+# Programs default to true (always-on) or false (opt-in) depending on how
+# commonly they're used across machines.
 {lib, ...}: {
   options.homelab = {
     programs = {

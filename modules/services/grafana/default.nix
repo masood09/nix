@@ -1,3 +1,6 @@
+# Grafana — observability dashboards with Loki + Prometheus datasources.
+# Authenticates via Authentik OIDC. Provisions Node Exporter and PostgreSQL
+# dashboards as read-only on activation.
 {
   config,
   lib,

@@ -1,3 +1,5 @@
+# heartbeat — primary homelab server (NAS + shared services).
+# Mirrored SSD root, mirrored NVMe fast pool, 6-disk HDD data pool.
 {
   imports = [
     ./disko

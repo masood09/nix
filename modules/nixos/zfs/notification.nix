@@ -1,3 +1,6 @@
+# ZFS event notifications — sends ZED alerts (scrub results, errors, etc.)
+# to Discord via webhook. Replaces ZED's default email with a custom script
+# that posts formatted messages to a Discord channel.
 {
   config,
   lib,
@@ -6,7 +9,6 @@
 }: let
   homelabCfg = config.homelab;
 
-  # Any datasets with enable = true?
   anyManagedDatasets = (lib.attrNames (lib.filterAttrs (_: v: v.enable or false) homelabCfg.zfs.datasets)) != [];
 
   enableZFS = (homelabCfg.isRootZFS or false) || anyManagedDatasets;

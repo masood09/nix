@@ -1,3 +1,4 @@
+# Options — Authentik SSO (domain, ports, worker, ZFS).
 {
   config,
   lib,

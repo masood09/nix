@@ -1,3 +1,5 @@
+# MailArchiver — email archival service with OAuth login via Authentik.
+# Backed by PostgreSQL with ZFS dataset for persistent storage.
 {
   config,
   lib,

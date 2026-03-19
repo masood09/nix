@@ -1,3 +1,4 @@
+# Options — Grafana dashboards (domain, port, ZFS, OAuth).
 {
   config,
   lib,

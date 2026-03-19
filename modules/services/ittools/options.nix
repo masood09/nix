@@ -1,3 +1,4 @@
+# Options — IT-Tools utility dashboard (domain, port).
 {
   config,
   lib,

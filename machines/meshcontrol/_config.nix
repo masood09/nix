@@ -1,3 +1,4 @@
+# Homelab options — mesh networking control plane (Headscale + Headplane).
 {
   config.homelab = {
     purpose = "Mesh Networking Control Plane (Headscale)";

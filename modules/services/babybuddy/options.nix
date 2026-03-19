@@ -1,3 +1,4 @@
+# Options — Baby Buddy child tracker (domain, port, ZFS, OAuth).
 {
   config,
   lib,

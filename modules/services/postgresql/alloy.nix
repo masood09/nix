@@ -1,3 +1,4 @@
+# PostgreSQL sub-module — Alloy metrics scraping via postgres_exporter.
 {
   config,
   lib,

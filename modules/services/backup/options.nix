@@ -1,3 +1,4 @@
+# Options — backup orchestration (restic paths, ZFS snapshot + restic repo).
 {lib, ...}: {
   options.homelab.services = {
     backup = {

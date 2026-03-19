@@ -1,3 +1,5 @@
+# NixOS service module for Nightscout — Node.js CGM dashboard with
+# MongoDB backend, configurable display units, and environment file secrets.
 {
   config,
   lib,

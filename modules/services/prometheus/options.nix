@@ -1,3 +1,4 @@
+# Options — Prometheus metrics (port, retention, scrape targets, ZFS).
 {
   config,
   lib,

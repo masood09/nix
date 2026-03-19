@@ -1,3 +1,5 @@
+# Karakeep — bookmark/read-later manager with AI summarization.
+# Authenticates via Authentik OIDC with password auth disabled.
 {
   config,
   lib,

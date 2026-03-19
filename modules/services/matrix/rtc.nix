@@ -1,3 +1,4 @@
+# Matrix sub-module — LiveKit SFU + JWT service for voice/video calls.
 {
   config,
   lib,

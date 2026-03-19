@@ -1,3 +1,5 @@
+# trialunit — test & integration environment (Proxmox VM).
+# Mirrors production services for staging. Mirrored root, 6-disk data pool.
 {
   config,
   lib,

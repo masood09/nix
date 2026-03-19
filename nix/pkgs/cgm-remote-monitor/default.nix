@@ -1,3 +1,4 @@
+# Nightscout (cgm-remote-monitor) — Node.js CGM dashboard built with buildNpmPackage.
 {
   lib,
   nodejs,

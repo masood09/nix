@@ -1,3 +1,4 @@
+# Homelab options — test environment (Proxmox VM, test.mantannest.com domain).
 {
   config.homelab = {
     purpose = "Test & Integration Environment";

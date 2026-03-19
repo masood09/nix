@@ -1,3 +1,5 @@
+# NixOS service module for MailArchiver — .NET email archival app with
+# appsettings.json config generation, OAuth support, and PostgreSQL backend.
 {
   config,
   lib,

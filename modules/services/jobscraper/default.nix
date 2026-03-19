@@ -1,3 +1,4 @@
+# JobScraper — custom job board aggregator running as a Podman container.
 {
   config,
   lib,

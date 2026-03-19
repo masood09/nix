@@ -1,3 +1,7 @@
+# ZFS dataset provisioning — declarative dataset creation and mounting.
+# Service modules declare datasets via homelab.zfs.datasets.<name> and this
+# module generates systemd oneshot units that create/mount them at boot.
+# Datasets are created idempotently (skipped if they already exist).
 {
   config,
   lib,

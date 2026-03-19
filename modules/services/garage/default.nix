@@ -1,3 +1,5 @@
+# Garage — S3-compatible distributed object storage. Separate ZFS datasets
+# for data (large, no restic) and metadata (small, backed up via restic).
 {
   config,
   lib,

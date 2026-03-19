@@ -1,3 +1,6 @@
+# macOS packages — Homebrew casks for GUI apps and taps for formulae
+# not available in nixpkgs (Aerospace, SketchyBar, Kanata, etc.).
+# `cleanup = "zap"` removes apps not listed here on activation.
 {
   config,
   pkgs,

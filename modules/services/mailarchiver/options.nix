@@ -1,3 +1,4 @@
+# Options — MailArchiver email archival (domain, port, ZFS, OAuth).
 {
   config,
   lib,

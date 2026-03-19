@@ -1,3 +1,6 @@
+# Git — commit signing (SSH or GPG), delta diff viewer, and allowed signers.
+# All SSH public keys from primaryUser.sshPublicKeys are added to the
+# git allowed-signers file so commits signed from any machine verify correctly.
 {
   config,
   homelabCfg,
@@ -10,6 +13,7 @@
   keys = homelabCfg.primaryUser.sshPublicKeys;
   email = gitCfg.userEmail;
 
+  # Generate allowed_signers file with all SSH keys for commit verification
   signersFile = pkgs.writeText "git-allowed-signers" (
     lib.concatMapStringsSep "\n" (key: ''${email} namespaces="git" ${key}'') keys
   );
@@ -40,6 +44,7 @@ in {
           colorMoved = "default";
         };
 
+        # SSH signing (default) uses allowed_signers; GPG uses openpgp
         gpg =
           if usingGpg
           then {

@@ -1,3 +1,4 @@
+# Matrix sub-module — Synapse homeserver with MAS, PostgreSQL, ZFS, and signing keys.
 {
   config,
   lib,
@@ -72,6 +73,7 @@ in {
             }
           ];
 
+          # Connect via Unix socket (no password needed with peer auth)
           database = {
             name = "psycopg2";
             args = {
@@ -95,6 +97,7 @@ in {
             show_locked_users = true;
           };
 
+          # MSC3266: room summary API, MSC4222: sliding sync, MSC4140: delayed events
           experimental_features = {
             msc3266_enabled = true;
             msc4222_enabled = true;
@@ -179,6 +182,7 @@ in {
             secret_file = config.sops.secrets."matrix/mas/matrix-secret".path;
           };
 
+          # Passwords disabled — all auth flows via upstream OIDC (Authentik)
           passwords = {
             enabled = false;
           };

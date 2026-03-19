@@ -1,3 +1,4 @@
+# Machine networking — static IPs on dual NICs, loose reverse-path for Tailscale.
 {
   networking = {
     firewall.checkReversePath = "loose";

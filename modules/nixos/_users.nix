@@ -1,3 +1,6 @@
+# User management — immutable users with sops-managed passwords.
+# Defines the primary user account and their SSH authorized keys.
+# Password is read from sops at activation time (mutableUsers = false).
 {
   config,
   lib,
@@ -44,6 +47,7 @@ in {
         then pkgs.zsh
         else pkgs.bash;
 
+      # All user accounts are declarative; no passwd/useradd changes persist
       mutableUsers = false;
 
       users = {
@@ -56,6 +60,7 @@ in {
               "networkmanager"
               "wheel"
             ]
+            # Desktop users need direct access to audio/input/video devices
             ++ lib.optionals (homelabCfg.role == "desktop") [
               "audio"
               "input"

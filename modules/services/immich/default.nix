@@ -1,3 +1,5 @@
+# Immich — self-hosted photo/video management with ML-powered search.
+# Excludes generated thumbnails and encoded video from restic backups.
 {
   config,
   lib,

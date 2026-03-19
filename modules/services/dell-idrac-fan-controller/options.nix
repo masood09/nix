@@ -1,3 +1,4 @@
+# Options — Dell iDRAC fan controller (IPMI host, thresholds).
 {lib, ...}: {
   options.homelab.services.dell-idrac-fan-controller = {
     enable = lib.mkEnableOption "Whether to enable Dell iDRAC Fan Controller.";

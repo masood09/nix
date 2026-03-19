@@ -1,3 +1,6 @@
+# Disk declarations — disk-by-id paths for ZFS pools.
+# Used by disko and the ZFS module to build pool vdevs.
+# Machines populate these in their _config.nix.
 {lib, ...}: {
   options.homelab.disks = {
     root = lib.mkOption {

@@ -1,3 +1,4 @@
+# Options — Uptime Kuma service monitor (domain, port, ZFS).
 {
   config,
   lib,

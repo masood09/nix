@@ -1,3 +1,4 @@
+# Homelab options — core network services (Blocky DNS + NUT UPS).
 {
   config.homelab = {
     purpose = "Core Network Services (DNS Filtering + UPS Monitoring)";

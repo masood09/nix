@@ -1,3 +1,4 @@
+# Machine networking — static IP on VLAN 20 (Proxmox VM).
 {
   networking = {
     useDHCP = false;

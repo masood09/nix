@@ -1,3 +1,4 @@
+# Eza — modern ls replacement with git status and icons. Aliases ls → eza.
 {
   homelabCfg,
   lib,

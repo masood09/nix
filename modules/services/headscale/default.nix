@@ -1,3 +1,5 @@
+# Headscale — self-hosted Tailscale control server for the mesh VPN.
+# Includes optional Headplane admin UI and OIDC authentication via Authentik.
 {
   config,
   lib,

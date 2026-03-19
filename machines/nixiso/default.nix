@@ -1,3 +1,5 @@
+# nixiso — minimal NixOS installer ISO with SSH key pre-configured.
+# Boot this on a new machine, SSH in, and run the install script.
 {pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     efibootmgr

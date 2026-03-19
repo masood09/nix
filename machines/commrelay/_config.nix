@@ -1,3 +1,4 @@
+# Homelab options — federated messaging server (Matrix Synapse + LiveKit RTC).
 {
   config.homelab = {
     purpose = "Secure, federated real-time messaging and identity-aware communication hub (Matrix Synapse).";

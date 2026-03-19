@@ -1,3 +1,4 @@
+# Homelab options — monitoring server (Uptime Kuma).
 {
   config.homelab = {
     purpose = "Monitoring & Service Health (Uptime Kuma)";

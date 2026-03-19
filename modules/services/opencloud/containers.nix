@@ -1,3 +1,4 @@
+# OpenCloud sub-module — Podman OCI container definitions.
 {
   config,
   lib,

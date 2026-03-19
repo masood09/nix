@@ -1,3 +1,4 @@
+# OpenCloud sub-module — ZFS dataset for persistent storage.
 {
   config,
   lib,

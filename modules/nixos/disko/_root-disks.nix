@@ -1,3 +1,5 @@
+# Disko layout for mirrored ZFS root — two-disk mirror with dual EFI
+# partitions and encrypted rpool with impermanence datasets.
 {
   config,
   lib,
@@ -108,6 +110,7 @@ in {
           };
         };
 
+        # Impermanence: root is rolled back to this blank snapshot on every boot
         "root/empty" = mkLegacy "/" {
           postCreateHook = "zfs snapshot rpool/root/empty@start";
         };
@@ -122,6 +125,7 @@ in {
 
         "root/var/log" = mkLegacy "/var/log" {};
 
+        # 10G reservation prevents pool from filling completely (ZFS needs free space)
         "root/reserved" = {
           type = "zfs_fs";
           options = {

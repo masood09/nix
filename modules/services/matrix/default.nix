@@ -1,3 +1,5 @@
+# Matrix — federated messaging (Synapse homeserver + LiveKit RTC for calls).
+# Sub-modules: synapse.nix (homeserver), rtc.nix (voice/video), caddy.nix (proxy).
 {
   config,
   lib,

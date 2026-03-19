@@ -1,3 +1,4 @@
+# Headscale sub-module — Headplane web UI for managing the VPN.
 {
   config,
   lib,

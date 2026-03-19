@@ -1,3 +1,5 @@
+# NixOS service module for Matrix Authentication Service (MAS) — handles
+# login/OIDC for Synapse with YAML config generation and secret file support.
 {
   config,
   lib,

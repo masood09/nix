@@ -1,3 +1,4 @@
+# Options — Vaultwarden password manager (domain, port, ZFS).
 {
   config,
   lib,

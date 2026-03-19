@@ -1,3 +1,4 @@
+# PostgreSQL auth — shared database/user definitions imported by machines.
 {lib, ...}: {
   config = {
     services = {

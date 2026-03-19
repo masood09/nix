@@ -1,3 +1,4 @@
+# Options — Loki log aggregation (domain, port, retention periods, ZFS).
 {
   config,
   lib,

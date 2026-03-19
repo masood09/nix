@@ -1,3 +1,6 @@
+# Vaultwarden — self-hosted Bitwarden-compatible password manager.
+# SSO-only login via Authentik (password auth disabled). Uses PostgreSQL
+# when available, falls back to SQLite otherwise.
 {
   config,
   lib,

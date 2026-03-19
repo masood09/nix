@@ -1,3 +1,7 @@
+# Remote unlock — SSH server in the initrd for unlocking encrypted disks.
+# On encrypted-root machines, an SSH daemon starts during early boot so the
+# disk passphrase can be entered remotely (port 2222 by default).
+# Non-ZFS machines drop into cryptsetup-askpass; ZFS machines use zfs load-key.
 {
   config,
   lib,

@@ -1,3 +1,4 @@
+# Custom NixOS service modules for apps not yet in nixpkgs.
 {
   imports = [
     ./mailarchiver.nix

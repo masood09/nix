@@ -1,3 +1,6 @@
+# MOTD — custom message of the day shown on interactive login.
+# Displays hostname (figlet), machine purpose, IPs, kernel, load, memory,
+# uptime, reboot-required status, and ZFS pool health (if applicable).
 {
   homelabCfg,
   lib,
