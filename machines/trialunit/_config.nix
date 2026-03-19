@@ -111,7 +111,6 @@
           enable = true;
 
           headplane = {
-            enable = false; # Temporarily disabled - pnpm hash mismatch upstream
             zfs = {
               enable = true;
               dataset = "dpool/tank/services/headplane";
