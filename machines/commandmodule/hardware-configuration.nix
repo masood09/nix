@@ -1,4 +1,4 @@
-# Auto-generated hardware config — do not edit manually (nixos-generate-config).
+# Hardware config — ThinkPad laptop (bare-metal Intel x86_64).
 {
   config,
   lib,
@@ -19,7 +19,7 @@
         "usbhid"
         "usb_storage"
         "sd_mod"
-        "rtsx_pci_sdmmc"
+        "rtsx_pci_sdmmc" # Realtek SD card reader
       ];
     };
 
@@ -48,11 +48,18 @@
     extraModulePackages = [];
   };
 
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  nixpkgs = {
+    hostPlatform = lib.mkDefault "x86_64-linux";
+  };
 
   hardware = {
     enableRedistributableFirmware = true;
     firmware = [pkgs.linux-firmware];
-    cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+
+    cpu = {
+      intel = {
+        updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+      };
+    };
   };
 }
