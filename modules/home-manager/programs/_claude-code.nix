@@ -1,3 +1,4 @@
+# Claude Code — Anthropic's CLI coding assistant.
 {homelabCfg, ...}: {
   programs = {
     claude-code = {

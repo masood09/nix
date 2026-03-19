@@ -1,3 +1,5 @@
+# commandmodule — ThinkPad laptop, NixOS desktop with Niri compositor.
+# Single NVMe root, encrypted ZFS, impermanence.
 {
   imports = [
     ./disko
@@ -10,9 +12,11 @@
     ./../../modules/home-manager
   ];
 
-  homelab.disks = {
-    root = [
-      "nvme-INTEL_SSDPEKKF256G8L_BTHP94351NSP256B"
-    ];
+  homelab = {
+    disks = {
+      root = [
+        "nvme-INTEL_SSDPEKKF256G8L_BTHP94351NSP256B"
+      ];
+    };
   };
 }

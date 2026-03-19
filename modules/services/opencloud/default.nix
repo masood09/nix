@@ -1,3 +1,6 @@
+# OpenCloud — self-hosted file sync & share (ownCloud successor).
+# Runs as Podman containers with Collabora Online for document editing.
+# Uses its own wildcard ACME cert for *.opencloud.domain subdomains.
 {
   config,
   lib,

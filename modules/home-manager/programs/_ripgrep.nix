@@ -1,3 +1,4 @@
+# Ripgrep — fast recursive grep. Aliases grep → rg.
 {
   homelabCfg,
   lib,

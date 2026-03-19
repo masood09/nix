@@ -1,3 +1,4 @@
+# Fast pool (fpool) — mirrored SSD pair for database and service workloads.
 {
   config,
   lib,

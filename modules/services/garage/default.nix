@@ -1,3 +1,5 @@
+# Garage — S3-compatible distributed object storage. Separate ZFS datasets
+# for data (large, no restic) and metadata (small, backed up via restic).
 {
   config,
   lib,
@@ -17,27 +19,35 @@ in {
   ];
 
   config = lib.mkIf garageCfg.enable {
-    homelab.zfs.datasets = lib.mkMerge [
-      (lib.mkIf garageCfg.zfs.enable {
-        garage-data = {
-          enable = true;
-          dataset = garageCfg.zfs.datasetData;
-          properties = garageCfg.zfs.propertiesData;
-          mountpoint = garageCfg.dataDir;
-          requiredBy = ["garage.service"];
-          restic.enable = false;
-        };
+    homelab = {
+      zfs = {
+        datasets = lib.mkMerge [
+          (lib.mkIf garageCfg.zfs.enable {
+            garage-data = {
+              enable = true;
+              dataset = garageCfg.zfs.datasetData;
+              properties = garageCfg.zfs.propertiesData;
+              mountpoint = garageCfg.dataDir;
+              requiredBy = ["garage.service"];
+              restic = {
+                enable = false;
+              };
+            };
 
-        garage-meta = {
-          enable = true;
-          dataset = garageCfg.zfs.datasetMeta;
-          properties = garageCfg.zfs.propertiesMeta;
-          mountpoint = garageCfg.metaDir;
-          requiredBy = ["garage.service"];
-          restic.enable = true;
-        };
-      })
-    ];
+            garage-meta = {
+              enable = true;
+              dataset = garageCfg.zfs.datasetMeta;
+              properties = garageCfg.zfs.propertiesMeta;
+              mountpoint = garageCfg.metaDir;
+              requiredBy = ["garage.service"];
+              restic = {
+                enable = true;
+              };
+            };
+          })
+        ];
+      };
+    };
 
     services = {
       garage = {
@@ -173,20 +183,26 @@ in {
         };
       };
 
-      tmpfiles.rules = [
-        "d ${toString garageCfg.dataDir} 0700 garage garage -"
-        "z ${toString garageCfg.dataDir} 0700 garage garage -"
-        "d ${toString garageCfg.metaDir} 0700 garage garage -"
-        "z ${toString garageCfg.metaDir} 0700 garage garage -"
-      ];
+      tmpfiles = {
+        rules = [
+          "d ${toString garageCfg.dataDir} 0700 garage garage -"
+          "z ${toString garageCfg.dataDir} 0700 garage garage -"
+          "d ${toString garageCfg.metaDir} 0700 garage garage -"
+          "z ${toString garageCfg.metaDir} 0700 garage garage -"
+        ];
+      };
     };
 
     # Impermanence fallback if you ever disable ZFS datasets
     environment = lib.mkIf (homelabCfg.impermanence && !garageCfg.zfs.enable) {
-      persistence."/nix/persist".directories = [
-        garageCfg.dataDir
-        garageCfg.metaDir
-      ];
+      persistence = {
+        "/nix/persist" = {
+          directories = [
+            garageCfg.dataDir
+            garageCfg.metaDir
+          ];
+        };
+      };
     };
   };
 }

@@ -1,3 +1,6 @@
+# Emacs — installs emacs-pgtk (native Wayland) on Linux with Doom Emacs
+# dependencies (LSPs, formatters, linters). Adds `em` shell alias for
+# emacsclient across all enabled shells.
 {
   homelabCfg,
   lib,
@@ -13,24 +16,27 @@
   };
 in {
   home = {
-    packages = lib.optionals emacsEnabled (with pkgs; [
-      cmake
-      coreutils
-      coreutils-prefixed
-      fontconfig
-      gomodifytags
-      gopls
-      gore
-      gotests
-      jsbeautifier
-      multimarkdown
-      nil
-      nixfmt-rfc-style
-      nodejs
-      shellcheck
-      stylelint
-      terraform
-    ]);
+    packages = lib.optionals emacsEnabled (
+      # emacs-pgtk for native Wayland support (standard emacs is X11-only)
+      lib.optional pkgs.stdenv.isLinux pkgs.emacs-pgtk
+      ++ (with pkgs; [
+        # Doom Emacs dependencies: build tools, LSPs, formatters
+        cmake
+        fontconfig
+        gomodifytags
+        gopls
+        gore
+        gotests
+        jsbeautifier
+        multimarkdown
+        nil
+        nixfmt-rfc-style
+        nodejs
+        shellcheck
+        stylelint
+        terraform
+      ])
+    );
   };
 
   programs = {

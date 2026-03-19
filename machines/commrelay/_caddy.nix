@@ -1,3 +1,4 @@
+# Caddy overrides — Matrix .well-known delegation and Element Web static hosting.
 {
   config,
   lib,
@@ -45,6 +46,7 @@ in {
                 respond `${builtins.toJSON clientConfig}` 200
               }
 
+              # Route auth endpoints to MAS instead of Synapse
               @masAuth path_regexp masAuth ^/_matrix/client/(.*)/(login|logout|refresh)$
               reverse_proxy @masAuth http://100.64.0.21:${toString matrixCfg.synapse.mas.http.web.port}
 
@@ -70,6 +72,7 @@ in {
             '';
           };
 
+          # Cross-machine reverse proxies — services running on heartbeat (100.64.0.21)
           "keep.${config.networking.domain}" = {
             useACMEHost = config.networking.domain;
             extraConfig = ''
@@ -80,6 +83,7 @@ in {
           "passwords.${config.networking.domain}" = {
             useACMEHost = config.networking.domain;
             extraConfig = ''
+              # Block Vaultwarden admin panel from external access
               @admin path /admin /admin/*
               respond @admin 403
 

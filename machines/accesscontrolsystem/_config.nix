@@ -1,74 +1,77 @@
+# Homelab options — identity & access control server (Authentik SSO).
 {
-  config.homelab = {
-    purpose = "Identity & Access Control (SSO / Authentik)";
-    isRootZFS = true;
-    isEncryptedRoot = true;
-    impermanence = true;
+  config = {
+    homelab = {
+      purpose = "Identity & Access Control (SSO / Authentik)";
+      isRootZFS = true;
+      isEncryptedRoot = true;
+      impermanence = true;
 
-    networking = {
-      hostName = "accesscontrolsystem";
-    };
-
-    programs = {
-      motd = {
-        enable = true;
-
-        networkInterfaces = [
-          "enp0s6"
-          "tailscale0"
-        ];
-      };
-    };
-
-    services = {
-      authentik = {
-        enable = true;
+      networking = {
+        hostName = "accesscontrolsystem";
       };
 
-      acme = {
-        zfs = {
+      programs = {
+        motd = {
           enable = true;
+
+          networkInterfaces = [
+            "enp0s6"
+            "tailscale0"
+          ];
         };
       };
 
-      backup = {
-        enable = true;
-
-        extraPaths = ["/var/lib/private/authentik/media"];
-
-        serviceUnits = [
-          "authentik.service"
-          "authentik-worker.service"
-        ];
-      };
-
-      caddy = {
-        enable = true;
-      };
-
-      postgresql = {
-        enable = true;
-
-        zfs = {
+      services = {
+        authentik = {
           enable = true;
-          dataset = "rpool/root/var/lib/postgresql/17";
+        };
+
+        acme = {
+          zfs = {
+            enable = true;
+          };
         };
 
         backup = {
           enable = true;
 
+          extraPaths = ["/var/lib/private/authentik/media"];
+
+          serviceUnits = [
+            "authentik.service"
+            "authentik-worker.service"
+          ];
+        };
+
+        caddy = {
+          enable = true;
+        };
+
+        postgresql = {
+          enable = true;
+
           zfs = {
             enable = true;
-            dataset = "rpool/root/var/backup/postgresql";
+            dataset = "rpool/root/var/lib/postgresql/17";
+          };
+
+          backup = {
+            enable = true;
+
+            zfs = {
+              enable = true;
+              dataset = "rpool/root/var/backup/postgresql";
+            };
           };
         };
-      };
 
-      tailscale = {
-        enable = true;
-
-        zfs = {
+        tailscale = {
           enable = true;
+
+          zfs = {
+            enable = true;
+          };
         };
       };
     };

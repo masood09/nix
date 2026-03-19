@@ -1,3 +1,4 @@
+# Blocky sub-module — Alloy metrics scraping for the DNS proxy.
 {
   config,
   lib,

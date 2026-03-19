@@ -1,3 +1,6 @@
+# Starship — cross-shell prompt with Catppuccin-inspired colour segments.
+# Shows: OS icon, hostname (SSH only), directory, git, language versions,
+# k8s context, docker, conda, time, and command duration.
 {
   homelabCfg,
   lib,

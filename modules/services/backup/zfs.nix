@@ -1,3 +1,5 @@
+# Backup sub-module — ZFS snapshot + restic orchestration (stop services,
+# snapshot, mount, backup, unmount, restart).
 {
   config,
   lib,
@@ -84,9 +86,11 @@ in {
         };
       };
 
-      tmpfiles.rules = [
-        "d ${backupRoot} 0750 root root -"
-      ];
+      tmpfiles = {
+        rules = [
+          "d ${backupRoot} 0750 root root -"
+        ];
+      };
     };
   };
 }

@@ -1,3 +1,5 @@
+# Tailscale — mesh VPN client connecting to the self-hosted Headscale server.
+# Auto-authenticates via sops-managed pre-auth key with --accept-routes.
 {
   config,
   lib,
@@ -10,12 +12,12 @@
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "tailscale";
-    dataDir = cfg.dataDir;
+    inherit (cfg) dataDir;
     user = "root";
     group = "root";
     mainServices = ["tailscaled"];
     zfs = {
-      enable = cfg.zfs.enable;
+      inherit (cfg.zfs) enable;
       datasetServiceName = "zfs-dataset-tailscale";
     };
   };
@@ -25,12 +27,18 @@ in {
   ];
 
   config = lib.mkIf cfg.enable {
-    homelab.zfs.datasets.tailscale = lib.mkIf cfg.zfs.enable {
-      inherit (cfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          tailscale = lib.mkIf cfg.zfs.enable {
+            inherit (cfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = cfg.dataDir;
-      requiredBy = ["tailscaled.service"];
+            enable = true;
+            mountpoint = cfg.dataDir;
+            requiredBy = ["tailscaled.service"];
+          };
+        };
+      };
     };
 
     services = {
@@ -49,14 +57,18 @@ in {
 
     inherit (permSvc) systemd;
 
-    environment.persistence."/nix/persist" =
-      lib.mkIf (
-        !homelabCfg.isRootZFS
-        && !cfg.zfs.enable
-      ) {
-        directories = [
-          cfg.dataDir
-        ];
+    environment = {
+      persistence = {
+        "/nix/persist" =
+          lib.mkIf (
+            !homelabCfg.isRootZFS
+            && !cfg.zfs.enable
+          ) {
+            directories = [
+              cfg.dataDir
+            ];
+          };
       };
+    };
   };
 }

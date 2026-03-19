@@ -1,3 +1,6 @@
+# ZFS management — auto-scrub, trim, metrics export, and sub-modules for
+# dataset provisioning (dataset.nix), Discord notifications (notification.nix),
+# and Alloy/Prometheus scraping (alloy.nix).
 {
   config,
   lib,
@@ -5,7 +8,6 @@
 }: let
   homelabCfg = config.homelab;
 
-  # Any datasets with enable = true?
   anyManagedDatasets = (lib.attrNames (lib.filterAttrs (_: v: v.enable or false) homelabCfg.zfs.datasets)) != [];
 
   enableZFS = (homelabCfg.isRootZFS or false) || anyManagedDatasets;
@@ -16,21 +18,33 @@ in {
     ./notification.nix
   ];
 
-  options.homelab = {
-    isRootZFS = lib.mkEnableOption "Whether the root drive is ZFS.";
+  options = {
+    homelab = {
+      isRootZFS = lib.mkEnableOption "Whether the root drive is ZFS.";
+    };
   };
 
   config = lib.mkIf enableZFS {
     services = lib.mkIf (homelabCfg.isRootZFS || anyManagedDatasets) {
       zfs = {
-        autoScrub.enable = true;
-        autoScrub.interval = "monthly";
-        trim.enable = true;
+        autoScrub = {
+          enable = true;
+          interval = "monthly";
+        };
+
+        trim = {
+          enable = true;
+        };
       };
 
-      prometheus.exporters.zfs = lib.mkIf homelabCfg.services.alloy.enable {
-        enable = true;
-        listenAddress = "127.0.0.1";
+      prometheus = {
+        exporters = {
+          # ZFS metrics for Prometheus via Alloy
+          zfs = lib.mkIf homelabCfg.services.alloy.enable {
+            enable = true;
+            listenAddress = "127.0.0.1";
+          };
+        };
       };
     };
   };

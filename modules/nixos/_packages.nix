@@ -1,3 +1,5 @@
+# System packages and shell programs — base tools available on all NixOS machines.
+# Shell selection (fish/zsh) and editor (neovim/vim) are driven by homelab options.
 {
   config,
   pkgs,
@@ -6,13 +8,15 @@
   homelabCfg = config.homelab;
   neovimEnabled = homelabCfg.programs.neovim.enable or false;
 in {
-  environment.systemPackages = with pkgs; [
-    efibootmgr
-    ghostty.terminfo
-    git
-    gptfdisk
-    parted
-  ];
+  environment = {
+    systemPackages = with pkgs; [
+      efibootmgr
+      ghostty.terminfo
+      git
+      gptfdisk
+      parted
+    ];
+  };
 
   programs = {
     fish = {
@@ -26,6 +30,7 @@ in {
       vimAlias = true;
     };
 
+    # Vim is always available as fallback; only set as default editor if neovim is off
     vim = {
       enable = true;
       defaultEditor = !neovimEnabled;

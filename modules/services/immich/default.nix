@@ -1,3 +1,5 @@
+# Immich — self-hosted photo/video management with ML-powered search.
+# Excludes generated thumbnails and encoded video from restic backups.
 {
   config,
   lib,
@@ -14,13 +16,13 @@
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "immich";
-    dataDir = immichCfg.dataDir;
+    inherit (immichCfg) dataDir;
     user = "immich";
     group = "immich";
     mode = "0750";
     mainServices = ["immich-server" "immich-machine-learning"];
     zfs = {
-      enable = immichCfg.zfs.enable;
+      inherit (immichCfg.zfs) enable;
       datasetServiceName = "zfs-dataset-immich";
     };
   };
@@ -31,19 +33,25 @@ in {
 
   config = lib.mkIf immichCfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.immich = lib.mkIf immichCfg.zfs.enable {
-      inherit (immichCfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          immich = lib.mkIf immichCfg.zfs.enable {
+            inherit (immichCfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = immichCfg.dataDir;
+            enable = true;
+            mountpoint = immichCfg.dataDir;
 
-      requiredBy = [
-        "immich-server.service"
-        "immich-machine-learning.service"
-      ];
+            requiredBy = [
+              "immich-server.service"
+              "immich-machine-learning.service"
+            ];
 
-      restic = {
-        enable = true;
+            restic = {
+              enable = true;
+            };
+          };
+        };
       };
     };
 
@@ -61,11 +69,13 @@ in {
 
       restic = lib.mkIf (resticEnabled && immichCfg.zfs.enable) {
         backups = {
-          backup.exclude = [
-            "/mnt/nightly_backup/immich/backups"
-            "/mnt/nightly_backup/immich/encoded-video"
-            "/mnt/nightly_backup/immich/thumbs"
-          ];
+          backup = {
+            exclude = [
+              "/mnt/nightly_backup/immich/backups"
+              "/mnt/nightly_backup/immich/encoded-video"
+              "/mnt/nightly_backup/immich/thumbs"
+            ];
+          };
         };
       };
 
@@ -87,12 +97,18 @@ in {
       };
     };
 
-    users.users = {
-      immich.uid = immichCfg.userId;
-    };
+    users = {
+      users = {
+        immich = {
+          uid = immichCfg.userId;
+        };
+      };
 
-    users.groups = {
-      immich.gid = immichCfg.groupId;
+      groups = {
+        immich = {
+          gid = immichCfg.groupId;
+        };
+      };
     };
 
     inherit (permSvc) systemd;
@@ -103,9 +119,13 @@ in {
         && !homelabCfg.isRootZFS
         && !immichCfg.zfs.enable
       ) {
-        persistence."/nix/persist".directories = [
-          immichCfg.dataDir
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = [
+              immichCfg.dataDir
+            ];
+          };
+        };
       };
   };
 }

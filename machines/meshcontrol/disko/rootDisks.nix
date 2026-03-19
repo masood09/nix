@@ -1,3 +1,4 @@
+# Root pool — single-disk ZFS with encrypted impermanence datasets.
 {
   config,
   lib,

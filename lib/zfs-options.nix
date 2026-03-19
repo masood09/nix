@@ -1,3 +1,5 @@
+# Shared ZFS option builder — generates the enable/dataset/properties option
+# set reused by every service that supports ZFS-backed storage.
 {lib}: {
   # mkZfsOptions: generates the standard zfs option set used by most services.
   #

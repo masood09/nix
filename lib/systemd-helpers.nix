@@ -1,3 +1,6 @@
+# Systemd helper generators — creates permission-fix oneshot services and
+# tmpfiles rules so data directories have correct ownership before main
+# services start, with optional ZFS dataset ordering.
 {
   lib,
   pkgs,
@@ -67,10 +70,12 @@
           };
         };
 
-      tmpfiles.rules = [
-        "d ${dataDir} ${mode} ${user} ${group} -"
-        "z ${dataDir} ${mode} ${user} ${group} -"
-      ];
+      tmpfiles = {
+        rules = [
+          "d ${dataDir} ${mode} ${user} ${group} -"
+          "z ${dataDir} ${mode} ${user} ${group} -"
+        ];
+      };
     };
   };
 }

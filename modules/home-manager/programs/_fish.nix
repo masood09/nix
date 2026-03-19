@@ -1,3 +1,4 @@
+# Fish shell — opt-in shell with fzf plugin integration.
 {
   homelabCfg,
   pkgs,

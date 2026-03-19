@@ -1,61 +1,68 @@
+# Homelab options — mesh networking control plane (Headscale + Headplane).
 {
-  config.homelab = {
-    purpose = "Mesh Networking Control Plane (Headscale)";
-    isRootZFS = true;
-    isEncryptedRoot = true;
-    impermanence = true;
+  config = {
+    homelab = {
+      purpose = "Mesh Networking Control Plane (Headscale)";
+      isRootZFS = true;
+      isEncryptedRoot = true;
+      impermanence = true;
 
-    networking = {
-      hostName = "meshcontrol";
-    };
-
-    programs = {
-      motd = {
-        enable = true;
-
-        networkInterfaces = [
-          "enp0s6"
-        ];
+      networking = {
+        hostName = "meshcontrol";
       };
-    };
 
-    services = {
-      acme = {
-        zfs = {
+      programs = {
+        motd = {
           enable = true;
+
+          networkInterfaces = [
+            "enp0s6"
+          ];
         };
       };
 
-      backup = {
-        enable = true;
+      services = {
+        acme = {
+          zfs = {
+            enable = true;
+          };
+        };
 
-        serviceUnits = [
-          "headplane.service"
-          "headscale.service"
-        ];
-      };
+        backup = {
+          enable = true;
 
-      caddy = {
-        enable = true;
-      };
+          serviceUnits = [
+            "headplane.service"
+            "headscale.service"
+          ];
+        };
 
-      headscale = {
-        enable = true;
-
-        oidc = {
+        caddy = {
           enable = true;
         };
 
-        zfs = {
+        headscale = {
           enable = true;
+
+          headplane = {
+            enable = false; # Temporarily disabled - pnpm hash mismatch upstream
+          };
+
+          oidc = {
+            enable = true;
+          };
+
+          zfs = {
+            enable = true;
+          };
         };
-      };
 
-      tailscale = {
-        enable = true;
-
-        zfs = {
+        tailscale = {
           enable = true;
+
+          zfs = {
+            enable = true;
+          };
         };
       };
     };

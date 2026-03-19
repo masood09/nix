@@ -1,3 +1,4 @@
+# murderbot — primary macOS dev machine (personal).
 {
   imports = [
     ./hardware-configuration.nix
@@ -9,9 +10,11 @@
     ./_packages.nix
   ];
 
-  nixpkgs.overlays = [
-    (import ../../nix/overlays/darwin-setproctitle.nix)
-  ];
+  nixpkgs = {
+    overlays = [
+      (import ../../nix/overlays/darwin-setproctitle.nix)
+    ];
+  };
 
   homelab = {
     role = "desktop";
@@ -21,10 +24,18 @@
     };
 
     programs = {
-      claude-code.enable = true;
-      emacs.enable = true;
-      git.enable = true;
-      neovim.enable = true;
+      claude-code = {
+        enable = true;
+      };
+      emacs = {
+        enable = true;
+      };
+      git = {
+        enable = true;
+      };
+      neovim = {
+        enable = true;
+      };
     };
   };
 }

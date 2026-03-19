@@ -1,3 +1,4 @@
+# Headscale sub-module — Headplane web UI for managing the VPN.
 {
   config,
   lib,
@@ -14,21 +15,29 @@
   settings = lib.recursiveUpdate config.services.headscale.settings {
     tls_cert_path = "/dev/null";
     tls_key_path = "/dev/null";
-    policy.path = "/dev/null";
+    policy = {
+      path = "/dev/null";
+    };
   };
 
   headscaleConfig = format.generate "headscale.yml" settings;
 in {
   config = lib.mkIf (headscaleCfg.enable && cfg.enable) {
-    homelab.zfs.datasets.headplane = lib.mkIf cfg.zfs.enable {
-      inherit (cfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          headplane = lib.mkIf cfg.zfs.enable {
+            inherit (cfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = cfg.dataDir;
-      requiredBy = ["headplane.service"];
+            enable = true;
+            mountpoint = cfg.dataDir;
+            requiredBy = ["headplane.service"];
 
-      restic = {
-        enable = true;
+            restic = {
+              enable = true;
+            };
+          };
+        };
       };
     };
 
@@ -50,9 +59,11 @@ in {
             dns_records_path = config.services.headscale.settings.dns.extra_records_path;
           };
 
-          integration.agent = {
-            enabled = true;
-            pre_authkey_path = config.sops.secrets."headscale/headplane/integration-agent-pre-auth-key".path;
+          integration = {
+            agent = {
+              enabled = true;
+              pre_authkey_path = config.sops.secrets."headscale/headplane/integration-agent-pre-auth-key".path;
+            };
           };
 
           oidc = {
@@ -122,10 +133,12 @@ in {
         };
       };
 
-      tmpfiles.rules = [
-        "d ${toString cfg.dataDir} 0700 ${config.services.headscale.user} ${config.services.headscale.group} -"
-        "z ${toString cfg.dataDir} 0700 ${config.services.headscale.user} ${config.services.headscale.group} -"
-      ];
+      tmpfiles = {
+        rules = [
+          "d ${toString cfg.dataDir} 0700 ${config.services.headscale.user} ${config.services.headscale.group} -"
+          "z ${toString cfg.dataDir} 0700 ${config.services.headscale.user} ${config.services.headscale.group} -"
+        ];
+      };
     };
   };
 }

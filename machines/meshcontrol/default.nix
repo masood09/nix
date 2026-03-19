@@ -1,3 +1,4 @@
+# meshcontrol — mesh networking control plane (Headscale + Headplane).
 {
   imports = [
     ./disko
@@ -10,10 +11,11 @@
     ./../../modules/home-manager
   ];
 
-  homelab.disks = {
-    root = [
-      "scsi-360be897f1a3847ccb8118a239ec26e56"
-    ];
+  homelab = {
+    disks = {
+      root = [
+        "scsi-360be897f1a3847ccb8118a239ec26e56"
+      ];
+    };
   };
-
 }

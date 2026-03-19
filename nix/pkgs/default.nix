@@ -1,3 +1,5 @@
+# Auto-discovers custom packages — any subdirectory with a default.nix
+# becomes a package callable via pkgs.<name>.
 {
   pkgs,
   lib,

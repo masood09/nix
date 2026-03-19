@@ -1,3 +1,4 @@
+# Tmux — terminal multiplexer.
 {homelabCfg, ...}: {
   programs = {
     tmux = {
