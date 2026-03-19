@@ -133,16 +133,26 @@
     };
   };
 in {
-  options.homelab.zfs.datasets = lib.mkOption {
-    type = lib.types.attrsOf (lib.types.submodule datasetSubmodule);
-    default = {};
-    description = "Reusable ZFS datasets to ensure exist + mounted.";
+  options = {
+    homelab = {
+      zfs = {
+        datasets = lib.mkOption {
+          type = lib.types.attrsOf (lib.types.submodule datasetSubmodule);
+          default = {};
+          description = "Reusable ZFS datasets to ensure exist + mounted.";
+        };
+      };
+    };
   };
 
   config = lib.mkIf (enabledDatasets != {}) {
-    boot.supportedFilesystems = ["zfs"];
+    boot = {
+      supportedFilesystems = ["zfs"];
+    };
 
-    systemd.services =
-      lib.mkMerge (lib.mapAttrsToList mkDatasetUnit enabledDatasets);
+    systemd = {
+      services =
+        lib.mkMerge (lib.mapAttrsToList mkDatasetUnit enabledDatasets);
+    };
   };
 }

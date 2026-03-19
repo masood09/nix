@@ -63,19 +63,25 @@ in {
     };
 
     users = {
-      users.nightscout = {
-        uid = cfg.userId;
+      users = {
+        nightscout = {
+          uid = cfg.userId;
+        };
       };
 
-      groups.nightscout = {
-        gid = cfg.groupId;
+      groups = {
+        nightscout = {
+          gid = cfg.groupId;
+        };
       };
     };
 
-    networking.firewall = lib.mkIf cfg.openFirewall {
-      allowedTCPPorts = [
-        cfg.port
-      ];
+    networking = {
+      firewall = lib.mkIf cfg.openFirewall {
+        allowedTCPPorts = [
+          cfg.port
+        ];
+      };
     };
   };
 }

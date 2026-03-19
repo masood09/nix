@@ -200,7 +200,13 @@ in {
   ];
 
   config = lib.mkIf cfg.enable {
-    homelab.services.restic.enable = true;
+    homelab = {
+      services = {
+        restic = {
+          enable = true;
+        };
+      };
+    };
 
     systemd = {
       services = {

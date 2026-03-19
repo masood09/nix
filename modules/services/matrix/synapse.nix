@@ -15,30 +15,34 @@
   dbOwner = "matrix-synapse";
 in {
   config = lib.mkIf cfg.synapse.enable {
-    homelab.zfs.datasets = lib.mkIf cfg.synapse.zfs.enable {
-      matrix-synapse = {
-        enable = true;
+    homelab = {
+      zfs = {
+        datasets = lib.mkIf cfg.synapse.zfs.enable {
+          matrix-synapse = {
+            enable = true;
 
-        inherit (cfg.synapse.zfs.dataDir) dataset properties;
+            inherit (cfg.synapse.zfs.dataDir) dataset properties;
 
-        mountpoint = cfg.synapse.dataDir;
-        requiredBy = ["matrix-synapse.service"];
+            mountpoint = cfg.synapse.dataDir;
+            requiredBy = ["matrix-synapse.service"];
 
-        restic = {
-          enable = true;
-        };
-      };
+            restic = {
+              enable = true;
+            };
+          };
 
-      matrix-synapse-media = {
-        enable = true;
+          matrix-synapse-media = {
+            enable = true;
 
-        inherit (cfg.synapse.zfs.mediaDir) dataset properties;
+            inherit (cfg.synapse.zfs.mediaDir) dataset properties;
 
-        mountpoint = cfg.synapse.mediaDir;
-        requiredBy = ["matrix-synapse.service"];
+            mountpoint = cfg.synapse.mediaDir;
+            requiredBy = ["matrix-synapse.service"];
 
-        restic = {
-          enable = true;
+            restic = {
+              enable = true;
+            };
+          };
         };
       };
     };
@@ -239,7 +243,9 @@ in {
           ];
 
           # Ensure we connect to the right port (in case you customized it)
-          environment.PGPORT = toString (pg.settings.port or 5432);
+          environment = {
+            PGPORT = toString (pg.settings.port or 5432);
+          };
 
           script = ''
             set -euo pipefail
@@ -355,12 +361,14 @@ in {
         };
       };
 
-      tmpfiles.rules = [
-        "d ${toString cfg.synapse.dataDir} 0750 matrix-synapse matrix-synapse -"
-        "d ${toString cfg.synapse.mediaDir} 0750 matrix-synapse matrix-synapse -"
-        "z ${toString cfg.synapse.dataDir} 0750 matrix-synapse matrix-synapse -"
-        "z ${toString cfg.synapse.mediaDir} 0750 matrix-synapse matrix-synapse -"
-      ];
+      tmpfiles = {
+        rules = [
+          "d ${toString cfg.synapse.dataDir} 0750 matrix-synapse matrix-synapse -"
+          "d ${toString cfg.synapse.mediaDir} 0750 matrix-synapse matrix-synapse -"
+          "z ${toString cfg.synapse.dataDir} 0750 matrix-synapse matrix-synapse -"
+          "z ${toString cfg.synapse.mediaDir} 0750 matrix-synapse matrix-synapse -"
+        ];
+      };
     };
 
     environment =
@@ -369,10 +377,14 @@ in {
         && !homelabCfg.isRootZFS
         && !cfg.synapse.zfs.enable
       ) {
-        persistence."/nix/persist".directories = [
-          cfg.synapse.dataDir
-          cfg.synapse.mediaDir
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = [
+              cfg.synapse.dataDir
+              cfg.synapse.mediaDir
+            ];
+          };
+        };
       };
 
     users = {

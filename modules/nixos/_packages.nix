@@ -8,13 +8,15 @@
   homelabCfg = config.homelab;
   neovimEnabled = homelabCfg.programs.neovim.enable or false;
 in {
-  environment.systemPackages = with pkgs; [
-    efibootmgr
-    ghostty.terminfo
-    git
-    gptfdisk
-    parted
-  ];
+  environment = {
+    systemPackages = with pkgs; [
+      efibootmgr
+      ghostty.terminfo
+      git
+      gptfdisk
+      parted
+    ];
+  };
 
   programs = {
     fish = {

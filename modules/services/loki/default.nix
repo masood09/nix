@@ -33,18 +33,24 @@ in {
 
   config = lib.mkIf lokiCfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.loki = lib.mkIf lokiCfg.zfs.enable {
-      inherit (lokiCfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          loki = lib.mkIf lokiCfg.zfs.enable {
+            inherit (lokiCfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = lokiDataDir;
+            enable = true;
+            mountpoint = lokiDataDir;
 
-      requiredBy = [
-        "loki.service"
-      ];
+            requiredBy = [
+              "loki.service"
+            ];
 
-      restic = {
-        enable = false;
+            restic = {
+              enable = false;
+            };
+          };
+        };
       };
     };
 
@@ -172,12 +178,18 @@ in {
       };
     };
 
-    users.users = {
-      loki.uid = lokiCfg.userId;
-    };
+    users = {
+      users = {
+        loki = {
+          uid = lokiCfg.userId;
+        };
+      };
 
-    users.groups = {
-      loki.gid = lokiCfg.groupId;
+      groups = {
+        loki = {
+          gid = lokiCfg.groupId;
+        };
+      };
     };
 
     inherit (permSvc) systemd;
@@ -188,9 +200,13 @@ in {
         && !homelabCfg.isRootZFS
         && !lokiCfg.zfs.enable
       ) {
-        persistence."/nix/persist".directories = [
-          lokiDataDir
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = [
+              lokiDataDir
+            ];
+          };
+        };
       };
   };
 }

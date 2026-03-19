@@ -25,10 +25,12 @@ in {
       };
     };
 
-    systemd.services = {
-      alloy = {
-        environment = {
-          ALLOY_HOSTNAME = config.homelab.networking.hostName;
+    systemd = {
+      services = {
+        alloy = {
+          environment = {
+            ALLOY_HOSTNAME = config.homelab.networking.hostName;
+          };
         };
       };
     };
@@ -49,15 +51,17 @@ in {
       };
     };
 
-    environment.etc = {
-      "alloy/config.alloy" = {
-        source = ./config.alloy;
-      };
-      "alloy/loki-systemd.alloy" = {
-        source = ./loki-systemd.alloy;
-      };
-      "alloy/prometheus-node-exporter.alloy" = {
-        source = ./prometheus-node-exporter.alloy;
+    environment = {
+      etc = {
+        "alloy/config.alloy" = {
+          source = ./config.alloy;
+        };
+        "alloy/loki-systemd.alloy" = {
+          source = ./loki-systemd.alloy;
+        };
+        "alloy/prometheus-node-exporter.alloy" = {
+          source = ./prometheus-node-exporter.alloy;
+        };
       };
     };
   };

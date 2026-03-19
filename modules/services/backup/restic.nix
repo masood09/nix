@@ -22,24 +22,30 @@
   hasResticPaths = (datasetNames != []) || (extraPaths != []);
 in {
   config = lib.mkIf resticEnabled {
-    services.restic.backups.backup = lib.mkIf hasResticPaths {
-      inherit (homelabCfg.services.restic) pruneOpts;
+    services = {
+      restic = {
+        backups = {
+          backup = lib.mkIf hasResticPaths {
+            inherit (homelabCfg.services.restic) pruneOpts;
 
-      initialize = true;
+            initialize = true;
 
-      environmentFile = config.sops.secrets."restic/.env".path;
-      repositoryFile = config.sops.secrets."restic/repo".path;
-      passwordFile = config.sops.secrets."restic/password".path;
+            environmentFile = config.sops.secrets."restic/.env".path;
+            repositoryFile = config.sops.secrets."restic/repo".path;
+            passwordFile = config.sops.secrets."restic/password".path;
 
-      extraOptions = [
-        "s3.connections=10"
-        "--no-extra-verify"
-      ];
+            extraOptions = [
+              "s3.connections=10"
+              "--no-extra-verify"
+            ];
 
-      # Restic backs up *already-mounted* snapshot views
-      paths = resticPaths ++ extraPaths;
+            # Restic backs up *already-mounted* snapshot views
+            paths = resticPaths ++ extraPaths;
 
-      timerConfig = null;
+            timerConfig = null;
+          };
+        };
+      };
     };
   };
 }

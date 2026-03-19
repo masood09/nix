@@ -1,174 +1,178 @@
 # Sops secret declarations — paths, owners, and restart triggers for this machine.
 {
-  config.sops.secrets = {
-    "alloy/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["alloy.service"];
-    };
+  config = {
+    sops = {
+      secrets = {
+        "alloy/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["alloy.service"];
+        };
 
-    "authentik/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = [
-        "authentik.service"
-        "authentik-worker.service"
-      ];
-    };
+        "authentik/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = [
+            "authentik.service"
+            "authentik-worker.service"
+          ];
+        };
 
-    "babybuddy/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["podman-babybuddy.service"];
-    };
+        "babybuddy/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["podman-babybuddy.service"];
+        };
 
-    "caddy/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      owner = "caddy";
-      restartUnits = ["caddy.service"];
-    };
+        "caddy/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "caddy";
+          restartUnits = ["caddy.service"];
+        };
 
-    "cloudflare/api-key" = {
-      restartUnits = ["acme-setup.service"];
-    };
+        "cloudflare/api-key" = {
+          restartUnits = ["acme-setup.service"];
+        };
 
-    "dell-idrac-fan-controller/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["podman-dell-idrac-fan-controller.service"];
-    };
+        "dell-idrac-fan-controller/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["podman-dell-idrac-fan-controller.service"];
+        };
 
-    "dpool_tank_key" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
+        "dpool_tank_key" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
 
-    "garage/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["garage.service"];
-    };
+        "garage/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["garage.service"];
+        };
 
-    "grafana/authentik-client-secret" = {
-      sopsFile = ./secrets.sops.yaml;
-      owner = "grafana";
-      restartUnits = ["grafana.service"];
-    };
+        "grafana/authentik-client-secret" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "grafana";
+          restartUnits = ["grafana.service"];
+        };
 
-    "headscale/dns-extra-records.json" = {
-      owner = "headscale";
-      sopsFile = ./../../secrets/headscale-dns.sops.yaml;
-      restartUnits = ["headscale.service"];
-    };
+        "headscale/dns-extra-records.json" = {
+          owner = "headscale";
+          sopsFile = ./../../secrets/headscale-dns.sops.yaml;
+          restartUnits = ["headscale.service"];
+        };
 
-    "headscale/oidc-client-secret" = {
-      owner = "headscale";
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = [
-        "headscale.service"
-        "headplane.service"
-      ];
-    };
+        "headscale/oidc-client-secret" = {
+          owner = "headscale";
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = [
+            "headscale.service"
+            "headplane.service"
+          ];
+        };
 
-    "headscale/headplane/headscale-api-key" = {
-      owner = "headscale";
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["headplane.service"];
-    };
+        "headscale/headplane/headscale-api-key" = {
+          owner = "headscale";
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["headplane.service"];
+        };
 
-    "headscale/headplane/integration-agent-pre-auth-key" = {
-      owner = "headscale";
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["headplane.service"];
-    };
+        "headscale/headplane/integration-agent-pre-auth-key" = {
+          owner = "headscale";
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["headplane.service"];
+        };
 
-    "headscale/headplane/server-cookie-secret" = {
-      owner = "headscale";
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["headplane.service"];
-    };
+        "headscale/headplane/server-cookie-secret" = {
+          owner = "headscale";
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["headplane.service"];
+        };
 
-    "jobscraper/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["podman-jobscraper.service"];
-    };
+        "jobscraper/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["podman-jobscraper.service"];
+        };
 
-    "karakeep/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      owner = "karakeep";
-      restartUnits = [
-        "karakeep-web.service"
-        "karakeep-workers.service"
-      ];
-    };
+        "karakeep/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "karakeep";
+          restartUnits = [
+            "karakeep-web.service"
+            "karakeep-workers.service"
+          ];
+        };
 
-    "mailarchiver/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["mailarchiver.service"];
-    };
+        "mailarchiver/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["mailarchiver.service"];
+        };
 
-    "matrix/mas/matrix-secret" = {
-      owner = "matrix-authentication-service";
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["matrix-authentication-service.service"];
-    };
+        "matrix/mas/matrix-secret" = {
+          owner = "matrix-authentication-service";
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["matrix-authentication-service.service"];
+        };
 
-    "matrix/mas/upstream-oauth2.config" = {
-      owner = "matrix-authentication-service";
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["matrix-authentication-service.service"];
-    };
+        "matrix/mas/upstream-oauth2.config" = {
+          owner = "matrix-authentication-service";
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["matrix-authentication-service.service"];
+        };
 
-    "matrix/mas/secrets.config" = {
-      owner = "matrix-authentication-service";
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["matrix-authentication-service.service"];
-    };
+        "matrix/mas/secrets.config" = {
+          owner = "matrix-authentication-service";
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["matrix-authentication-service.service"];
+        };
 
-    "matrix/lk-jwt-service/keys" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["lk-jwt-service.service"];
-    };
+        "matrix/lk-jwt-service/keys" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["lk-jwt-service.service"];
+        };
 
-    "matrix/synapse/mas-secret" = {
-      owner = "matrix-synapse";
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["matrix-synapse.service"];
-    };
+        "matrix/synapse/mas-secret" = {
+          owner = "matrix-synapse";
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["matrix-synapse.service"];
+        };
 
-    "mongodb/root-password" = {
-      owner = "mongodb";
-      sopsFile = ./secrets.sops.yaml;
-    };
+        "mongodb/root-password" = {
+          owner = "mongodb";
+          sopsFile = ./secrets.sops.yaml;
+        };
 
-    "nightscout/.env" = {
-      owner = "nightscout";
-      sopsFile = ./secrets.sops.yaml;
-    };
+        "nightscout/.env" = {
+          owner = "nightscout";
+          sopsFile = ./secrets.sops.yaml;
+        };
 
-    "opencloud/collabora/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["podman-compose-opencloud-root.target"];
-    };
+        "opencloud/collabora/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["podman-compose-opencloud-root.target"];
+        };
 
-    "opencloud/opencloud/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["podman-compose-opencloud-root.target"];
-    };
+        "opencloud/opencloud/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["podman-compose-opencloud-root.target"];
+        };
 
-    "restic/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
-    "restic/repo" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
-    "restic/password" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
+        "restic/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
+        "restic/repo" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
+        "restic/password" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
 
-    "tailscale/preauth-key" = {
-      sopsFile = ./secrets.sops.yaml;
-    };
+        "tailscale/preauth-key" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
 
-    "vaultwarden/.env" = {
-      sopsFile = ./secrets.sops.yaml;
-      restartUnits = ["vaultwarden.service"];
-    };
+        "vaultwarden/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["vaultwarden.service"];
+        };
 
-    "zed/discord-zfs-webhook" = {};
+        "zed/discord-zfs-webhook" = {};
+      };
+    };
   };
 }

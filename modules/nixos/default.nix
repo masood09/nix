@@ -28,24 +28,31 @@
     ./../services
   ];
 
-  options.homelab = {
-    role = lib.mkOption {
-      default = "server";
-      type = lib.types.enum ["desktop" "server"];
-      description = ''
-        The role of this machine. Could be server or desktop.
-      '';
-    };
+  options = {
+    homelab = {
+      role = lib.mkOption {
+        default = "server";
+        type = lib.types.enum ["desktop" "server"];
+        description = ''
+          The role of this machine. Could be server or desktop.
+        '';
+      };
 
-    purpose = lib.mkOption {
-      type = lib.types.str;
-      default = "";
+      purpose = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+      };
     };
   };
 
   config = {
-    time.timeZone = "America/Toronto";
-    zramSwap.enable = true;
+    time = {
+      timeZone = "America/Toronto";
+    };
+
+    zramSwap = {
+      enable = true;
+    };
 
     nix = {
       settings = {
@@ -64,13 +71,19 @@
       };
     };
 
-    # Shorter timeouts so failed services don't block boot/shutdown
-    systemd.settings.Manager = {
-      DefaultTimeoutStartSec = "20s";
-      DefaultTimeoutStopSec = "10s";
+    systemd = {
+      settings = {
+        # Shorter timeouts so failed services don't block boot/shutdown
+        Manager = {
+          DefaultTimeoutStartSec = "20s";
+          DefaultTimeoutStopSec = "10s";
+        };
+      };
     };
 
-    # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-    system.stateVersion = "25.11";
+    system = {
+      # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
+      stateVersion = "25.11";
+    };
   };
 }

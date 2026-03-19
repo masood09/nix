@@ -149,22 +149,28 @@
   '';
 in {
   config = lib.mkIf cfg.enable {
-    home.packages = [
-      motd
-      pkgs.figlet
-      pkgs.lolcat
-    ];
+    home = {
+      packages = [
+        motd
+        pkgs.figlet
+        pkgs.lolcat
+      ];
+    };
 
     programs = {
-      zsh.initContent = lib.mkIf zshEnabled (lib.mkOrder cfg.zshInitOrder ''
-        [[ -o interactive ]] && command -v motd >/dev/null 2>&1 && motd
-      '');
+      zsh = {
+        initContent = lib.mkIf zshEnabled (lib.mkOrder cfg.zshInitOrder ''
+          [[ -o interactive ]] && command -v motd >/dev/null 2>&1 && motd
+        '');
+      };
 
-      fish.interactiveShellInit = lib.mkIf fishEnabled (lib.mkAfter ''
-        if status is-interactive
-          command -sq motd; and motd
-        end
-      '');
+      fish = {
+        interactiveShellInit = lib.mkIf fishEnabled (lib.mkAfter ''
+          if status is-interactive
+            command -sq motd; and motd
+          end
+        '');
+      };
     };
   };
 }

@@ -8,7 +8,9 @@
 }: let
   homelabCfg = config.homelab;
 in {
-  environment.systemPackages = with pkgs; [];
+  environment = {
+    systemPackages = with pkgs; [];
+  };
 
   nix-homebrew = {
     enable = true;

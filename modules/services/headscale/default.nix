@@ -35,15 +35,21 @@ in {
 
   config = lib.mkIf headscaleCfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.headscale = lib.mkIf headscaleCfg.zfs.enable {
-      inherit (headscaleCfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          headscale = lib.mkIf headscaleCfg.zfs.enable {
+            inherit (headscaleCfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = dataDir;
-      requiredBy = ["headscale.service"];
+            enable = true;
+            mountpoint = dataDir;
+            requiredBy = ["headscale.service"];
 
-      restic = {
-        enable = true;
+            restic = {
+              enable = true;
+            };
+          };
+        };
       };
     };
 
@@ -52,7 +58,9 @@ in {
         inherit (headscaleCfg) enable;
 
         settings = {
-          logtail.enabled = false;
+          logtail = {
+            enabled = false;
+          };
           server_url = "https://${headscaleCfg.webDomain}";
           metrics_listen_addr = "127.0.0.1:${toString headscaleCfg.metricsPort}";
 
@@ -108,9 +116,13 @@ in {
         && !homelabCfg.isRootZFS
         && !headscaleCfg.zfs.enable
       ) {
-        persistence."/nix/persist".directories = [
-          dataDir
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = [
+              dataDir
+            ];
+          };
+        };
       };
   };
 }

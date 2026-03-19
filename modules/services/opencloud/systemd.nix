@@ -96,33 +96,39 @@ in {
         };
       };
 
-      tmpfiles.rules = [
-        "d ${toString cfg.dataDir} 0750 opencloud opencloud -"
-        "d ${toString cfg.dataDir}/etc 0750 opencloud opencloud -"
-        "d ${toString cfg.dataDir}/idm 0750 opencloud opencloud -"
-        "d ${toString cfg.dataDir}/nats 0750 opencloud opencloud -"
-        "d ${toString cfg.dataDir}/search 0750 opencloud opencloud -"
-        "d ${toString cfg.dataDir}/storage 0750 opencloud opencloud -"
-        "d ${toString cfg.dataDir}/storage/metadata 0750 opencloud opencloud -"
-        "d ${toString cfg.dataDir}/storage/ocm 0750 opencloud opencloud -"
-        "d ${toString cfg.dataDir}/storage/users 0750 opencloud opencloud -"
-        "z ${toString cfg.dataDir} 0750 opencloud opencloud -"
-        "z ${toString cfg.dataDir}/etc 0750 opencloud opencloud -"
-        "z ${toString cfg.dataDir}/idm 0750 opencloud opencloud -"
-        "z ${toString cfg.dataDir}/nats 0750 opencloud opencloud -"
-        "z ${toString cfg.dataDir}/search 0750 opencloud opencloud -"
-        "z ${toString cfg.dataDir}/storage 0750 opencloud opencloud -"
-        "z ${toString cfg.dataDir}/storage/metadata 0750 opencloud opencloud -"
-        "z ${toString cfg.dataDir}/storage/ocm 0750 opencloud opencloud -"
-        "z ${toString cfg.dataDir}/storage/users 0750 opencloud opencloud -"
-      ];
+      tmpfiles = {
+        rules = [
+          "d ${toString cfg.dataDir} 0750 opencloud opencloud -"
+          "d ${toString cfg.dataDir}/etc 0750 opencloud opencloud -"
+          "d ${toString cfg.dataDir}/idm 0750 opencloud opencloud -"
+          "d ${toString cfg.dataDir}/nats 0750 opencloud opencloud -"
+          "d ${toString cfg.dataDir}/search 0750 opencloud opencloud -"
+          "d ${toString cfg.dataDir}/storage 0750 opencloud opencloud -"
+          "d ${toString cfg.dataDir}/storage/metadata 0750 opencloud opencloud -"
+          "d ${toString cfg.dataDir}/storage/ocm 0750 opencloud opencloud -"
+          "d ${toString cfg.dataDir}/storage/users 0750 opencloud opencloud -"
+          "z ${toString cfg.dataDir} 0750 opencloud opencloud -"
+          "z ${toString cfg.dataDir}/etc 0750 opencloud opencloud -"
+          "z ${toString cfg.dataDir}/idm 0750 opencloud opencloud -"
+          "z ${toString cfg.dataDir}/nats 0750 opencloud opencloud -"
+          "z ${toString cfg.dataDir}/search 0750 opencloud opencloud -"
+          "z ${toString cfg.dataDir}/storage 0750 opencloud opencloud -"
+          "z ${toString cfg.dataDir}/storage/metadata 0750 opencloud opencloud -"
+          "z ${toString cfg.dataDir}/storage/ocm 0750 opencloud opencloud -"
+          "z ${toString cfg.dataDir}/storage/users 0750 opencloud opencloud -"
+        ];
+      };
     };
 
     # Impermanence fallback if you ever disable ZFS datasets
     environment = lib.mkIf (homelabCfg.impermanence && !cfg.zfs.enable) {
-      persistence."/nix/persist".directories = [
-        cfg.dataDir
-      ];
+      persistence = {
+        "/nix/persist" = {
+          directories = [
+            cfg.dataDir
+          ];
+        };
+      };
     };
   };
 }

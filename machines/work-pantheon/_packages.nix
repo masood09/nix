@@ -4,11 +4,13 @@
   pkgs,
   ...
 }: {
-  environment.systemPackages = with pkgs; [
-    kubectx
-    k9s
-    shellcheck
-  ];
+  environment = {
+    systemPackages = with pkgs; [
+      kubectx
+      k9s
+      shellcheck
+    ];
+  };
 
   homebrew = {
     onActivation = {

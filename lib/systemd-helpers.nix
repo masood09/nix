@@ -70,10 +70,12 @@
           };
         };
 
-      tmpfiles.rules = [
-        "d ${dataDir} ${mode} ${user} ${group} -"
-        "z ${dataDir} ${mode} ${user} ${group} -"
-      ];
+      tmpfiles = {
+        rules = [
+          "d ${dataDir} ${mode} ${user} ${group} -"
+          "z ${dataDir} ${mode} ${user} ${group} -"
+        ];
+      };
     };
   };
 }

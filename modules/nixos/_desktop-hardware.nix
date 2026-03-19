@@ -9,9 +9,18 @@
   homelabCfg = config.homelab;
   isDesktop = homelabCfg.role == "desktop";
 in {
-  options.homelab = {
-    hardware.bluetooth.enable = lib.mkEnableOption "bluetooth support";
-    hardware.fingerprint.enable = lib.mkEnableOption "fingerprint reader support (fprintd)";
+  options = {
+    homelab = {
+      hardware = {
+        bluetooth = {
+          enable = lib.mkEnableOption "bluetooth support";
+        };
+
+        fingerprint = {
+          enable = lib.mkEnableOption "fingerprint reader support (fprintd)";
+        };
+      };
+    };
   };
 
   config = lib.mkIf isDesktop {
@@ -22,20 +31,38 @@ in {
       };
 
       # GPU acceleration (mesa)
-      graphics.enable = true;
+      graphics = {
+        enable = true;
+      };
     };
 
-    # RealtimeKit gives PipeWire realtime scheduling priority
-    security.rtkit.enable = true;
-
-    # PipeWire replaces PulseAudio + ALSA with a single unified daemon
-    services.pipewire = {
-      enable = true;
-      alsa.enable = true;
-      alsa.support32Bit = true;
-      pulse.enable = true;
+    security = {
+      # RealtimeKit gives PipeWire realtime scheduling priority
+      rtkit = {
+        enable = true;
+      };
     };
 
-    services.fprintd.enable = homelabCfg.hardware.fingerprint.enable;
+    services = {
+      # PipeWire replaces PulseAudio + ALSA with a single unified daemon
+      pipewire = {
+        enable = true;
+
+        alsa = {
+          enable = true;
+          # 32-bit compatibility for Wine/Steam
+          support32Bit = true;
+        };
+
+        pulse = {
+          enable = true;
+        };
+      };
+
+      # Fingerprint authentication daemon
+      fprintd = {
+        enable = homelabCfg.hardware.fingerprint.enable;
+      };
+    };
   };
 }

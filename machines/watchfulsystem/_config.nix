@@ -1,58 +1,60 @@
 # Homelab options — monitoring server (Uptime Kuma).
 {
-  config.homelab = {
-    purpose = "Monitoring & Service Health (Uptime Kuma)";
-    isRootZFS = true;
-    isEncryptedRoot = true;
-    impermanence = true;
+  config = {
+    homelab = {
+      purpose = "Monitoring & Service Health (Uptime Kuma)";
+      isRootZFS = true;
+      isEncryptedRoot = true;
+      impermanence = true;
 
-    networking = {
-      hostName = "watchfulsystem";
-    };
-
-    programs = {
-      motd = {
-        enable = true;
-
-        networkInterfaces = [
-          "enp0s6"
-          "tailscale0"
-        ];
+      networking = {
+        hostName = "watchfulsystem";
       };
-    };
 
-    services = {
-      acme = {
-        zfs = {
+      programs = {
+        motd = {
           enable = true;
+
+          networkInterfaces = [
+            "enp0s6"
+            "tailscale0"
+          ];
         };
       };
 
-      backup = {
-        enable = true;
+      services = {
+        acme = {
+          zfs = {
+            enable = true;
+          };
+        };
 
-        serviceUnits = [
-          "uptime-kuma.service"
-        ];
-      };
+        backup = {
+          enable = true;
 
-      caddy = {
-        enable = true;
-      };
+          serviceUnits = [
+            "uptime-kuma.service"
+          ];
+        };
 
-      tailscale = {
-        enable = true;
-
-        zfs = {
+        caddy = {
           enable = true;
         };
-      };
 
-      uptime-kuma = {
-        enable = true;
-
-        zfs = {
+        tailscale = {
           enable = true;
+
+          zfs = {
+            enable = true;
+          };
+        };
+
+        uptime-kuma = {
+          enable = true;
+
+          zfs = {
+            enable = true;
+          };
         };
       };
     };

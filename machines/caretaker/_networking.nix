@@ -1,7 +1,10 @@
 # Machine networking — static IP on VLAN 20, loose reverse-path for Tailscale.
 {
   networking = {
-    firewall.checkReversePath = "loose";
+    # Loose reverse-path filtering required for Tailscale
+    firewall = {
+      checkReversePath = "loose";
+    };
 
     useDHCP = false;
 

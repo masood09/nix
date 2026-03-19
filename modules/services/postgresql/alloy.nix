@@ -10,19 +10,23 @@
   postgresqlExporterPort = toString config.services.prometheus.exporters.postgres.port;
 in {
   config = {
-    environment.etc."alloy/postgresql.alloy" = lib.mkIf (postgresqlEnabled && alloyEnabled) {
-      text = ''
-        prometheus.scrape "postgresql_target" {
-          targets = [
-            {
-              __address__ = "127.0.0.1:${postgresqlExporterPort}",
-              instance = sys.env("ALLOY_HOSTNAME"),
-            },
-          ]
+    environment = {
+      etc = {
+        "alloy/postgresql.alloy" = lib.mkIf (postgresqlEnabled && alloyEnabled) {
+          text = ''
+            prometheus.scrape "postgresql_target" {
+              targets = [
+                {
+                  __address__ = "127.0.0.1:${postgresqlExporterPort}",
+                  instance = sys.env("ALLOY_HOSTNAME"),
+                },
+              ]
 
-          forward_to = [prometheus.remote_write.metrics_service.receiver]
-        }
-      '';
+              forward_to = [prometheus.remote_write.metrics_service.receiver]
+            }
+          '';
+        };
+      };
     };
   };
 }

@@ -59,39 +59,42 @@
   ];
 in {
   config = lib.mkIf zenEnabled {
-    home.packages = [
-      (pkgs.wrapFirefox
-        inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped
-        {
-          # Lock prefs so they persist across profile resets
-          extraPrefs = lib.concatLines (
-            lib.mapAttrsToList (
-              name: value: ''lockPref(${lib.strings.toJSON name}, ${lib.strings.toJSON value});''
-            ) prefs
-          );
+    home = {
+      packages = [
+        (pkgs.wrapFirefox
+          inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.zen-browser-unwrapped
+          {
+            # Lock prefs so they persist across profile resets
+            extraPrefs = lib.concatLines (
+              lib.mapAttrsToList (
+                name: value: ''lockPref(${lib.strings.toJSON name}, ${lib.strings.toJSON value});''
+              )
+              prefs
+            );
 
-          extraPolicies = {
-            DisableTelemetry = true;
-            DisableFirefoxStudies = true;
-            DontCheckDefaultBrowser = true;
+            extraPolicies = {
+              DisableTelemetry = true;
+              DisableFirefoxStudies = true;
+              DontCheckDefaultBrowser = true;
 
-            ExtensionSettings = builtins.listToAttrs extensions;
+              ExtensionSettings = builtins.listToAttrs extensions;
 
-            # Brave Search as default (privacy-respecting, no Google)
-            SearchEngines = {
-              Default = "Brave";
-              Add = [
-                {
-                  Name = "Brave";
-                  URLTemplate = "https://search.brave.com/search?q={searchTerms}";
-                  IconURL = "https://cdn.search.brave.com/serp/v2/_app/immutable/assets/brave-search-icon.CsIFM2aN.svg";
-                  Alias = "@brave";
-                  Method = "GET";
-                }
-              ];
+              # Brave Search as default (privacy-respecting, no Google)
+              SearchEngines = {
+                Default = "Brave";
+                Add = [
+                  {
+                    Name = "Brave";
+                    URLTemplate = "https://search.brave.com/search?q={searchTerms}";
+                    IconURL = "https://cdn.search.brave.com/serp/v2/_app/immutable/assets/brave-search-icon.CsIFM2aN.svg";
+                    Alias = "@brave";
+                    Method = "GET";
+                  }
+                ];
+              };
             };
-          };
-        })
-    ];
+          })
+      ];
+    };
   };
 }

@@ -34,6 +34,8 @@
   ];
 
   services = {
-    fstrim.enable = true;
+    fstrim = {
+      enable = true;
+    };
   };
 }

@@ -29,5 +29,9 @@
 
   # Nicely reload system units when changing configs
   # Self-note: nix-darwin seems to luckily ignore this setting
-  systemd.user.startServices = "sd-switch";
+  systemd = {
+    user = {
+      startServices = "sd-switch";
+    };
+  };
 }

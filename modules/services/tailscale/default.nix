@@ -27,12 +27,18 @@ in {
   ];
 
   config = lib.mkIf cfg.enable {
-    homelab.zfs.datasets.tailscale = lib.mkIf cfg.zfs.enable {
-      inherit (cfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          tailscale = lib.mkIf cfg.zfs.enable {
+            inherit (cfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = cfg.dataDir;
-      requiredBy = ["tailscaled.service"];
+            enable = true;
+            mountpoint = cfg.dataDir;
+            requiredBy = ["tailscaled.service"];
+          };
+        };
+      };
     };
 
     services = {
@@ -51,14 +57,18 @@ in {
 
     inherit (permSvc) systemd;
 
-    environment.persistence."/nix/persist" =
-      lib.mkIf (
-        !homelabCfg.isRootZFS
-        && !cfg.zfs.enable
-      ) {
-        directories = [
-          cfg.dataDir
-        ];
+    environment = {
+      persistence = {
+        "/nix/persist" =
+          lib.mkIf (
+            !homelabCfg.isRootZFS
+            && !cfg.zfs.enable
+          ) {
+            directories = [
+              cfg.dataDir
+            ];
+          };
       };
+    };
   };
 }

@@ -28,15 +28,21 @@ in {
 
   config = lib.mkIf cfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.mongodb = lib.mkIf cfg.zfs.enable {
-      inherit (cfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          mongodb = lib.mkIf cfg.zfs.enable {
+            inherit (cfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = cfg.dataDir;
-      requiredBy = ["mongodb.service"];
+            enable = true;
+            mountpoint = cfg.dataDir;
+            requiredBy = ["mongodb.service"];
 
-      restic = {
-        enable = true;
+            restic = {
+              enable = true;
+            };
+          };
+        };
       };
     };
 
@@ -73,9 +79,13 @@ in {
         && !cfg.zfs.enable
       )
       {
-        persistence."/nix/persist".directories = [
-          cfg.dataDir
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = [
+              cfg.dataDir
+            ];
+          };
+        };
       };
   };
 }
