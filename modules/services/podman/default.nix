@@ -31,33 +31,49 @@ in {
 
   config = lib.mkIf podmanCfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.podman = lib.mkIf podmanCfg.zfs.enable {
-      inherit (podmanCfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          podman = lib.mkIf podmanCfg.zfs.enable {
+            inherit (podmanCfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = dataDir;
+            enable = true;
+            mountpoint = dataDir;
 
-      requiredBy = [
-        "podman.service"
-      ];
+            requiredBy = [
+              "podman.service"
+            ];
 
-      restic = {
-        enable = false;
+            restic = {
+              enable = false;
+            };
+          };
+        };
       };
     };
 
-    virtualisation.podman = {
-      enable = true;
-      autoPrune.enable = true;
+    virtualisation = {
+      podman = {
+        enable = true;
+        autoPrune = {
+          enable = true;
+        };
+      };
     };
 
-    networking.firewall.interfaces = let
-      matchAll =
-        if !config.networking.nftables.enable
-        then "podman+"
-        else "podman*";
-    in {
-      "${matchAll}".allowedUDPPorts = [53];
+    networking = {
+      firewall = {
+        interfaces = let
+          matchAll =
+            if !config.networking.nftables.enable
+            then "podman+"
+            else "podman*";
+        in {
+          "${matchAll}" = {
+            allowedUDPPorts = [53];
+          };
+        };
+      };
     };
 
     inherit (permSvc) systemd;
@@ -68,9 +84,13 @@ in {
         && !homelabCfg.isRootZFS
         && !podmanCfg.zfs.enable
       ) {
-        persistence."/nix/persist".directories = [
-          dataDir
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = [
+              dataDir
+            ];
+          };
+        };
       };
   };
 }

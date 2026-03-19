@@ -16,14 +16,20 @@ in {
   ];
 
   config = lib.mkIf (ittoolsCfg.enable && podmanEnabled) {
-    virtualisation.oci-containers.containers.ittools = {
-      # renovate: datasource=docker depName=ghcr.io/willjayyyy/next-tools
-      image = "ghcr.io/willjayyyy/next-tools:1.9.6";
-      autoStart = true;
+    virtualisation = {
+      oci-containers = {
+        containers = {
+          ittools = {
+            # renovate: datasource=docker depName=ghcr.io/willjayyyy/next-tools
+            image = "ghcr.io/willjayyyy/next-tools:1.9.6";
+            autoStart = true;
 
-      ports = [
-        "${ittoolsCfg.listenAddress}:${toString ittoolsCfg.listenPort}:80"
-      ];
+            ports = [
+              "${ittoolsCfg.listenAddress}:${toString ittoolsCfg.listenPort}:80"
+            ];
+          };
+        };
+      };
     };
 
     services = {
@@ -39,15 +45,23 @@ in {
       };
     };
 
-    # -------------------------
     # Loki drop rules (Alloy)
-    # -------------------------
-    homelab.services.alloy.loki.systemd.dropRules = lib.mkIf alloyEnabled (lib.mkAfter [
-      {
-        name = "it-tools: drop Uptime-Kuma 200 / probes";
-        unit = "podman-ittools.service";
-        expression = ".*\"GET / HTTP/[^\"]+\" 200 .*\"Uptime-Kuma/.*";
-      }
-    ]);
+    homelab = {
+      services = {
+        alloy = {
+          loki = {
+            systemd = {
+              dropRules = lib.mkIf alloyEnabled (lib.mkAfter [
+                {
+                  name = "it-tools: drop Uptime-Kuma 200 / probes";
+                  unit = "podman-ittools.service";
+                  expression = ".*\"GET / HTTP/[^\"]+\" 200 .*\"Uptime-Kuma/.*";
+                }
+              ]);
+            };
+          };
+        };
+      };
+    };
   };
 }

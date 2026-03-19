@@ -17,31 +17,37 @@ in {
 
   config = lib.mkIf postgresqlCfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.postgresql = lib.mkIf postgresqlCfg.zfs.enable {
-      inherit (postgresqlCfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          postgresql = lib.mkIf postgresqlCfg.zfs.enable {
+            inherit (postgresqlCfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = postgresqlCfg.dataDir;
-      requiredBy = ["postgresql.service"];
-    };
+            enable = true;
+            mountpoint = postgresqlCfg.dataDir;
+            requiredBy = ["postgresql.service"];
+          };
 
-    # ZFS dataset for backup dataDir
-    homelab.zfs.datasets.postgresql-backup =
-      lib.mkIf (
-        backupCfg.enable
-        && backupCfg.zfs.enable
-      )
-      {
-        inherit (backupCfg.zfs) dataset properties;
+          # ZFS dataset for backup dataDir
+          postgresql-backup =
+            lib.mkIf (
+              backupCfg.enable
+              && backupCfg.zfs.enable
+            )
+            {
+              inherit (backupCfg.zfs) dataset properties;
 
-        enable = true;
-        mountpoint = backupCfg.dataDir;
-        requiredBy = ["postgresql.service"];
+              enable = true;
+              mountpoint = backupCfg.dataDir;
+              requiredBy = ["postgresql.service"];
 
-        restic = {
-          enable = true;
+              restic = {
+                enable = true;
+              };
+            };
         };
       };
+    };
 
     services = {
       postgresql = {
@@ -69,33 +75,39 @@ in {
         startAt = "2000-01-01 00:00";
       };
 
-      prometheus.exporters.postgres = {
-        enable = true;
-        listenAddress = "127.0.0.1";
-        runAsLocalSuperUser = true;
+      prometheus = {
+        exporters = {
+          postgres = {
+            enable = true;
+            listenAddress = "127.0.0.1";
+            runAsLocalSuperUser = true;
+          };
+        };
       };
     };
 
     # Service hardening + mount ordering
-    systemd.services = {
-      postgresql = lib.mkMerge [
-        {
-          # Unit-level ordering / mount requirements
-          unitConfig = {
-            RequiresMountsFor = [postgresqlCfg.dataDir];
-          };
-        }
+    systemd = {
+      services = {
+        postgresql = lib.mkMerge [
+          {
+            # Unit-level ordering / mount requirements
+            unitConfig = {
+              RequiresMountsFor = [postgresqlCfg.dataDir];
+            };
+          }
 
-        (lib.mkIf postgresqlCfg.zfs.enable {
-          requires = ["zfs-dataset-postgresql.service"];
-          after = ["zfs-dataset-postgresql.service"];
-        })
+          (lib.mkIf postgresqlCfg.zfs.enable {
+            requires = ["zfs-dataset-postgresql.service"];
+            after = ["zfs-dataset-postgresql.service"];
+          })
 
-        (lib.mkIf (backupCfg.enable && backupCfg.zfs.enable) {
-          requires = ["zfs-dataset-postgresql-backup.service"];
-          after = ["zfs-dataset-postgresql-backup.service"];
-        })
-      ];
+          (lib.mkIf (backupCfg.enable && backupCfg.zfs.enable) {
+            requires = ["zfs-dataset-postgresql-backup.service"];
+            after = ["zfs-dataset-postgresql-backup.service"];
+          })
+        ];
+      };
     };
 
     environment =
@@ -105,18 +117,26 @@ in {
         && !postgresqlCfg.zfs.enable
       )
       {
-        persistence."/nix/persist".directories = [
-          postgresqlCfg.dataDir
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = [
+              postgresqlCfg.dataDir
+            ];
+          };
+        };
       };
 
-    networking.firewall.allowedTCPPorts =
-      lib.mkIf (
-        postgresqlCfg.enable
-        && config.services.postgresql.enableTCPIP
-      )
-      [
-        config.services.postgresql.settings.port
-      ];
+    networking = {
+      firewall = {
+        allowedTCPPorts =
+          lib.mkIf (
+            postgresqlCfg.enable
+            && config.services.postgresql.enableTCPIP
+          )
+          [
+            config.services.postgresql.settings.port
+          ];
+      };
+    };
   };
 }

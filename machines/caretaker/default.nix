@@ -11,10 +11,12 @@
     ./../../modules/home-manager
   ];
 
-  homelab.disks = {
-    root = [
-      "nvme-HighRel_512GB_SSD_MP27W06206776"
-    ];
+  homelab = {
+    disks = {
+      root = [
+        "nvme-HighRel_512GB_SSD_MP27W06206776"
+      ];
+    };
   };
 
   # tmpfs root — wiped on every reboot (impermanence without ZFS)

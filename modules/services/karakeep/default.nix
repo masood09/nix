@@ -29,18 +29,24 @@ in {
 
   config = lib.mkIf cfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.karakeep = lib.mkIf cfg.zfs.enable {
-      inherit (cfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          karakeep = lib.mkIf cfg.zfs.enable {
+            inherit (cfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = cfg.dataDir;
+            enable = true;
+            mountpoint = cfg.dataDir;
 
-      requiredBy = [
-        "karakeep.service"
-      ];
+            requiredBy = [
+              "karakeep.service"
+            ];
 
-      restic = {
-        enable = true;
+            restic = {
+              enable = true;
+            };
+          };
+        };
       };
     };
 
@@ -111,15 +117,21 @@ in {
         && !homelabCfg.isRootZFS
         && !cfg.zfs.enable
       ) {
-        persistence."/nix/persist".directories = [
-          cfg.dataDir
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = [
+              cfg.dataDir
+            ];
+          };
+        };
       };
 
-    networking.firewall = lib.mkIf cfg.openFirewall {
-      allowedTCPPorts = [
-        cfg.listenPort
-      ];
+    networking = {
+      firewall = lib.mkIf cfg.openFirewall {
+        allowedTCPPorts = [
+          cfg.listenPort
+        ];
+      };
     };
   };
 }

@@ -33,18 +33,24 @@ in {
 
   config = lib.mkIf vaultwardenCfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.vaultwarden = lib.mkIf vaultwardenCfg.zfs.enable {
-      inherit (vaultwardenCfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          vaultwarden = lib.mkIf vaultwardenCfg.zfs.enable {
+            inherit (vaultwardenCfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = vaultwardenCfg.dataDir;
+            enable = true;
+            mountpoint = vaultwardenCfg.dataDir;
 
-      requiredBy = [
-        "vaultwarden.service"
-      ];
+            requiredBy = [
+              "vaultwarden.service"
+            ];
 
-      restic = {
-        enable = true;
+            restic = {
+              enable = true;
+            };
+          };
+        };
       };
     };
 
@@ -74,9 +80,11 @@ in {
 
       restic = lib.mkIf (resticEnabled && vaultwardenCfg.zfs.enable) {
         backups = {
-          backup.exclude = [
-            "/mnt/nightly_backup/vaultwarden/tmp"
-          ];
+          backup = {
+            exclude = [
+              "/mnt/nightly_backup/vaultwarden/tmp"
+            ];
+          };
         };
       };
 
@@ -111,12 +119,18 @@ in {
       };
     };
 
-    users.users = {
-      vaultwarden.uid = vaultwardenCfg.userId;
-    };
+    users = {
+      users = {
+        vaultwarden = {
+          uid = vaultwardenCfg.userId;
+        };
+      };
 
-    users.groups = {
-      vaultwarden.gid = vaultwardenCfg.groupId;
+      groups = {
+        vaultwarden = {
+          gid = vaultwardenCfg.groupId;
+        };
+      };
     };
 
     inherit (permSvc) systemd;
@@ -127,15 +141,21 @@ in {
         && !homelabCfg.isRootZFS
         && !vaultwardenCfg.zfs.enable
       ) {
-        persistence."/nix/persist".directories = [
-          vaultwardenCfg.dataDir
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = [
+              vaultwardenCfg.dataDir
+            ];
+          };
+        };
       };
 
-    networking.firewall = lib.mkIf vaultwardenCfg.openFirewall {
-      allowedTCPPorts = [
-        vaultwardenCfg.listenPort
-      ];
+    networking = {
+      firewall = lib.mkIf vaultwardenCfg.openFirewall {
+        allowedTCPPorts = [
+          vaultwardenCfg.listenPort
+        ];
+      };
     };
   };
 }

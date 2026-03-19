@@ -9,8 +9,13 @@
     zsh = {
       inherit (homelabCfg.programs.zsh) enable;
 
-      autosuggestion.enable = true;
-      syntaxHighlighting.enable = true;
+      autosuggestion = {
+        enable = true;
+      };
+
+      syntaxHighlighting = {
+        enable = true;
+      };
 
       # Dumb terminal guard — disable ZLE and fancy prompts for TRAMP/scp
       initContent = lib.mkOrder 500 ''

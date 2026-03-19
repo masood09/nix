@@ -86,9 +86,11 @@ in {
         };
       };
 
-      tmpfiles.rules = [
-        "d ${backupRoot} 0750 root root -"
-      ];
+      tmpfiles = {
+        rules = [
+          "d ${backupRoot} 0750 root root -"
+        ];
+      };
     };
   };
 }

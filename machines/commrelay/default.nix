@@ -13,9 +13,11 @@
     ./_caddy.nix
   ];
 
-  homelab.disks = {
-    root = [
-      "scsi-3600eccee132b4016afad1991ab86365f"
-    ];
+  homelab = {
+    disks = {
+      root = [
+        "scsi-3600eccee132b4016afad1991ab86365f"
+      ];
+    };
   };
 }

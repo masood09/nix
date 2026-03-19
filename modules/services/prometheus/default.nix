@@ -31,18 +31,24 @@ in {
 
   config = lib.mkIf cfg.enable {
     # ZFS dataset for dataDir
-    homelab.zfs.datasets.prometheus = lib.mkIf cfg.zfs.enable {
-      inherit (cfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          prometheus = lib.mkIf cfg.zfs.enable {
+            inherit (cfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = prometheusDataDir;
+            enable = true;
+            mountpoint = prometheusDataDir;
 
-      requiredBy = [
-        "prometheus.service"
-      ];
+            requiredBy = [
+              "prometheus.service"
+            ];
 
-      restic = {
-        enable = false;
+            restic = {
+              enable = false;
+            };
+          };
+        };
       };
     };
 
@@ -98,9 +104,13 @@ in {
         && !homelabCfg.isRootZFS
         && !cfg.zfs.enable
       ) {
-        persistence."/nix/persist".directories = [
-          prometheusDataDir
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = [
+              prometheusDataDir
+            ];
+          };
+        };
       };
   };
 }

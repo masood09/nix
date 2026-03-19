@@ -47,13 +47,13 @@ in {
         symbola
       ])
       # Linux desktop GUI apps
-      ++ lib.optionals (role == "desktop" && pkgs.stdenv.isLinux) ([
+      ++ lib.optionals (role == "desktop" && pkgs.stdenv.isLinux) [
         pkgs.bitwarden-desktop
         pkgs.element-desktop
         pkgs.ghostty
         pkgs.opencloud-desktop
         pkgs.zoom-us
-      ])
+      ]
       # macOS-specific (coreutils for GNU compat, nixos-rebuild for remote deploys)
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
         coreutils

@@ -45,39 +45,47 @@ in {
     };
 
     # ZFS-managed ACME state dir
-    homelab.zfs.datasets.acme = lib.mkIf acmeCfg.zfs.enable {
-      inherit (acmeCfg.zfs) dataset properties;
+    homelab = {
+      zfs = {
+        datasets = {
+          acme = lib.mkIf acmeCfg.zfs.enable {
+            inherit (acmeCfg.zfs) dataset properties;
 
-      enable = true;
-      mountpoint = "/var/lib/acme";
+            enable = true;
+            mountpoint = "/var/lib/acme";
 
-      # Ensure it exists before units that might touch ACME state
-      requiredBy = [
-        "caddy.service"
-        "acme.service"
-      ];
+            # Ensure it exists before units that might touch ACME state
+            requiredBy = [
+              "caddy.service"
+              "acme.service"
+            ];
+          };
+        };
+      };
     };
 
     # Make systemd enforce the mount is present
-    systemd.services = lib.mkIf acmeCfg.zfs.enable {
-      caddy = {
-        # Unit-level ordering / mount requirements
-        unitConfig = {
-          RequiresMountsFor = ["/var/lib/acme"];
+    systemd = {
+      services = lib.mkIf acmeCfg.zfs.enable {
+        caddy = {
+          # Unit-level ordering / mount requirements
+          unitConfig = {
+            RequiresMountsFor = ["/var/lib/acme"];
+          };
+
+          requires = ["zfs-dataset-acme.service"];
+          after = ["zfs-dataset-acme.service"];
         };
 
-        requires = ["zfs-dataset-acme.service"];
-        after = ["zfs-dataset-acme.service"];
-      };
+        acme-setup = {
+          # Unit-level ordering / mount requirements
+          unitConfig = {
+            RequiresMountsFor = ["/var/lib/acme"];
+          };
 
-      acme-setup = {
-        # Unit-level ordering / mount requirements
-        unitConfig = {
-          RequiresMountsFor = ["/var/lib/acme"];
+          requires = ["zfs-dataset-acme.service"];
+          after = ["zfs-dataset-acme.service"];
         };
-
-        requires = ["zfs-dataset-acme.service"];
-        after = ["zfs-dataset-acme.service"];
       };
     };
 
@@ -87,14 +95,22 @@ in {
         && !homelabCfg.isRootZFS
         && !acmeCfg.zfs.enable
       ) {
-        persistence."/nix/persist".directories = [
-          "/var/lib/acme"
-        ];
+        persistence = {
+          "/nix/persist" = {
+            directories = [
+              "/var/lib/acme"
+            ];
+          };
+        };
       };
 
-    networking.firewall.allowedTCPPorts = [
-      80
-      443
-    ];
+    networking = {
+      firewall = {
+        allowedTCPPorts = [
+          80
+          443
+        ];
+      };
+    };
   };
 }

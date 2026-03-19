@@ -49,19 +49,21 @@
 in {
   config = lib.mkIf enableZFS {
     services = lib.mkIf (homelabCfg.isRootZFS || anyManagedDatasets) {
-      zfs.zed = {
-        enableMail = false;
+      zfs = {
+        zed = {
+          enableMail = false;
 
-        settings = {
-          ZED_EMAIL_ADDR = ["root"];
+          settings = {
+            ZED_EMAIL_ADDR = ["root"];
 
-          # Run our webhook poster instead of a real mailer
-          ZED_EMAIL_PROG = "${zedDiscord}";
-          ZED_EMAIL_OPTS = "-s '@SUBJECT@'"; # ZED passes subject via -s
+            # Run our webhook poster instead of a real mailer
+            ZED_EMAIL_PROG = "${zedDiscord}";
+            ZED_EMAIL_OPTS = "-s '@SUBJECT@'"; # ZED passes subject via -s
 
-          # Optional: make notifications less spammy / more verbose
-          ZED_NOTIFY_INTERVAL_SECS = 3600; # throttle similar events
-          ZED_NOTIFY_VERBOSE = true; # include scrub successes etc.
+            # Throttle similar events and include scrub successes
+            ZED_NOTIFY_INTERVAL_SECS = 3600;
+            ZED_NOTIFY_VERBOSE = true;
+          };
         };
       };
     };

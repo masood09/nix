@@ -11,9 +11,11 @@
     ./../../modules/home-manager
   ];
 
-  homelab.disks = {
-    root = [
-      "scsi-360426a0eab5646b58549a8cc41c1c1aa"
-    ];
+  homelab = {
+    disks = {
+      root = [
+        "scsi-360426a0eab5646b58549a8cc41c1c1aa"
+      ];
+    };
   };
 }

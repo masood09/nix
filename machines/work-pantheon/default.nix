@@ -11,9 +11,11 @@
     ./_packages.nix
   ];
 
-  nixpkgs.overlays = [
-    (import ../../nix/overlays/darwin-setproctitle.nix)
-  ];
+  nixpkgs = {
+    overlays = [
+      (import ../../nix/overlays/darwin-setproctitle.nix)
+    ];
+  };
 
   homelab = {
     role = "desktop";
@@ -30,7 +32,9 @@
     };
 
     programs = {
-      emacs.enable = true;
+      emacs = {
+        enable = true;
+      };
 
       git = {
         userEmail = "masoodahmed@pantheon.io";
@@ -47,13 +51,17 @@
         enable = true;
       };
 
-      neovim.enable = true;
+      neovim = {
+        enable = true;
+      };
     };
   };
 
   system = {
     defaults = {
-      universalaccess.reduceMotion = lib.mkForce null;
+      universalaccess = {
+        reduceMotion = lib.mkForce null;
+      };
     };
   };
 }

@@ -8,20 +8,24 @@
 }: let
   homelabCfg = config.homelab;
 in {
-  options.homelab = {
-    isEncryptedRoot = lib.mkOption {
-      default = true;
-      type = lib.types.bool;
-    };
+  options = {
+    homelab = {
+      isEncryptedRoot = lib.mkOption {
+        default = true;
+        type = lib.types.bool;
+      };
 
-    isMirroredBoot = lib.mkEnableOption "Whether its mirrored boot";
+      isMirroredBoot = lib.mkEnableOption "Whether its mirrored boot";
+    };
   };
 
   config = {
     # Auto-detect mirrored boot from disk count (>1 root disk = mirrored)
-    homelab.isMirroredBoot = lib.mkDefault (
-      (builtins.length (config.homelab.disks.root or [])) > 1
-    );
+    homelab = {
+      isMirroredBoot = lib.mkDefault (
+        (builtins.length (config.homelab.disks.root or [])) > 1
+      );
+    };
 
     boot = {
       loader = {
@@ -73,10 +77,12 @@ in {
       };
 
       # IPv6 disabled across the homelab
-      kernel.sysctl = {
-        "net.ipv6.conf.all.disable_ipv6" = 1;
-        "net.ipv6.conf.default.disable_ipv6" = 1;
-        "net.ipv6.conf.lo.disable_ipv6" = 1;
+      kernel = {
+        sysctl = {
+          "net.ipv6.conf.all.disable_ipv6" = 1;
+          "net.ipv6.conf.default.disable_ipv6" = 1;
+          "net.ipv6.conf.lo.disable_ipv6" = 1;
+        };
       };
 
       initrd = {

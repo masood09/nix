@@ -24,58 +24,65 @@ in {
   config = lib.mkIf gitCfg.enable {
     xdg.configFile."git/allowed_signers".source = signersFile;
 
-    programs.git = {
-      inherit (gitCfg) enable;
-      lfs.enable = true;
+    programs = {
+      git = {
+        inherit (gitCfg) enable;
 
-      settings = {
-        user = {
-          inherit email;
-          name = gitCfg.userName;
-          signingkey = lib.mkIf (usingGpg && gpgKey != null) gpgKey;
+        lfs = {
+          enable = true;
         };
 
-        delta = {
-          navigate = true;
-          side-by-side = true;
-        };
-
-        diff = {
-          colorMoved = "default";
-        };
-
-        # SSH signing (default) uses allowed_signers; GPG uses openpgp
-        gpg =
-          if usingGpg
-          then {
-            format = "openpgp";
-            program = "${pkgs.gnupg}/bin/gpg";
-          }
-          else {
-            format = "ssh";
-            ssh.allowedSignersFile = toString signersFile;
+        settings = {
+          user = {
+            inherit email;
+            name = gitCfg.userName;
+            signingkey = lib.mkIf (usingGpg && gpgKey != null) gpgKey;
           };
 
-        init = {
-          defaultBranch = "main";
+          delta = {
+            navigate = true;
+            side-by-side = true;
+          };
+
+          diff = {
+            colorMoved = "default";
+          };
+
+          # SSH signing (default) uses allowed_signers; GPG uses openpgp
+          gpg =
+            if usingGpg
+            then {
+              format = "openpgp";
+              program = "${pkgs.gnupg}/bin/gpg";
+            }
+            else {
+              format = "ssh";
+              ssh = {
+                allowedSignersFile = toString signersFile;
+              };
+            };
+
+          init = {
+            defaultBranch = "main";
+          };
+
+          merge = {
+            conflictStyle = "diff3";
+          };
+
+          pull = {
+            rebase = true;
+          };
+
+          github = {
+            user = gitCfg.githubUsername;
+          };
         };
 
-        merge = {
-          conflictStyle = "diff3";
+        signing = {
+          key = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
+          signByDefault = true;
         };
-
-        pull = {
-          rebase = true;
-        };
-
-        github = {
-          user = gitCfg.githubUsername;
-        };
-      };
-
-      signing = {
-        key = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
-        signByDefault = true;
       };
     };
   };

@@ -11,8 +11,12 @@
 in {
   config = lib.mkIf niriEnabled {
     # GTK/GNOME apps respect this for dark theme
-    dconf.settings."org/gnome/desktop/interface" = {
-      color-scheme = "prefer-dark";
+    dconf = {
+      settings = {
+        "org/gnome/desktop/interface" = {
+          color-scheme = "prefer-dark";
+        };
+      };
     };
 
     programs = {
@@ -25,7 +29,9 @@ in {
       dank-material-shell = {
         enable = true;
         enableSystemMonitoring = true;
-        dgop.package = inputs.dgop.packages.${pkgs.stdenv.hostPlatform.system}.default;
+        dgop = {
+          package = inputs.dgop.packages.${pkgs.stdenv.hostPlatform.system}.default;
+        };
         systemd = {
           enable = true;
           restartIfChanged = true;

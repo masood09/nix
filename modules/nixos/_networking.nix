@@ -7,22 +7,26 @@
 }: let
   networkingCfg = config.homelab.networking;
 in {
-  options.homelab.networking = {
-    domain = lib.mkOption {
-      type = lib.types.str;
-      default = "mantannest.com";
-    };
+  options = {
+    homelab = {
+      networking = {
+        domain = lib.mkOption {
+          type = lib.types.str;
+          default = "mantannest.com";
+        };
 
-    hostName = lib.mkOption {
-      type = lib.types.str;
-      description = ''
-        The hostname of the machine.
-      '';
-    };
+        hostName = lib.mkOption {
+          type = lib.types.str;
+          description = ''
+            The hostname of the machine.
+          '';
+        };
 
-    wireless_enable = lib.mkOption {
-      default = false;
-      type = lib.types.bool;
+        wireless_enable = lib.mkOption {
+          default = false;
+          type = lib.types.bool;
+        };
+      };
     };
   };
 
@@ -31,7 +35,10 @@ in {
       inherit (networkingCfg) hostName domain;
 
       # WiFi machines (desktops/laptops) use NetworkManager
-      networkmanager.enable = networkingCfg.wireless_enable;
+      networkmanager = {
+        enable = networkingCfg.wireless_enable;
+      };
+
       enableIPv6 = false;
 
       # ZFS requires a unique 8-char hostId; derive it from hostname
@@ -39,7 +46,9 @@ in {
         builtins.hashString "sha256" config.networking.hostName
       );
 
-      firewall.enable = true;
+      firewall = {
+        enable = true;
+      };
     };
   };
 }
