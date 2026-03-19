@@ -56,7 +56,7 @@ in {
 
       options = {
         ashift = "12";
-        autotrim = "on";
+        autotrim = "off";
       };
 
       # Defaults inherited by datasets in this pool
@@ -67,7 +67,6 @@ in {
         compression = "zstd";
         dnodesize = "auto";
         normalization = "formD";
-        relatime = "on";
         xattr = "sa";
         "com.sun:auto-snapshot" = "true";
       };
