@@ -9,7 +9,6 @@
     ./_networking.nix
     ./_nixpkgs.nix
     ./_packages.nix
-    ./_prune-system-generations.nix
     ./_reboot-required-check.nix
     ./_remote-unlock.nix
     ./_security.nix
@@ -42,6 +41,9 @@
 
     nix = {
       settings = {
+        experimental-features = "nix-command flakes";
+        auto-optimise-store = true;
+
         substituters = [
           "https://cache.nixos.org/?priority=10"
           "https://nix-community.cachix.org"
