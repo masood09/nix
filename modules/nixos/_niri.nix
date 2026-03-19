@@ -42,6 +42,13 @@ in {
     # Auto-unlock GNOME Keyring on login via PAM
     security.pam.services.greetd.enableGnomeKeyring = true;
 
+    # DMS shell dependencies
+    services = {
+      accounts-daemon.enable = true;
+      power-profiles-daemon.enable = true;
+      printing.enable = true;
+    };
+
     # Font discovery
     fonts.fontconfig.enable = true;
 
