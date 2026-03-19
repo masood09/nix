@@ -14,7 +14,7 @@
 in {
   home = {
     packages = lib.optionals emacsEnabled (
-      lib.optional pkgs.stdenv.isLinux pkgs.emacs
+      lib.optional pkgs.stdenv.isLinux pkgs.emacs-pgtk
       ++ (with pkgs; [
         cmake
         fontconfig
