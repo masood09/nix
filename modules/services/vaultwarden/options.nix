@@ -74,6 +74,7 @@ in {
             properties = {
               logbias = "latency";
               recordsize = "16K";
+              redundant_metadata = "most";
             };
           };
         };
