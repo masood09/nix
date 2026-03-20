@@ -3,9 +3,13 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   homelabCfg = config.homelab;
+  gfxCfg = homelabCfg.hardware.graphics;
+  isIntel = gfxCfg.driver == "intel";
+  isAmd = gfxCfg.driver == "amd";
 in {
   options = {
     homelab = {
@@ -24,6 +28,15 @@ in {
 
         graphics = {
           enable = lib.mkEnableOption "graphics support";
+
+          driver = lib.mkOption {
+            default = "intel";
+            type = lib.types.enum [
+              "intel"
+              "amd"
+            ];
+            description = "GPU driver family — determines which VA-API/VDPAU packages to install.";
+          };
         };
       };
     };
@@ -37,8 +50,30 @@ in {
       };
 
       # GPU acceleration (mesa)
-      graphics = lib.mkIf homelabCfg.hardware.graphics.enable {
+      graphics = lib.mkIf gfxCfg.enable {
         enable = true;
+
+        extraPackages = with pkgs;
+          if isIntel
+          then [
+            intel-media-driver # iHD — hardware video decode/encode (Broadwell+)
+            intel-vaapi-driver # i965 — fallback for older Intel iGPUs
+            intel-compute-runtime # OpenCL runtime (NEO)
+            vaapiVdpau # VDPAU compatibility layer over VA-API
+            libvdpau-va-gl # VDPAU fallback via OpenGL
+          ]
+          else [
+            # AMD uses mesa's built-in RADV/radeonsi — no extra VA-API driver needed
+            rocmPackages.clr # OpenCL runtime (ROCm)
+            libvdpau-va-gl # VDPAU fallback via OpenGL
+          ];
+      };
+
+      # AMD GPU kernel driver
+      amdgpu = lib.mkIf (gfxCfg.enable && isAmd) {
+        initrd = {
+          enable = true;
+        };
       };
     };
 
