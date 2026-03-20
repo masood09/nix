@@ -1,5 +1,4 @@
-# Niri compositor — Wayland session with desktop services,
-# Bitwarden polkit, font discovery, and session variables.
+# Niri compositor — tiling Wayland compositor with Bitwarden polkit policy.
 {
   config,
   lib,
@@ -25,18 +24,14 @@ in {
       };
     };
 
-    services = {
-      # Desktop service dependencies
-      accounts-daemon = {
-        enable = true;
-      };
-
-      power-profiles-daemon = {
-        enable = true;
-      };
-
-      printing = {
-        enable = true;
+    security = {
+      pam = {
+        services = {
+          greetd = {
+            # Auto-unlock GNOME Keyring on login via PAM
+            enableGnomeKeyring = true;
+          };
+        };
       };
     };
 
@@ -61,18 +56,6 @@ in {
           </policyconfig>
         '')
       ];
-
-      # Wayland environment hints
-      sessionVariables = {
-        NIXOS_OZONE_WL = "1";
-      };
-    };
-
-    fonts = {
-      fontconfig = {
-        # Required for user-installed fonts to be discovered
-        enable = true;
-      };
     };
   };
 }
