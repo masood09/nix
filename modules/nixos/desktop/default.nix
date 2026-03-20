@@ -12,6 +12,7 @@
   isAmd = gfxCfg.driver == "amd";
 in {
   imports = [
+    ./_greetd.nix
     ./_niri.nix
   ];
 
