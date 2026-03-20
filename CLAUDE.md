@@ -57,6 +57,12 @@ homelab = {
 - `_` prefix for private/internal config files (e.g., `_config.nix`, `_networking.nix`)
 - `default.nix` as main entry point for directories
 
+### Code Style
+- **Nested attribute sets**: Always use fully nested structure, never dot notation for attribute sets
+  - ✅ Good: `services = { greetd = { enable = true; }; };`
+  - ❌ Bad: `services.greetd = { enable = true; };`
+  - This applies to all top-level options: `services`, `programs`, `security`, `environment`, etc.
+
 ### Secrets Management
 - sops-nix with age encryption
 - Per-machine keys defined in `.sops.yaml`
