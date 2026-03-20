@@ -1,17 +1,19 @@
 # Desktop hardware — audio, GPU, bluetooth, and fingerprint reader.
-# Only active on machines with role == "desktop". Bluetooth and fingerprint
-# are individually gated behind their own enable flags.
+# Each feature is individually gated behind its own enable flag.
 {
   config,
   lib,
   ...
 }: let
   homelabCfg = config.homelab;
-  isDesktop = homelabCfg.role == "desktop";
 in {
   options = {
     homelab = {
       hardware = {
+        audio = {
+          enable = lib.mkEnableOption "audio support";
+        };
+
         bluetooth = {
           enable = lib.mkEnableOption "bluetooth support";
         };
@@ -19,11 +21,15 @@ in {
         fingerprint = {
           enable = lib.mkEnableOption "fingerprint reader support (fprintd)";
         };
+
+        graphics = {
+          enable = lib.mkEnableOption "graphics support";
+        };
       };
     };
   };
 
-  config = lib.mkIf isDesktop {
+  config = {
     hardware = {
       bluetooth = lib.mkIf homelabCfg.hardware.bluetooth.enable {
         enable = true;
@@ -31,21 +37,21 @@ in {
       };
 
       # GPU acceleration (mesa)
-      graphics = {
+      graphics = lib.mkIf homelabCfg.hardware.graphics.enable {
         enable = true;
       };
     };
 
     security = {
       # RealtimeKit gives PipeWire realtime scheduling priority
-      rtkit = {
+      rtkit = lib.mkIf homelabCfg.hardware.audio.enable {
         enable = true;
       };
     };
 
     services = {
       # PipeWire replaces PulseAudio + ALSA with a single unified daemon
-      pipewire = {
+      pipewire = lib.mkIf homelabCfg.hardware.audio.enable {
         enable = true;
 
         alsa = {
@@ -60,8 +66,8 @@ in {
       };
 
       # Fingerprint authentication daemon
-      fprintd = {
-        inherit (homelabCfg.hardware.fingerprint) enable;
+      fprintd = lib.mkIf homelabCfg.hardware.fingerprint.enable {
+        enable = true;
       };
     };
   };

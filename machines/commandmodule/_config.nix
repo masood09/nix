@@ -20,11 +20,19 @@
       };
 
       hardware = {
+        audio = {
+          enable = true;
+        };
+
         bluetooth = {
           enable = true;
         };
 
         fingerprint = {
+          enable = true;
+        };
+
+        graphics = {
           enable = true;
         };
       };
