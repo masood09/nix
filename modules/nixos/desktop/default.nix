@@ -1,5 +1,6 @@
-# Desktop modules — hardware (audio, GPU, bluetooth, fingerprint) and Niri compositor.
-# Hardware features are individually gated behind their own enable flags.
+# Desktop modules — shared desktop services, hardware, and compositor(s).
+# desktop.enable gates shared services (accounts-daemon, printing, fonts, etc.).
+# Hardware features and compositors are individually gated behind their own enable flags.
 {
   config,
   lib,
@@ -18,6 +19,10 @@ in {
 
   options = {
     homelab = {
+      desktop = {
+        enable = lib.mkEnableOption "desktop environment (shared services, login manager)";
+      };
+
       hardware = {
         audio = {
           enable = lib.mkEnableOption "audio support";
@@ -107,6 +112,33 @@ in {
 
       # Fingerprint authentication daemon
       fprintd = lib.mkIf homelabCfg.hardware.fingerprint.enable {
+        enable = true;
+      };
+
+      # Shared desktop service dependencies (compositor-agnostic)
+      accounts-daemon = lib.mkIf homelabCfg.desktop.enable {
+        enable = true;
+      };
+
+      power-profiles-daemon = lib.mkIf homelabCfg.desktop.enable {
+        enable = true;
+      };
+
+      printing = lib.mkIf homelabCfg.desktop.enable {
+        enable = true;
+      };
+    };
+
+    # Wayland environment hints
+    environment = lib.mkIf homelabCfg.desktop.enable {
+      sessionVariables = {
+        NIXOS_OZONE_WL = "1";
+      };
+    };
+
+    fonts = lib.mkIf homelabCfg.desktop.enable {
+      fontconfig = {
+        # Required for user-installed fonts to be discovered
         enable = true;
       };
     };

@@ -14,6 +14,8 @@
       };
 
       desktop = {
+        enable = true;
+
         niri = {
           enable = true;
         };

@@ -48,7 +48,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Desktop (Niri + DankMaterialShell)
+    # Desktop (Niri + sysc-greet + DankMaterialShell)
+    sysc-greet = {
+      url = "github:Nomadcxx/sysc-greet";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     dms = {
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -93,6 +97,7 @@
           inputs.authentik-nix.nixosModules.default
           inputs.impermanence.nixosModules.impermanence
           inputs.headplane.nixosModules.headplane
+          inputs.sysc-greet.nixosModules.default
 
           (import ./nix/services/default.nix)
 
