@@ -1,6 +1,6 @@
 # User packages — role-based package lists for servers, Linux desktops, and macOS.
-# Desktop tools (dev CLIs, fonts) are shared across Linux and macOS;
-# GUI apps and platform-specific packages are split by stdenv.
+# Desktop dev CLIs are shared across Linux and macOS;
+# GUI apps, fonts, and platform-specific packages are split by stdenv.
 {
   homelabCfg,
   inputs,
@@ -37,14 +37,6 @@ in {
         stow
         xz
         awscli2
-
-        # Fonts
-        julia-mono
-        nerd-fonts.jetbrains-mono
-        nerd-fonts.meslo-lg
-        nerd-fonts.symbols-only
-        nerd-fonts.hack
-        symbola
       ])
       # Linux desktop GUI apps
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isLinux) [
@@ -59,6 +51,34 @@ in {
         coreutils
         coreutils-prefixed
         nixos-rebuild
+
+        # Fonts (on NixOS these are installed system-wide via fonts.packages)
+        # Sans-serif / serif
+        dejavu_fonts
+        noto-fonts
+        noto-fonts-cjk-sans
+        inter # Inter Variable font for DankMaterialShell
+
+        # Monospace
+        fira-code
+        fira-code-symbols
+        jetbrains-mono
+        julia-mono
+        terminus_font
+        maple-mono.NF
+
+        # Nerd Fonts (patched with icons/glyphs)
+        nerd-fonts.symbols-only
+        nerd-fonts.fira-code
+        nerd-fonts.droid-sans-mono
+        nerd-fonts.jetbrains-mono
+        nerd-fonts.meslo-lg
+        nerd-fonts.hack
+
+        # Icons / emoji
+        noto-fonts-emoji
+        font-awesome
+        material-icons
       ]);
   };
 }
