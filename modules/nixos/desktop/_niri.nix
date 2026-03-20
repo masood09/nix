@@ -24,19 +24,6 @@ in {
       };
     };
 
-    security = {
-      pam = {
-        services = {
-          greetd = {
-            # Auto-unlock GNOME Keyring on login via PAM
-            enableGnomeKeyring = true;
-            # Enable fingerprint authentication at login
-            fprintAuth = config.homelab.hardware.fingerprint.enable;
-          };
-        };
-      };
-    };
-
     environment = {
       # Bitwarden polkit policy for system auth unlock
       systemPackages = [
