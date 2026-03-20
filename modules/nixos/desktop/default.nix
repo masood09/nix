@@ -166,7 +166,7 @@ in {
         nerd-fonts.hack
 
         # Icons / emoji
-        noto-fonts-emoji
+        noto-fonts-color-emoji
         font-awesome
         material-icons
       ];
