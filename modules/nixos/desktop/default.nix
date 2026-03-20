@@ -141,6 +141,35 @@ in {
         # Required for user-installed fonts to be discovered
         enable = true;
       };
+
+      packages = with pkgs; [
+        # Sans-serif / serif
+        dejavu_fonts
+        noto-fonts
+        noto-fonts-cjk-sans
+        inter # Inter Variable font for DankMaterialShell
+
+        # Monospace
+        fira-code
+        fira-code-symbols
+        jetbrains-mono
+        julia-mono
+        terminus_font
+        maple-mono.NF
+
+        # Nerd Fonts (patched with icons/glyphs)
+        nerd-fonts.symbols-only
+        nerd-fonts.fira-code
+        nerd-fonts.droid-sans-mono
+        nerd-fonts.jetbrains-mono
+        nerd-fonts.meslo-lg
+        nerd-fonts.hack
+
+        # Icons / emoji
+        noto-fonts-emoji
+        font-awesome
+        material-icons
+      ];
     };
   };
 }
