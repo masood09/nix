@@ -69,7 +69,7 @@ in {
             intel-media-driver # iHD — hardware video decode/encode (Broadwell+)
             intel-vaapi-driver # i965 — fallback for older Intel iGPUs
             intel-compute-runtime # OpenCL runtime (NEO)
-            vaapiVdpau # VDPAU compatibility layer over VA-API
+            libva-vdpau-driver # VDPAU compatibility layer over VA-API
             libvdpau-va-gl # VDPAU fallback via OpenGL
           ]
           else [
