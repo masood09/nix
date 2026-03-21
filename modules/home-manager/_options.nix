@@ -188,6 +188,41 @@
           };
         };
 
+        stylix = {
+          enable = lib.mkOption {
+            default = true;
+            type = lib.types.bool;
+            description = ''
+              Whether to enable stylix base16 theming.
+            '';
+          };
+
+          polarity = lib.mkOption {
+            default = "dark";
+            type = lib.types.enum ["dark" "light"];
+            description = ''
+              Theme polarity (dark or light mode).
+            '';
+          };
+
+          scheme = lib.mkOption {
+            default = "catppuccin-mocha";
+            type = lib.types.str;
+            description = ''
+              Base16 color scheme name from base16-schemes package.
+              Examples: catppuccin-mocha, gruvbox-dark-medium, nord, tokyo-night-dark.
+            '';
+          };
+
+          wallpaper = lib.mkOption {
+            type = lib.types.nullOr lib.types.path;
+            default = null;
+            description = ''
+              Path to wallpaper image. Stylix will extract colors from this if set.
+            '';
+          };
+        };
+
         tmux = {
           enable = lib.mkOption {
             default = true;

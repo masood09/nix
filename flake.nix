@@ -28,6 +28,10 @@
       url = "github:catppuccin/nix/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    stylix = {
+      url = "github:nix-community/stylix/release-25.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # macOS
     nix-darwin = {
@@ -79,6 +83,7 @@
           inputs.authentik-nix.nixosModules.default
           inputs.impermanence.nixosModules.impermanence
           inputs.headplane.nixosModules.headplane
+          inputs.stylix.nixosModules.stylix
 
           (import ./nix/services/default.nix)
 
@@ -100,6 +105,7 @@
         modules = [
           inputs.nix-homebrew.darwinModules.nix-homebrew
           inputs.home-manager.darwinModules.home-manager
+          inputs.stylix.darwinModules.stylix
 
           path
         ];
