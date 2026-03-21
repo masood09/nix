@@ -8,7 +8,6 @@ in {
       username = homelabCfg.primaryUser.userName;
       entries = [
         {path = "/Applications/Zen.app";}
-        {path = "/Applications/Ghostty.app";}
         {path = "/Applications/Emacs.app";}
         {path = "/Applications/Element.app";}
         {path = "/Applications/Discord.app";}

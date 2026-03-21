@@ -11,7 +11,6 @@ in {
   environment = {
     systemPackages = with pkgs; [
       efibootmgr
-      ghostty.terminfo
       git
       gptfdisk
       parted
