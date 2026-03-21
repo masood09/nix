@@ -40,11 +40,7 @@ in {
       ])
       # Linux desktop GUI apps
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isLinux) [
-        pkgs.bitwarden-desktop
-        pkgs.element-desktop
         pkgs.ghostty
-        pkgs.opencloud-desktop
-        pkgs.zoom-us
       ]
       # macOS-specific (coreutils for GNU compat, nixos-rebuild for remote deploys)
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
@@ -57,7 +53,7 @@ in {
         dejavu_fonts
         noto-fonts
         noto-fonts-cjk-sans
-        inter # Inter Variable font for DankMaterialShell
+        inter
 
         # Monospace
         fira-code

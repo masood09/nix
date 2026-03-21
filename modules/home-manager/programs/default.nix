@@ -30,7 +30,6 @@
 
     # Desktop (Linux only, gated on niri.enable)
     ./_niri.nix
-    ./_zen.nix
 
     # Theming & UX
     ./_catppuccin.nix
