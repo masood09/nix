@@ -138,6 +138,10 @@
           enable = lib.mkEnableOption "Whether to enable GPG.";
         };
 
+        kitty = {
+          enable = lib.mkEnableOption "Whether to enable kitty terminal.";
+        };
+
         motd = {
           enable = lib.mkEnableOption "Show a custom MOTD on interactive shells.";
 
