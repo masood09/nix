@@ -7,6 +7,7 @@
     ./_bash.nix
     ./_fish.nix
     ./_zsh.nix
+    ./_kitty.nix
     ./_tmux.nix
     ./_starship.nix
 
