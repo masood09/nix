@@ -1,6 +1,5 @@
-# Stylix — Base16 theming system providing fallback themes for all programs.
-# Sits at the bottom of the theme hierarchy (Manual > Catppuccin > Stylix).
-# Programs with dedicated Catppuccin modules should disable their Stylix targets.
+# Stylix — Base16 theming system providing consistent theming for all programs.
+# Uses base16 color schemes to automatically theme supported applications.
 {
   homelabCfg,
   inputs,
@@ -55,15 +54,11 @@ in {
       popups = 0.95;
     };
 
-    # Disable Stylix targets for programs that use Catppuccin modules
-    # This follows the theme hierarchy: Manual > Catppuccin > Stylix
+    # Disable Starship target - it uses hardcoded Catppuccin colors
     targets = {
-      bat.enable = false; # Using Catppuccin module
-      btop.enable = false; # Using Catppuccin module
-      fzf.enable = false; # Using Catppuccin module
-      tmux.enable = false; # Using Catppuccin module
-      neovim.enable = false; # Using Catppuccin module
-      starship.enable = false; # Using Catppuccin module (manual config)
+      starship = {
+        enable = false;
+      };
     };
   };
 }

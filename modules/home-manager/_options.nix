@@ -26,16 +26,6 @@
           };
         };
 
-        catppuccin = {
-          enable = lib.mkOption {
-            default = true;
-            type = lib.types.bool;
-            description = ''
-              Whether to enable catppuccin.
-            '';
-          };
-        };
-
         claude-code = {
           enable = lib.mkEnableOption "Whether to enable Claude Code.";
         };

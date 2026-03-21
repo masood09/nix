@@ -32,7 +32,6 @@
     ./_niri.nix
 
     # Theming & UX
-    ./_catppuccin.nix
     ./_stylix.nix
     ./_motd.nix
 
