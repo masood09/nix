@@ -183,10 +183,6 @@ in {
         Clicking = true;
         TrackpadRightClick = true;
       };
-
-      universalaccess = {
-        reduceMotion = true;
-      };
     };
 
     stateVersion = 4;

@@ -56,12 +56,4 @@
       };
     };
   };
-
-  system = {
-    defaults = {
-      universalaccess = {
-        reduceMotion = lib.mkForce null;
-      };
-    };
-  };
 }
