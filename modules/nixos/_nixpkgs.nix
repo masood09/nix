@@ -1,4 +1,4 @@
-# Nixpkgs configuration — allow unfree packages and disable docs on servers.
+# Nixpkgs configuration and documentation settings.
 {
   nixpkgs = {
     config = {
@@ -8,19 +8,16 @@
       packageOverrides = pkgs: {
         inherit (pkgs) stdenv;
       };
+    };
+  };
 
-      # Servers don't need man pages or documentation
-      documentation = {
-        enable = false;
-      };
-
-      man = {
-        enable = false;
-      };
-
-      info = {
-        enable = false;
-      };
+  # Disable man and info pages to reduce closure size.
+  documentation = {
+    man = {
+      enable = false;
+    };
+    info = {
+      enable = false;
     };
   };
 }
