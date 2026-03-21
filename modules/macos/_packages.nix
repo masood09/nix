@@ -43,7 +43,6 @@ in {
       "alfred"
       "appcleaner"
       "emacs-plus-app"
-      "ghostty"
       "karabiner-elements"
       "shortcat"
       "tailscale-app"

@@ -38,10 +38,6 @@ in {
         xz
         awscli2
       ])
-      # Linux desktop GUI apps
-      ++ lib.optionals (role == "desktop" && pkgs.stdenv.isLinux) [
-        pkgs.ghostty
-      ]
       # macOS-specific (coreutils for GNU compat, nixos-rebuild for remote deploys)
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
         coreutils
