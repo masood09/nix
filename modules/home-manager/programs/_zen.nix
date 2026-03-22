@@ -27,13 +27,28 @@
         OfferToSaveLogins = false;
         PasswordManagerEnabled = false;
 
-        # Privacy settings
+        # Security — Disable autofill for sensitive data
+        AutofillAddressEnabled = false;
+        AutofillCreditCardEnabled = false;
+
+        # UX — Disable update prompts and default browser checks
+        DisableAppUpdate = true;
+        DisableFeedbackCommands = true;
+        DontCheckDefaultBrowser = true;
+
+        # Privacy — Tracking protection
         EnableTrackingProtection = {
           Value = true;
           Locked = true;
           Cryptomining = true;
           Fingerprinting = true;
           EmailTracking = true;
+        };
+
+        # Privacy — Clear data on browser shutdown
+        SanitizeOnShutdown = {
+          FormData = true;
+          Cache = true;
         };
 
         # DNS over HTTPS — disabled, using system DNS
