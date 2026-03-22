@@ -227,6 +227,10 @@
           };
         };
 
+        zen = {
+          enable = lib.mkEnableOption "Whether to enable Zen browser.";
+        };
+
         zoxide = {
           enable = lib.mkOption {
             default = true;

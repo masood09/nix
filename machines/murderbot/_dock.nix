@@ -7,8 +7,8 @@ in {
       enable = true;
       username = homelabCfg.primaryUser.userName;
       entries = [
-        # Web browser (Zen - Firefox-based)
-        {path = "/Applications/Zen.app";}
+        # Web browser (Zen - Firefox-based, installed via home-manager)
+        {path = "/Users/${homelabCfg.primaryUser.userName}/Applications/Home Manager Apps/Zen Browser (Beta).app";}
         # Text editor and development environment
         {path = "/Applications/Emacs.app";}
         # Terminal emulator (kitty installed via home-manager, lives in user directory)
