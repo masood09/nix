@@ -39,6 +39,9 @@
       neovim = {
         enable = true;
       };
+      zen = {
+        enable = true;
+      };
     };
   };
 }
