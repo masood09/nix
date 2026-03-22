@@ -1,7 +1,12 @@
 # Zen Browser — privacy-focused Firefox fork with vertical tabs and workspaces.
 # Configured with strict privacy, Stylix theming, container isolation, workspace tabs,
 # UI mods, and productivity extensions.
-{homelabCfg, ...}: {
+{
+  homelabCfg, # Homelab configuration options
+  inputs, # Flake inputs (firefox-addons)
+  pkgs, # Nixpkgs for platform detection
+  ...
+}: {
   # Enable Stylix theming for Zen browser
   stylix = {
     targets = {
@@ -111,6 +116,24 @@
 
             # Disable spellcheck
             "layout.spellcheckDefault" = 0;
+          };
+
+          # Extensions — privacy, productivity, and theming
+          extensions = {
+            packages = with inputs.firefox-addons.packages.${pkgs.stdenv.hostPlatform.system}; [
+              # Privacy & Ad Blocking
+              adnauseam # Ad blocker that clicks ads to obfuscate tracking
+
+              # Productivity
+              vimium # Vim keyboard navigation
+              stylus # Custom CSS styles
+              bitwarden # Password manager
+
+              # Theming & Enhancements
+              catppuccin-web-file-icons # Catppuccin-themed file icons
+              sponsorblock # Skip YouTube sponsorships
+              dearrow # Crowdsourced clickbait titles/thumbnails
+            ];
           };
 
           # Zen Mods — UI/UX enhancements from the Zen Mods marketplace
