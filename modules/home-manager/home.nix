@@ -4,10 +4,13 @@
   lib,
   pkgs,
   homelabCfg,
+  inputs,
   ...
 }: {
   imports = [
     ./programs
+    # Zen browser home-manager module (beta variant)
+    inputs.zen-browser.homeModules.beta
   ];
 
   home = {

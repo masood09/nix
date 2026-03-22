@@ -4,12 +4,15 @@
 {
   config,
   pkgs,
+  inputs,
   ...
 }: let
   homelabCfg = config.homelab;
 in {
   environment = {
-    systemPackages = with pkgs; [];
+    systemPackages = with pkgs; [
+      # Zen browser now managed via home-manager module
+    ];
   };
 
   nix-homebrew = {
@@ -46,7 +49,7 @@ in {
       "karabiner-elements"
       "shortcat"
       "tailscale-app"
-      "zen"
+      # Zen browser now installed via Nix (see systemPackages above)
     ];
     masApps = {
       "Amphetamine" = 937984704;

@@ -1,0 +1,167 @@
+#+TITLE: Zen Browser Configuration & Troubleshooting
+#+AUTHOR: Masood Ahmed
+#+DATE: 2026-03-22
+
+* Overview
+
+Zen Browser is configured via home-manager with Stylix theming, privacy settings, and custom extensions. This document covers common issues and how to reset the browser profile.
+
+* Architecture
+
+** Profile Management
+
+Zen Browser uses two key files to manage profiles:
+
+1. ~profiles.ini~ - Lists available profiles and which one is default (managed by home-manager)
+2. ~installs.ini~ - Maps Zen installations to specific profiles (created by Zen on first launch)
+
+** The Problem
+
+When you rebuild nix-darwin:
+- home-manager creates ~profiles.ini~ pointing to ~Profiles/default~
+- home-manager via Stylix creates theme files in ~Profiles/default~
+- When Zen launches for the first time, it creates its own profile (e.g., ~dxo5exh8.Default (release)~)
+- Zen creates ~installs.ini~ pointing to its new profile, NOT the home-manager one
+- This mismatch causes: "Your Zen profile cannot be loaded. It may be missing or inaccessible."
+
+** The Solution
+
+The ~installs.ini~ file must point to ~Profiles/default~ to match home-manager's configuration.
+
+* Clearing Zen and Starting Fresh
+
+** Complete Reset Command
+
+#+begin_src bash
+# 1. Kill all Zen processes
+pkill -9 "Zen Browser" 2>/dev/null || true
+
+# 2. Remove all Zen data
+rm -rf "$HOME/Library/Application Support/Zen" \
+       "$HOME/Library/Caches/Zen" \
+       "$HOME/Library/Preferences/org.mozilla.zen."*
+
+# 3. Rebuild nix-darwin
+just deploy
+
+# 4. Create installs.ini before launching Zen
+cat > "$HOME/Library/Application Support/Zen/installs.ini" << 'EOF'
+[86B0D1EEB84199DD]
+Default=Profiles/default
+Locked=1
+EOF
+
+# 5. Launch Zen
+open -a "Zen Browser (Beta)"
+#+end_src
+
+** What Each Step Does
+
+1. *Kill Zen* - Ensures no processes are holding files open
+2. *Remove data* - Deletes all profiles, caches, and preferences
+3. *Rebuild* - home-manager recreates the profile structure with your config
+4. *Create installs.ini* - Tells Zen to use the home-manager managed profile
+5. *Launch* - Zen starts with the correct profile
+
+* Making It Reproducible
+
+To make this fully declarative, add ~installs.ini~ to your home-manager configuration:
+
+#+begin_src nix
+# In modules/home-manager/programs/_zen.nix
+
+home = {
+  file = {
+    "Library/Application Support/Zen/installs.ini" = {
+      text = ''
+        [86B0D1EEB84199DD]
+        Default=Profiles/default
+        Locked=1
+      '';
+    };
+  };
+};
+#+end_src
+
+This ensures that ~installs.ini~ always points to the correct profile, even after a clean rebuild.
+
+* Understanding the Installation ID
+
+The installation ID (~86B0D1EEB84199DD~) is a unique identifier for your Zen Browser installation. It's used to:
+- Track which profile belongs to which installation (important if you have multiple Zen versions)
+- Prevent profile conflicts between different installations
+
+This ID is consistent for a given Zen installation path. If you change the Zen app location, you might need a new ID.
+
+* File Locations
+
+| File                                                    | Purpose                          | Managed By   |
+|---------------------------------------------------------+----------------------------------+--------------|
+| ~Library/Application Support/Zen/profiles.ini~         | Profile list and default         | home-manager |
+| ~Library/Application Support/Zen/installs.ini~         | Installation to profile mapping  | Manual/Zen   |
+| ~Library/Application Support/Zen/Profiles/default/~    | Profile data and settings        | home-manager |
+| ~Library/Application Support/Zen/Profiles/default/user.js~ | Firefox prefs (symlink)      | home-manager |
+| ~Library/Caches/Zen/~                                  | Browser cache                    | Zen          |
+| ~Library/Preferences/org.mozilla.zen.*~                | macOS preferences                | Zen          |
+
+* Configuration Files
+
+The Zen Browser configuration is split across:
+
+- ~modules/home-manager/programs/_zen.nix~ - Main browser configuration
+  - Policies (privacy, tracking protection, DNS-over-HTTPS)
+  - Profiles and extensions
+  - Browser settings (preferences)
+  - Search engines
+
+- ~modules/home-manager/programs/_zen.nix~ (stylix section) - Theming
+  - Applies base16 colors to browser UI
+  - Configures fonts
+  - Manages CSS themes
+
+* Common Issues
+
+** "Profile cannot be loaded" Error
+
+*Cause:* Mismatch between ~installs.ini~ and ~profiles.ini~
+
+*Solution:* Run the complete reset command above
+
+** Extensions Not Loading
+
+*Cause:* NUR might not be available in your nixpkgs overlay
+
+*Solution:* Check that NUR is configured in ~flake.nix~
+
+** Settings Not Applying
+
+*Cause:* Zen might be using the wrong profile
+
+*Solution:* Verify ~installs.ini~ points to ~Profiles/default~:
+
+#+begin_src bash
+cat "$HOME/Library/Application Support/Zen/installs.ini"
+#+end_src
+
+Should show:
+#+begin_example
+[86B0D1EEB84199DD]
+Default=Profiles/default
+Locked=1
+#+end_example
+
+** Multiple Profiles Created
+
+*Cause:* Zen created its own profile instead of using home-manager's
+
+*Solution:*
+1. Check ~ls -la "$HOME/Library/Application Support/Zen/Profiles/"~
+2. Remove any profiles that aren't ~default~
+3. Fix ~installs.ini~ to point to ~Profiles/default~
+
+* Tips
+
+- Always close Zen before rebuilding nix-darwin
+- Don't manually delete Zen files while the browser is running
+- If you see a new auto-generated profile (e.g., ~abc123.Default (release)~), it means ~installs.ini~ wasn't set correctly
+- The ~Locked=1~ setting in ~installs.ini~ prevents Zen from changing the profile path

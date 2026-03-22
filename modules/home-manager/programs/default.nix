@@ -32,6 +32,9 @@
     # Desktop (Linux only, gated on niri.enable)
     ./_niri.nix
 
+    # Applications
+    ./_zen.nix
+
     # Theming & UX
     ./_stylix.nix
     ./_motd.nix
