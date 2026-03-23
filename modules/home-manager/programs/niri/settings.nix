@@ -38,6 +38,11 @@
     };
   };
 
+  # Startup applications
+  spawn-at-startup = [
+    {command = ["noctalia-shell"];}
+  ];
+
   # Layout settings
   layout = {
     gaps = 8;
