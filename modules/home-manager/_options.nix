@@ -229,6 +229,17 @@
 
         zen = {
           enable = lib.mkEnableOption "Whether to enable Zen browser.";
+
+          containerProfile = lib.mkOption {
+            type = lib.types.enum ["homelab" "family" "work"];
+            default = "homelab";
+            description = ''
+              Which container/workspace set to configure.
+              "homelab" — Personal, Homelab, Admin, Google (default).
+              "family"  — Personal, Work, Google (for family members' machines).
+              "work"    — Personal, Work, Google (for work machines).
+            '';
+          };
         };
 
         zoxide = {

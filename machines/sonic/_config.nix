@@ -81,6 +81,7 @@
 
         zen = {
           enable = true;
+          containerProfile = "family";
         };
       };
     };
