@@ -23,6 +23,7 @@ in {
         # Doom Emacs dependencies: build tools, LSPs, formatters
         cmake
         fontconfig
+        gcc # C compiler for tree-sitter grammar compilation
         gomodifytags
         gopls
         gore
@@ -35,6 +36,7 @@ in {
         shellcheck
         stylelint
         terraform
+        tree-sitter # Syntax highlighting via tree-sitter grammars
       ])
     );
   };
