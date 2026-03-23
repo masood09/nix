@@ -3,6 +3,7 @@
   lib,
   noctaliaEnabled,
   scripts,
+  wallpaper, # Path to wallpaper image, or null — controls swaybg spawn
 }: {
   # Input configuration
   input = {
@@ -42,9 +43,11 @@
     };
   };
 
-  # Startup applications — mutually exclusive: Noctalia shell or Waybar
+  # Startup applications — swaybg first so the background appears immediately.
+  # Bar is mutually exclusive: Noctalia shell or Waybar depending on config.
   spawn-at-startup =
-    lib.optional noctaliaEnabled {command = ["noctalia-shell"];}
+    lib.optional (wallpaper != null) {command = ["swaybg" "--image" "${wallpaper}" "--mode" "fill"];}
+    ++ lib.optional noctaliaEnabled {command = ["noctalia-shell"];}
     ++ lib.optional (!noctaliaEnabled) {command = ["waybar"];};
 
   # Layout settings
