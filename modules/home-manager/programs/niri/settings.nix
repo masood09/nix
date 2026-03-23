@@ -30,7 +30,7 @@
         height = 1080;
         refresh = 59.999;
       };
-      scale = 1.25;
+      scale = 1.125;
       position = {
         x = 1280;
         y = 0;
@@ -45,7 +45,7 @@
 
   # Layout settings
   layout = {
-    gaps = 8;
+    gaps = 5;
     center-focused-column = "never";
 
     preset-column-widths = [
@@ -56,18 +56,15 @@
 
     default-column-width = {proportion = 0.5;};
 
+    # Colors omitted — managed by Stylix
     focus-ring = {
       enable = true;
-      width = 2;
-      active.color = "#7fc8ff";
-      inactive.color = "#505050";
+      width = 1.5;
     };
 
     border = {
       enable = false;
-      width = 4;
-      active.color = "#ffc87f";
-      inactive.color = "#505050";
+      width = 1;
     };
   };
 
@@ -82,6 +79,16 @@
 
   # Window rules
   window-rules = [
+    # Rounded corners — applied globally to all windows
+    {
+      geometry-corner-radius = {
+        top-left = 10.0;
+        top-right = 10.0;
+        bottom-left = 10.0;
+        bottom-right = 10.0;
+      };
+      clip-to-geometry = true;
+    }
     # WezTerm workaround
     {
       matches = [{app-id = "^org\\.wezfurlong\\.wezterm$";}];
@@ -96,6 +103,15 @@
         }
       ];
       open-floating = true;
+    }
+  ];
+
+  # Layer rules — Noctalia overview wallpaper (Option 1: blurred overview)
+  # Requires "Enable overview wallpaper" ON in Noctalia settings
+  layer-rules = [
+    {
+      matches = [{namespace = "^noctalia-overview.*";}];
+      place-within-backdrop = true;
     }
   ];
 
