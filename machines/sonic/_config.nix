@@ -79,6 +79,11 @@
           ];
         };
 
+        stylix = {
+          scheme = ../../nix/themes/sonic-dark.yaml;
+          polarity = "dark";
+        };
+
         zen = {
           enable = true;
           containerProfile = "family";
