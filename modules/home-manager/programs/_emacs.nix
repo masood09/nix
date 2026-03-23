@@ -23,7 +23,9 @@ in {
         # Doom Emacs dependencies: build tools, LSPs, formatters
         cmake
         fontconfig
-        gcc # C compiler for tree-sitter grammar compilation
+        gcc # C compiler for tree-sitter/vterm compilation
+        gnumake # Required by vterm and other native-compiled Emacs packages
+        libtool # Required by vterm to build libvterm
         gomodifytags
         gopls
         gore
