@@ -16,8 +16,12 @@ in {
   stylix = lib.mkIf cfg.enable {
     enable = true;
 
-    # Base16 color scheme
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/${cfg.scheme}.yaml";
+    # Base16 color scheme — path to a custom YAML file, or a named scheme
+    # from the base16-schemes package (e.g. "catppuccin-mocha").
+    base16Scheme =
+      if builtins.isPath cfg.scheme
+      then cfg.scheme
+      else "${pkgs.base16-schemes}/share/themes/${cfg.scheme}.yaml";
 
     # Theme polarity (dark/light)
     inherit (cfg) polarity;

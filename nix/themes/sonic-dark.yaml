@@ -1,0 +1,26 @@
+scheme: "Sonic Dark"
+author: "Masood Ahmed"
+# Inspired by Sonic the Hedgehog — deep space navy backgrounds, electric cobalt
+# blue accents, Green Hill Zone greens, and Super Sonic gold highlights.
+
+# Backgrounds — deep navy from Sonic's night sky aesthetic
+base00: "0B1120" # Default background (space navy)
+base01: "131E2D" # Lighter background (panels, statusline)
+base02: "1E3356" # Selection background (deep sonic blue)
+base03: "3A5A8A" # Comments, invisibles (muted blue)
+
+# Foregrounds — blue-tinted whites
+base04: "6B8DB8" # Dark foreground (status bar text)
+base05: "C5D8EE" # Default foreground (blue-white)
+base06: "E0ECF8" # Light foreground
+base07: "F0F8FF" # Lightest foreground (Alice Blue)
+
+# Accent colors
+base08: "E05252" # Red   — Sonic's shoe red (errors, deletions)
+base09: "FF7043" # Orange — shoe buckle accent (integers, constants)
+base0A: "FFD700" # Gold  — Super Sonic (classes, bold, warnings)
+base0B: "4EC94E" # Green — Green Hill Zone (strings, inserted)
+base0C: "00D4D4" # Cyan  — speed trail (support, escape sequences)
+base0D: "1E90FF" # Blue  — Sonic's iconic blue (functions, attributes)
+base0E: "9F7AEA" # Purple — Chaos Emerald (keywords, storage)
+base0F: "7B6248" # Brown — earth/rock tones (embedded language markers)

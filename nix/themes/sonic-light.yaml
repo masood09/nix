@@ -1,0 +1,26 @@
+scheme: "Sonic Light"
+author: "Masood Ahmed"
+# Inspired by Sonic the Hedgehog — sky-blue daytime backgrounds mirroring
+# Green Hill Zone's open sky, with Sonic's cobalt blue and red as primary accents.
+
+# Backgrounds — sky blue tints from Green Hill Zone's daytime sky
+base00: "EEF5FF" # Default background (sky blue tint)
+base01: "DCE9F8" # Lighter background (panels, statusline)
+base02: "C0D8F0" # Selection background
+base03: "7A9FCC" # Comments, invisibles (muted blue)
+
+# Foregrounds — deep navy blues
+base04: "3D6A9E" # Dark foreground (status bar text)
+base05: "0A1A30" # Default foreground (deep navy)
+base06: "061120" # Darker foreground
+base07: "020810" # Darkest foreground
+
+# Accent colors — darkened for light-background readability
+base08: "C0392B" # Red   — Sonic's shoe red (errors, deletions)
+base09: "D2580A" # Orange — shoe buckle accent (integers, constants)
+base0A: "A07800" # Gold  — Super Sonic darkened (classes, bold, warnings)
+base0B: "247B24" # Green — Green Hill Zone darkened (strings, inserted)
+base0C: "007878" # Cyan  — speed trail darkened (support, escape sequences)
+base0D: "0055BB" # Blue  — Sonic's iconic blue darkened (functions, attributes)
+base0E: "6B3FC0" # Purple — Chaos Emerald darkened (keywords, storage)
+base0F: "5C4030" # Brown — earth/rock tones (embedded language markers)
