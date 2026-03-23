@@ -69,6 +69,11 @@
     };
 
     # Applications
+    # Claude Code CLI (hourly auto-updates, binary cache)
+    claude-code = {
+      url = "github:sadjow/claude-code-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs = {
@@ -118,6 +123,7 @@
 
           {
             nixpkgs.overlays = [
+              inputs.claude-code.overlays.default
               inputs.headplane.overlays.default
               (import ./nix/overlays/default.nix)
             ];
@@ -136,6 +142,14 @@
           inputs.home-manager.darwinModules.home-manager
           inputs.stylix.darwinModules.stylix
 
+          {
+            nixpkgs.overlays = [
+              inputs.claude-code.overlays.default
+              inputs.headplane.overlays.default
+              (import ./nix/overlays/default.nix)
+            ];
+          }
+
           path
         ];
       };
@@ -148,6 +162,7 @@
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
+            inputs.claude-code.overlays.default
             inputs.headplane.overlays.default
             (import ./nix/overlays/default.nix)
           ];
