@@ -21,7 +21,7 @@
         };
 
         noctalia = {
-          enable = true;
+          enable = false;
         };
       };
 
