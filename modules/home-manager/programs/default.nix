@@ -30,7 +30,7 @@
     ./_neovim.nix
 
     # Desktop (Linux only, gated on niri.enable)
-    ./_niri.nix
+    ./niri
     ./_noctalia.nix
 
     # Applications
