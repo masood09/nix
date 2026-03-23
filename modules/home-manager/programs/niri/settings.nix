@@ -42,8 +42,10 @@
     };
   };
 
-  # Startup applications
-  spawn-at-startup = lib.optional noctaliaEnabled {command = ["noctalia-shell"];};
+  # Startup applications — mutually exclusive: Noctalia shell or Waybar
+  spawn-at-startup =
+    lib.optional noctaliaEnabled {command = ["noctalia-shell"];}
+    ++ lib.optional (!noctaliaEnabled) {command = ["waybar"];};
 
   # Layout settings
   layout = {
