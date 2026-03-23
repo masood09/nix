@@ -17,6 +17,8 @@ keys:
     age1nsg2cqxkudumqj362mfeg5zfydgld9e78rwceancqx7lt3gr0dkqjnp9kp
   - &trialunit
     age1pcju0zkh2k3f8m7856k9ftzkjqw538jf255t2azusf9yr6v2nqksfn2pwa
+  - &masoodahmed
+    age1zpv05al3vr4kl6xwkqy234k70qkfwrm9pjv0hd3uyqsqqmeq4stsxhrv39
   - &murderbot
     age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
 
@@ -33,62 +35,72 @@ creation_rules:
           - *heartbeat
           - *sonic
           - *trialunit
+          - *masoodahmed
           - *murderbot
 
   - path_regex: ^secrets/headscale-dns\.sops\.yaml$
     key_groups:
       - age:
         - *meshcontrol
-        - *murderbot
         - *trialunit
+        - *masoodahmed
+        - *murderbot
 
   - path_regex: ^secrets/headscale-acl\.sops\.yaml$
     key_groups:
       - age:
         - *meshcontrol
-        - *murderbot
         - *trialunit
+        - *masoodahmed
+        - *murderbot
 
   - path_regex: ^machines/accesscontrolsystem/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *accesscontrolsystem
+        - *masoodahmed
         - *murderbot
 
   - path_regex: ^machines/commandmodule/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *commandmodule
+        - *masoodahmed
         - *murderbot
 
   - path_regex: ^machines/commrelay/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *commrelay
+        - *masoodahmed
         - *murderbot
 
   - path_regex: ^machines/caretaker/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *caretaker
+        - *masoodahmed
         - *murderbot
 
   - path_regex: ^machines/meshcontrol/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *meshcontrol
+        - *masoodahmed
         - *murderbot
 
   - path_regex: ^machines/watchfulsystem/secrets\.sops\.yaml$
     key_groups:
       - age:
-        - *murderbot
         - *watchfulsystem
+        - *masoodahmed
+        - *murderbot
 
   - path_regex: ^machines/heartbeat/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *heartbeat
+        - *masoodahmed
         - *murderbot
 
   - path_regex: ^machines/sonic/secrets\.sops\.yaml$
@@ -96,12 +108,14 @@ creation_rules:
       - age:
         - *commandmodule
         - *sonic
+        - *masoodahmed
         - *murderbot
 
   - path_regex: ^machines/trialunit/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *trialunit
+        - *masoodahmed
         - *murderbot
 
 stores:
