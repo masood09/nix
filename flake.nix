@@ -4,6 +4,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable"; # Required for Noctalia
 
     # NixOS infrastructure
     impermanence = {
@@ -27,6 +28,19 @@
     stylix = {
       url = "github:nix-community/stylix/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Desktop shell environment (requires unstable for latest Quickshell)
+    noctalia = {
+      url = "github:noctalia-dev/noctalia-shell";
+      inputs = {
+        nixpkgs.follows = "nixpkgs-unstable";
+        noctalia-qs.follows = "noctalia-qs";
+      };
+    };
+    noctalia-qs = {
+      url = "github:noctalia-dev/noctalia-qs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
     # macOS
