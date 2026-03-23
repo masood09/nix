@@ -31,6 +31,7 @@
 
     # Desktop (Linux only, gated on niri.enable)
     ./_niri.nix
+    ./_noctalia.nix
 
     # Applications
     ./_zen.nix

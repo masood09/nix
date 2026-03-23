@@ -15,6 +15,7 @@ in {
   imports = [
     ./_greetd.nix
     ./_niri.nix
+    ./_noctalia.nix
   ];
 
   options = {
@@ -125,6 +126,11 @@ in {
       };
 
       printing = lib.mkIf homelabCfg.desktop.enable {
+        enable = true;
+      };
+
+      # Battery/power monitoring (required by Noctalia)
+      upower = lib.mkIf homelabCfg.desktop.enable {
         enable = true;
       };
     };
