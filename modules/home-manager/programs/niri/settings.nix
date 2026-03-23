@@ -1,5 +1,9 @@
 # Niri settings — declarative configuration for niri compositor
-{scripts}: {
+{
+  lib,
+  noctaliaEnabled,
+  scripts,
+}: {
   # Input configuration
   input = {
     keyboard = {
@@ -39,9 +43,7 @@
   };
 
   # Startup applications
-  spawn-at-startup = [
-    {command = ["noctalia-shell"];}
-  ];
+  spawn-at-startup = lib.optional noctaliaEnabled {command = ["noctalia-shell"];};
 
   # Layout settings
   layout = {
@@ -108,12 +110,10 @@
 
   # Layer rules — Noctalia overview wallpaper (Option 1: blurred overview)
   # Requires "Enable overview wallpaper" ON in Noctalia settings
-  layer-rules = [
-    {
-      matches = [{namespace = "^noctalia-overview.*";}];
-      place-within-backdrop = true;
-    }
-  ];
+  layer-rules = lib.optional noctaliaEnabled {
+    matches = [{namespace = "^noctalia-overview.*";}];
+    place-within-backdrop = true;
+  };
 
   # Keybindings
   binds = let
