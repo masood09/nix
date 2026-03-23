@@ -192,6 +192,8 @@
       heartbeat = mkNixOSConfig ./machines/heartbeat;
       trialunit = mkNixOSConfig ./machines/trialunit;
 
+      sonic = mkNixOSConfig ./machines/sonic;
+
       # Minimal NixOS installer ISO with SSH key baked in
       nixiso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
