@@ -43,6 +43,12 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
+    # Niri Wayland compositor with binary cache and declarative config
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # macOS
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
