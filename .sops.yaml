@@ -13,6 +13,8 @@ keys:
     age1gqvw59226drpwn8942x55jcf5zca5gfupj9eppmeagfevx3pupzs78dfs6
   - &heartbeat
     age1r84yxudulk0jgdtgcmu0qx79ztuxzrzrk4jl5s9n52x4874q35cqzu4enh
+  - &sonic
+    age1nsg2cqxkudumqj362mfeg5zfydgld9e78rwceancqx7lt3gr0dkqjnp9kp
   - &trialunit
     age1pcju0zkh2k3f8m7856k9ftzkjqw538jf255t2azusf9yr6v2nqksfn2pwa
   - &murderbot
@@ -29,6 +31,7 @@ creation_rules:
           - *caretaker
           - *commandmodule
           - *heartbeat
+          - *sonic
           - *trialunit
           - *murderbot
 
@@ -86,6 +89,13 @@ creation_rules:
     key_groups:
       - age:
         - *heartbeat
+        - *murderbot
+
+  - path_regex: ^machines/sonic/secrets\.sops\.yaml$
+    key_groups:
+      - age:
+        - *commandmodule
+        - *sonic
         - *murderbot
 
   - path_regex: ^machines/trialunit/secrets\.sops\.yaml$
