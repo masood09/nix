@@ -20,7 +20,7 @@ in {
     base16Scheme = "${pkgs.base16-schemes}/share/themes/${cfg.scheme}.yaml";
 
     # Theme polarity (dark/light)
-    polarity = cfg.polarity;
+    inherit (cfg) polarity;
 
     # Wallpaper for color extraction (optional)
     image = lib.mkIf (cfg.wallpaper != null) cfg.wallpaper;
