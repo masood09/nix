@@ -34,7 +34,7 @@
     ./_noctalia.nix
 
     # Applications
-    ./_zen.nix
+    ./zen
 
     # Theming & UX
     ./_stylix.nix
