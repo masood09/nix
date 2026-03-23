@@ -193,6 +193,14 @@ After reboot:
   #+end_src
 - Confirm =/= is ephemeral (rolled back on each boot).
 - Confirm =/home= persists across reboots.
-- Connect to WiFi via =nmcli=.
+- Connect to WiFi via =nmcli=:
+  #+begin_src bash
+  nmcli device wifi list
+  nmcli device wifi connect "<SSID>" password "<PASSWORD>"
+  #+end_src
+  Verify:
+  #+begin_src bash
+  nmcli connection show --active
+  #+end_src
 - The age public key from step 7 must be added to =.sops.yaml= and secrets
   re-encrypted before the first deploy via =just deploy=.
