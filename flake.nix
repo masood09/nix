@@ -4,7 +4,6 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable"; # Required for Noctalia
 
     # NixOS infrastructure
     impermanence = {
@@ -30,23 +29,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Desktop shell environment (requires unstable for latest Quickshell)
-    noctalia = {
-      url = "github:noctalia-dev/noctalia-shell";
+    # Desktop shell
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs = {
-        nixpkgs.follows = "nixpkgs-unstable";
-        noctalia-qs.follows = "noctalia-qs";
+        nixpkgs.follows = "nixpkgs";
       };
     };
-    noctalia-qs = {
-      url = "github:noctalia-dev/noctalia-qs";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-
-    # Niri Wayland compositor with binary cache and declarative config
-    niri = {
-      url = "github:sodiboo/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
+    dgop = {
+      url = "github:AvengeMedia/dgop";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+      };
     };
 
     # macOS

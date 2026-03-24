@@ -19,10 +19,6 @@
         niri = {
           enable = true;
         };
-
-        noctalia = {
-          enable = true;
-        };
       };
 
       hardware = {

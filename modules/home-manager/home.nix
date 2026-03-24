@@ -11,8 +11,8 @@
     ./programs
     # Zen browser home-manager module (beta variant)
     inputs.zen-browser.homeModules.beta
-    # Noctalia shell home-manager module
-    inputs.noctalia.homeModules.default
+    # DMS shell home-manager module
+    inputs.dms.homeModules.dank-material-shell
   ];
 
   home = {
