@@ -31,8 +31,7 @@
 
     # Desktop (Linux only, gated on niri.enable)
     ./niri
-    ./_noctalia.nix
-    ./waybar # Active only when Noctalia is disabled
+    ./_dms.nix
 
     # Applications
     ./zen
