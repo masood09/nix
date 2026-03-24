@@ -9,6 +9,7 @@
     home = {
       packages = with pkgs; [
         claude-code # Native binary (hourly updates from sadjow/claude-code-nix)
+        mcp-nixos
       ];
     };
   };
