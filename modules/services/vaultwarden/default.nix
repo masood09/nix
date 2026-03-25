@@ -14,6 +14,7 @@
   postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
   resticEnabled = config.homelab.services.restic.enable;
 
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "vaultwarden";
@@ -135,20 +136,11 @@ in {
 
     inherit (permSvc) systemd;
 
-    environment =
-      lib.mkIf (
-        homelabCfg.impermanence
-        && !homelabCfg.isRootZFS
-        && !vaultwardenCfg.zfs.enable
-      ) {
-        persistence = {
-          "/nix/persist" = {
-            directories = [
-              vaultwardenCfg.dataDir
-            ];
-          };
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = vaultwardenCfg.zfs.enable;
+      directories = [vaultwardenCfg.dataDir];
+    };
 
     networking = {
       firewall = lib.mkIf vaultwardenCfg.openFirewall {

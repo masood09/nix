@@ -10,6 +10,7 @@
 }: let
   homelabCfg = config.homelab;
   cfg = homelabCfg.services.mongodb;
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
 
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
@@ -94,20 +95,10 @@ in {
       };
     };
 
-    environment =
-      lib.mkIf (
-        homelabCfg.impermanence
-        && !homelabCfg.isRootZFS
-        && !cfg.zfs.enable
-      )
-      {
-        persistence = {
-          "/nix/persist" = {
-            directories = [
-              cfg.dataDir
-            ];
-          };
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = cfg.zfs.enable;
+      directories = [cfg.dataDir];
+    };
   };
 }

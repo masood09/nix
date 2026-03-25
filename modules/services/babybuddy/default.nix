@@ -14,6 +14,7 @@
   postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
   resticEnabled = config.homelab.services.restic.enable;
 
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "babybuddy";
@@ -154,19 +155,10 @@ in {
 
     inherit (permSvc) systemd;
 
-    environment =
-      lib.mkIf (
-        homelabCfg.impermanence
-        && !homelabCfg.isRootZFS
-        && !babybuddyCfg.zfs.enable
-      ) {
-        persistence = {
-          "/nix/persist" = {
-            directories = [
-              babybuddyCfg.dataDir
-            ];
-          };
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = babybuddyCfg.zfs.enable;
+      directories = [babybuddyCfg.dataDir];
+    };
   };
 }

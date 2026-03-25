@@ -13,6 +13,7 @@
 
   dbName = "matrix-synapse";
   dbOwner = "matrix-synapse";
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
 in {
   config = lib.mkIf cfg.synapse.enable {
     assertions = [
@@ -377,21 +378,11 @@ in {
       };
     };
 
-    environment =
-      lib.mkIf (
-        homelabCfg.impermanence
-        && !homelabCfg.isRootZFS
-        && !cfg.synapse.zfs.enable
-      ) {
-        persistence = {
-          "/nix/persist" = {
-            directories = [
-              cfg.synapse.dataDir
-              cfg.synapse.mediaDir
-            ];
-          };
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = cfg.synapse.zfs.enable;
+      directories = [cfg.synapse.dataDir cfg.synapse.mediaDir];
+    };
 
     users = {
       users = {

@@ -9,6 +9,7 @@
   homelabCfg = config.homelab;
   caddyEnabled = homelabCfg.services.caddy.enable;
   acmeCfg = homelabCfg.services.acme;
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
 in {
   imports = [
     ./options.nix
@@ -89,20 +90,11 @@ in {
       };
     };
 
-    environment =
-      lib.mkIf (
-        homelabCfg.impermanence
-        && !homelabCfg.isRootZFS
-        && !acmeCfg.zfs.enable
-      ) {
-        persistence = {
-          "/nix/persist" = {
-            directories = [
-              "/var/lib/acme"
-            ];
-          };
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = acmeCfg.zfs.enable;
+      directories = ["/var/lib/acme"];
+    };
 
     networking = {
       firewall = {

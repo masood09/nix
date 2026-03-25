@@ -9,6 +9,7 @@
   homelabCfg = config.homelab;
   postgresqlCfg = homelabCfg.services.postgresql;
   backupCfg = postgresqlCfg.backup;
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
 in {
   imports = [
     ./alloy.nix
@@ -110,21 +111,11 @@ in {
       };
     };
 
-    environment =
-      lib.mkIf (
-        homelabCfg.impermanence
-        && !homelabCfg.isRootZFS
-        && !postgresqlCfg.zfs.enable
-      )
-      {
-        persistence = {
-          "/nix/persist" = {
-            directories = [
-              postgresqlCfg.dataDir
-            ];
-          };
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = postgresqlCfg.zfs.enable;
+      directories = [postgresqlCfg.dataDir];
+    };
 
     networking = {
       firewall = {
