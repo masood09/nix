@@ -97,6 +97,13 @@
 
     forAllSystems = nixpkgs.lib.genAttrs systems;
 
+    # Applied to all NixOS, Darwin, and package builds
+    sharedOverlays = [
+      inputs.claude-code.overlays.default
+      inputs.headplane.overlays.default
+      (import ./nix/overlays/default.nix)
+    ];
+
     # Shared NixOS configuration builder. Each machine provides its own
     # path (e.g. ./machines/heartbeat) which is appended to the common
     # module list containing disko, sops, home-manager, etc.
@@ -115,13 +122,7 @@
 
           (import ./nix/services/default.nix)
 
-          {
-            nixpkgs.overlays = [
-              inputs.claude-code.overlays.default
-              inputs.headplane.overlays.default
-              (import ./nix/overlays/default.nix)
-            ];
-          }
+          {nixpkgs.overlays = sharedOverlays;}
 
           path
         ];
@@ -136,13 +137,7 @@
           inputs.home-manager.darwinModules.home-manager
           inputs.stylix.darwinModules.stylix
 
-          {
-            nixpkgs.overlays = [
-              inputs.claude-code.overlays.default
-              inputs.headplane.overlays.default
-              (import ./nix/overlays/default.nix)
-            ];
-          }
+          {nixpkgs.overlays = sharedOverlays;}
 
           path
         ];
@@ -155,11 +150,7 @@
       system: let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [
-            inputs.claude-code.overlays.default
-            inputs.headplane.overlays.default
-            (import ./nix/overlays/default.nix)
-          ];
+          overlays = sharedOverlays;
         };
       in
         import ./nix/pkgs {
