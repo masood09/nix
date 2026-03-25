@@ -102,6 +102,7 @@
       inputs.claude-code.overlays.default
       inputs.headplane.overlays.default
       (import ./nix/overlays/default.nix)
+      (import ./nix/overlays/darwin-setproctitle.nix)
     ];
 
     # Shared NixOS configuration builder. Each machine provides its own
