@@ -23,22 +23,22 @@ This file should be consulted *before* adding any new service, container, or sys
 | masoodahmed | 1000 |
 
 ** Service Users
-| Service                       |  UID |  GID |
-|-------------------------------+------+------|
-| alloy                         | 3000 | 3000 |
-| immich                        | 3001 | 3001 |
-| uptime-kuma                   | 3002 | 3002 |
-| vaultwarden                   | 3003 | 3003 |
-| babybuddy                     | 3004 | 3004 |
-| loki                          | 3005 | 3005 |
-| garage                        | 3006 | 3006 |
-| karakeep                      | 3007 | 3007 |
-| opencloud                     | 3008 | 3008 |
-| unbound                       | 3009 | 3009 |
-| matrix-authentication-service | 3010 | 3010 |
-| mailarchiver                  | 3011 | 3011 |
-| mongodb                       | 3012 | 3012 |
-| nightscout                    | 3013 | 3013 |
+| Service                       |  UID |  GID | Description                                     |
+|-------------------------------+------+------+-------------------------------------------------|
+| alloy                         | 3000 | 3000 | Grafana telemetry agent (logs/metrics shipping) |
+| immich                        | 3001 | 3001 | Self-hosted photo/video management              |
+| uptime-kuma                   | 3002 | 3002 | Service health monitoring and status pages      |
+| vaultwarden                   | 3003 | 3003 | Bitwarden-compatible password manager           |
+| babybuddy                     | 3004 | 3004 | Baby tracking app (Podman container)            |
+| loki                          | 3005 | 3005 | Log aggregation with per-level retention        |
+| garage                        | 3006 | 3006 | S3-compatible distributed object storage        |
+| karakeep                      | 3007 | 3007 | Bookmark/read-later manager with AI summaries   |
+| opencloud                     | 3008 | 3008 | File sync & share (ownCloud successor)          |
+| unbound                       | 3009 | 3009 | Recursive DNS resolver (upstream for Blocky)    |
+| matrix-authentication-service | 3010 | 3010 | Matrix Synapse delegated authentication         |
+| mailarchiver                  | 3011 | 3011 | Email archival with OAuth via Authentik         |
+| mongodb                       | 3012 | 3012 | Document database (Nightscout backend)          |
+| nightscout                    | 3013 | 3013 | CGM dashboard for diabetes management           |
 
 
 * Port Registry
