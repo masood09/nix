@@ -40,52 +40,75 @@ This file should be consulted *before* adding any new service, container, or sys
 | mongodb                       | 3012 | 3012 | Document database (Nightscout backend)          |
 | nightscout                    | 3013 | 3013 | CGM dashboard for diabetes management           |
 
+Next available UID/GID: *3014*
+
 
 * Port Registry
 
-** Services
-| Service                              |  Port |
-|--------------------------------------+-------|
-| Blocky (DNS)                         |    53 |
-| Immich (Server)                      |  2283 |
-| Grafana                              |  3000 |
-| Uptime-Kuma                          |  3001 |
-| Immich (Machine Learning)            |  3003 |
-| Loki                                 |  3100 |
-| Garage (S3 API)                      |  3900 |
-| Garage (RPC)                         |  3901 |
-| Garage (S3 Web)                      |  3902 |
-| Garage (Admin/Metrics)               |  3903 |
-| Garage (K2 API)                      |  3904 |
-| Blocky (Metrics)                     |  4000 |
-| Unbound                              |  5335 |
-| Meilisearch                          |  7700 |
-| livekit (Matrix RTC)                 |  7880 |
-| livekit RTC (Matrix RTC)             |  7881 |
-| Matrix Synapse HTTP Listener         |  8008 |
-| Headscale                            |  8080 |
-| Vaultwarden                          |  8222 |
-| IT-Tools                             |  8901 |
-| Job Scraper                          |  8902 |
-| Baby Buddy                           |  8903 |
-| Karakeep                             |  8904 |
-| OpenCloud                            |  8905 |
-| OpenCloud Collabora                  |  8906 |
-| OpenCloud WOPI                       |  8907 |
-| OpenCloud Metrics                    |  8908 |
-| Headplane                            |  8909 |
-| Matrix Authentication Service        |  8910 |
-| Matrix Authentication Service Health |  8911 |
-| lk-jwt-service (Matrix RTC)          |  8912 |
-| MailArchiver                         |  8913 |
-| Nightscout                           |  8914 |
-| Authentik                            |  9000 |
-| Prometheus                           |  9090 |
-| Headscale (Metrics)                  |  9091 |
-| prometheus-zfs-exporter              |  9134 |
-| prometheus-postgres-exporter         |  9187 |
-| google-chrome-stable                 |  9222 |
-| Authentik (Metric)                   |  9300 |
-| Authentik (Built-in HTTPS)           |  9443 |
-| OpenCloud Collabora                  |  9980 |
-| MongoDB                              | 27017 |
+** Infrastructure
+| Service           |  Port | Notes                            |
+|-------------------+-------+----------------------------------|
+| Blocky (DNS)      |    53 | TCP + UDP                        |
+| SSH               | 22222 | Non-standard port, key-only auth |
+
+** Application Services
+| Service                              |  Port | Notes                             |
+|--------------------------------------+-------+-----------------------------------|
+| Immich (Server)                      |  2283 |                                   |
+| Grafana                              |  3000 | Upstream default                  |
+| Uptime-Kuma                          |  3001 | Upstream default                  |
+| Immich (Machine Learning)            |  3003 |                                   |
+| Loki                                 |  3100 |                                   |
+| Garage (S3 API)                      |  3900 |                                   |
+| Garage (RPC)                         |  3901 |                                   |
+| Garage (Admin/Metrics)               |  3903 |                                   |
+| Blocky (Metrics)                     |  4000 |                                   |
+| PostgreSQL                           |  5432 | Upstream default, localhost only  |
+| Unbound                              |  5335 | Localhost only (Blocky upstream)  |
+| Meilisearch                          |  7700 | Karakeep search backend           |
+| LiveKit (Matrix RTC)                 |  7880 |                                   |
+| LiveKit RTC (TCP)                    |  7881 |                                   |
+| Matrix Synapse                       |  8008 | HTTP listener                     |
+| Headscale                            |  8080 |                                   |
+| Vaultwarden                          |  8222 |                                   |
+| IT-Tools                             |  8901 | Podman container                  |
+| Job Scraper                          |  8902 | Podman container                  |
+| Baby Buddy                           |  8903 | Podman container                  |
+| Karakeep                             |  8904 |                                   |
+| OpenCloud                            |  8905 | Podman container                  |
+| OpenCloud Collabora                  |  8906 | Podman container (internal 9980)  |
+| OpenCloud WOPI                       |  8907 | Podman container                  |
+| OpenCloud Metrics                    |  8908 |                                   |
+| Headplane                            |  8909 |                                   |
+| Matrix Authentication Service        |  8910 |                                   |
+| Matrix Authentication Service Health |  8911 |                                   |
+| lk-jwt-service (Matrix RTC)          |  8912 |                                   |
+| MailArchiver                         |  8913 |                                   |
+| Nightscout                           |  8914 |                                   |
+| Authentik                            |  9000 |                                   |
+| Prometheus                           |  9090 | Upstream default                  |
+| Headscale (Metrics)                  |  9091 |                                   |
+| prometheus-node-exporter             |  9100 | Upstream default (via Alloy)      |
+| prometheus-zfs-exporter              |  9134 | Upstream default                  |
+| prometheus-postgres-exporter         |  9187 | Upstream default                  |
+| Karakeep (Chrome, remote debugging)  |  9222 | Upstream default                  |
+| Authentik (Metrics)                  |  9300 |                                   |
+| Authentik (Built-in HTTPS)           |  9443 |                                   |
+| Grafana Alloy (HTTP)                 | 12345 | Upstream default                  |
+| MongoDB                              | 27017 | Localhost only (Nightscout)       |
+| LiveKit RTC (UDP range)              | 50100 | 50100–50200                       |
+
+Next available port in 89xx block: *8915*
+
+
+* Conventions
+
+** UID/GID Allocation
+- Human users: 1000+
+- Service users: 3000+ (UID always equals GID)
+
+** Port Allocation
+- Infrastructure (DNS, SSH): well-known or low ports
+- Application services: 89xx block for homelab services
+- Upstream defaults (Grafana 3000, Prometheus 9090, etc.) are kept as-is
+- Metrics endpoints use upstream conventions (9xxx range)
