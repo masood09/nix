@@ -18,6 +18,8 @@ in {
             client_secret_path = config.sops.secrets."headscale/oidc-client-secret".path;
 
             only_start_if_oidc_is_available = true;
+            # Authentik is the sole OIDC provider and always verifies email
+            # before account creation, so a second check here is redundant.
             email_verified_required = false;
 
             scope = [
