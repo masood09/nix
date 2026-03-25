@@ -6,50 +6,48 @@
   pkgs,
   lib,
   ...
-}:
-with lib; let
+}: let
   cfg = config.local.dock;
   inherit (pkgs) stdenv dockutil;
 in {
   options = {
     local = {
       dock = {
-        enable = mkOption {
+        enable = lib.mkOption {
           description = "Enable dock";
           default = stdenv.isDarwin;
         };
 
-        entries = mkOption {
+        entries = lib.mkOption {
           description = "Entries on the Dock";
-          type = with types;
-            listOf (submodule {
-              options = {
-                path = lib.mkOption {type = str;};
-                section = lib.mkOption {
-                  type = str;
-                  default = "apps";
-                };
-                options = lib.mkOption {
-                  type = str;
-                  default = "";
-                };
+          type = lib.types.listOf (lib.types.submodule {
+            options = {
+              path = lib.mkOption {type = lib.types.str;};
+              section = lib.mkOption {
+                type = lib.types.str;
+                default = "apps";
               };
-            });
+              options = lib.mkOption {
+                type = lib.types.str;
+                default = "";
+              };
+            };
+          });
           readOnly = true;
         };
 
-        username = mkOption {
+        username = lib.mkOption {
           description = "Username to apply the dock settings to";
-          type = types.str;
+          type = lib.types.str;
         };
       };
     };
   };
 
-  config = mkIf cfg.enable (
+  config = lib.mkIf cfg.enable (
     let
       normalize = path:
-        if hasSuffix ".app" path
+        if lib.hasSuffix ".app" path
         then path + "/"
         else path;
       entryURI = path:
@@ -60,9 +58,9 @@ in {
           ["%20" "%21" "%22" "%23" "%24" "%25" "%26" "%27" "%28" "%29"]
           (normalize path)
         );
-      wantURIs = concatMapStrings (entry: "${entryURI entry.path}\n") cfg.entries;
+      wantURIs = lib.concatMapStrings (entry: "${entryURI entry.path}\n") cfg.entries;
       createEntries =
-        concatMapStrings
+        lib.concatMapStrings
         (
           entry: "${dockutil}/bin/dockutil --no-restart --add '${entry.path}' --section ${entry.section} ${entry.options}\n"
         )
