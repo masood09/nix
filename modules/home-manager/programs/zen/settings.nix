@@ -34,14 +34,23 @@
             "extensions.formautofill.creditCards.enabled" = false;
             "signon.rememberSignons" = false;
 
-            # Downloads — Always ask where to save
+            # Security — Disable Firefox Sync (also blocked by DisableFirefoxAccounts policy)
+            "identity.fxaccounts.enabled" = false;
+
+            # Security — Strict certificate pinning (no MITM exceptions)
+            "security.cert_pinning.enforcement_level" = 2;
+
+            # Downloads — Always ask where to save, skip handler prompt
             "browser.download.useDownloadDir" = false;
+            "browser.download.always_ask_before_handling_new_types" = false;
+            "extensions.postDownloadThirdPartyPrompt" = false;
 
             # UI — Startup behavior
             "browser.aboutwelcome.enabled" = false;
             "browser.startup.firstrunSkipsHomepage" = true;
             "browser.startup.homepage_override.mstone" = "ignore";
             "trailhead.firstrun.didSeeAboutWelcome" = true;
+            "browser.firefox-view.feature-tour" = "{\"screen\":\"\",\"complete\":true}";
 
             # UI — General
             "browser.ctrlTab.sortByRecentlyUsed" = true;

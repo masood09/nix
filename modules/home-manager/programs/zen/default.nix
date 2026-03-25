@@ -26,10 +26,18 @@
     };
   };
 
+  # Workaround for https://github.com/0xc000022070/zen-browser-flake/issues/63
+  home = {
+    sessionVariables = {
+      MOZ_LEGACY_PROFILES = "1";
+    };
+  };
+
   programs = {
     zen-browser = {
       inherit (homelabCfg.programs.zen) enable;
       setAsDefaultBrowser = true;
+      languagePacks = ["en-US"];
 
       # Policies (Firefox-compatible enterprise policies)
       policies = {
