@@ -93,20 +93,12 @@ in {
                 };
               };
 
+              # Username and Password are supplied at runtime via environmentFile
+              # (Authentication__Username, Authentication__Password).
               Authentication = lib.mkOption {
                 default = {};
                 type = lib.types.submodule {
                   options = {
-                    Username = lib.mkOption {
-                      type = lib.types.str;
-                      default = "admin";
-                    };
-
-                    Password = lib.mkOption {
-                      type = lib.types.str;
-                      default = "secure123!";
-                    };
-
                     SessionTimeoutMinutes = lib.mkOption {
                       type = lib.types.int;
                       default = 60;
