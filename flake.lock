@@ -131,6 +131,22 @@
         "type": "github"
       }
     },
+    "betterfox": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1772315048,
+        "narHash": "sha256-rUuEfbjIXox5x5ul/4VarIm7bii/SCcDJjocEbHA1kM=",
+        "owner": "yokoffing",
+        "repo": "Betterfox",
+        "rev": "f1c8e3809dbd23f4f9aa1e5e70805c61734b1f14",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yokoffing",
+        "repo": "Betterfox",
+        "type": "github"
+      }
+    },
     "brew-src": {
       "flake": false,
       "locked": {
@@ -696,6 +712,7 @@
     "root": {
       "inputs": {
         "authentik-nix": "authentik-nix",
+        "betterfox": "betterfox",
         "claude-code": "claude-code",
         "dgop": "dgop",
         "disko": "disko",
