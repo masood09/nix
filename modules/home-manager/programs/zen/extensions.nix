@@ -1,7 +1,7 @@
 # Extensions and Zen Mods — privacy, productivity, theming, and UI enhancements.
 # Extensions are force-installed via ExtensionSettings policy.
 # Zen Mods are installed via the Zen Mods marketplace.
-{...}: {
+_: {
   programs = {
     zen-browser = {
       policies = {

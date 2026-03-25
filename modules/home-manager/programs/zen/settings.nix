@@ -1,5 +1,5 @@
 # Browser preferences — privacy, network, security, UI, and Zen-specific settings.
-{...}: {
+_: {
   programs = {
     zen-browser = {
       profiles = {
