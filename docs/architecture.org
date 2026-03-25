@@ -1,0 +1,212 @@
+#+TITLE: Repository Architecture
+#+AUTHOR: Masood Ahmed
+#+DATE: 2026-03-25
+#+STARTUP: overview
+
+* Overview
+
+Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 1 NixOS desktop, and 2 macOS machines with home-manager, sops-nix secrets, ZFS, and impermanence.
+
+* Repository Layout
+
+#+begin_example
+flake.nix                          Entry point — inputs, mkNixOSConfig, mkDarwinConfig
+flake.lock                         Pinned dependency versions
+
+machines/                          Per-machine configurations
+  heartbeat/                         NixOS server (NAS, primary services)
+  trialunit/                         NixOS server (secondary services)
+  accesscontrolsystem/               NixOS server (Authentik SSO)
+  meshcontrol/                       NixOS server (Headscale VPN control)
+  commrelay/                         NixOS server (Matrix, monitoring)
+  watchfulsystem/                    NixOS server (monitoring, uptime)
+  caretaker/                         NixOS server (DNS, Tailscale)
+  commandmodule/                     NixOS desktop (laptop)
+  murderbot/                         macOS (primary dev)
+  work-pantheon/                     macOS (work)
+  sonic/                             macOS
+  nixiso/                            NixOS installer ISO
+
+modules/                           Reusable configuration modules
+  nixos/                             NixOS system (boot, networking, users, ZFS, impermanence)
+  nixos/desktop/                     Desktop-specific (Niri, GPU, audio, Bluetooth)
+  nixos/zfs/                         ZFS dataset provisioning
+  macos/                             nix-darwin system (dock, packages, networking)
+  home-manager/                      User environment (shell, programs, theming)
+  home-manager/programs/             Per-program configs (_emacs.nix, _git.nix, etc.)
+  services/                          27 declarative service modules
+
+lib/                               Shared helpers
+  systemd-helpers.nix                mkPermissionService — permission-fixing oneshots
+  zfs-options.nix                    mkZfsOptions — ZFS dataset option builder
+
+nix/                               Package and overlay definitions
+  pkgs/                              Custom packages (auto-discovered)
+  overlays/                          Nixpkgs overlays
+  services/                          Custom NixOS service modules
+
+secrets/                           Shared sops-encrypted secrets
+docs/                              Documentation
+#+end_example
+
+* Flake Data Flow
+
+#+begin_example
+                              flake.nix
+                                  |
+                    +-------------+-------------+
+                    |             |             |
+              mkNixOSConfig  mkDarwinConfig  packages
+                    |             |             |
+                    v             v             v
+            +-- sharedOverlays --+-- sharedOverlays --+
+            |                    |                    |
+    NixOS modules        Darwin modules        import nixpkgs
+            |                    |                    |
+   machines/<name>      machines/<name>        nix/pkgs/
+            |                    |
+     +------+------+      +-----+-----+
+     |      |      |      |     |     |
+   nixos  services hm   macos  hm  homebrew
+#+end_example
+
+* Module Dependency Graph
+
+#+begin_example
+flake.nix
+  |
+  +-- machines/<name>/default.nix        Machine entry point
+  |     +-- _config.nix                  homelab.* options for this machine
+  |     +-- hardware-configuration.nix   Hardware-specific (auto-generated)
+  |     +-- secrets.sops.yaml            Per-machine encrypted secrets
+  |
+  +-- modules/nixos/default.nix          NixOS system base
+  |     +-- _boot.nix                    Bootloader, ZFS initrd rollback
+  |     +-- _networking.nix              Hostname, firewall, hostId
+  |     +-- _users.nix                   Immutable users (passwords via sops)
+  |     +-- _sops.nix                    sops-nix configuration
+  |     +-- _security.nix               sudo, polkit
+  |     +-- _impermanence.nix            Ephemeral root, /nix/persist
+  |     +-- _packages.nix               Base system packages
+  |     +-- _disks.nix                   Disko disk layouts
+  |     +-- _nixpkgs.nix                Nixpkgs settings
+  |     +-- _auto-update.nix            Automatic system updates
+  |     +-- _reboot-required-check.nix  Reboot notification
+  |     +-- _remote-unlock.nix          ZFS remote unlock via SSH
+  |     +-- zfs/                         ZFS dataset provisioning
+  |     +-- desktop/                     Desktop (Niri, GPU, audio, Bluetooth)
+  |
+  +-- modules/services/default.nix       Service module loader
+  |     +-- <service>/default.nix        Service implementation
+  |     +-- <service>/options.nix        homelab.services.<name>.* options
+  |
+  +-- modules/home-manager/default.nix   Home-manager base
+  |     +-- programs/                    Per-program configuration
+  |
+  +-- modules/macos/base.nix             macOS system defaults
+        +-- _dock.nix                    Declarative Dock management
+        +-- _packages.nix               Homebrew + nix packages
+        +-- _networking.nix             macOS network settings
+#+end_example
+
+* Service Module Pattern
+
+Every service follows the same structure:
+
+#+begin_example
+modules/services/<name>/
+  options.nix      homelab.services.<name>.* option declarations
+  default.nix      Implementation gated by lib.mkIf <service>.enable
+#+end_example
+
+Each service module can optionally integrate with:
+
+| Integration   | Option                                    | Effect                                           |
+|---------------+-------------------------------------------+--------------------------------------------------|
+| ZFS dataset   | =homelab.services.<name>.zfs.enable=        | Dedicated dataset created and mounted at boot    |
+| Impermanence  | automatic                                 | Persist data dirs if ZFS is not used             |
+| Restic backup | =homelab.zfs.datasets.<name>.restic.enable= | Dataset included in nightly restic backup        |
+| Secrets       | =config.sops.secrets."<path>".path=         | Decrypted at runtime by sops-nix                 |
+| Reverse proxy | =services.caddy.virtualHosts=               | Service registers its own Caddy vhost            |
+| Permissions   | =lib/systemd-helpers.nix=                   | Oneshot service fixes dir ownership before start |
+
+* homelab.* Option Namespace
+
+All machine identity and service configuration flows through the =homelab.*= namespace:
+
+#+begin_example
+homelab
+  +-- role             "server" | "desktop"
+  +-- purpose          Free-text machine description
+  +-- primaryUser      { userName, userId }
+  +-- networking       { hostName, domain }
+  +-- impermanence     bool — ephemeral root enabled
+  +-- isRootZFS        bool — root is on ZFS
+  +-- programs
+  |     +-- emacs.enable
+  |     +-- ...
+  +-- services
+  |     +-- backup     { enable, serviceUnits, extraPaths, backupRoot }
+  |     +-- restic     { enable, pruneOpts }
+  |     +-- caddy      { enable }
+  |     +-- immich     { enable, zfs.enable, dataDir, ... }
+  |     +-- ...        (27 services total)
+  +-- zfs
+        +-- datasets   Attrset of declarative ZFS datasets
+#+end_example
+
+* Machine Roles
+
+| Role    | Machines                                                                                     | Characteristics                                |
+|---------+----------------------------------------------------------------------------------------------+------------------------------------------------|
+| server  | heartbeat, trialunit, accesscontrolsystem, meshcontrol, commrelay, watchfulsystem, caretaker | ZFS root, impermanence, headless, backup       |
+| desktop | commandmodule                                                                                | Niri compositor, GPU, audio, Bluetooth, Stylix |
+| macOS   | murderbot, work-pantheon, sonic                                                              | nix-darwin, Homebrew, Dock management          |
+
+* Secrets Architecture
+
+Three-tier sops-nix structure with age encryption:
+
+#+begin_example
+.sops.yaml                         Key hierarchy and creation rules
+
+secrets/
+  secrets.sops.yaml                Global (all NixOS machines + dev keys)
+  headscale-dns.sops.yaml          Scoped (meshcontrol, trialunit)
+  headscale-acl.sops.yaml          Scoped (meshcontrol, trialunit)
+
+machines/<name>/
+  secrets.sops.yaml                Per-host (that machine + dev keys)
+#+end_example
+
+See [[file:secrets-rotation.org][secrets-rotation.org]] for rotation procedures and incident response.
+
+* Storage Architecture
+
+NixOS servers use ZFS with encryption and ephemeral root:
+
+#+begin_example
+Boot:     /boot (mirrored ESP on multi-disk machines)
+Root:     rpool/root (rolled back to blank snapshot on every boot)
+Persist:  /nix/persist (bind-mounted via impermanence)
+Services: rpool/root/var/lib/<service> (dedicated datasets per service)
+Backup:   rpool/root/var/backup/postgresql (pg_dump target)
+#+end_example
+
+See [[file:backup.org][backup.org]] for the nightly backup pipeline.
+
+* Key Helpers
+
+** =lib/systemd-helpers.nix= — =mkPermissionService=
+
+Generates a oneshot systemd service that fixes directory ownership and permissions before the main service starts. Integrates with ZFS dataset ordering so the directory exists before permissions are set.
+
+** =lib/zfs-options.nix= — =mkZfsOptions=
+
+Builder for consistent =homelab.services.<name>.zfs.*= option declarations. Provides =enable=, =dataset=, and =mountpoint= with sensible defaults derived from the service name.
+
+* Related Documentation
+
+- [[file:backup.org][backup.org]] — Nightly backup pipeline and operations
+- [[file:secrets-rotation.org][secrets-rotation.org]] — Key rotation and incident response
+- [[file:service-registry.org][service-registry.org]] — UIDs, GIDs, and port allocations
