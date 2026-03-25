@@ -1,6 +1,8 @@
 default:
     just --list
 
+user := 'masoodahmed'
+
 deploy machine='' ip='': preflight
     @if [ "$(uname)" = "Darwin" ] && [ -z "{{ machine }}" ] && [ -z "{{ ip }}" ]; then \
       sudo darwin-rebuild switch --flake .; \
@@ -9,35 +11,40 @@ deploy machine='' ip='': preflight
     elif [ -z "{{ ip }}" ]; then \
       nixos-rebuild switch --use-remote-sudo --flake ".#{{ machine }}"; \
     else \
-      nixos-rebuild switch --fast --flake ".#{{ machine }}" --use-remote-sudo --target-host "masood@{{ ip }}" --build-host "masood@{{ ip }}"; \
+      nixos-rebuild switch --fast --flake ".#{{ machine }}" --use-remote-sudo --target-host "{{ user }}@{{ ip }}" --build-host "{{ user }}@{{ ip }}"; \
     fi
 
 # Pre-flight checks — run before deploy to catch formatting and lint errors early
 preflight:
     @echo "Running pre-flight checks..."
-    @just fmt
+    @nix fmt -- --check .
     @just lint
 
 up:
-    nix --extra-experimental-features nix-command --extra-experimental-features flakes flake update
+    nix flake update
 
 lint:
     statix check .
 
 fmt:
-    nix --extra-experimental-features nix-command --extra-experimental-features flakes fmt .
+    nix fmt
 
-gc:
-    sudo nix-collect-garbage -d && nix-collect-garbage -d
+gc age='7d':
+    sudo nix-collect-garbage --delete-older-than {{ age }} && nix-collect-garbage --delete-older-than {{ age }}
 
 repair:
     sudo nix-store --verify --check-contents --repair
 
 sops-rotate:
+    @if git diff --name-only -- '*.sops.yaml' | grep -q .; then \
+      echo "ERROR: uncommitted changes in sops files — commit or stash first"; \
+      git diff --name-only -- '*.sops.yaml'; \
+      exit 1; \
+    fi
     find . -name "*.sops.yaml" -type f ! -name ".sops.yaml" -print0 | xargs -0 -n1 sops --rotate --in-place
 
 sops-update:
-    while IFS= read -r -d '' f; do echo "Updating keys: $f"; echo "y" | sops updatekeys "$f"; done < <(find . -name "*.sops.yaml" -type f ! -name ".sops.yaml" -print0)
+    find . -name "*.sops.yaml" -type f ! -name ".sops.yaml" -exec sops updatekeys {} \;
 
 build-iso:
-    nix --extra-experimental-features nix-command --extra-experimental-features flakes build .#nixosConfigurations.nixiso.config.system.build.isoImage
+    nix build .#nixosConfigurations.nixiso.config.system.build.isoImage

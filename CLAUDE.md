@@ -9,17 +9,19 @@ Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 
 ## Commands
 
 ```bash
-just deploy                          # Deploy to current machine
+just deploy                          # Deploy to current machine (runs preflight first)
 just deploy machine=heartbeat        # Deploy to specific machine
 just deploy machine=heartbeat ip=x   # Deploy remotely via SSH
+just preflight                       # Check formatting + lint (no auto-fix)
 just up                              # Update flake.lock
 just lint                            # Check with statix
-just fmt                             # Format with alejandra (or: nix fmt)
-just gc                              # Garbage collect
+just fmt                             # Format with alejandra
+just gc                              # Garbage collect (default: 7d retention)
+just gc age=30d                      # Garbage collect with custom retention
 just repair                          # Verify and repair nix store
 just build-iso                       # Build NixOS installer ISO
-just sops-rotate                     # Rotate all sops keys
-just sops-update                     # Update sops key files
+just sops-rotate                     # Rotate all sops keys (requires clean git)
+just sops-update                     # Update sops key files (interactive)
 ```
 
 ## Architecture
