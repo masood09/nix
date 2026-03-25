@@ -423,6 +423,14 @@ in {
             Restart = "always";
             RestartSec = 5;
 
+            # Sandbox: only dataDir is writable; /run/postgresql remains accessible
+            NoNewPrivileges = true;
+            PrivateDevices = true;
+            PrivateTmp = true;
+            ProtectHome = true;
+            ProtectSystem = "strict";
+            ReadWritePaths = [cfg.dataDir];
+
             Environment =
               [
                 "ASPNETCORE_ENVIRONMENT=Production"

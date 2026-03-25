@@ -53,10 +53,30 @@ in {
         dbpath = cfg.dataDir;
         enableAuth = true;
         initialRootPasswordFile = config.sops.secrets."mongodb/root-password".path;
+        pidFile = "/run/mongodb/mongodb.pid";
       };
     };
 
-    inherit (permSvc) systemd;
+    # Upstream NixOS mongodb module has no systemd hardening
+    systemd = lib.mkMerge [
+      permSvc.systemd
+
+      {
+        services = {
+          mongodb = {
+            serviceConfig = {
+              NoNewPrivileges = true;
+              PrivateDevices = true;
+              PrivateTmp = true;
+              ProtectHome = true;
+              ProtectSystem = "strict";
+              RuntimeDirectory = "mongodb";
+              ReadWritePaths = [cfg.dataDir];
+            };
+          };
+        };
+      }
+    ];
 
     users = {
       users = {
