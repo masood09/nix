@@ -19,7 +19,10 @@ in {
       settings = {
         add_newline = false;
 
-        # Catppuccin Mocha color palette (hardcoded since catppuccin flake was removed)
+        # Catppuccin Mocha palette is hardcoded here because Starship uses named
+        # palette references in format strings (e.g. "fg:mauve"). Stylix provides
+        # base16 colors (base00-base0F) which don't map to Catppuccin's named
+        # colors, so we maintain the full palette inline.
         palette = "catppuccin_mocha";
 
         palettes = {
