@@ -55,6 +55,7 @@ in {
       users = {
         ${homelabCfg.primaryUser.userName} = {
           isNormalUser = true;
+          uid = homelabCfg.primaryUser.userId;
           description = homelabCfg.primaryUser.userName;
 
           extraGroups =
