@@ -19,6 +19,7 @@ in {
           targets = [
             {
               __address__ = "127.0.0.1:${blockyExporterPort}",
+              instance = sys.env("ALLOY_HOSTNAME"),
             },
           ]
 
