@@ -29,8 +29,13 @@ in {
     # Wallpaper for color extraction (optional)
     image = lib.mkIf (cfg.wallpaper != null) cfg.wallpaper;
 
-    # Fonts (using system defaults, can be customized later)
+    # Fonts — families and sizes applied uniformly across terminal and GUI apps
     fonts = {
+      sizes = {
+        terminal = 12;
+        applications = 12;
+      };
+
       monospace = {
         package = pkgs.nerd-fonts.jetbrains-mono;
         name = "JetBrains Mono";
