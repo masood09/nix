@@ -17,6 +17,12 @@ in {
   ];
 
   config = lib.mkIf authentikCfg.enable {
+    assertions = [
+      {
+        assertion = postgresqlEnabled;
+        message = "Authentik requires PostgreSQL (homelab.services.postgresql.enable)";
+      }
+    ];
     services = {
       authentik = {
         inherit (authentikCfg) enable;

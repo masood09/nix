@@ -31,6 +31,12 @@ in {
   ];
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = postgresqlEnabled;
+        message = "MailArchiver requires PostgreSQL (homelab.services.postgresql.enable)";
+      }
+    ];
     # ZFS dataset for dataDir
     homelab = {
       zfs = {

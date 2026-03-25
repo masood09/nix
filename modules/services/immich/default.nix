@@ -32,6 +32,12 @@ in {
   ];
 
   config = lib.mkIf immichCfg.enable {
+    assertions = [
+      {
+        assertion = postgresqlEnabled;
+        message = "Immich requires PostgreSQL (homelab.services.postgresql.enable)";
+      }
+    ];
     # ZFS dataset for dataDir
     homelab = {
       zfs = {
