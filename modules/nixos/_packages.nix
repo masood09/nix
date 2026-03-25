@@ -12,9 +12,7 @@ in {
     systemPackages = with pkgs; [
       efibootmgr
       git
-      gptfdisk
       kitty.terminfo
-      parted
     ];
   };
 
