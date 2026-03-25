@@ -132,6 +132,8 @@ in {
     users = {
       users = {
         mailarchiver = {
+          isSystemUser = true;
+          group = "mailarchiver";
           uid = cfg.userId;
         };
       };

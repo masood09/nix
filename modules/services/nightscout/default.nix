@@ -71,6 +71,8 @@ in {
     users = {
       users = {
         nightscout = {
+          isSystemUser = true;
+          group = "nightscout";
           uid = cfg.userId;
         };
       };
