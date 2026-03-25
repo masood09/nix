@@ -12,6 +12,12 @@
             description = "Extra filesystem paths to include in restic backup (in addition to staged ZFS snapshot views).";
           };
 
+          backupRoot = lib.mkOption {
+            type = lib.types.path;
+            default = "/mnt/nightly_backup";
+            description = "Root directory where ZFS snapshots are mounted for restic backup.";
+          };
+
           serviceUnits = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             default = [];

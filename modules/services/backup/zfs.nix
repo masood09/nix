@@ -10,12 +10,12 @@
 
   resticEnabled = homelabCfg.services.restic.enable;
 
-  zfsDatasets = homelabCfg.zfs.datasets or {};
-  resticDatasetEntries = lib.filterAttrs (_: ds: (ds.restic.enable or false)) zfsDatasets;
+  zfsDatasets = homelabCfg.zfs.datasets;
+  resticDatasetEntries = lib.filterAttrs (_: ds: ds.restic.enable) zfsDatasets;
 
   datasetNames = lib.attrNames resticDatasetEntries;
 
-  backupRoot = "/mnt/nightly_backup";
+  backupRoot = toString homelabCfg.services.backup.backupRoot;
   mountPathFor = name: "${backupRoot}/${name}";
 
   cleanupScript = pkgs.writeShellScript "restic-zfs-cleanup" ''
@@ -72,7 +72,7 @@ in {
             ExecStart = "${cleanupScript}";
             User = "root";
           };
-          path = with pkgs; [zfs util-linux coreutils];
+          path = [pkgs.zfs pkgs.util-linux pkgs.coreutils];
         };
 
         backup-restic-zfs-dataset-prepare = {
@@ -82,7 +82,7 @@ in {
             ExecStart = "${prepareScript}";
             User = "root";
           };
-          path = with pkgs; [zfs util-linux coreutils];
+          path = [pkgs.zfs pkgs.util-linux pkgs.coreutils];
         };
       };
 

@@ -8,14 +8,14 @@
 
   resticEnabled = homelabCfg.services.restic.enable;
 
-  zfsDatasets = homelabCfg.zfs.datasets or {};
+  zfsDatasets = homelabCfg.zfs.datasets;
   resticDatasetEntries =
-    lib.filterAttrs (_: ds: (ds.restic.enable or false)) zfsDatasets;
+    lib.filterAttrs (_: ds: ds.restic.enable) zfsDatasets;
 
   datasetNames = lib.attrNames resticDatasetEntries;
-  extraPaths = homelabCfg.services.backup.extraPaths or [];
+  inherit (homelabCfg.services.backup) extraPaths;
 
-  backupRoot = "/mnt/nightly_backup";
+  backupRoot = toString homelabCfg.services.backup.backupRoot;
   mountPathFor = name: "${backupRoot}/${name}";
   resticPaths = map mountPathFor datasetNames;
 

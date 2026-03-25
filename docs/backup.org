@@ -1,0 +1,270 @@
+#+TITLE: Backup Architecture
+#+AUTHOR: Masood Ahmed
+#+DATE: 2026-03-25
+#+STARTUP: overview
+
+* Overview
+
+Nightly backup pipeline that runs on every NixOS server at 2:00 AM via a systemd timer. The pipeline orchestrates service shutdown, PostgreSQL dumps, ZFS snapshots, restic backup to S3, integrity verification, and service restart.
+
+#+begin_example
+  02:00 AM
+     |
+     v
+  Stop services (serviceUnits)
+     |
+     v
+  PostgreSQL dumps (pg_dump per database)
+     |
+     v
+  ZFS snapshot + mount (read-only, per dataset)
+     |
+     v
+  Restart services  <-- services back online before upload
+     |
+     v
+  Restic backup to S3 (from mounted snapshots + extraPaths)
+     |
+     v
+  Restic check (metadata + 5% random data sample)
+     |
+     v
+  Cleanup ZFS snapshots + mounts
+     |
+     v
+  Done
+#+end_example
+
+Key design decision: services are restarted *before* the restic upload begins. The upload reads from immutable ZFS snapshot mounts, so services can safely resume while the (potentially slow) upload runs.
+
+* Machines
+
+| Machine             | Backup | Service Units Stopped               | ZFS Datasets | Extra Paths | PG Backup |
+|---------------------+--------+-------------------------------------+--------------+-------------+-----------|
+| heartbeat           | Yes    | immich, karakeep, mailarchiver,     | postgresql   | -           | Yes       |
+|                     |        | matrix-synapse, matrix-auth,        |              |             |           |
+|                     |        | nightscout, podman-babybuddy,       |              |             |           |
+|                     |        | podman-opencloud, vaultwarden       |              |             |           |
+| trialunit           | Yes    | authentik, garage, headplane,       | postgresql   | authentik   | Yes       |
+|                     |        | headscale, immich, karakeep,        |              | media       |           |
+|                     |        | mailarchiver, matrix-synapse,       |              |             |           |
+|                     |        | matrix-auth, nightscout,            |              |             |           |
+|                     |        | podman-babybuddy, podman-opencloud, |              |             |           |
+|                     |        | uptime-kuma, vaultwarden            |              |             |           |
+| accesscontrolsystem | Yes    | authentik, authentik-worker         | postgresql   | authentik   | Yes       |
+|                     |        |                                     |              | media       |           |
+| meshcontrol         | Yes    | headplane, headscale                | -            | -           | No        |
+| commrelay           | Yes    | uptime-kuma                         | -            | -           | No        |
+| watchfulsystem      | Yes    | uptime-kuma                         | -            | -           | No        |
+| caretaker           | Yes    | (none)                              | -            | -           | No        |
+
+* Architecture
+
+** Module Structure
+
+#+begin_example
+modules/services/backup/
+  options.nix   -- homelab.services.backup.* and homelab.services.restic.* options
+  default.nix   -- orchestrator: systemd service + timer, pipeline script
+  restic.nix    -- services.restic.backups.backup configuration (NixOS upstream module)
+  zfs.nix       -- ZFS snapshot prepare/cleanup systemd services
+#+end_example
+
+** Systemd Units
+
+| Unit                              | Type    | Purpose                                    |
+|-----------------------------------+---------+--------------------------------------------|
+| =backup-system.service=             | oneshot | Main orchestrator (runs the full pipeline) |
+| =backup-system.timer=               | timer   | Fires at =*-*-* 02:00:00= daily                |
+| =backup-restic-zfs-dataset-prepare= | oneshot | Snapshot ZFS datasets + mount read-only    |
+| =backup-restic-zfs-dataset-cleanup= | oneshot | Unmount + destroy snapshots                |
+| =restic-backups-backup.service=     | oneshot | Restic upload (NixOS-generated)            |
+| =postgresqlBackup-<db>.service=     | oneshot | Per-database pg_dump (NixOS-generated)     |
+
+The main =backup-system.service= invokes the other units via =systemctl start= rather than systemd dependencies. This gives the orchestrator script full control over ordering and error handling.
+
+** Options
+
+*** =homelab.services.backup=
+
+| Option       | Type        | Default             | Description                                  |
+|--------------+-------------+---------------------+----------------------------------------------|
+| =enable=       | bool        | =false=               | Enable the backup pipeline                   |
+| =backupRoot=   | path        | =/mnt/nightly_backup= | Where ZFS snapshots are mounted for restic   |
+| =extraPaths=   | list of str | =[]          =      | Additional paths to include in restic backup |
+| =serviceUnits= | list of str | =[]          =      | systemd units to stop during snapshot window |
+
+*** =homelab.services.restic=
+
+| Option    | Type        | Default                               | Description                 |
+|-----------+-------------+---------------------------------------+-----------------------------|
+| =enable=    | bool        | =false= (auto-enabled by backup module) | Enable restic configuration |
+| =pruneOpts= | list of str | =--keep-daily 3=, =--keep-weekly 4=       | Retention policy            |
+
+** ZFS Dataset Integration
+
+Any ZFS dataset declared via =homelab.zfs.datasets.<name>= can opt into restic backup by setting =restic.enable = true=. The backup module automatically:
+
+1. Discovers all datasets with =restic.enable = true=
+2. Creates a snapshot named =<dataset>@restic_nightly=
+3. Mounts the snapshot read-only at =<backupRoot>/<name>=
+4. Includes the mount path in restic's backup paths
+5. Cleans up (unmount + destroy snapshot) after backup completes
+
+* Pipeline Details
+
+** Service Stop/Start
+
+The orchestrator reads service unit names from a Nix-generated text file. For each unit it:
+
+1. Checks =LoadState= -- skips units that aren't installed (safe for shared configs)
+2. Checks =is-active= -- skips units that are already stopped
+3. Stops/starts the unit
+
+An EXIT trap guarantees services are restarted even if the script fails at any point. A guard variable (=_services_started=) prevents double-restart when the explicit restart has already run.
+
+** PostgreSQL Dumps
+
+If =services.postgresql= and =services.postgresqlBackup= are enabled, the pipeline triggers each =postgresqlBackup-<db>.service= unit. These are standard NixOS =pg_dump= oneshots that write SQL dumps to the configured backup directory.
+
+The dump directory is typically on its own ZFS dataset (with =restic.enable=), so the dumps are captured in the subsequent ZFS snapshot and uploaded by restic.
+
+Individual database backup failures are logged but do not abort the pipeline.
+
+** ZFS Snapshots
+
+The prepare script runs *while services are stopped*, ensuring a crash-consistent snapshot. For each dataset:
+
+#+begin_src bash
+# Clean up any stale state from a previous failed run
+umount /mnt/nightly_backup/<name> 2>/dev/null || true
+zfs destroy <dataset>@restic_nightly 2>/dev/null || true
+
+# Create fresh snapshot and mount read-only
+zfs snapshot <dataset>@restic_nightly
+mount -t zfs -o ro <dataset>@restic_nightly /mnt/nightly_backup/<name>
+#+end_src
+
+The cleanup script reverses this: unmount, rmdir, destroy snapshot. It uses =set +euo pipefail= so cleanup proceeds even if individual steps fail.
+
+** Restic Backup
+
+The NixOS =services.restic.backups.backup= configuration:
+
+- *Repository*: S3-compatible storage (credentials from sops)
+- *Paths*: Mounted ZFS snapshots + any =extraPaths=
+- *Connection tuning*: =s3.connections=10= for parallel uploads
+- *Auto-initialize*: Creates the repo on first run
+- *Timer disabled*: =timerConfig = null= (our orchestrator triggers it)
+- *Retention*: 3 daily + 4 weekly snapshots (configurable via =pruneOpts=)
+- *Post-backup verification*: =restic check --read-data-subset=5%= validates
+  metadata integrity and samples 5% of stored data
+
+* Secrets
+
+Each machine that runs backups has three restic secrets in its =secrets.sops.yaml=:
+
+| Secret Path     | Purpose                                                         |
+|-----------------+-----------------------------------------------------------------|
+| =restic/.env=     | S3 credentials (=AWS_ACCESS_KEY_ID=, =AWS_SECRET_ACCESS_KEY=, etc.) |
+| =restic/repo=     | Repository URL (e.g., =s3:https://garage.example.com/bucket=)     |
+| =restic/password= | Restic encryption password                                      |
+
+These are decrypted at runtime by sops-nix and passed to the restic service via =environmentFile=, =repositoryFile=, and =passwordFile=.
+
+Machines with restic secrets: heartbeat, trialunit, accesscontrolsystem, meshcontrol, commrelay, watchfulsystem.
+
+* Safety Guarantees
+
+1. *Services always restart*: EXIT trap fires on any failure; guard prevents double-start on success path
+2. *Crash-consistent snapshots*: Services are stopped before ZFS snapshot creation; snapshots are atomic at the ZFS level
+3. *Services resume before upload*: The (slow) restic upload reads from immutable snapshot mounts, so services are back online during the upload window
+4. *Stale state cleanup*: Prepare script cleans up leftover mounts/snapshots from previous failed runs before creating new ones
+5. *Graceful degradation*: PostgreSQL backup failures, missing units, and restic check errors are logged but do not abort the pipeline
+6. *Integrity verification*: Post-backup =restic check= validates repository metadata and samples 5% of data blocks
+
+* Operations
+
+** Manual Trigger
+
+#+begin_src bash
+sudo systemctl start backup-system.service
+#+end_src
+
+** Check Status
+
+#+begin_src bash
+# Timer status
+systemctl status backup-system.timer
+
+# Last run logs
+journalctl -u backup-system.service --since today
+
+# Restic snapshots
+sudo /run/current-system/sw/bin/restic-backup snapshots
+
+# Restic repository stats
+sudo /run/current-system/sw/bin/restic-backup stats
+#+end_src
+
+** Manual Restic Operations
+
+The NixOS restic module generates a =restic-backup= wrapper at =/run/current-system/sw/bin/restic-backup= with credentials and repository pre-configured.
+
+#+begin_src bash
+# List snapshots
+sudo restic-backup snapshots
+
+# Browse a snapshot
+sudo restic-backup ls latest
+
+# Restore a file
+sudo restic-backup restore latest --target /tmp/restore --include /path/to/file
+
+# Full integrity check
+sudo restic-backup check --read-data
+
+# Repository stats
+sudo restic-backup stats
+#+end_src
+
+** Adding a New Machine
+
+1. Enable the backup module in =machines/<name>/_config.nix=:
+   #+begin_src nix
+   homelab = {
+     services = {
+       backup = {
+         enable = true;
+         serviceUnits = ["my-service.service"];  # units to stop during snapshot
+         # extraPaths = ["/var/lib/something"];   # optional non-ZFS paths
+       };
+     };
+   };
+   #+end_src
+
+2. Add restic secrets to =machines/<name>/secrets.sops.yaml=:
+   #+begin_example
+   restic:
+       .env: ENC[AES256_GCM,...]
+       repo: ENC[AES256_GCM,...]
+       password: ENC[AES256_GCM,...]
+   #+end_example
+
+3. For ZFS-backed services, set =restic.enable = true= on the dataset:
+   #+begin_src nix
+   homelab = {
+     services = {
+       postgresql = {
+         enable = true;
+         backup = {
+           enable = true;
+           zfs = {
+             enable = true;
+             dataset = "rpool/root/var/backup/postgresql";
+           };
+         };
+       };
+     };
+   };
+   #+end_src
