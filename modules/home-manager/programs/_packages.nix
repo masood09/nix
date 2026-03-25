@@ -38,6 +38,10 @@ in {
         xz
         awscli2
       ])
+      # Linux desktop — Wayland utilities (gated on niri.enable)
+      ++ lib.optionals ((homelabCfg.desktop.niri.enable or false) && pkgs.stdenv.isLinux) (with pkgs; [
+        wl-clipboard
+      ])
       # macOS-specific (coreutils for GNU compat, nixos-rebuild for remote deploys)
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
         coreutils
