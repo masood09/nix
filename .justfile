@@ -1,7 +1,7 @@
 default:
     just --list
 
-deploy machine='' ip='':
+deploy machine='' ip='': preflight
     @if [ "$(uname)" = "Darwin" ] && [ -z "{{ machine }}" ] && [ -z "{{ ip }}" ]; then \
       sudo darwin-rebuild switch --flake .; \
     elif [ -z "{{ machine }}" ] && [ -z "{{ ip }}" ]; then \
@@ -11,6 +11,12 @@ deploy machine='' ip='':
     else \
       nixos-rebuild switch --fast --flake ".#{{ machine }}" --use-remote-sudo --target-host "masood@{{ ip }}" --build-host "masood@{{ ip }}"; \
     fi
+
+# Pre-flight checks — run before deploy to catch formatting and lint errors early
+preflight:
+    @echo "Running pre-flight checks..."
+    @just fmt
+    @just lint
 
 up:
     nix --extra-experimental-features nix-command --extra-experimental-features flakes flake update
