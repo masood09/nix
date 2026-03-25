@@ -1,5 +1,7 @@
 # MongoDB — document database used by Nightscout. Auth enabled with
 # root password from sops. ZFS-backed data directory.
+# TLS is intentionally omitted: only Nightscout connects, and it does so
+# over localhost (Unix socket / 127.0.0.1). No network exposure.
 {
   config,
   lib,
