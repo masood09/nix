@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 1 NixOS desktop/laptop, and 2 macOS machines with home-manager, sops-nix secrets, ZFS, and impermanence.
+Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 2 NixOS desktops, and 2 macOS machines with home-manager, sops-nix secrets, ZFS, and impermanence.
 
 ## Commands
 
@@ -34,11 +34,21 @@ just sops-update                     # Update sops key files (interactive)
   - `modules/nixos/` - NixOS system config (boot, networking, users, impermanence, zfs)
   - `modules/macos/` - nix-darwin system config
   - `modules/services/` - 27 declarative services (each in own directory)
+- `lib/` - Shared helper libraries:
+  - `persistence-helpers.nix` - Impermanence bind-mount guard (three-part condition: `impermanence && !isRootZFS && !zfsEnable`)
+  - `systemd-helpers.nix` - Permission-fixing oneshot service generator (`mkPermissionService`)
+  - `zfs-options.nix` - ZFS dataset option builder
 - `nix/pkgs/` - Custom package definitions (auto-discovered)
 - `nix/overlays/` - Package overlays
-- `nix/services/` - Custom NixOS service modules
+- `nix/services/` - Custom NixOS service modules (nightscout, mailarchiver, matrix-authentication-service)
 - `secrets/` - Shared sops-encrypted secrets
-- `docs/service-registry.org` - Authoritative source for UIDs, GIDs, and port assignments
+- `docs/` - Documentation:
+  - `service-registry.org` - Authoritative source for UIDs, GIDs, and port assignments
+  - `architecture.org` - System architecture overview
+  - `backup.org` - Backup strategy and procedures
+  - `secrets-rotation.org` - Secrets rotation runbook
+  - `analysis.org` - Codebase review findings and recommendations
+  - `zen.org` - Zen Browser configuration notes
 
 ### Custom Options Namespace
 
@@ -61,9 +71,15 @@ homelab = {
 
 ### Code Style
 - **Nested attribute sets**: Always use fully nested structure, never dot notation for attribute sets
-  - ✅ Good: `services = { greetd = { enable = true; }; };`
-  - ❌ Bad: `services.greetd = { enable = true; };`
+  - Good: `services = { greetd = { enable = true; }; };`
+  - Bad: `services.greetd = { enable = true; };`
   - This applies to all top-level options: `services`, `programs`, `security`, `environment`, etc.
+
+### Persistence Model
+- Servers use ZFS root with impermanence: ephemeral root wipes on boot, persistent data in `/nix/persist`
+- Services that manage their own ZFS dataset bypass impermanence bind-mounts entirely
+- The three-part guard in `lib/persistence-helpers.nix` handles all scenarios: `impermanence && !isRootZFS && !zfsEnable`
+- Import the helper as: `persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};`
 
 ### Secrets Management
 - sops-nix with age encryption
@@ -85,15 +101,24 @@ Before adding services, check `docs/service-registry.org` for:
 - Port allocations (avoid collisions)
 - Group IDs (match UIDs)
 
+### Adding a New Service
+- Custom services (no upstream NixOS module) must set `isSystemUser = true` and `group` on their user definitions
+- Services backed by upstream NixOS modules (e.g., immich, vaultwarden) do not need manual user config as the upstream module handles it
+- Use `lib/persistence-helpers.nix` for impermanence bind-mounts
+- Use `lib/systemd-helpers.nix` for permission-fixing oneshot services
+- Use `lib/zfs-options.nix` for ZFS dataset options
+
 ## Key Dependencies
 
 - nixpkgs: `nixos-25.11`
 - home-manager: `release-25.11`
 - nix-darwin: `nix-darwin-25.11`
-- Other inputs: disko, impermanence, sops-nix, nix-homebrew, authentik-nix, catppuccin, headplane
+- stylix: `release-25.11`
+- Other inputs: disko, impermanence, sops-nix, nix-homebrew, authentik-nix, headplane, dms, dgop, claude-code, zen-browser, betterfox
 
 ## Machines
 
 **NixOS servers**: accesscontrolsystem, commrelay, meshcontrol, watchfulsystem, caretaker, heartbeat, trialunit
-**NixOS desktop**: commandmodule (laptop)
-**macOS**: murderbot (primary dev), work-pantheon
+**NixOS desktops**: commandmodule (primary dev, laptop), sonic (desktop)
+**macOS**: murderbot, work-pantheon
+**Other**: nixiso (minimal NixOS installer ISO)
