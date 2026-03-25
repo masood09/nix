@@ -58,6 +58,12 @@
         neovim = {
           enable = true;
         };
+        oci-cli = {
+          enable = true;
+        };
+        opentofu = {
+          enable = true;
+        };
 
         motd = {
           enable = true;

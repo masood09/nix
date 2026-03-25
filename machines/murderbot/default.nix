@@ -39,6 +39,12 @@
       neovim = {
         enable = true;
       };
+      oci-cli = {
+        enable = true;
+      };
+      opentofu = {
+        enable = true;
+      };
       zen = {
         enable = true;
       };

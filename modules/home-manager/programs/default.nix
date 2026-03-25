@@ -29,6 +29,10 @@
     ./_gpg.nix
     ./_neovim.nix
 
+    # Cloud & infrastructure
+    ./_oci-cli.nix
+    ./_opentofu.nix
+
     # Desktop (Linux only, gated on niri.enable)
     ./niri
     ./_dms.nix

@@ -1,6 +1,6 @@
-# User packages — role-based package lists for servers, Linux desktops, and macOS.
-# Desktop dev CLIs are shared across Linux and macOS;
-# GUI apps, fonts, and platform-specific packages are split by stdenv.
+# User packages — role-based package lists for servers, desktops, and macOS.
+# Tool-specific packages (emacs, oci-cli, etc.) live in their own _<name>.nix
+# modules; this file covers shared dev CLIs and platform-specific packages.
 {
   homelabCfg,
   inputs,
@@ -25,18 +25,12 @@ in {
         age
         alejandra
         findutils
-        gnutar
         go
         just
         jq
-        oci-cli
-        opentofu
-        restic
         sops
         statix
         stow
-        xz
-        awscli2
       ])
       # Linux desktop — Wayland utilities (gated on niri.enable)
       ++ lib.optionals ((homelabCfg.desktop.niri.enable or false) && pkgs.stdenv.isLinux) (with pkgs; [
@@ -55,26 +49,8 @@ in {
         noto-fonts-cjk-sans
         inter
 
-        # Monospace
-        fira-code
-        fira-code-symbols
-        jetbrains-mono
-        julia-mono
-        terminus_font
-        maple-mono.NF
-
-        # Nerd Fonts (patched with icons/glyphs)
-        nerd-fonts.symbols-only
-        nerd-fonts.fira-code
-        nerd-fonts.droid-sans-mono
-        nerd-fonts.jetbrains-mono
-        nerd-fonts.meslo-lg
-        nerd-fonts.hack
-
-        # Icons / emoji
+        # Emoji
         noto-fonts-color-emoji
-        font-awesome
-        material-icons
       ]);
   };
 }
