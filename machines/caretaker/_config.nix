@@ -25,6 +25,8 @@
       services = {
         backup = {
           enable = true;
+          # No services need stopping — blocky handles DNS restarts gracefully
+          serviceUnits = [];
         };
 
         blocky = {
