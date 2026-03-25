@@ -1,6 +1,7 @@
 # Boot configuration — bootloader selection, kernel params, and initrd setup.
 # Automatically chooses between systemd-boot (non-ZFS) and GRUB (ZFS),
 # with support for mirrored boot partitions on multi-disk setups.
+# Desktops get graphical GRUB; servers stay text-only.
 {
   config,
   lib,
@@ -54,9 +55,13 @@ in {
 
           devices = lib.mkIf (!homelabCfg.isMirroredBoot) ["nodev"];
 
-          gfxmodeEfi = "text";
+          # Graphical framebuffer on desktops (needed for Plymouth); text on servers
+          gfxmodeEfi =
+            if homelabCfg.role == "desktop"
+            then "auto"
+            else "text";
 
-          extraConfig = ''
+          extraConfig = lib.mkIf (homelabCfg.role != "desktop") ''
             terminal_output console
           '';
 
