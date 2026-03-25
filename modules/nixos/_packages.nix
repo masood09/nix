@@ -13,6 +13,7 @@ in {
       efibootmgr
       git
       gptfdisk
+      kitty.terminfo
       parted
     ];
   };
