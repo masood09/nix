@@ -15,6 +15,12 @@
   dbOwner = "matrix-synapse";
 in {
   config = lib.mkIf cfg.synapse.enable {
+    assertions = [
+      {
+        assertion = postgresqlEnabled;
+        message = "Matrix Synapse requires PostgreSQL (homelab.services.postgresql.enable)";
+      }
+    ];
     homelab = {
       zfs = {
         datasets = lib.mkIf cfg.synapse.zfs.enable {

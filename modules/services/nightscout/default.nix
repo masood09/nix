@@ -14,6 +14,12 @@ in {
   ];
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = homelabCfg.services.mongodb.enable;
+        message = "Nightscout requires MongoDB (homelab.services.mongodb.enable)";
+      }
+    ];
     services = {
       nightscout = {
         enable = true;
