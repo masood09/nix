@@ -13,7 +13,7 @@
       "customType": "regex",
       "managerFilePatterns": ["/(^|/).+\\.nix$/"],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>[^\\s]+)(?: depName=(?<depName>[^\\s]+))?(?: versioning=(?<versioning>[^\\s]+))?\\s*\\n\\s*rev\\s*=\\s*\"(?<currentValue>[^\"]+)\";"
+        "# renovate: datasource=(?<datasource>[^\\s]+)(?: depName=(?<depName>[^\\s]+))?(?: versioning=(?<versioning>[^\\s]+))?\\s*\\n\\s*(?:rev|version)\\s*=\\s*\"(?<currentValue>[^\"]+)\";"
       ]
     }
   ]
