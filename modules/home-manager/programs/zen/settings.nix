@@ -40,6 +40,11 @@
             # Security — Strict certificate pinning (no MITM exceptions)
             "security.cert_pinning.enforcement_level" = 2;
 
+            # Betterfox overrides — settings that differ from Securefox defaults
+            "permissions.default.geo" = 0; # Ask per-site (Securefox blocks all)
+            "permissions.default.desktop-notification" = 0; # Ask per-site (Securefox blocks all)
+            "dom.security.https_only_mode" = false; # Needed for LAN (e.g. router at http://10.0.1.1)
+
             # Downloads — Always ask where to save, skip handler prompt
             "browser.download.useDownloadDir" = false;
             "browser.download.always_ask_before_handling_new_types" = false;

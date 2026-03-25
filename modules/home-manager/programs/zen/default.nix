@@ -7,6 +7,7 @@
 #   pins.nix        — pinned tabs
 {
   homelabCfg,
+  inputs,
   ...
 }: {
   imports = [
@@ -86,6 +87,14 @@
         default = {
           id = 0;
           isDefault = true;
+
+          # Betterfox — curated Firefox performance, privacy, and UX tweaks.
+          # Overrides for conflicts are in settings.nix.
+          extraConfig = ''
+            ${builtins.readFile "${inputs.betterfox}/Fastfox.js"}
+            ${builtins.readFile "${inputs.betterfox}/Securefox.js"}
+            ${builtins.readFile "${inputs.betterfox}/Peskyfox.js"}
+          '';
         };
       };
     };

@@ -75,7 +75,10 @@
         home-manager.follows = "home-manager";
       };
     };
-
+    betterfox = {
+      url = "github:yokoffing/Betterfox";
+      flake = false;
+    };
   };
 
   outputs = {
