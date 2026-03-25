@@ -11,12 +11,6 @@
     ./_packages.nix
   ];
 
-  nixpkgs = {
-    overlays = [
-      (import ../../nix/overlays/darwin-setproctitle.nix)
-    ];
-  };
-
   homelab = {
     role = "desktop";
 
