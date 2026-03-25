@@ -170,6 +170,12 @@
     else
       echo "   - starting $resticUnit"
       systemctl start "$resticUnit"
+
+      # Verify repo integrity post-backup (metadata + 5% random data sample).
+      # restic-backup wrapper has credentials and repo preconfigured.
+      echo "   - verifying restic repository integrity"
+      /run/current-system/sw/bin/restic-backup check --read-data-subset=5% \
+        || echo "   ! restic check reported errors (non-fatal)"
     fi
 
     if [ "${
