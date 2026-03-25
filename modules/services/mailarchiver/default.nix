@@ -12,6 +12,7 @@
   postgresqlEnabled = config.services.postgresql.enable;
   postgresqlBackupEnabled = config.services.postgresqlBackup.enable;
 
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "mailarchiver";
@@ -142,18 +143,10 @@ in {
       };
     };
 
-    environment =
-      lib.mkIf (
-        homelabCfg.impermanence
-        && !homelabCfg.isRootZFS
-      ) {
-        persistence = {
-          "/nix/persist" = {
-            directories = lib.optionals (!cfg.zfs.enable) [
-              cfg.dataDir
-            ];
-          };
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = cfg.zfs.enable;
+      directories = [cfg.dataDir];
+    };
   };
 }

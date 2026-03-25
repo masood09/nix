@@ -12,6 +12,7 @@
 
   dataDir = lib.removeSuffix "/" (toString headscaleCfg.dataDir);
 
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "headscale";
@@ -110,19 +111,10 @@ in {
 
     inherit (permSvc) systemd;
 
-    environment =
-      lib.mkIf (
-        homelabCfg.impermanence
-        && !homelabCfg.isRootZFS
-        && !headscaleCfg.zfs.enable
-      ) {
-        persistence = {
-          "/nix/persist" = {
-            directories = [
-              dataDir
-            ];
-          };
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = headscaleCfg.zfs.enable;
+      directories = [dataDir];
+    };
   };
 }

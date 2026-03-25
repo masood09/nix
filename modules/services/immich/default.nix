@@ -13,6 +13,7 @@
   caddyEnabled = config.homelab.services.caddy.enable;
   resticEnabled = config.homelab.services.restic.enable;
 
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "immich";
@@ -119,19 +120,10 @@ in {
 
     inherit (permSvc) systemd;
 
-    environment =
-      lib.mkIf (
-        homelabCfg.impermanence
-        && !homelabCfg.isRootZFS
-        && !immichCfg.zfs.enable
-      ) {
-        persistence = {
-          "/nix/persist" = {
-            directories = [
-              immichCfg.dataDir
-            ];
-          };
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = immichCfg.zfs.enable;
+      directories = [immichCfg.dataDir];
+    };
   };
 }

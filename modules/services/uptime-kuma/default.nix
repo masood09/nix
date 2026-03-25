@@ -10,6 +10,7 @@
   uptimeKumaCfg = homelabCfg.services.uptime-kuma;
   caddyEnabled = homelabCfg.services.caddy.enable;
 
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "uptime-kuma";
@@ -103,19 +104,10 @@ in {
       }
     ];
 
-    environment =
-      lib.mkIf (
-        homelabCfg.impermanence
-        && !homelabCfg.isRootZFS
-        && !uptimeKumaCfg.zfs.enable
-      ) {
-        persistence = {
-          "/nix/persist" = {
-            directories = [
-              uptimeKumaCfg.dataDir
-            ];
-          };
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = uptimeKumaCfg.zfs.enable;
+      directories = [uptimeKumaCfg.dataDir];
+    };
   };
 }

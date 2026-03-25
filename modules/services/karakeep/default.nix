@@ -10,6 +10,7 @@
   cfg = homelabCfg.services.karakeep;
   caddyEnabled = config.services.caddy.enable;
 
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "karakeep";
@@ -111,20 +112,11 @@ in {
 
     inherit (permSvc) systemd;
 
-    environment =
-      lib.mkIf (
-        homelabCfg.impermanence
-        && !homelabCfg.isRootZFS
-        && !cfg.zfs.enable
-      ) {
-        persistence = {
-          "/nix/persist" = {
-            directories = [
-              cfg.dataDir
-            ];
-          };
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = cfg.zfs.enable;
+      directories = [cfg.dataDir];
+    };
 
     networking = {
       firewall = lib.mkIf cfg.openFirewall {

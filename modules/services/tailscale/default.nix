@@ -9,6 +9,7 @@
   homelabCfg = config.homelab;
   cfg = homelabCfg.services.tailscale;
 
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "tailscale";
@@ -57,18 +58,10 @@ in {
 
     inherit (permSvc) systemd;
 
-    environment = {
-      persistence = {
-        "/nix/persist" =
-          lib.mkIf (
-            !homelabCfg.isRootZFS
-            && !cfg.zfs.enable
-          ) {
-            directories = [
-              cfg.dataDir
-            ];
-          };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = cfg.zfs.enable;
+      directories = [cfg.dataDir];
     };
   };
 }

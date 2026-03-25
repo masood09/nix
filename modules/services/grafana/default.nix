@@ -15,6 +15,7 @@
 
   grafanaDataDir = lib.removeSuffix "/" (toString grafanaCfg.dataDir);
 
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "grafana";
@@ -166,19 +167,10 @@ in {
 
     inherit (permSvc) systemd;
 
-    environment =
-      lib.mkIf (
-        homelabCfg.impermanence
-        && !homelabCfg.isRootZFS
-        && !grafanaCfg.zfs.enable
-      ) {
-        persistence = {
-          "/nix/persist" = {
-            directories = [
-              grafanaDataDir
-            ];
-          };
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = grafanaCfg.zfs.enable;
+      directories = [grafanaDataDir];
+    };
   };
 }

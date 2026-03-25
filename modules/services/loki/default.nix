@@ -14,6 +14,7 @@
   lokiDataDir = lib.removeSuffix "/" (toString lokiCfg.dataDir);
   lokiPath = p: "${lokiDataDir}/${p}";
 
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "loki";
@@ -194,19 +195,10 @@ in {
 
     inherit (permSvc) systemd;
 
-    environment =
-      lib.mkIf (
-        homelabCfg.impermanence
-        && !homelabCfg.isRootZFS
-        && !lokiCfg.zfs.enable
-      ) {
-        persistence = {
-          "/nix/persist" = {
-            directories = [
-              lokiDataDir
-            ];
-          };
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = lokiCfg.zfs.enable;
+      directories = [lokiDataDir];
+    };
   };
 }

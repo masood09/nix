@@ -13,6 +13,7 @@
 
   # Helpers
   mkAddr = addr: port: "${addr}:${toString port}";
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
 in {
   imports = [
     ./options.nix
@@ -193,16 +194,10 @@ in {
       };
     };
 
-    # Impermanence fallback if you ever disable ZFS datasets
-    environment = lib.mkIf (homelabCfg.impermanence && !garageCfg.zfs.enable) {
-      persistence = {
-        "/nix/persist" = {
-          directories = [
-            garageCfg.dataDir
-            garageCfg.metaDir
-          ];
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = garageCfg.zfs.enable;
+      directories = [garageCfg.dataDir garageCfg.metaDir];
     };
   };
 }

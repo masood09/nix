@@ -11,6 +11,7 @@
 
   proxySrc = ./config/proxy.yaml;
   cspSrc = ./config/csp.yaml;
+  persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
 in {
   config = lib.mkIf (cfg.enable && podmanEnabled) {
     systemd = {
@@ -120,15 +121,10 @@ in {
       };
     };
 
-    # Impermanence fallback if you ever disable ZFS datasets
-    environment = lib.mkIf (homelabCfg.impermanence && !cfg.zfs.enable) {
-      persistence = {
-        "/nix/persist" = {
-          directories = [
-            cfg.dataDir
-          ];
-        };
-      };
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = cfg.zfs.enable;
+      directories = [cfg.dataDir];
     };
   };
 }
