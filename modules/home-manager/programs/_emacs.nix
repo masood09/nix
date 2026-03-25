@@ -20,25 +20,37 @@ in {
       # emacs-pgtk for native Wayland support (standard emacs is X11-only)
       lib.optional pkgs.stdenv.isLinux pkgs.emacs-pgtk
       ++ (with pkgs; [
-        # Doom Emacs dependencies: build tools, LSPs, formatters
+        # Build deps for :term vterm (native compilation)
         cmake
-        fontconfig
-        gcc # C compiler for tree-sitter/vterm compilation
-        gnumake # Required by vterm and other native-compiled Emacs packages
-        libtool # Required by vterm to build libvterm
+        gcc
+        gnumake
+        libtool
+
+        # LSP servers
+        gopls # :lang go
+        nil # :lang nix
+        nodejs # LSP server runtime
+
+        # :lang go tools
         gomodifytags
-        gopls
         gore
         gotests
-        jsbeautifier
-        multimarkdown
-        nil
-        nixfmt-rfc-style
-        nodejs
-        shellcheck
-        stylelint
-        terraform
-        tree-sitter # Syntax highlighting via tree-sitter grammars
+
+        # Formatters & linters
+        html-tidy # :lang web
+        jsbeautifier # :lang web (JS/CSS/HTML formatting)
+        nixfmt-rfc-style # :lang nix (nix-format-buffer)
+        shellcheck # :lang sh
+        stylelint # :lang web
+
+        # Other module deps
+        multimarkdown # :lang markdown
+        terraform # :tools terraform
+        tree-sitter # :tools tree-sitter
+
+        # Fonts required by Doom Emacs
+        nerd-fonts.symbols-only # nerd-icons.el
+        symbola # Unicode symbol coverage
       ])
     );
   };

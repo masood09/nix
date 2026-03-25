@@ -162,6 +162,14 @@
           enable = lib.mkEnableOption "Whether to enable neovim.";
         };
 
+        oci-cli = {
+          enable = lib.mkEnableOption "Whether to enable Oracle Cloud CLI.";
+        };
+
+        opentofu = {
+          enable = lib.mkEnableOption "Whether to enable OpenTofu.";
+        };
+
         ripgrep = {
           enable = lib.mkOption {
             default = true;

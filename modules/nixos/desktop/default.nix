@@ -154,26 +154,8 @@ in {
         noto-fonts-cjk-sans
         inter # Inter Variable font for DankMaterialShell
 
-        # Monospace
-        fira-code
-        fira-code-symbols
-        jetbrains-mono
-        julia-mono
-        terminus_font
-        maple-mono.NF
-
-        # Nerd Fonts (patched with icons/glyphs)
-        nerd-fonts.symbols-only
-        nerd-fonts.fira-code
-        nerd-fonts.droid-sans-mono
-        nerd-fonts.jetbrains-mono
-        nerd-fonts.meslo-lg
-        nerd-fonts.hack
-
-        # Icons / emoji
+        # Emoji
         noto-fonts-color-emoji
-        font-awesome
-        material-icons
       ];
     };
   };
