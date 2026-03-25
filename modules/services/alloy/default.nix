@@ -31,6 +31,16 @@ in {
           environment = {
             ALLOY_HOSTNAME = config.homelab.networking.hostName;
           };
+
+          # The upstream module sets DynamicUser = true, which would allocate
+          # a transient UID at runtime.  We need a stable UID/GID (3000) that
+          # is consistent across reboots and matches the service registry, so
+          # override it in favour of the static user defined below.
+          serviceConfig = {
+            DynamicUser = lib.mkForce false;
+            User = "alloy";
+            Group = "alloy";
+          };
         };
       };
     };
