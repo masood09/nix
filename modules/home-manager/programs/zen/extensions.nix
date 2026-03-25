@@ -1,31 +1,125 @@
 # Extensions and Zen Mods — privacy, productivity, theming, and UI enhancements.
-{
-  inputs,
-  pkgs,
-  ...
-}: {
+# Extensions are force-installed via ExtensionSettings policy.
+# Zen Mods are installed via the Zen Mods marketplace.
+{...}: {
   programs = {
     zen-browser = {
+      policies = {
+        # Extensions — block manual installs, allow only Nix-managed extensions
+        ExtensionSettings = {
+          "*" = {
+            blocked_install_message = "Extensions must be added via Nix config";
+            installation_mode = "blocked";
+          };
+          # AdNauseam — ad blocker + tracking obfuscation
+          "adnauseam@rednoise.org" = {
+            installation_mode = "force_installed";
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/adnauseam/latest.xpi";
+            private_browsing = true;
+            default_area = "navbar";
+            permissions = ["alarms" "dns" "menus" "privacy" "storage" "tabs" "unlimitedStorage" "webNavigation" "webRequest" "webRequestBlocking" "management"];
+            origins = ["<all_urls>"];
+          };
+          # Vimium — vim keyboard navigation
+          "{d7742d87-e61d-4b78-b8a1-b469842139fa}" = {
+            installation_mode = "force_installed";
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/vimium-ff/latest.xpi";
+            private_browsing = true;
+            default_area = "navbar";
+            permissions = ["tabs" "bookmarks" "history" "storage" "sessions" "notifications" "scripting" "webNavigation" "search" "clipboardRead" "clipboardWrite"];
+            origins = ["<all_urls>"];
+          };
+          # DeArrow — crowdsourced clickbait replacement
+          "deArrow@ajay.app" = {
+            installation_mode = "force_installed";
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/dearrow/latest.xpi";
+            private_browsing = true;
+            default_area = "navbar";
+            permissions = ["storage" "unlimitedStorage" "alarms" "scripting"];
+            origins = ["https://sponsor.ajay.app/*" "https://dearrow-thumb.ajay.app/*" "https://*.googlevideo.com/*" "https://*.youtube.com/*" "https://www.youtube-nocookie.com/embed/*" "*://*/*"];
+          };
+          # SponsorBlock — skip YouTube sponsorships
+          "sponsorBlocker@ajay.app" = {
+            installation_mode = "force_installed";
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi";
+            private_browsing = true;
+            default_area = "navbar";
+            permissions = ["storage" "scripting" "unlimitedStorage"];
+            origins = ["https://sponsor.ajay.app/*" "*://*/*"];
+          };
+          # Stylus — custom CSS styles
+          "{7a7a4a92-a2a0-41d1-9fd7-1e92480d612d}" = {
+            installation_mode = "force_installed";
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/styl-us/latest.xpi";
+            private_browsing = true;
+            permissions = ["alarms" "contextMenus" "storage" "tabs" "unlimitedStorage" "webNavigation" "webRequest" "webRequestBlocking"];
+            origins = ["<all_urls>"];
+          };
+          # Catppuccin Web File Icons
+          "{bbb880ce-43c9-47ae-b746-c3e0096c5b76}" = {
+            installation_mode = "force_installed";
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/catppuccin-web-file-icons/latest.xpi";
+            private_browsing = true;
+            permissions = ["storage" "contextMenus" "activeTab"];
+          };
+          # Bitwarden — password manager
+          "{446900e4-71c2-419f-a6a7-df9c091e268b}" = {
+            installation_mode = "force_installed";
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/bitwarden-password-manager/latest.xpi";
+            private_browsing = true;
+            default_area = "navbar";
+            permissions = ["alarms" "clipboardRead" "clipboardWrite" "contextMenus" "idle" "storage" "tabs" "unlimitedStorage" "webNavigation" "webRequest" "webRequestBlocking" "notifications" "nativeMessaging"];
+            origins = ["<all_urls>" "*://*/*"];
+          };
+          # Consent-O-Matic — auto-decline GDPR cookie banners
+          "gdpr@cavi.au.dk" = {
+            installation_mode = "force_installed";
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/consent-o-matic/latest.xpi";
+            private_browsing = true;
+            permissions = ["activeTab" "tabs" "storage"];
+            origins = ["<all_urls>"];
+          };
+          # ClearURLs — strip tracking parameters from URLs
+          "{74145f27-f039-47ce-a470-a662b129930a}" = {
+            installation_mode = "force_installed";
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/clearurls/latest.xpi";
+            private_browsing = true;
+            permissions = ["webRequest" "webRequestBlocking" "storage" "unlimitedStorage" "contextMenus" "webNavigation" "tabs" "downloads"];
+            origins = ["<all_urls>"];
+          };
+          # Karakeep — self-hosted bookmark manager
+          "addon@karakeep.app" = {
+            installation_mode = "force_installed";
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/karakeep/latest.xpi";
+            private_browsing = true;
+            default_area = "navbar";
+            permissions = ["storage" "tabs" "contextMenus"];
+          };
+        };
+
+        # Extension policies — pre-configure extensions via managed storage
+        "3rdparty" = {
+          Extensions = {
+            "adnauseam@rednoise.org" = {
+              userSettings = [
+                ["hidingAds" "true"]
+                ["clickingAds" "true"]
+                ["blockingMalware" "true"]
+                ["disableClickingForDNT" "true"]
+                ["blurCollectedAds" "true"]
+                ["noOutgoingCookies" "true"]
+                ["noOutgoingReferer" "true"]
+                ["noOutgoingUserAgent" "true"]
+                ["tooltipsDisabled" "true"]
+                ["webrtcIPAddressHidden" "false"]
+              ];
+            };
+          };
+        };
+      };
+
       profiles = {
         default = {
-          # Extensions — privacy, productivity, and theming
-          extensions = {
-            packages = with inputs.firefox-addons.packages.${pkgs.stdenv.hostPlatform.system}; [
-              # Privacy & Ad Blocking
-              adnauseam # Ad blocker that clicks ads to obfuscate tracking
-
-              # Productivity
-              vimium # Vim keyboard navigation
-              stylus # Custom CSS styles
-              bitwarden # Password manager
-
-              # Theming & Enhancements
-              catppuccin-web-file-icons # Catppuccin-themed file icons
-              sponsorblock # Skip YouTube sponsorships
-              dearrow # Crowdsourced clickbait titles/thumbnails
-            ];
-          };
-
           # Zen Mods — UI/UX enhancements from the Zen Mods marketplace
           mods = [
             "253a3a74-0cc4-47b7-8b82-996a64f030d5" # Floating History
