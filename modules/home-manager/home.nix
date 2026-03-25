@@ -7,6 +7,11 @@
   inputs,
   ...
 }: {
+  # Servers have no D-Bus session, so dconf writes (e.g. Stylix GTK/cursor
+  # themes) fail with "ca.desrt.dconf was not provided by any .service files".
+  dconf = {
+    enable = lib.mkDefault (homelabCfg.role == "desktop");
+  };
   imports = [
     ./programs
     # Zen browser home-manager module (beta variant)
