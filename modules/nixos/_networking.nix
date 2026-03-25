@@ -41,7 +41,9 @@ in {
 
       enableIPv6 = false;
 
-      # ZFS requires a unique 8-char hostId; derive it from hostname
+      # ZFS requires a unique 8-hex hostId per machine. Derived deterministically
+      # from the hostname via SHA-256. IMPORTANT: no two machines may share a
+      # hostname — ZFS will silently corrupt data if hostIds collide.
       hostId = builtins.substring 0 8 (
         builtins.hashString "sha256" config.networking.hostName
       );
