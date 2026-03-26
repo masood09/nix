@@ -28,13 +28,19 @@ in {
               "/var/lib/nixos"
             ])
             # Desktop-specific state (login manager, bluetooth pairings, fingerprints, WiFi)
-            (lib.mkIf (homelabCfg.role == "desktop") [
-              "/var/cache/tuigreet"
-              "/var/lib/bluetooth"
-              "/var/lib/fprint"
-              "/var/lib/NetworkManager"
-              "/etc/NetworkManager/system-connections"
-            ])
+            (lib.mkIf (homelabCfg.role == "desktop") (
+              [
+                "/var/lib/bluetooth"
+                "/var/lib/fprint"
+                "/var/lib/NetworkManager"
+                "/etc/NetworkManager/system-connections"
+              ]
+              ++ (
+                if homelabCfg.desktop.greeter == "sysc-greet"
+                then ["/var/cache/sysc-greet"]
+                else ["/var/cache/tuigreet"]
+              )
+            ))
           ];
 
           # Machine identity and SSH host keys must persist across reboots

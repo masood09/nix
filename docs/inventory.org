@@ -106,16 +106,17 @@ Linux desktops with Niri also get:
 
 *** Services
 
-| Service                | Purpose                                         |
-|------------------------+-------------------------------------------------|
-| accounts-daemon        | User account information service                |
-| pipewire               | Unified audio daemon (replaces PulseAudio/ALSA) |
-| fprintd                | Fingerprint authentication                      |
-| power-profiles-daemon  | CPU power profile management                    |
-| printing (CUPS)        | Print server                                    |
-| upower                 | Battery/power monitoring                        |
-| greetd + tuigreet      | TUI login manager                               |
-| niri                   | Scrollable-tiling Wayland compositor            |
+| Service               | Purpose                                         |
+|-----------------------+-------------------------------------------------|
+| accounts-daemon       | User account information service                |
+| pipewire              | Unified audio daemon (replaces PulseAudio/ALSA) |
+| fprintd               | Fingerprint authentication                      |
+| power-profiles-daemon | CPU power profile management                    |
+| printing (CUPS)       | Print server                                    |
+| upower                | Battery/power monitoring                        |
+| greetd + tuigreet     | TUI login manager (default greeter)             |
+| greetd + sysc-greet   | Graphical greeter (ASCII art + themes in kitty) |
+| niri                  | Scrollable-tiling Wayland compositor            |
 
 *** Graphics Packages
 
