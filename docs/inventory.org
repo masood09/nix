@@ -80,7 +80,33 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 | Module  | Package(s)   | Purpose                             |
 |---------+--------------+-------------------------------------|
 | zen/    | zen-browser  | Privacy-focused Firefox fork        |
-| niri/   | fuzzel       | Wayland application launcher        |
+
+*** Niri Desktop (=niri/default.nix=, Linux desktops with Niri)
+
+**** Packages
+
+| Package             | Purpose                              |
+|---------------------+--------------------------------------|
+| swaybg              | Wallpaper setter                     |
+| wl-clipboard        | Wayland clipboard utilities          |
+| xwayland-satellite  | XWayland support for Niri            |
+
+**** Programs (home-manager modules)
+
+| Program  | Purpose                    |
+|----------+----------------------------|
+| rofi     | Application launcher       |
+| swaylock | Screen locker              |
+| waybar   | Status bar                 |
+
+**** Services (home-manager modules)
+
+| Service    | Purpose                              |
+|------------+--------------------------------------|
+| mako       | Notification daemon (D-Bus activated)|
+| playerctld | MPRIS media player daemon            |
+| swayidle   | Idle management                      |
+| udiskie    | Auto-mount removable media           |
 
 ** Desktop Role Packages (=role == "desktop"=)
 
@@ -95,12 +121,6 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 | sops       | Secrets editor                      |
 | statix     | Nix linter                          |
 | stow       | Symlink farm manager (dotfiles)     |
-
-Linux desktops with Niri also get:
-
-| Package      | Purpose                    |
-|--------------+----------------------------|
-| wl-clipboard | Wayland clipboard utility  |
 
 ** NixOS Desktop Module (=homelab.desktop.enable=)
 
@@ -117,7 +137,8 @@ Linux desktops with Niri also get:
 | upower                | Battery/power monitoring                        |
 | greetd + tuigreet     | TUI login manager (default greeter)             |
 | greetd + sysc-greet   | Graphical greeter (ASCII art + themes in kitty) |
-| niri                  | Scrollable-tiling Wayland compositor            |
+| light                 | Backlight control (udev rules for video group)  |
+| niri                  | Scrollable-tiling Wayland compositor             |
 
 *** Graphics Packages
 
