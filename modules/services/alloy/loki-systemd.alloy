@@ -121,7 +121,10 @@ loki.process "systemd" {
 	}
 
     // -------------------------
-	// Collabora: parse "INF/WRN/ERR/TRC" token and override `level`
+	// Collabora: parse "INF/WRN/ERR/TRC" token and override `level`.
+	// Lives here (not in opencloud/) because log-processing stages must
+	// be part of the single loki.process "systemd" pipeline — unlike
+	// scrape targets, they cannot be split into independent files.
 	// Example:
 	// wsd-... 2026-.. [ ... ] WRN  message| file:line
 	// -------------------------
