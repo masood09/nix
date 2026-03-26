@@ -47,6 +47,9 @@
       };
 
       programs = {
+        fastfetch = {
+          zpools = ["rpool"];
+        };
         emacs = {
           enable = true;
         };
@@ -64,15 +67,6 @@
         };
         neovim = {
           enable = true;
-        };
-
-        motd = {
-          enable = true;
-
-          networkInterfaces = [
-            "enp1s0"
-            "wlp2s0"
-          ];
         };
 
         stylix = {

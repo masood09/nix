@@ -11,16 +11,7 @@
         hostName = "caretaker";
       };
 
-      programs = {
-        motd = {
-          enable = true;
-
-          networkInterfaces = [
-            "enp1s0"
-            "tailscale0"
-          ];
-        };
-      };
+      programs = {};
 
       services = {
         backup = {

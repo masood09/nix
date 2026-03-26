@@ -42,7 +42,6 @@
 
     # Theming & UX
     ./_stylix.nix
-    ./_motd.nix
 
     # Per-role package lists
     ./_packages.nix

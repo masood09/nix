@@ -63,7 +63,19 @@
             '';
           };
 
-          showOnLogin = lib.mkEnableOption "Show fastfetch on interactive shell login.";
+          showOnLogin = lib.mkOption {
+            default = true;
+            type = lib.types.bool;
+            description = ''
+              Whether to show fastfetch on interactive shell login.
+            '';
+          };
+
+          zpools = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [];
+            description = "ZFS pool names to show usage for in fastfetch output.";
+          };
 
           zshInitOrder = lib.mkOption {
             type = lib.types.int;
@@ -148,22 +160,6 @@
 
         kitty = {
           enable = lib.mkEnableOption "Whether to enable kitty terminal.";
-        };
-
-        motd = {
-          enable = lib.mkEnableOption "Show a custom MOTD on interactive shells.";
-
-          networkInterfaces = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            default = [];
-            description = "Network interfaces to display IP addresses for in the MOTD.";
-          };
-
-          zshInitOrder = lib.mkOption {
-            type = lib.types.int;
-            default = 650;
-            description = "Order value for the MOTD in zsh initialization (lower runs earlier).";
-          };
         };
 
         neovim = {

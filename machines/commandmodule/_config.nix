@@ -40,6 +40,9 @@
       };
 
       programs = {
+        fastfetch = {
+          zpools = ["rpool"];
+        };
         claude-code = {
           enable = true;
         };
@@ -63,15 +66,6 @@
         };
         opentofu = {
           enable = true;
-        };
-
-        motd = {
-          enable = true;
-
-          networkInterfaces = [
-            "enp0s31f6"
-            "wlp0s20f3"
-          ];
         };
 
         stylix = {

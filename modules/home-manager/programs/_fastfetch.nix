@@ -11,8 +11,10 @@
   zshEnabled = homelabCfg.programs.zsh.enable or false;
   fishEnabled = homelabCfg.programs.fish.enable or false;
 
-  # Custom command modules — prepended/appended to the default module list.
-  # Guards use `or false` because these NixOS-only options are absent on macOS.
+  # Custom command modules — role and reboot are prepended after the title,
+  # desktop-only and zpool modules are appended after the common defaults.
+  # The reboot guard uses `or false` because rebootRequiredCheck is a
+  # NixOS-only option absent on macOS.
 
   roleModule = lib.optional (homelabCfg.purpose != "") {
     type = "command";
@@ -28,19 +30,39 @@
     }
   ];
 
-  zfsModules = lib.optionals (homelabCfg.isRootZFS or false) [
-    "separator"
-    {
-      type = "command";
-      key = "ZPool Status";
-      text = "zpool status -x 2>/dev/null || echo 'N/A'";
-    }
-    {
-      type = "command";
-      key = "ZPool Usage";
-      text = "zpool list -Ho name,cap,size 2>/dev/null | awk '{printf \"%s: %s used of %s\\n\", $1, $2, $3}' || echo 'N/A'";
-    }
+  isDesktop = (homelabCfg.role or "") == "desktop";
+
+  # Modules only relevant on desktop machines
+  desktopModules = lib.optionals isDesktop [
+    "packages"
+    "display"
+    "de"
+    "wm"
+    "wmtheme"
+    "theme"
+    "icons"
+    "font"
+    "cursor"
+    "gpu"
+    "battery"
+    "poweradapter"
   ];
+
+  zpoolModules = lib.optionals (cfg.zpools != []) (
+    [
+      "separator"
+      {
+        type = "command";
+        key = "ZPool Status";
+        text = "zpool status -x 2>/dev/null || echo 'N/A'";
+      }
+    ]
+    ++ lib.forEach cfg.zpools (pool: {
+      type = "command";
+      key = "ZPool (${pool})";
+      text = "echo \"$(zpool list -Ho cap ${pool} 2>/dev/null) used\" || echo 'N/A'";
+    })
+  );
 in {
   programs = {
     fastfetch = {
@@ -60,29 +82,18 @@ in {
             "host"
             "kernel"
             "uptime"
-            "packages"
             "shell"
-            "display"
-            "de"
-            "wm"
-            "wmtheme"
-            "theme"
-            "icons"
-            "font"
-            "cursor"
             "terminal"
             "terminalfont"
             "cpu"
-            "gpu"
             "memory"
             "swap"
             "disk"
             "localip"
-            "battery"
-            "poweradapter"
             "locale"
           ]
-          ++ zfsModules
+          ++ desktopModules
+          ++ zpoolModules
           ++ [
             "break"
             "colors"

@@ -12,14 +12,8 @@
       };
 
       programs = {
-        motd = {
-          enable = true;
-
-          networkInterfaces = [
-            "eno2"
-            "enp1s0f1"
-            "tailscale0"
-          ];
+        fastfetch = {
+          zpools = ["rpool" "fpool" "dpool"];
         };
       };
 
