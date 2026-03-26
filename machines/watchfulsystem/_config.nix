@@ -7,6 +7,10 @@
       isEncryptedRoot = true;
       impermanence = true;
 
+      hardware = {
+        isVM = true;
+      };
+
       networking = {
         hostName = "watchfulsystem";
       };
