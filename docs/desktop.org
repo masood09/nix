@@ -23,7 +23,7 @@ modules/nixos/desktop/
   _niri.nix          Niri compositor system-level enablement
 
 modules/home-manager/programs/
-  niri/default.nix   Niri user-level config (fuzzel launcher)
+  niri/default.nix   Niri user-level config (rofi, waybar, mako, swayidle, swaylock, playerctld, udiskie)
   _kitty.nix         Terminal emulator
   _stylix.nix        Base16 theming (fonts, cursor, opacity, color scheme)
   zen/               Browser (privacy hardening, extensions, containers, pinned tabs)
@@ -60,9 +60,9 @@ PAM evaluation order for tuigreet with fingerprint enabled:
 
 * Compositor
 
-Niri is a scrollable-tiling Wayland compositor. System-level enablement (~programs.niri.enable~) is in ~_niri.nix~. User configuration lives in ~$XDG_CONFIG_HOME/niri/config.kdl~ (not managed declaratively by this flake).
+Niri is a scrollable-tiling Wayland compositor. System-level enablement (~programs.niri.enable~ and ~programs.light.enable~ for backlight control) is in ~_niri.nix~. User configuration lives in ~$XDG_CONFIG_HOME/niri/config.kdl~ (not managed declaratively by this flake).
 
-fuzzel is installed as the application launcher via home-manager when Niri is enabled on Linux.
+When Niri is enabled on Linux, home-manager installs and configures: rofi (app launcher), waybar (status bar), mako (notifications), swayidle (idle management), swaylock (screen locker), playerctld (MPRIS daemon), and udiskie (auto-mount). Packages without HM modules (swaybg, wl-clipboard, xwayland-satellite) are installed directly.
 
 * Graphics
 
