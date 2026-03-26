@@ -48,6 +48,7 @@
 
       programs = {
         fastfetch = {
+          logo = ../../nix/logos/sonic.png;
           zpools = ["rpool"];
         };
         emacs = {
