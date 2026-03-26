@@ -45,6 +45,11 @@
       "kvm"
     ];
 
+    kernelParams = [
+      # Disable Panel Self Refresh — causes micro-stutter on Whiskey Lake iGPU
+      "i915.enable_psr=0"
+    ];
+
     extraModulePackages = [];
   };
 
