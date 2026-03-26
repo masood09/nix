@@ -47,8 +47,6 @@ in {
         dejavu_fonts
         noto-fonts
         noto-fonts-cjk-sans
-        inter
-
         # Emoji
         noto-fonts-color-emoji
       ]);

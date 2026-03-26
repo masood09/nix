@@ -29,20 +29,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Desktop shell
-    dms = {
-      url = "github:AvengeMedia/DankMaterialShell/stable";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
-    dgop = {
-      url = "github:AvengeMedia/dgop";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
-
     # macOS
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";

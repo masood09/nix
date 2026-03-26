@@ -1,5 +1,4 @@
 # Niri desktop (home-manager side) — fuzzel launcher.
-# Niri config is managed by DMS via ~/.config/niri/dms/*.kdl
 {
   homelabCfg,
   lib,

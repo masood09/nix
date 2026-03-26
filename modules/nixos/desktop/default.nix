@@ -162,8 +162,6 @@ in {
         dejavu_fonts
         noto-fonts
         noto-fonts-cjk-sans
-        inter # Inter Variable font for DankMaterialShell
-
         # Emoji
         noto-fonts-color-emoji
       ];
