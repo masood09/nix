@@ -3,15 +3,13 @@ default:
 
 user := 'masoodahmed'
 
-deploy machine='' ip='': preflight
-    @if [ "$(uname)" = "Darwin" ] && [ -z "{{ machine }}" ] && [ -z "{{ ip }}" ]; then \
+deploy machine='': preflight
+    @if [ "$(uname)" = "Darwin" ] && [ -z "{{ machine }}" ]; then \
       sudo darwin-rebuild switch --flake .; \
-    elif [ -z "{{ machine }}" ] && [ -z "{{ ip }}" ]; then \
-      nixos-rebuild switch --use-remote-sudo --flake .; \
-    elif [ -z "{{ ip }}" ]; then \
-      nixos-rebuild switch --use-remote-sudo --flake ".#{{ machine }}"; \
+    elif [ -z "{{ machine }}" ]; then \
+      nixos-rebuild switch --sudo --flake .; \
     else \
-      nixos-rebuild switch --fast --flake ".#{{ machine }}" --use-remote-sudo --target-host "{{ user }}@{{ ip }}" --build-host "{{ user }}@{{ ip }}"; \
+      nixos-rebuild switch --no-reexec --flake ".#{{ machine }}" --sudo --target-host "{{ user }}@{{ machine }}" --build-host "{{ user }}@{{ machine }}"; \
     fi
 
 # Pre-flight checks — run before deploy to catch formatting and lint errors early
