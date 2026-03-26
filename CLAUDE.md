@@ -10,8 +10,7 @@ Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 
 
 ```bash
 just deploy                          # Deploy to current machine (runs preflight first)
-just deploy machine=heartbeat        # Deploy to specific machine
-just deploy machine=heartbeat ip=x   # Deploy remotely via SSH
+just deploy machine=heartbeat        # Build and deploy on remote machine via SSH
 just preflight                       # Check formatting + lint (no auto-fix)
 just up                              # Update flake.lock
 just lint                            # Check with statix
@@ -47,6 +46,8 @@ just sops-update                     # Update sops key files (interactive)
   - `architecture.org` - System architecture overview
   - `backup.org` - Backup strategy and procedures
   - `secrets-rotation.org` - Secrets rotation runbook
+  - `inventory.org` - Packages, services, and fonts per machine
+  - `desktop.org` - Desktop architecture (login, graphics, theming)
   - `analysis.org` - Codebase review findings and recommendations
   - `zen.org` - Zen Browser configuration notes
 

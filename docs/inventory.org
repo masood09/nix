@@ -305,7 +305,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 *** caretaker
 
-- *Purpose:* Core Network Services (DNS Filtering)
+- *Purpose:* Core Network Services (DNS Filtering + UPS Monitoring)
 - *Storage:* tmpfs root (non-ZFS, encrypted ext4 /nix, impermanence)
 
 **** Services
