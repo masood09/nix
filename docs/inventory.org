@@ -242,6 +242,12 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 |---------+------------+------------------------------------------|
 | Blocky  | blocky/    | DNS proxy with ad/tracker blocking       |
 
+** Firmware
+
+| Service | Module Dir  | Purpose                                     |
+|---------+-------------+---------------------------------------------|
+| fwupd   | (always on) | Firmware updates via LVFS (disabled on VMs) |
+
 ** Containers
 
 | Service | Module Dir | Purpose                                              |
@@ -276,6 +282,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 - *Purpose:* Identity & Access Control (SSO / Authentik)
 - *Storage:* ZFS root (encrypted, impermanence)
+- *Platform:* VM
 
 **** Services
 
@@ -317,6 +324,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 - *Purpose:* Secure federated messaging (Matrix Synapse)
 - *Storage:* ZFS root (encrypted, impermanence)
+- *Platform:* VM
 
 **** Services
 
@@ -374,6 +382,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 - *Purpose:* Mesh Networking Control Plane (Headscale)
 - *Storage:* ZFS root (encrypted, impermanence)
+- *Platform:* VM
 
 **** Services
 
@@ -395,6 +404,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 - *Purpose:* Test & Integration Environment (mirrors production)
 - *Storage:* ZFS root (encrypted, impermanence), pools: rpool, dpool
+- *Platform:* VM
 - *Domain:* test.mantannest.com
 
 **** Services
@@ -438,6 +448,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 - *Purpose:* Monitoring & Service Health (Uptime Kuma)
 - *Storage:* ZFS root (encrypted, impermanence)
+- *Platform:* VM
 
 **** Services
 

@@ -1,7 +1,11 @@
 # Root NixOS module — shared by all NixOS machines.
 # Imports every sub-module and defines the top-level homelab options
 # (role, purpose) that other modules key off of.
-{lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   imports = [
     # System-level modules
     ./_auto-update.nix
@@ -41,10 +45,22 @@
         type = lib.types.str;
         default = "";
       };
+
+      hardware = {
+        isVM = lib.mkEnableOption "virtual machine mode (disables fwupd and other bare-metal services)";
+      };
     };
   };
 
   config = {
+    # Firmware updates — fwupd pulls from LVFS; run `fwupdmgr update` to apply
+    # Disabled on VMs where there is no physical firmware to update.
+    services = {
+      fwupd = lib.mkIf (!config.homelab.hardware.isVM) {
+        enable = true;
+      };
+    };
+
     time = {
       timeZone = "America/Toronto";
     };
