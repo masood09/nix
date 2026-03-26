@@ -134,11 +134,21 @@ in {
       };
     };
 
-    # Wayland environment hints
-    environment = lib.mkIf homelabCfg.desktop.enable {
-      sessionVariables = {
-        NIXOS_OZONE_WL = "1";
-      };
+    # Wayland session — toolkit hints and VA-API driver selection
+    environment = {
+      sessionVariables = lib.mkMerge [
+        (lib.mkIf homelabCfg.desktop.enable {
+          NIXOS_OZONE_WL = "1"; # Electron apps: use native Wayland
+          MOZ_ENABLE_WAYLAND = "1"; # Firefox/Zen: use native Wayland
+        })
+        (lib.mkIf gfxCfg.enable {
+          # iHD = Broadwell+ Intel (UHD 620, etc.), radeonsi = AMD (RDNA, etc.)
+          LIBVA_DRIVER_NAME =
+            if isIntel
+            then "iHD"
+            else "radeonsi";
+        })
+      ];
     };
 
     fonts = lib.mkIf homelabCfg.desktop.enable {

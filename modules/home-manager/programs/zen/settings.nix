@@ -64,10 +64,10 @@ _: {
             "full-screen-api.ignore-widgets" = true;
             "layout.spellcheckDefault" = 0;
 
-            # UI — Smooth scrolling
+            # UI — Smooth scrolling (150 = comfortable on niri; 275 caused perceived jank)
             "apz.overscroll.enabled" = true;
             "general.smoothScroll" = true;
-            "mousewheel.default.delta_multiplier_y" = 275;
+            "mousewheel.default.delta_multiplier_y" = 150;
 
             # Zen — Theme
             "zen.theme.acrylic-elements" = false;
