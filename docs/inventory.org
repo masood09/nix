@@ -460,8 +460,9 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 - *Purpose:* Primary Laptop (NixOS Desktop)
 - *Storage:* ZFS root (encrypted, impermanence)
-- *GPU:* Intel
+- *GPU:* Intel (UHD 620, Whiskey Lake)
 - *Desktop:* Niri compositor + greetd
+- *Kernel params:* =i915.enable_psr=0= (disables Panel Self Refresh to fix micro-stutter)
 
 **** Hardware Features
 
