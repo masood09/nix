@@ -11,7 +11,7 @@
   headscaleExporterPort = toString homelabCfg.services.headscale.metricsPort;
 in {
   config = {
-    environment.etc."alloy/config-headscale.alloy" = lib.mkIf (headscaleEnabled && alloyEnabled) {
+    environment.etc."alloy/headscale.alloy" = lib.mkIf (headscaleEnabled && alloyEnabled) {
       text = ''
         prometheus.scrape "headscale_target" {
           targets = [

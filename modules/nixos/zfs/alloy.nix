@@ -14,7 +14,7 @@
   zfsExporterPort = toString config.services.prometheus.exporters.zfs.port;
 in {
   config = {
-    environment.etc."alloy/config-zfs.alloy" = lib.mkIf (enableZFS && alloyEnabled && config.services.prometheus.exporters.zfs.enable) {
+    environment.etc."alloy/zfs.alloy" = lib.mkIf (enableZFS && alloyEnabled && config.services.prometheus.exporters.zfs.enable) {
       text = ''
         prometheus.scrape "zfs_target" {
           targets = [
