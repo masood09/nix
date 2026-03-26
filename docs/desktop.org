@@ -1,0 +1,174 @@
+#+TITLE: Desktop Architecture
+#+AUTHOR: Masood Ahmed
+#+DATE: 2026-03-26
+#+STARTUP: overview
+
+* Overview
+
+Two NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. Both use ZFS root with impermanence (ephemeral root, persistent ~/home~). macOS desktops (murderbot, work-pantheon) use nix-darwin and are out of scope for this document.
+
+| Machine       | Hardware           | GPU            | Primary User       | Theme               |
+|---------------+--------------------+----------------+--------------------+---------------------|
+| commandmodule | ThinkPad (Intel)   | Intel UHD 620  | masoodahmed (1000) | catppuccin-mocha    |
+| sonic         | ThinkPad T14 Gen 3 | AMD Ryzen iGPU | zainahmed (1001)   | sonic-dark (custom) |
+
+* Module Structure
+
+Desktop configuration is split across NixOS system modules and home-manager user modules.
+
+#+begin_example
+modules/nixos/desktop/
+  default.nix        Shared services: audio, bluetooth, fingerprint, printing, power, fonts, gnome-keyring
+  _greetd.nix        Login manager (tuigreet or sysc-greet) with PAM config
+  _niri.nix          Niri compositor system-level enablement
+
+modules/home-manager/programs/
+  niri/default.nix   Niri user-level config (fuzzel launcher)
+  _kitty.nix         Terminal emulator
+  _stylix.nix        Base16 theming (fonts, cursor, opacity, color scheme)
+  zen/               Browser (privacy hardening, extensions, containers, pinned tabs)
+#+end_example
+
+Everything is gated behind ~homelab.*~ options. A machine opts into the desktop stack by setting ~homelab.desktop.enable = true~ and ~homelab.desktop.niri.enable = true~ in its ~_config.nix~.
+
+* Login Flow
+
+** Greeter
+
+greetd manages login sessions. Two greeters are available via ~homelab.desktop.greeter~:
+
+- *tuigreet* (default) — TUI greeter that launches ~niri-session~. Supports fingerprint auth when ~homelab.hardware.fingerprint.enable = true~.
+- *sysc-greet* — graphical greeter using Niri as compositor. Fingerprint PAM is explicitly disabled because sysc-greet handles only a single password prompt; fprintd's concurrent PAM conversation causes "Connection refused" on the greetd IPC socket.
+
+** PAM Stack
+
+The greetd PAM service is configured per-greeter in ~_greetd.nix~:
+
+- ~enableGnomeKeyring = true~ — passes the login password to gnome-keyring-daemon for auto-unlock
+- ~fprintAuth~ — conditional on greeter type and hardware support
+
+PAM evaluation order for tuigreet with fingerprint enabled:
+
+1. ~pam_fprintd.so~ (sufficient) — if fingerprint succeeds, PAM short-circuits
+2. ~pam_unix.so~ (optional, early) — password collection
+3. ~pam_gnome_keyring.so~ (optional) — receives password for keyring unlock
+4. ~pam_unix.so~ (sufficient, try_first_pass) — password verification
+
+** GNOME Keyring
+
+~services.gnome.gnome-keyring~ is enabled for all desktops. The PAM module auto-unlocks the ~login~ keyring on password login. Fingerprint login cannot unlock the keyring because no password flows through PAM (see Pain Points).
+
+* Compositor
+
+Niri is a scrollable-tiling Wayland compositor. System-level enablement (~programs.niri.enable~) is in ~_niri.nix~. User configuration lives in ~$XDG_CONFIG_HOME/niri/config.kdl~ (not managed declaratively by this flake).
+
+fuzzel is installed as the application launcher via home-manager when Niri is enabled on Linux.
+
+* Graphics
+
+GPU acceleration is configured per-driver via ~homelab.hardware.graphics.driver~:
+
+** Intel (commandmodule)
+
+| Package               | Purpose                                 |
+|-----------------------+-----------------------------------------|
+| intel-media-driver    | iHD VA-API (hardware video, Broadwell+) |
+| intel-vaapi-driver    | i965 VA-API fallback (older Intel)      |
+| intel-compute-runtime | OpenCL (NEO)                            |
+| libva-vdpau-driver    | VDPAU compatibility over VA-API         |
+| libvdpau-va-gl        | VDPAU fallback via OpenGL               |
+
+~LIBVA_DRIVER_NAME=iHD~. Kernel param ~i915.enable_psr=0~ disables Panel Self Refresh to fix scrolling micro-stutter on Whiskey Lake.
+
+** AMD (sonic)
+
+| Package          | Purpose                   |
+|------------------+---------------------------|
+| rocmPackages.clr | OpenCL runtime (ROCm)     |
+| libvdpau-va-gl   | VDPAU fallback via OpenGL |
+
+~LIBVA_DRIVER_NAME=radeonsi~. Mesa's built-in RADV/radeonsi handles VA-API natively. ~hardware.amdgpu.initrd.enable = true~ for early module loading.
+
+* Audio
+
+PipeWire replaces PulseAudio and ALSA with a unified daemon. Enabled when ~homelab.hardware.audio.enable = true~:
+
+- ALSA compatibility with 32-bit support (Wine/Steam)
+- PulseAudio compatibility layer
+- RealtimeKit (~security.rtkit~) for realtime scheduling priority
+
+* Theming
+
+Stylix provides Base16 theming across all applications (terminal, browser, editor, compositor). Configured in ~_stylix.nix~:
+
+| Setting    | Default               | Notes                                |
+|------------+-----------------------+--------------------------------------|
+| Scheme     | catppuccin-mocha      | String (named) or path (custom YAML) |
+| Polarity   | dark                  | ~dark~ or ~light~                        |
+| Monospace  | JetBrains Mono (12pt) | Nerd Font variant                    |
+| Sans-serif | Montserrat (12pt)     |                                      |
+| Cursor     | Bibata Modern Classic | Size 24                              |
+| Opacity    | 0.95                  | Terminal and popups                  |
+
+sonic uses a custom scheme (~nix/themes/sonic-dark.yaml~) with a Sonic the Hedgehog-inspired palette.
+
+Starship prompt is excluded from Stylix targets — it uses hardcoded Catppuccin colors.
+
+* Persistence
+
+Both desktops run ZFS root with impermanence. Root is rolled back to a blank snapshot on every boot (~zfs rollback -r rpool/root/empty@start~). Desktop-specific persistent directories in ~/nix/persist~:
+
+| Path                                   | Purpose                   |
+|----------------------------------------+---------------------------|
+| /var/lib/bluetooth                     | Bluetooth pairings        |
+| /var/lib/fprint                        | Fingerprint templates     |
+| /var/lib/NetworkManager                | WiFi connections          |
+| /etc/NetworkManager/system-connections | WiFi connection configs   |
+| /var/cache/tuigreet (or sysc-greet)    | Greeter session cache     |
+| /home                                  | User data (neededForBoot) |
+
+* Boot
+
+ZFS machines use GRUB (systemd-boot lacks ZFS support). Desktop-specific: ~gfxmodeEfi = "auto"~ for graphical framebuffer. Servers use ~gfxmodeEfi = "text"~.
+
+* Pain Points
+
+** Fingerprint login cannot unlock GNOME Keyring
+
+When ~pam_fprintd.so~ succeeds (marked ~sufficient~), PAM short-circuits the auth stack. ~pam_gnome_keyring.so~ never receives a password, so the ~login~ keyring stays locked. Apps that use the Secret Service API (Element, Discord) will prompt for credentials each session.
+
+*Workaround:* log in with password instead of fingerprint. The keyring unlocks automatically.
+
+** sysc-greet cannot use fingerprint auth
+
+sysc-greet handles only a single password prompt. fprintd's concurrent PAM conversation causes "Connection refused" on the greetd IPC socket, failing all authentication. Fingerprint PAM is hardcoded to ~false~ for the sysc-greet greeter.
+
+** Niri config is not declarative
+
+Niri user configuration (~config.kdl~) is not managed by this flake. Changes to keybindings, window rules, and layout settings are manual and not reproducible across machines.
+
+** ZFS requires GRUB
+
+systemd-boot does not support ZFS. Both desktops are locked to GRUB, which is functional but lacks the cleaner systemd-boot UX and its integration with ~bootctl~.
+
+* Future Improvements
+
+** LUKS + systemd-boot migration
+
+Migrating desktops from ZFS root to ext4 + LUKS would enable systemd-boot and unlock ~pam_fde_boot_pw~ (packaged in nixpkgs as ~pam_fde_boot_pw~). This PAM module retrieves the disk encryption passphrase from the kernel keyring and passes it through PAM at login, enabling both auto-login and GNOME Keyring auto-unlock without typing a password twice. Blocked on ZFS-to-ext4+LUKS migration.
+
+** Auto-login on encrypted desktops
+
+With encrypted root, the user already proves identity at boot. Typing the same password at greetd is redundant. ~pam_fde_boot_pw~ solves this by forwarding the disk passphrase through PAM, but requires LUKS (not ZFS native encryption) and systemd-boot. Depends on the LUKS migration above.
+
+** Plymouth boot splash
+
+Add Plymouth for a graphical boot splash between GRUB (or systemd-boot after LUKS migration) and the greeter. Provides a polished boot experience instead of scrolling systemd output. NixOS has ~boot.plymouth.enable~ upstream.
+
+** Noctalia Shell
+
+[[https://noctalia.dev/][Noctalia]] is a minimal Wayland desktop shell built on Quickshell. It provides panels, notifications, and system UI with a clean aesthetic and 83+ community plugins. Noctalia supports Niri natively, making it a natural fit for the current compositor stack. Would replace ad-hoc status bar / notification tooling with a unified shell layer.
+
+** Declarative Niri configuration
+
+Manage Niri's ~config.kdl~ via home-manager to make keybindings, window rules, and layout settings reproducible across commandmodule and sonic.
