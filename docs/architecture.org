@@ -5,7 +5,7 @@
 
 * Overview
 
-Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 1 NixOS desktop, and 2 macOS machines with home-manager, sops-nix secrets, ZFS, and impermanence.
+Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 2 NixOS desktops, and 2 macOS machines with home-manager, sops-nix secrets, ZFS, and impermanence.
 
 * Repository Layout
 
@@ -22,9 +22,9 @@ machines/                          Per-machine configurations
   watchfulsystem/                    NixOS server (monitoring, uptime)
   caretaker/                         NixOS server (DNS, Tailscale)
   commandmodule/                     NixOS desktop (laptop)
+  sonic/                             NixOS desktop (laptop)
   murderbot/                         macOS (primary dev)
   work-pantheon/                     macOS (work)
-  sonic/                             macOS
   nixiso/                            NixOS installer ISO
 
 modules/                           Reusable configuration modules
@@ -37,6 +37,7 @@ modules/                           Reusable configuration modules
   services/                          27 declarative service modules
 
 lib/                               Shared helpers
+  persistence-helpers.nix            mkPersistenceDirs — impermanence bind-mount guard
   systemd-helpers.nix                mkPermissionService — permission-fixing oneshots
   zfs-options.nix                    mkZfsOptions — ZFS dataset option builder
 
@@ -160,8 +161,8 @@ homelab
 | Role    | Machines                                                                                     | Characteristics                                |
 |---------+----------------------------------------------------------------------------------------------+------------------------------------------------|
 | server  | heartbeat, trialunit, accesscontrolsystem, meshcontrol, commrelay, watchfulsystem, caretaker | ZFS root, impermanence, headless, backup       |
-| desktop | commandmodule                                                                                | Niri compositor, GPU, audio, Bluetooth, Stylix |
-| macOS   | murderbot, work-pantheon, sonic                                                              | nix-darwin, Homebrew, Dock management          |
+| desktop | commandmodule, sonic                                                                         | Niri compositor, GPU, audio, Bluetooth, Stylix |
+| macOS   | murderbot, work-pantheon                                                                     | nix-darwin, Homebrew, Dock management          |
 
 * Secrets Architecture
 
@@ -197,6 +198,10 @@ See [[file:backup.org][backup.org]] for the nightly backup pipeline.
 
 * Key Helpers
 
+** =lib/persistence-helpers.nix= — =mkPersistenceDirs=
+
+Generates impermanence bind-mount directory entries with a three-part guard: =impermanence && !isRootZFS && !zfsEnable=. Services that manage their own ZFS dataset bypass impermanence entirely.
+
 ** =lib/systemd-helpers.nix= — =mkPermissionService=
 
 Generates a oneshot systemd service that fixes directory ownership and permissions before the main service starts. Integrates with ZFS dataset ordering so the directory exists before permissions are set.
@@ -208,5 +213,7 @@ Builder for consistent =homelab.services.<name>.zfs.*= option declarations. Prov
 * Related Documentation
 
 - [[file:backup.org][backup.org]] — Nightly backup pipeline and operations
+- [[file:desktop.org][desktop.org]] — Desktop architecture (login, graphics, theming)
+- [[file:inventory.org][inventory.org]] — Packages, services, and fonts per machine
 - [[file:secrets-rotation.org][secrets-rotation.org]] — Key rotation and incident response
 - [[file:service-registry.org][service-registry.org]] — UIDs, GIDs, and port allocations
