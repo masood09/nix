@@ -41,6 +41,7 @@ in {
           services = {
             greetd = {
               fprintAuth = false;
+              enableGnomeKeyring = true;
             };
           };
         };
@@ -67,6 +68,7 @@ in {
           services = {
             greetd = {
               fprintAuth = config.homelab.hardware.fingerprint.enable;
+              enableGnomeKeyring = true;
             };
           };
         };

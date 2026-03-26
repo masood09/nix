@@ -111,6 +111,7 @@ Linux desktops with Niri also get:
 | accounts-daemon       | User account information service                |
 | pipewire              | Unified audio daemon (replaces PulseAudio/ALSA) |
 | fprintd               | Fingerprint authentication                      |
+| gnome-keyring         | Credential storage, auto-unlocked via PAM       |
 | power-profiles-daemon | CPU power profile management                    |
 | printing (CUPS)       | Print server                                    |
 | upower                | Battery/power monitoring                        |

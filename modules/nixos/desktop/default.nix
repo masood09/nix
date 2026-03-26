@@ -115,6 +115,14 @@ in {
         enable = true;
       };
 
+      # GNOME Keyring — credential storage (Element, Discord tokens, etc.),
+      # auto-unlocked via PAM on password login (fingerprint login cannot unlock it)
+      gnome = lib.mkIf homelabCfg.desktop.enable {
+        gnome-keyring = {
+          enable = true;
+        };
+      };
+
       # Shared desktop service dependencies (compositor-agnostic)
       accounts-daemon = lib.mkIf homelabCfg.desktop.enable {
         enable = true;
