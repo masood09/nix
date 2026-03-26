@@ -71,6 +71,12 @@
             '';
           };
 
+          logo = lib.mkOption {
+            type = lib.types.nullOr lib.types.path;
+            default = null;
+            description = "Path to a custom image file used as the fastfetch logo (rendered via Kitty graphics protocol).";
+          };
+
           zpools = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             default = [];

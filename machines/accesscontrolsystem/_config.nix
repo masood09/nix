@@ -13,6 +13,7 @@
 
       programs = {
         fastfetch = {
+          logo = ../../nix/logos/accesscontrolsystem.png;
           zpools = ["rpool"];
         };
       };

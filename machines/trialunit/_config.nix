@@ -14,6 +14,7 @@
 
       programs = {
         fastfetch = {
+          logo = ../../nix/logos/trialunit.png;
           zpools = ["rpool" "dpool"];
         };
       };

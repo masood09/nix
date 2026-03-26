@@ -11,7 +11,11 @@
         hostName = "caretaker";
       };
 
-      programs = {};
+      programs = {
+        fastfetch = {
+          logo = ../../nix/logos/caretaker.png;
+        };
+      };
 
       services = {
         backup = {
