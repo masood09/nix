@@ -62,6 +62,14 @@
               Whether to enable fastfetch.
             '';
           };
+
+          showOnLogin = lib.mkEnableOption "Show fastfetch on interactive shell login.";
+
+          zshInitOrder = lib.mkOption {
+            type = lib.types.int;
+            default = 650;
+            description = "Order value for fastfetch in zsh initialization (lower runs earlier).";
+          };
         };
 
         fd = {
