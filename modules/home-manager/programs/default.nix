@@ -35,7 +35,6 @@
 
     # Desktop (Linux only, gated on niri.enable)
     ./niri
-    ./_dms.nix
 
     # Applications
     ./zen

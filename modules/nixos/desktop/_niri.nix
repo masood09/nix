@@ -1,5 +1,4 @@
 # Niri compositor — NixOS module (enables niri system-wide)
-# Runtime config is managed by DMS via ~/.config/niri/dms/*.kdl
 {
   config,
   lib,

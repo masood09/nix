@@ -16,8 +16,6 @@
     ./programs
     # Zen browser home-manager module (beta variant)
     inputs.zen-browser.homeModules.beta
-    # DMS shell home-manager module
-    inputs.dms.homeModules.dank-material-shell
   ];
 
   home = {
