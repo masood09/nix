@@ -1,0 +1,632 @@
+#+TITLE: Infrastructure Inventory
+#+DESCRIPTION: Packages, services, and fonts per machine and shared modules.
+#+STARTUP: overview
+
+* Shared Modules
+
+Modules applied to groups of machines (all NixOS, all desktops, all macOS, etc.) before any machine-specific config.
+
+** NixOS System Packages (all NixOS machines)
+
+| Package          | Purpose                                            |
+|------------------+----------------------------------------------------|
+| efibootmgr       | EFI boot entry management                          |
+| git              | Version control (needed for flake fetches)         |
+| kitty.terminfo   | Terminfo for Kitty terminal (remote SSH sessions)  |
+
+System programs enabled conditionally via =homelab.programs.*=:
+- =fish= (interactive shell)
+- =zsh= (interactive shell)
+- =neovim= (editor, set as default when enabled)
+- =vim= (always installed as fallback editor)
+
+** Home-Manager Programs (all machines via home-manager)
+
+Each program module guards itself with its own =homelab.programs.<name>.enable= flag. Machines opt in via =_config.nix=.
+
+*** Shell & Terminal
+
+| Module        | Package(s)                                | Purpose                             |
+|---------------+-------------------------------------------+-------------------------------------|
+| _bash.nix     | bash (built-in)                           | Fallback shell, always enabled      |
+| _fish.nix     | fish, fzf (plugin)                        | Interactive shell with fuzzy search |
+| _zsh.nix      | zsh, autosuggestions, syntax-highlighting | Interactive shell                   |
+| _kitty.nix    | kitty                                     | GPU-accelerated terminal emulator   |
+| _tmux.nix     | tmux                                      | Terminal multiplexer                |
+| _starship.nix | starship                                  | Cross-shell prompt                  |
+
+*** CLI Tools
+
+| Module         | Package(s) | Purpose                               |
+|----------------+------------+---------------------------------------|
+| _bat.nix       | bat        | cat replacement with syntax highlight |
+| _btop.nix      | btop       | System resource monitor               |
+| _direnv.nix    | direnv     | Per-directory env with nix-direnv     |
+| _eza.nix       | eza        | Modern ls with git status             |
+| _fastfetch.nix | fastfetch  | System info display                   |
+| _fd.nix        | fd         | Fast find alternative                 |
+| _fzf.nix       | fzf        | Fuzzy finder                          |
+| _ripgrep.nix   | ripgrep    | Fast recursive grep                   |
+| _zoxide.nix    | zoxide     | Smart directory jumping (cd alias)    |
+
+*** Development
+
+| Module           | Package(s)                                                         | Purpose                            |
+|------------------+--------------------------------------------------------------------+------------------------------------|
+| _claude-code.nix | claude-code, mcp-nixos                                             | Anthropic CLI + NixOS MCP server   |
+| _emacs.nix       | emacs-pgtk, cmake, gcc, gnumake, libtool, gopls, nil, nodejs,      | Editor with LSP, Go tooling,       |
+|                  | gomodifytags, gore, gotests, html-tidy, jsbeautifier,              | formatters, tree-sitter grammars   |
+|                  | nixfmt-rfc-style, shellcheck, stylelint, multimarkdown, terraform, |                                    |
+|                  | tree-sitter, nerd-fonts.symbols-only, symbola                      |                                    |
+| _git.nix         | git, delta                                                         | Version control with pretty diffs  |
+| _gpg.nix         | gpg, gpg-agent (SSH agent mode)                                    | GPG encryption + smartcard/YubiKey |
+| _neovim.nix      | neovim                                                             | Editor (vi/vim aliases)            |
+
+*** Cloud & Infrastructure
+
+| Module          | Package(s) | Purpose                       |
+|-----------------+------------+-------------------------------|
+| _oci-cli.nix    | oci-cli    | Oracle Cloud Infrastructure   |
+| _opentofu.nix   | opentofu   | Infrastructure-as-code        |
+
+*** Theming
+
+| Module      | Package(s)                                                                                 | Purpose                   |
+|-------------+--------------------------------------------------------------------------------------------+---------------------------|
+| _stylix.nix | JetBrains Mono (monospace), Montserrat (sansSerif & serif), Bibata-Modern-Classic (cursor) | Base16 theming via Stylix |
+
+*** Applications
+
+| Module  | Package(s)   | Purpose                             |
+|---------+--------------+-------------------------------------|
+| zen/    | zen-browser  | Privacy-focused Firefox fork        |
+| niri/   | fuzzel       | Wayland application launcher        |
+
+** Desktop Role Packages (=role == "desktop"=)
+
+| Package    | Purpose                             |
+|------------+-------------------------------------|
+| age        | File encryption (sops key tool)     |
+| alejandra  | Nix formatter                       |
+| findutils  | GNU find/xargs                      |
+| go         | Go programming language             |
+| just       | Command runner (justfile)           |
+| jq         | JSON processor                      |
+| sops       | Secrets editor                      |
+| statix     | Nix linter                          |
+| stow       | Symlink farm manager (dotfiles)     |
+
+Linux desktops with Niri also get:
+
+| Package      | Purpose                    |
+|--------------+----------------------------|
+| wl-clipboard | Wayland clipboard utility  |
+
+** NixOS Desktop Module (=homelab.desktop.enable=)
+
+*** Services
+
+| Service                | Purpose                                         |
+|------------------------+-------------------------------------------------|
+| accounts-daemon        | User account information service                |
+| pipewire               | Unified audio daemon (replaces PulseAudio/ALSA) |
+| fprintd                | Fingerprint authentication                      |
+| power-profiles-daemon  | CPU power profile management                    |
+| printing (CUPS)        | Print server                                    |
+| upower                 | Battery/power monitoring                        |
+| greetd + tuigreet      | TUI login manager                               |
+| niri                   | Scrollable-tiling Wayland compositor            |
+
+*** Graphics Packages
+
+*Intel GPU:*
+
+| Package               | Purpose                                  |
+|-----------------------+------------------------------------------|
+| intel-media-driver    | iHD VA-API (hardware video, Broadwell+)  |
+| intel-vaapi-driver    | i965 VA-API fallback (older Intel)       |
+| intel-compute-runtime | OpenCL (NEO)                             |
+| libva-vdpau-driver    | VDPAU compatibility over VA-API          |
+| libvdpau-va-gl        | VDPAU fallback via OpenGL                |
+
+*AMD GPU:*
+
+| Package           | Purpose                       |
+|-------------------+-------------------------------|
+| rocmPackages.clr  | OpenCL runtime (ROCm)         |
+| libvdpau-va-gl    | VDPAU fallback via OpenGL     |
+
+*** Fonts (NixOS system-wide)
+
+| Font                   | Purpose                        |
+|------------------------+--------------------------------|
+| dejavu_fonts           | Sans-serif / serif fallback    |
+| noto-fonts             | Google Noto sans-serif / serif |
+| noto-fonts-cjk-sans    | CJK character coverage         |
+| noto-fonts-color-emoji | Emoji rendering                |
+
+** macOS Shared Module (all Darwin machines)
+
+*** Homebrew Brews
+
+| Package    | Purpose                              |
+|------------+--------------------------------------|
+| borders    | Window border highlight              |
+| sketchybar | Custom macOS status bar              |
+| kanata     | Keyboard remapping daemon            |
+
+*** Homebrew Casks
+
+| Package            | Purpose                             |
+|--------------------+-------------------------------------|
+| aerospace          | Tiling window manager               |
+| alfred             | Spotlight replacement / launcher    |
+| appcleaner         | Clean app uninstaller               |
+| emacs-plus-app     | Emacs macOS app bundle (d12frosted) |
+| karabiner-elements | Keyboard customizer                 |
+| shortcat           | Keyboard-driven UI navigation       |
+| tailscale-app      | Mesh VPN client                     |
+
+*** Mac App Store
+
+| App          | Purpose                      |
+|--------------+------------------------------|
+| Amphetamine  | Prevent sleep                |
+| Unarchiver   | Archive extraction           |
+
+** macOS Desktop Fonts (via home-manager)
+
+| Font                  | Purpose                              |
+|-----------------------+--------------------------------------|
+| dejavu_fonts          | Sans-serif / serif fallback          |
+| noto-fonts            | Google Noto sans-serif / serif       |
+| noto-fonts-cjk-sans   | CJK character coverage               |
+| noto-fonts-color-emoji | Emoji rendering                     |
+
+* NixOS Services
+
+Services defined in =modules/services/= and enabled per-machine via =homelab.services.<name>.enable=.
+
+** Core Infrastructure
+
+| Service    | Module Dir  | Purpose                                                         |
+|------------+-------------+-----------------------------------------------------------------|
+| SSH        | ssh/        | OpenSSH server (key-only, no root login)                        |
+| Tailscale  | tailscale/  | Mesh VPN client connected to self-hosted Headscale              |
+| Caddy      | caddy/      | Reverse proxy with automatic HTTPS (Cloudflare DNS)             |
+| PostgreSQL | postgresql/ | Shared database with peer auth and Prometheus exporter          |
+| MongoDB    | mongodb/    | Document database (localhost-only, used by Nightscout)          |
+| Backup     | backup/     | Nightly orchestration: stop services, pg_dump, ZFS snap, restic |
+| fstrim     | (always on) | Periodic SSD TRIM                                               |
+
+** Identity & Access Control
+
+| Service    | Module Dir     | Purpose                                          |
+|------------+----------------+--------------------------------------------------|
+| Authentik  | authentik/     | SSO / OIDC identity provider for all services    |
+| Headscale  | headscale/     | Self-hosted Tailscale control server + Headplane |
+
+** Communication
+
+| Service | Module Dir | Purpose                                                |
+|---------+------------+--------------------------------------------------------|
+| Matrix  | matrix/    | Synapse homeserver + MAS + LiveKit RTC (voice/video)   |
+
+** Passwords & Secrets
+
+| Service     | Module Dir    | Purpose                                     |
+|-------------+---------------+---------------------------------------------|
+| Vaultwarden | vaultwarden/  | Bitwarden-compatible password manager (SSO) |
+
+** Media & Storage
+
+| Service   | Module Dir | Purpose                                           |
+|-----------+------------+---------------------------------------------------|
+| Immich    | immich/    | Self-hosted photo/video management with ML search |
+| Garage    | garage/    | S3-compatible distributed object storage          |
+| OpenCloud | opencloud/ | File sync & share with Collabora document editing |
+
+** Monitoring & Observability
+
+| Service     | Module Dir   | Purpose                                             |
+|-------------+--------------+-----------------------------------------------------|
+| Prometheus  | prometheus/  | Time-series metrics store (remote-write from Alloy) |
+| Loki        | loki/        | Log aggregation with per-level retention            |
+| Grafana     | grafana/     | Dashboards (Loki + Prometheus, Authentik OIDC)      |
+| Alloy       | alloy/       | Telemetry agent (ships logs and metrics)            |
+| Uptime Kuma | uptime-kuma/ | Service health monitoring and status pages          |
+
+** DNS
+
+| Service | Module Dir | Purpose                                  |
+|---------+------------+------------------------------------------|
+| Blocky  | blocky/    | DNS proxy with ad/tracker blocking       |
+
+** Containers
+
+| Service | Module Dir | Purpose                                              |
+|---------+------------+------------------------------------------------------|
+| Podman  | podman/    | Rootless container runtime with auto-pruning         |
+
+** Specialized
+
+| Service                   | Module Dir                    | Purpose                                       |
+|---------------------------+-------------------------------+-----------------------------------------------|
+| BabyBuddy                 | babybuddy/                    | Baby tracking app (Podman + PostgreSQL)       |
+| IT-Tools                  | ittools/                      | Web-based dev utilities (stateless container) |
+| Karakeep                  | karakeep/                     | Bookmark manager with AI (Authentik OIDC)     |
+| JobScraper                | jobscraper/                   | Job board aggregator (Podman container)       |
+| Nightscout                | nix/services/nightscout.nix   | CGM dashboard (Node.js + MongoDB)             |
+| MailArchiver              | nix/services/mailarchiver.nix | Email archival (.NET service)                 |
+| Dell iDRAC Fan Controller | dell-idrac-fan-controller/    | Fan speed control via IPMI                    |
+
+* Custom Packages
+
+Defined in =nix/pkgs/= and auto-discovered.
+
+| Package            | Purpose                                |
+|--------------------+----------------------------------------|
+| mailarchiver       | .NET email archiving application       |
+| cgm-remote-monitor | Nightscout Node.js CGM dashboard       |
+
+* Machines
+
+** NixOS Servers
+*** accesscontrolsystem
+
+- *Purpose:* Identity & Access Control (SSO / Authentik)
+- *Storage:* ZFS root (encrypted, impermanence)
+
+**** Services
+
+| Service    | Notes                          |
+|------------+--------------------------------|
+| Authentik  | Primary SSO provider           |
+| ACME       | ZFS-backed cert storage        |
+| Backup     | Stops authentik + worker       |
+| Caddy      | Reverse proxy                  |
+| PostgreSQL | ZFS, localhost-only, backed up |
+| Tailscale  | ZFS state                      |
+
+**** Programs
+
+| Program   | Notes         |
+|-----------+---------------|
+| fastfetch | zpools: rpool |
+
+*** caretaker
+
+- *Purpose:* Core Network Services (DNS Filtering)
+- *Storage:* tmpfs root (non-ZFS, encrypted ext4 /nix, impermanence)
+
+**** Services
+
+| Service   | Notes                                   |
+|-----------+-----------------------------------------|
+| Backup    | No service stops (DNS restarts cleanly) |
+| Blocky    | DNS ad/tracker filtering                |
+| Tailscale | Non-ZFS state                           |
+
+**** Programs
+
+| Program   | Notes          |
+|-----------+----------------|
+| fastfetch | no zpools      |
+
+*** commrelay
+
+- *Purpose:* Secure federated messaging (Matrix Synapse)
+- *Storage:* ZFS root (encrypted, impermanence)
+
+**** Services
+
+| Service   | Notes                                       |
+|-----------+---------------------------------------------|
+| ACME      | ZFS-backed cert storage                     |
+| Backup    | Stops uptime-kuma                           |
+| Caddy     | Reverse proxy + Element Web + well-known    |
+| Matrix    | Synapse + LiveKit RTC, open firewall        |
+| Tailscale | ZFS state                                   |
+
+**** Programs
+
+| Program   | Notes         |
+|-----------+---------------|
+| fastfetch | zpools: rpool |
+
+*** heartbeat
+
+- *Purpose:* Primary Homelab Core (NAS + Shared Services)
+- *Storage:* ZFS root (encrypted, impermanence), pools: rpool, fpool, dpool
+
+**** Services
+
+| Service                   | Notes                                             |
+|---------------------------+---------------------------------------------------|
+| ACME                      | ZFS-backed cert storage                           |
+| Backup                    | Orchestrates 19+ service units                    |
+| Caddy                     | Reverse proxy                                     |
+| Dell iDRAC Fan Controller | IPMI fan speed management                         |
+| Grafana                   | ZFS-backed dashboards                             |
+| Immich                    | ZFS datasets for photos/video                     |
+| IT-Tools                  | Stateless developer utilities                     |
+| JobScraper                | Job aggregator container                          |
+| Karakeep                  | ZFS, open firewall, Authentik OIDC                |
+| Loki                      | ZFS-backed log aggregation                        |
+| MailArchiver              | ZFS-backed email archival                         |
+| Matrix                    | ZFS, TCP/IP, MAS with trusted proxies             |
+| MongoDB                   | ZFS-backed (Nightscout)                           |
+| Nightscout                | CGM dashboard, open firewall                      |
+| OpenCloud                 | ZFS-backed file sync                              |
+| Podman                    | ZFS-backed rootless containers                    |
+| PostgreSQL                | ZFS, TCP/IP enabled, backed up                    |
+| Prometheus                | ZFS-backed metrics                                |
+| Tailscale                 | ZFS state                                         |
+| Vaultwarden               | ZFS, open firewall                                |
+
+**** Programs
+
+| Program   | Notes                       |
+|-----------+-----------------------------|
+| fastfetch | zpools: rpool, fpool, dpool |
+
+*** meshcontrol
+
+- *Purpose:* Mesh Networking Control Plane (Headscale)
+- *Storage:* ZFS root (encrypted, impermanence)
+
+**** Services
+
+| Service    | Notes                             |
+|------------+-----------------------------------|
+| ACME       | ZFS-backed cert storage           |
+| Backup     | Stops headplane + headscale       |
+| Caddy      | Reverse proxy                     |
+| Headscale  | ZFS, OIDC via Authentik           |
+| Tailscale  | ZFS state                         |
+
+**** Programs
+
+| Program   | Notes         |
+|-----------+---------------|
+| fastfetch | zpools: rpool |
+
+*** trialunit
+
+- *Purpose:* Test & Integration Environment (mirrors production)
+- *Storage:* ZFS root (encrypted, impermanence), pools: rpool, dpool
+- *Domain:* test.mantannest.com
+
+**** Services
+
+| Service                   | Notes                                         |
+|---------------------------+-----------------------------------------------|
+| ACME                      | ZFS-backed cert storage                       |
+| Authentik                 | Test SSO instance                             |
+| BabyBuddy                 | ZFS-backed baby tracking                      |
+| Backup                    | Orchestrates 19+ service units                |
+| Blocky                    | DNS with local domain resolution              |
+| Caddy                     | Reverse proxy                                 |
+| Dell iDRAC Fan Controller | IPMI fan speed management                     |
+| Garage                    | ZFS S3-compatible storage                     |
+| Grafana                   | ZFS-backed dashboards                         |
+| Headscale                 | ZFS, OIDC, Headplane                          |
+| Immich                    | ZFS photo/video management                    |
+| IT-Tools                  | Stateless developer utilities                 |
+| JobScraper                | Job aggregator container                      |
+| Karakeep                  | ZFS bookmark manager                          |
+| Loki                      | ZFS, custom retention (24h/48h/168h)          |
+| MailArchiver              | ZFS email archival                            |
+| Matrix                    | ZFS, Caddy, LiveKit RTC                       |
+| MongoDB                   | ZFS (Nightscout)                              |
+| Nightscout                | CGM dashboard                                 |
+| OpenCloud                 | ZFS, multi-dataset                            |
+| Podman                    | ZFS rootless containers                       |
+| PostgreSQL                | ZFS, TCP/IP, backed up                        |
+| Prometheus                | 2d retention                                  |
+| Tailscale                 | ZFS state                                     |
+| Uptime Kuma               | ZFS health monitoring                         |
+| Vaultwarden               | ZFS password manager                          |
+
+**** Programs
+
+| Program   | Notes                |
+|-----------+----------------------|
+| fastfetch | zpools: rpool, dpool |
+
+*** watchfulsystem
+
+- *Purpose:* Monitoring & Service Health (Uptime Kuma)
+- *Storage:* ZFS root (encrypted, impermanence)
+
+**** Services
+
+| Service     | Notes                     |
+|-------------+---------------------------|
+| ACME        | ZFS-backed cert storage   |
+| Backup      | Stops uptime-kuma         |
+| Caddy       | Reverse proxy             |
+| Tailscale   | ZFS state                 |
+| Uptime Kuma | ZFS health monitoring     |
+
+**** Programs
+
+| Program   | Notes         |
+|-----------+---------------|
+| fastfetch | zpools: rpool |
+
+** NixOS Desktops
+*** commandmodule
+
+- *Purpose:* Primary Laptop (NixOS Desktop)
+- *Storage:* ZFS root (encrypted, impermanence)
+- *GPU:* Intel
+- *Desktop:* Niri compositor + greetd
+
+**** Hardware Features
+
+| Feature     | Enabled |
+|-------------+---------|
+| Audio       | yes     |
+| Bluetooth   | yes     |
+| Fingerprint | yes     |
+| Graphics    | yes     |
+| Wireless    | yes     |
+
+**** Programs
+
+| Program     | Notes                    |
+|-------------+--------------------------|
+| claude-code | Anthropic CLI + MCP      |
+| emacs       | Editor with LSP/Go tools |
+| fastfetch   | zpools: rpool            |
+| fish        | Interactive shell        |
+| git         | Version control          |
+| kitty       | Terminal emulator        |
+| neovim      | Editor                   |
+| oci-cli     | Oracle Cloud CLI         |
+| opentofu    | Infrastructure-as-code   |
+| stylix      | Theming                  |
+| zen         | Web browser              |
+
+*** sonic
+
+- *Purpose:* Sonic Laptop (NixOS Desktop)
+- *Storage:* ZFS root (encrypted, impermanence)
+- *GPU:* AMD
+- *Desktop:* Niri compositor + greetd
+- *Primary User:* zainahmed (uid 1001)
+
+**** Hardware Features
+
+| Feature     | Enabled |
+|-------------+---------|
+| Audio       | yes     |
+| Bluetooth   | yes     |
+| Fingerprint | yes     |
+| Graphics    | yes     |
+| Wireless    | yes     |
+
+**** Programs
+
+| Program   | Notes                              |
+|-----------+------------------------------------|
+| emacs     | Editor                             |
+| fastfetch | zpools: rpool                      |
+| fish      | Interactive shell                  |
+| git       | Zain Ahmed / zain@ahmedmasood.com  |
+| kitty     | Terminal emulator                  |
+| neovim    | Editor                             |
+| stylix    | Custom scheme (sonic-dark.yaml)    |
+| zen       | Web browser (family container)     |
+
+** macOS Machines
+*** murderbot
+
+- *Purpose:* Primary macOS dev machine (personal)
+
+**** Programs (home-manager)
+
+| Program     | Notes                  |
+|-------------+------------------------|
+| claude-code | Anthropic CLI          |
+| emacs       | Editor                 |
+| fastfetch   | System info            |
+| git         | Version control        |
+| kitty       | Terminal emulator      |
+| neovim      | Editor                 |
+| oci-cli     | Oracle Cloud CLI       |
+| opentofu    | Infrastructure-as-code |
+| zen         | Web browser            |
+
+**** Machine-Specific Homebrew Casks
+
+| Cask           | Purpose                                |
+|----------------+----------------------------------------|
+| balenaetcher   | USB/SD card image flasher              |
+| discord        | Chat client                            |
+| docker-desktop | Container runtime (GUI)                |
+| element        | Matrix chat client                     |
+| opencloud      | File sync client                       |
+| pgadmin4       | PostgreSQL admin GUI                   |
+| zoom           | Video conferencing                     |
+
+**** Machine-Specific Mac App Store
+
+| App               | Purpose                         |
+|-------------------+---------------------------------|
+| Bitwarden Desktop | Password manager                |
+| Home Assistant    | Smart home control              |
+| Infuse            | Media player                    |
+| Windows App       | Remote desktop to Windows       |
+| Xcode             | Apple developer tools           |
+
+**** Dock Apps
+
+Zen Browser, Emacs, kitty, Element, Discord, Messages, Reminders, Notes, Infuse, System Settings
+
+*** work-pantheon
+
+- *Purpose:* Work macOS machine (GPG signing with YubiKey)
+- *Primary User:* masoodahmed
+
+**** Programs (home-manager)
+
+| Program | Notes                                                       |
+|---------+-------------------------------------------------------------|
+| emacs   | Editor                                                      |
+| git     | masoodahmed@pantheon.io, GPG signing (key 27F12F49A6098D65) |
+| gpg     | GPG + smartcard/YubiKey SSH agent                           |
+| neovim  | Editor                                                      |
+
+**** Machine-Specific System Packages
+
+| Package    | Purpose                       |
+|------------+-------------------------------|
+| kubectx    | Kubernetes context switcher   |
+| k9s        | Kubernetes TUI                |
+| shellcheck | Shell script linter           |
+
+**** Machine-Specific Homebrew Brews
+
+| Brew            | Purpose                            |
+|-----------------+------------------------------------|
+| hopenpgp-tools  | PGP key linter                     |
+| pinentry-mac    | GPG PIN entry for macOS            |
+| ykman           | YubiKey CLI management             |
+| vault           | HashiCorp secrets management       |
+| docker          | Container CLI                      |
+| podman          | Rootless container CLI             |
+| krunkit         | Lightweight VM for containers      |
+| colima          | Container runtime on macOS         |
+
+**** Machine-Specific Homebrew Casks
+
+| Cask           | Purpose          |
+|----------------+------------------|
+| gcloud-cli     | Google Cloud CLI |
+| podman-desktop | Podman GUI       |
+
+**** Dock Apps
+
+Zen Browser, Google Chrome, Emacs, Slack, Zoom, System Settings
+
+** Other
+*** nixiso
+
+- *Purpose:* Minimal NixOS installer ISO with pre-configured SSH key
+
+**** System Packages
+
+| Package     | Purpose                         |
+|-------------+---------------------------------|
+| efibootmgr  | EFI boot entry management       |
+| git         | Version control                 |
+| gptfdisk    | GPT partition table editor      |
+| parted      | Disk partitioning               |
+
+**** Services
+
+| Service | Purpose                                   |
+|---------+-------------------------------------------|
+| openssh | SSH server for remote installation access |
