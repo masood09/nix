@@ -218,12 +218,12 @@
           };
 
           scheme = lib.mkOption {
-            default = "catppuccin-mocha";
+            default = "gruvbox-dark";
             type = lib.types.either lib.types.str lib.types.path;
             description = ''
               Base16 color scheme. Either a scheme name from the base16-schemes
-              package (e.g. "catppuccin-mocha", "nord") or a path to a custom
-              Base16 YAML file (e.g. ../../nix/themes/sonic-dark.yaml).
+              package (e.g. "gruvbox-dark", "catppuccin-mocha") or a path to a
+              custom Base16 YAML file (e.g. ../../nix/themes/sonic-dark.yaml).
             '';
           };
 
