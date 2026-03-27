@@ -124,6 +124,19 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 
 ** NixOS Desktop Module (=homelab.desktop.enable=)
 
+*** Kernel & Performance
+
+| Setting             | Value              | Purpose                                             |
+|---------------------+--------------------+-----------------------------------------------------|
+| kernelPackages      | linuxPackages_zen  | BORE scheduler, 1000Hz tick, optimized preemption   |
+| vm.swappiness       | 10                 | Prefer RAM over zram swap                           |
+| vm.vfs_cache_pressure | 50               | Retain filesystem metadata cache                    |
+| vm.dirty_ratio      | 5                  | Flush writes sooner (ZFS ARC manages write cache)   |
+| fontconfig antialias | true              | Smooth font edges                                   |
+| fontconfig hinting  | slight             | Respect built-in font hints                         |
+| fontconfig rgba     | rgb                | Subpixel rendering for LCD panels                   |
+| fontconfig lcdfilter | default           | Reduce color fringing from subpixel rendering       |
+
 *** Services
 
 | Service               | Purpose                                         |
@@ -138,7 +151,7 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 | greetd + tuigreet     | TUI login manager (default greeter)             |
 | greetd + sysc-greet   | Graphical greeter (ASCII art + themes in kitty) |
 | light                 | Backlight control (udev rules for video group)  |
-| niri                  | Scrollable-tiling Wayland compositor             |
+| niri                  | Scrollable-tiling Wayland compositor            |
 
 *** Graphics Packages
 
