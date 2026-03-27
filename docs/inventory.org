@@ -26,14 +26,14 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 
 *** Shell & Terminal
 
-| Module        | Package(s)                                | Purpose                             |
-|---------------+-------------------------------------------+-------------------------------------|
-| _bash.nix     | bash (built-in)                           | Fallback shell, always enabled      |
-| _fish.nix     | fish, fzf (plugin)                        | Interactive shell with fuzzy search |
-| _zsh.nix      | zsh, autosuggestions, syntax-highlighting | Interactive shell                   |
-| _kitty.nix    | kitty                                     | GPU-accelerated terminal emulator   |
-| _tmux.nix     | tmux                                      | Terminal multiplexer                |
-| _starship.nix | starship                                  | Cross-shell prompt                  |
+| Module        | Package(s)                                 | Purpose                             |
+|---------------+--------------------------------------------+-------------------------------------|
+| _bash.nix     | bash (built-in)                            | Fallback shell, always enabled      |
+| _fish.nix     | fish, tide, fzf, done, bang-bang (plugins) | Interactive shell with tide prompt  |
+| _zsh.nix      | zsh, autosuggestions, syntax-highlighting  | Interactive shell                   |
+| _kitty.nix    | kitty                                      | GPU-accelerated terminal emulator   |
+| _tmux.nix     | tmux                                       | Terminal multiplexer                |
+| _starship.nix | starship                                   | Cross-shell prompt (bash, zsh only) |
 
 *** CLI Tools
 
