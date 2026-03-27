@@ -160,9 +160,22 @@ in {
     };
 
     fonts = lib.mkIf homelabCfg.desktop.enable {
+      # Font rendering — anti-aliasing, hinting, and subpixel rendering for
+      # crisp text on LCD panels. autohint is off so fonts with good built-in
+      # hints (JetBrains Mono, Montserrat) render as intended.
       fontconfig = {
-        # Required for user-installed fonts to be discovered
         enable = true;
+        antialias = true;
+        hinting = {
+          enable = true;
+          autohint = false;
+          style = "slight";
+        };
+        subpixel = {
+          # RGB matches standard LCD subpixel layout (including ThinkPad panels)
+          rgba = "rgb";
+          lcdfilter = "default";
+        };
       };
 
       packages = with pkgs; [
