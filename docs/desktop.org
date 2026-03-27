@@ -114,7 +114,7 @@ Stylix provides Base16 theming across all applications (terminal, browser, edito
 
 sonic uses a custom scheme (~nix/themes/sonic-dark.yaml~) with a Sonic the Hedgehog-inspired palette.
 
-Starship prompt is excluded from Stylix targets — it uses hardcoded Catppuccin colors.
+Starship prompt is excluded from Stylix targets — it uses hardcoded Catppuccin colors. Fish uses tide instead of Starship; tide prompt colors are derived from Stylix base16 slots in ~_fish.nix~ so they adapt automatically per scheme.
 
 * Persistence
 
