@@ -52,7 +52,7 @@ in {
     };
   };
 
-  config = {
+  config = lib.mkIf homelabCfg.desktop.enable {
     hardware = {
       bluetooth = lib.mkIf homelabCfg.hardware.bluetooth.enable {
         enable = true;
@@ -117,32 +117,31 @@ in {
 
       # GNOME Keyring — credential storage (Element, Discord tokens, etc.),
       # auto-unlocked via PAM on password login (fingerprint login cannot unlock it)
-      gnome = lib.mkIf homelabCfg.desktop.enable {
+      gnome = {
         gnome-keyring = {
           enable = true;
         };
       };
 
-      # Shared desktop service dependencies (compositor-agnostic)
-      accounts-daemon = lib.mkIf homelabCfg.desktop.enable {
+      accounts-daemon = {
         enable = true;
       };
 
-      power-profiles-daemon = lib.mkIf homelabCfg.desktop.enable {
+      power-profiles-daemon = {
         enable = true;
       };
 
-      printing = lib.mkIf homelabCfg.desktop.enable {
+      printing = {
         enable = true;
       };
 
       # Battery/power monitoring
-      upower = lib.mkIf homelabCfg.desktop.enable {
+      upower = {
         enable = true;
       };
     };
 
-    boot = lib.mkIf homelabCfg.desktop.enable {
+    boot = {
       # Zen kernel — BORE scheduler for lower interactive latency, 1000Hz tick,
       # and optimized preemption. ZFS 2.3.x is compatible with the Zen kernel.
       # If issues arise, select an older generation from GRUB to revert.
@@ -163,10 +162,10 @@ in {
     # Wayland session — toolkit hints and VA-API driver selection
     environment = {
       sessionVariables = lib.mkMerge [
-        (lib.mkIf homelabCfg.desktop.enable {
+        {
           NIXOS_OZONE_WL = "1"; # Electron apps: use native Wayland
           MOZ_ENABLE_WAYLAND = "1"; # Firefox/Zen: use native Wayland
-        })
+        }
         (lib.mkIf gfxCfg.enable {
           # iHD = Broadwell+ Intel (UHD 620, etc.), radeonsi = AMD (RDNA, etc.)
           LIBVA_DRIVER_NAME =
@@ -177,7 +176,7 @@ in {
       ];
     };
 
-    fonts = lib.mkIf homelabCfg.desktop.enable {
+    fonts = {
       # Font rendering — anti-aliasing, hinting, and subpixel rendering for
       # crisp text on LCD panels. autohint is off so fonts with good built-in
       # hints (JetBrains Mono, Montserrat) render as intended.
