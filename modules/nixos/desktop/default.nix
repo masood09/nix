@@ -142,6 +142,19 @@ in {
       };
     };
 
+    # Desktop VM tuning — prefer RAM over swap, cache filesystem metadata,
+    # and flush dirty pages sooner to avoid write stalls (ZFS manages its own
+    # write cache via ARC, so a lower dirty_ratio is safe).
+    boot = {
+      kernel = {
+        sysctl = lib.mkIf homelabCfg.desktop.enable {
+          "vm.swappiness" = 10;
+          "vm.vfs_cache_pressure" = 50;
+          "vm.dirty_ratio" = 5;
+        };
+      };
+    };
+
     # Wayland session — toolkit hints and VA-API driver selection
     environment = {
       sessionVariables = lib.mkMerge [
