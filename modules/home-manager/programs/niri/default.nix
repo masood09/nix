@@ -15,6 +15,7 @@ in {
     home = {
       packages = with pkgs; [
         swaybg # wallpaper (no HM module)
+        swayidle # idle manager, spawned by niri (no HM module)
         wl-clipboard # clipboard utilities (no HM module)
         xwayland-satellite # XWayland support for niri (no HM module)
       ];
@@ -26,9 +27,6 @@ in {
         enable = true;
       };
       playerctld = {
-        enable = true;
-      };
-      swayidle = {
         enable = true;
       };
       udiskie = {
