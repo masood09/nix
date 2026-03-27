@@ -100,14 +100,14 @@ PipeWire replaces PulseAudio and ALSA with a unified daemon. Enabled when ~homel
 
 Stylix provides Base16 theming across all applications (terminal, browser, editor, compositor). Configured in ~_stylix.nix~:
 
-| Setting    | Default               | Notes                                |
-|------------+-----------------------+--------------------------------------|
-| Scheme     | catppuccin-mocha      | String (named) or path (custom YAML) |
-| Polarity   | dark                  | ~dark~ or ~light~                        |
-| Monospace  | JetBrains Mono (12pt) | Nerd Font variant                    |
-| Sans-serif | Montserrat (12pt)     |                                      |
-| Cursor     | Bibata Modern Classic | Size 24                              |
-| Opacity    | 0.95                  | Terminal and popups                  |
+| Setting    | Default                        | Notes                                |
+|------------+--------------------------------+--------------------------------------|
+| Scheme     | catppuccin-mocha               | String (named) or path (custom YAML) |
+| Polarity   | dark                           | ~dark~ or ~light~                        |
+| Monospace  | JetBrainsMono Nerd Font (12pt) | Nerd Font variant                    |
+| Sans-serif | Montserrat (12pt)              |                                      |
+| Cursor     | Bibata Modern Classic          | Size 24                              |
+| Opacity    | 0.95                           | Terminal and popups                  |
 
 sonic uses a custom scheme (~nix/themes/sonic-dark.yaml~) with a Sonic the Hedgehog-inspired palette.
 
