@@ -1,5 +1,6 @@
 # Home environment — base home-manager config shared across all machines.
-# Sets up home directory path (Linux vs macOS) and imports all program modules.
+# Sets up home directory path (Linux vs macOS), XDG directories, and imports
+# all program modules.
 {
   lib,
   pkgs,
@@ -32,6 +33,16 @@
     # macOS needs explicit SOPS key path (NixOS machines use the system age key)
     sessionVariables = lib.mkIf pkgs.stdenv.isDarwin {
       SOPS_AGE_KEY_FILE = "$HOME/.config/sops/age/keys.txt";
+    };
+  };
+
+  # Create standard XDG user directories (Desktop, Documents, Downloads, etc.)
+  # on Linux desktops. Skipped on macOS (xdg-user-dirs is freedesktop-only) and
+  # servers (no interactive desktop session).
+  xdg = {
+    userDirs = {
+      enable = pkgs.stdenv.isLinux && homelabCfg.role == "desktop";
+      createDirectories = true;
     };
   };
 

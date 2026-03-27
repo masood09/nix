@@ -22,6 +22,9 @@ modules/nixos/desktop/
   _greetd.nix        Login manager (tuigreet or sysc-greet) with PAM config
   _niri.nix          Niri compositor + backlight control (light)
 
+modules/home-manager/
+  home.nix           Base HM config: home path, session vars, XDG user directories (Desktop, Documents, etc.)
+
 modules/home-manager/programs/
   niri/default.nix   Niri user-level config (rofi, waybar, mako, swayidle, swaylock, playerctld, udiskie)
   _kitty.nix         Terminal emulator
