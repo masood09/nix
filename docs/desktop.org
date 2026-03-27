@@ -18,9 +18,9 @@ Desktop configuration is split across NixOS system modules and home-manager user
 
 #+begin_example
 modules/nixos/desktop/
-  default.nix        Shared services: audio, bluetooth, fingerprint, printing, power, fonts, gnome-keyring
+  default.nix        Shared services, hardware, kernel (Zen), VM tuning, fontconfig, fonts
   _greetd.nix        Login manager (tuigreet or sysc-greet) with PAM config
-  _niri.nix          Niri compositor system-level enablement
+  _niri.nix          Niri compositor + backlight control (light)
 
 modules/home-manager/programs/
   niri/default.nix   Niri user-level config (rofi, waybar, mako, swayidle, swaylock, playerctld, udiskie)
@@ -126,6 +126,36 @@ Both desktops run ZFS root with impermanence. Root is rolled back to a blank sna
 | /etc/NetworkManager/system-connections | WiFi connection configs   |
 | /var/cache/tuigreet (or sysc-greet)    | Greeter session cache     |
 | /home                                  | User data (neededForBoot) |
+
+* Kernel & Performance
+
+Desktops use the Zen kernel (~linuxPackages_zen~) for improved interactive responsiveness. Key differences from the stock kernel:
+
+- BORE scheduler — lower latency for foreground applications
+- 1000Hz tick rate — smoother input handling and animations
+- Optimized preemption — less stalling under load
+
+ZFS 2.3.x is compatible with the Zen kernel. If issues arise, select an older generation from GRUB to revert.
+
+** VM Tuning (sysctl)
+
+Desktop-specific sysctl overrides for memory management:
+
+| Parameter              | Value | Default | Rationale                                        |
+|------------------------+-------+---------+--------------------------------------------------|
+| vm.swappiness          |    10 |      60 | Prefer RAM over zram swap on desktops            |
+| vm.vfs_cache_pressure  |    50 |     100 | Retain more filesystem metadata in cache         |
+| vm.dirty_ratio         |     5 |      20 | Flush writes sooner; ZFS ARC manages write cache |
+
+** Font Rendering (fontconfig)
+
+| Setting   | Value   | Rationale                                                         |
+|-----------+---------+-------------------------------------------------------------------|
+| antialias | true    | Smooth font edges                                                 |
+| hinting   | slight  | Respects built-in font hints (JetBrains Mono, etc.)               |
+| autohint  | false   | Disabled — fonts with good hints render better without            |
+| rgba      | rgb     | Subpixel rendering for LCD panels (triples horizontal resolution) |
+| lcdfilter | default | Reduces color fringing from subpixel rendering                    |
 
 * Boot
 
