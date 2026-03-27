@@ -101,12 +101,12 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 
 **** Services (home-manager modules)
 
-| Service    | Purpose                              |
-|------------+--------------------------------------|
-| mako       | Notification daemon (D-Bus activated)|
-| playerctld | MPRIS media player daemon            |
-| swayidle   | Idle management                      |
-| udiskie    | Auto-mount removable media           |
+| Service    | Purpose                               |
+|------------+---------------------------------------|
+| mako       | Notification daemon (D-Bus activated) |
+| playerctld | MPRIS media player daemon             |
+| swayidle   | Idle management                       |
+| udiskie    | Auto-mount removable media            |
 
 ** Desktop Role Packages (=role == "desktop"=)
 
@@ -142,6 +142,7 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 | Service               | Purpose                                         |
 |-----------------------+-------------------------------------------------|
 | accounts-daemon       | User account information service                |
+| ananicy-cpp           | Auto-nice daemon (CachyOS rules)                |
 | pipewire              | Unified audio daemon (replaces PulseAudio/ALSA) |
 | fprintd               | Fingerprint authentication                      |
 | gnome-keyring         | Credential storage, auto-unlocked via PAM       |
@@ -167,10 +168,9 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 
 *AMD GPU:*
 
-| Package           | Purpose                       |
-|-------------------+-------------------------------|
-| rocmPackages.clr  | OpenCL runtime (ROCm)         |
-| libvdpau-va-gl    | VDPAU fallback via OpenGL     |
+| Package        | Purpose                   |
+|----------------+---------------------------|
+| libvdpau-va-gl | VDPAU fallback via OpenGL |
 
 *** Fonts (NixOS system-wide)
 

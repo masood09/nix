@@ -39,6 +39,11 @@
       "kvm"
     ];
 
+    kernelParams = [
+      # Use modern AMD P-State driver with energy performance preference
+      "amd_pstate=active"
+    ];
+
     extraModulePackages = [];
   };
 
