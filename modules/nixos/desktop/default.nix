@@ -142,12 +142,17 @@ in {
       };
     };
 
-    # Desktop VM tuning — prefer RAM over swap, cache filesystem metadata,
-    # and flush dirty pages sooner to avoid write stalls (ZFS manages its own
-    # write cache via ARC, so a lower dirty_ratio is safe).
-    boot = {
+    boot = lib.mkIf homelabCfg.desktop.enable {
+      # Zen kernel — BORE scheduler for lower interactive latency, 1000Hz tick,
+      # and optimized preemption. ZFS 2.3.x is compatible with the Zen kernel.
+      # If issues arise, select an older generation from GRUB to revert.
+      kernelPackages = pkgs.linuxPackages_zen;
+
+      # Desktop VM tuning — prefer RAM over swap, cache filesystem metadata,
+      # and flush dirty pages sooner to avoid write stalls (ZFS manages its own
+      # write cache via ARC, so a lower dirty_ratio is safe).
       kernel = {
-        sysctl = lib.mkIf homelabCfg.desktop.enable {
+        sysctl = {
           "vm.swappiness" = 10;
           "vm.vfs_cache_pressure" = 50;
           "vm.dirty_ratio" = 5;
