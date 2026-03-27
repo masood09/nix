@@ -2,19 +2,27 @@
 {
   homelabCfg,
   lib,
+  pkgs,
   ...
-}: {
+}: let
+  fishEnabled = homelabCfg.programs.fish.enable or false;
+in {
   programs = {
     kitty = {
       inherit (homelabCfg.programs.kitty) enable;
 
       settings = {
+        # Launch fish as the interactive shell without changing the login shell,
+        # avoiding home-manager activation issues with non-POSIX shells.
+        shell = lib.mkIf fishEnabled "${pkgs.fish}/bin/fish";
+
         # Font configuration
         font_size = lib.mkDefault 12;
 
         # Cursor
-        cursor_shape = "block";
+        cursor_shape = "underline";
         cursor_blink_interval = 0;
+        cursor_underline_thickness = "0.15";
 
         # Scrollback
         scrollback_lines = 10000;
@@ -31,10 +39,8 @@
         # Shell integration
         shell_integration = "enabled";
 
-        # Tab bar
-        tab_bar_edge = "top";
-        tab_bar_style = "powerline";
-        tab_powerline_style = "slanted";
+        # Disable tab bar (tiling WM handles window management)
+        tab_bar_min_tabs = 2;
 
         # Mouse
         copy_on_select = "yes";

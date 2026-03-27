@@ -110,7 +110,7 @@ Stylix provides Base16 theming across all applications (terminal, browser, edito
 | Monospace  | JetBrainsMono Nerd Font (12pt) | Nerd Font variant                    |
 | Sans-serif | Montserrat (12pt)              |                                      |
 | Cursor     | Bibata Modern Classic          | Size 24                              |
-| Opacity    | 0.95                           | Terminal and popups                  |
+| Opacity    | 0.90                           | Terminal and popups                  |
 
 sonic uses a custom scheme (~nix/themes/sonic-dark.yaml~) with a Sonic the Hedgehog-inspired palette.
 

@@ -59,8 +59,8 @@ in {
 
     # Opacity settings
     opacity = {
-      terminal = 0.95;
-      popups = 0.95;
+      terminal = 0.90;
+      popups = 0.90;
     };
 
     # Disable Starship target - it uses hardcoded Catppuccin colors
