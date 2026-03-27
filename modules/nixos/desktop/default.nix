@@ -74,7 +74,6 @@ in {
           ]
           else [
             # AMD uses mesa's built-in RADV/radeonsi — no extra VA-API driver needed
-            rocmPackages.clr # OpenCL runtime (ROCm)
             libvdpau-va-gl # VDPAU fallback via OpenGL
           ];
       };
@@ -127,6 +126,22 @@ in {
         enable = true;
       };
 
+      # ananicy-cpp — auto-nice daemon that prioritises interactive desktop apps
+      # (compositor, browser, terminal) and de-prioritises background work
+      # (builds, indexers). Uses CachyOS community rules as a base; Zen Beta
+      # is added manually because upstream rules only cover "zen" / "zen-bin".
+      ananicy = {
+        enable = true;
+        package = pkgs.ananicy-cpp;
+        rulesProvider = pkgs.ananicy-rules-cachyos;
+        extraRules = [
+          {
+            name = "zen-beta";
+            type = "Doc-View";
+          }
+        ];
+      };
+
       power-profiles-daemon = {
         enable = true;
       };
@@ -147,14 +162,35 @@ in {
       # If issues arise, select an older generation from GRUB to revert.
       kernelPackages = pkgs.linuxPackages_zen;
 
-      # Desktop VM tuning — prefer RAM over swap, cache filesystem metadata,
-      # and flush dirty pages sooner to avoid write stalls (ZFS manages its own
-      # write cache via ARC, so a lower dirty_ratio is safe).
+      # Desktop VM / scheduler tuning (inspired by CachyOS defaults).
+      # Absolute byte dirty limits give predictable write-back regardless of RAM
+      # size; zram-aware swappiness and single-page reads suit compressed swap.
       kernel = {
         sysctl = {
-          "vm.swappiness" = 10;
+          # zram-optimized: high swappiness prefers compressing to zram over
+          # evicting file cache; single-page reads (page-cluster=0) suit zram
+          # since there is no rotational seek penalty to amortise.
+          "vm.swappiness" = 150;
+          "vm.page-cluster" = 0;
+
+          # Predictable write-back: flush at 64 MB background / 256 MB hard cap
+          "vm.dirty_background_bytes" = 67108864;
+          "vm.dirty_bytes" = 268435456;
+
+          # Keep filesystem metadata cached aggressively
           "vm.vfs_cache_pressure" = 50;
-          "vm.dirty_ratio" = 5;
+
+          # Avoid background compaction latency spikes
+          "vm.compaction_proactiveness" = 0;
+
+          # Larger free-memory reserve to prevent allocation stalls
+          "vm.min_free_kbytes" = 67584;
+
+          # Disable NMI watchdog (saves power, reduces interrupts)
+          "kernel.nmi_watchdog" = 0;
+
+          # Disable split-lock mitigation (avoids performance penalty)
+          "kernel.split_lock_mitigate" = 0;
         };
       };
     };

@@ -18,7 +18,7 @@ Desktop configuration is split across NixOS system modules and home-manager user
 
 #+begin_example
 modules/nixos/desktop/
-  default.nix        Shared services, hardware, kernel (Zen), VM tuning, fontconfig, fonts
+  default.nix        Shared services, hardware, kernel (Zen), VM tuning, ananicy-cpp, fontconfig, fonts
   _greetd.nix        Login manager (tuigreet or sysc-greet) with PAM config
   _niri.nix          Niri compositor + backlight control (light)
 
@@ -82,12 +82,11 @@ GPU acceleration is configured per-driver via ~homelab.hardware.graphics.driver~
 
 ** AMD (sonic)
 
-| Package          | Purpose                   |
-|------------------+---------------------------|
-| rocmPackages.clr | OpenCL runtime (ROCm)     |
-| libvdpau-va-gl   | VDPAU fallback via OpenGL |
+| Package        | Purpose                   |
+|----------------+---------------------------|
+| libvdpau-va-gl | VDPAU fallback via OpenGL |
 
-~LIBVA_DRIVER_NAME=radeonsi~. Mesa's built-in RADV/radeonsi handles VA-API natively. ~hardware.amdgpu.initrd.enable = true~ for early module loading.
+~LIBVA_DRIVER_NAME=radeonsi~. Mesa's built-in RADV/radeonsi handles VA-API natively — no separate VA-API or OpenCL driver is needed for desktop use. ~hardware.amdgpu.initrd.enable = true~ for early module loading. Kernel param ~amd_pstate=active~ forces the modern AMD P-State EPP driver for fine-grained frequency scaling.
 
 * Audio
 
@@ -139,13 +138,23 @@ ZFS 2.3.x is compatible with the Zen kernel. If issues arise, select an older ge
 
 ** VM Tuning (sysctl)
 
-Desktop-specific sysctl overrides for memory management:
+Desktop-specific sysctl overrides inspired by CachyOS defaults. Absolute byte dirty limits replace ratio-based settings for predictable write-back regardless of RAM size. zram-aware values suit compressed swap.
 
-| Parameter              | Value | Default | Rationale                                        |
-|------------------------+-------+---------+--------------------------------------------------|
-| vm.swappiness          |    10 |      60 | Prefer RAM over zram swap on desktops            |
-| vm.vfs_cache_pressure  |    50 |     100 | Retain more filesystem metadata in cache         |
-| vm.dirty_ratio         |     5 |      20 | Flush writes sooner; ZFS ARC manages write cache |
+| Parameter                   |     Value | Default | Rationale                                           |
+|-----------------------------+-----------+---------+-----------------------------------------------------|
+| vm.swappiness               |       150 |      60 | Prefer compressing to zram over evicting file cache |
+| vm.page-cluster             |         0 |       3 | Single-page swap reads suit zram (no seek penalty)  |
+| vm.dirty_background_bytes   |  67108864 |       0 | Flush at 64 MB background (predictable write-back)  |
+| vm.dirty_bytes              | 268435456 |       0 | Hard cap at 256 MB (predictable write-back)         |
+| vm.vfs_cache_pressure       |        50 |     100 | Retain more filesystem metadata in cache            |
+| vm.compaction_proactiveness |         0 |      20 | Avoid background compaction latency spikes          |
+| vm.min_free_kbytes          |     67584 |    4096 | Larger free-memory reserve to prevent alloc stalls  |
+| kernel.nmi_watchdog         |         0 |       1 | Saves power, reduces interrupts                     |
+| kernel.split_lock_mitigate  |         0 |       1 | Avoids split-lock detection performance penalty     |
+
+** Process Scheduling (ananicy-cpp)
+
+ananicy-cpp is an auto-nice daemon that adjusts process niceness, I/O priority, and CPU scheduling class in real time. It uses the CachyOS community ruleset (~ananicy-rules-cachyos~) which covers hundreds of common applications. A custom rule is added for ~zen-beta~ (mapped to ~Doc-View~ type, same as Firefox/Zen) since upstream only covers ~zen~ and ~zen-bin~.
 
 ** Font Rendering (fontconfig)
 
