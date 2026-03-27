@@ -9,7 +9,7 @@ Two NixOS desktops run a Wayland-native stack: Niri compositor, greetd login man
 
 | Machine       | Hardware           | GPU            | Primary User       | Theme               |
 |---------------+--------------------+----------------+--------------------+---------------------|
-| commandmodule | ThinkPad (Intel)   | Intel UHD 620  | masoodahmed (1000) | catppuccin-mocha    |
+| commandmodule | ThinkPad (Intel)   | Intel UHD 620  | masoodahmed (1000) | gruvbox-dark        |
 | sonic         | ThinkPad T14 Gen 3 | AMD Ryzen iGPU | zainahmed (1001)   | sonic-dark (custom) |
 
 * Module Structure
@@ -105,7 +105,7 @@ Stylix provides Base16 theming across all applications (terminal, browser, edito
 
 | Setting    | Default                        | Notes                                |
 |------------+--------------------------------+--------------------------------------|
-| Scheme     | catppuccin-mocha               | String (named) or path (custom YAML) |
+| Scheme     | gruvbox-dark                   | String (named) or path (custom YAML) |
 | Polarity   | dark                           | ~dark~ or ~light~                        |
 | Monospace  | JetBrainsMono Nerd Font (12pt) | Nerd Font variant                    |
 | Sans-serif | Montserrat (12pt)              |                                      |
