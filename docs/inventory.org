@@ -103,7 +103,7 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 
 | Service    | Purpose                               |
 |------------+---------------------------------------|
-| mako       | Notification daemon (D-Bus activated) |
+| swaync     | Notification center (D-Bus activated) |
 | playerctld | MPRIS media player daemon             |
 | swayidle   | Idle management                       |
 | udiskie    | Auto-mount removable media            |

@@ -1,6 +1,6 @@
 # Niri compositor — NixOS system-level module.
 # Enables the compositor and backlight control (udev rules for the video group).
-# User-level tooling (rofi, waybar, mako, etc.) lives in
+# User-level tooling (rofi, waybar, swaync, etc.) lives in
 # modules/home-manager/programs/niri/default.nix.
 {
   config,
