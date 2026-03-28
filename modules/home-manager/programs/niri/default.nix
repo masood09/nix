@@ -23,8 +23,8 @@ in {
 
     # Systemd user services managed by home-manager
     services = {
-      mako = {
-        enable = true;
+      swaync = {
+        enable = true; # notification center with D-Bus activation
       };
       playerctld = {
         enable = true;
