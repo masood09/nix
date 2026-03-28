@@ -26,7 +26,8 @@ modules/home-manager/
   home.nix           Base HM config: home path, session vars, XDG user directories (Desktop, Documents, etc.)
 
 modules/home-manager/programs/
-  niri/default.nix   Niri user-level config (rofi, waybar, swaync, swayidle, swaylock, playerctld, udiskie)
+  niri/default.nix   Niri user-level config (rofi, swaync, swayidle, swaylock, playerctld, udiskie)
+  niri/_waybar.nix   Waybar status bar (clock, workspaces, audio, network, battery, notifications)
   _kitty.nix         Terminal emulator
   _stylix.nix        Base16 theming (fonts, cursor, opacity, color scheme)
   zen/               Browser (privacy hardening, extensions, containers, pinned tabs)
@@ -65,7 +66,7 @@ PAM evaluation order for tuigreet with fingerprint enabled:
 
 Niri is a scrollable-tiling Wayland compositor. System-level enablement (~programs.niri.enable~ and ~programs.light.enable~ for backlight control) is in ~_niri.nix~. User configuration lives in ~$XDG_CONFIG_HOME/niri/config.kdl~ (not managed declaratively by this flake).
 
-When Niri is enabled on Linux, home-manager installs and configures: rofi (app launcher), waybar (status bar), swaync (notifications), swayidle (idle management), swaylock (screen locker), playerctld (MPRIS daemon), and udiskie (auto-mount). Packages without HM modules (swaybg, wl-clipboard, xwayland-satellite) are installed directly.
+When Niri is enabled on Linux, home-manager installs and configures: rofi (app launcher), waybar (status bar, configured in ~_waybar.nix~ with clock, workspaces, PipeWire audio via pwvucontrol, network, battery, and swaync notification widget), swaync (notifications), swayidle (idle management), swaylock (screen locker), playerctld (MPRIS daemon), and udiskie (auto-mount). Packages without HM modules (swaybg, wl-clipboard, xwayland-satellite) are installed directly.
 
 * Graphics
 

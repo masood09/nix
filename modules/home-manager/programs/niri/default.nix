@@ -10,6 +10,10 @@
 }: let
   niriEnabled = (homelabCfg.desktop.niri.enable or false) && pkgs.stdenv.isLinux;
 in {
+  imports = [
+    ./_waybar.nix
+  ];
+
   config = lib.mkIf niriEnabled {
     # Packages without home-manager modules
     home = {
@@ -40,9 +44,6 @@ in {
         enable = true;
       };
       swaylock = {
-        enable = true;
-      };
-      waybar = {
         enable = true;
       };
     };
