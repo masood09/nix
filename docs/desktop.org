@@ -27,7 +27,7 @@ modules/home-manager/
 
 modules/home-manager/programs/
   niri/default.nix   Niri user-level config (rofi, swaync, swayidle, swaylock, playerctld, udiskie)
-  niri/_waybar.nix   Waybar status bar (clock, workspaces, audio, network, battery, notifications)
+  niri/_waybar.nix   Waybar status bar (clock, workspaces, window title, audio, network, battery, notifications)
   _kitty.nix         Terminal emulator
   _stylix.nix        Base16 theming (fonts, cursor, opacity, color scheme)
   zen/               Browser (privacy hardening, extensions, containers, pinned tabs)
