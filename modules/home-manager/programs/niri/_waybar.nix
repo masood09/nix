@@ -93,15 +93,6 @@ in {
             transition: all 0.3s ease-in-out;
           }
 
-          #clock {
-            background-color: @base00;
-            padding: 0 15px;
-            margin: 0 0 0 12px;
-            border-radius: 50px;
-            border: 1px solid @base01;
-            color: @base0A;
-          }
-
           #window {
             background-color: @base00;
             padding: 0 15px;
@@ -120,6 +111,7 @@ in {
           }
 
           #battery,
+          #clock,
           #pulseaudio,
           #network,
           #custom-notification {
@@ -133,7 +125,6 @@ in {
             margin-top = 12;
 
             modules-left = [
-              "clock"
               "niri/workspaces"
               "niri/window"
             ];
@@ -146,12 +137,13 @@ in {
               "pulseaudio"
               "network"
               "battery"
+              "clock"
               "custom/notification"
             ];
 
             clock = {
               interval = 60;
-              format = "{:%H:%M}";
+              format = "{:%b %d %H:%M}";
               max-length = 25;
             };
 
