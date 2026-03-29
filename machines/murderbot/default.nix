@@ -18,9 +18,7 @@
     };
 
     programs = {
-      fastfetch = {
-        logo = ../../nix/logos/murderbot.png;
-      };
+      fastfetch = {};
       claude-code = {
         enable = true;
       };

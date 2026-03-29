@@ -12,9 +12,7 @@
       };
 
       programs = {
-        fastfetch = {
-          logo = ../../nix/logos/caretaker.png;
-        };
+        fastfetch = {};
       };
 
       services = {

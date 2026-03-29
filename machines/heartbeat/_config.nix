@@ -13,7 +13,6 @@
 
       programs = {
         fastfetch = {
-          logo = ../../nix/logos/heartbeat.png;
           zpools = ["rpool" "fpool" "dpool"];
         };
       };

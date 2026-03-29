@@ -41,7 +41,6 @@
 
       programs = {
         fastfetch = {
-          logo = ../../nix/logos/commandmodule.png;
           zpools = ["rpool"];
         };
         claude-code = {
