@@ -63,10 +63,14 @@ in {
       popups = 0.90;
     };
 
-    # Disable Starship target - it uses hardcoded Catppuccin colors
     targets = {
+      # Disable Starship target - it uses hardcoded Catppuccin colors
       starship = {
         enable = false;
+      };
+      # Keep color variables and fonts, drop layout/padding/tooltip CSS
+      waybar = {
+        addCss = false;
       };
     };
   };
