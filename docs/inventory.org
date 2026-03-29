@@ -73,7 +73,7 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 
 | Module      | Package(s)                                                                                          | Purpose                   |
 |-------------+-----------------------------------------------------------------------------------------------------+---------------------------|
-| _stylix.nix | JetBrainsMono Nerd Font (monospace), Montserrat (sansSerif & serif), Bibata-Modern-Classic (cursor) | Base16 theming via Stylix |
+| _stylix.nix | JetBrainsMono Nerd Font (monospace), Inter (sansSerif & serif), Bibata-Modern-Classic (cursor) | Base16 theming via Stylix |
 
 *** Applications
 

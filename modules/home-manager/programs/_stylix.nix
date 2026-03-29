@@ -1,6 +1,7 @@
 # Stylix — Base16 theming system providing consistent theming for all programs.
 # Uses base16 color schemes to automatically theme supported applications.
 {
+  config,
   homelabCfg,
   inputs,
   lib,
@@ -8,10 +9,46 @@
   ...
 }: let
   cfg = homelabCfg.programs.stylix;
+  monoFont = config.stylix.fonts.monospace.name;
 in {
   imports = [
     inputs.stylix.homeModules.stylix
   ];
+
+  # Fontconfig — redirect NixOS default monospace fonts (Liberation Mono, DejaVu
+  # Sans Mono, Noto Sans Mono) to the Stylix monospace font. Without this, web
+  # pages and apps requesting these fonts would miss Nerd Font PUA icon glyphs.
+  xdg = lib.mkIf cfg.enable {
+    configFile = {
+      "fontconfig/conf.d/60-nerd-font-override.conf" = {
+        text = ''
+          <?xml version="1.0"?>
+          <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+          <fontconfig>
+            <!-- Replace monospace fonts that lack Nerd Font icons -->
+            <match target="pattern">
+              <test qual="any" name="family"><string>Liberation Mono</string></test>
+              <edit name="family" mode="assign" binding="strong">
+                <string>${monoFont}</string>
+              </edit>
+            </match>
+            <match target="pattern">
+              <test qual="any" name="family"><string>DejaVu Sans Mono</string></test>
+              <edit name="family" mode="assign" binding="strong">
+                <string>${monoFont}</string>
+              </edit>
+            </match>
+            <match target="pattern">
+              <test qual="any" name="family"><string>Noto Sans Mono</string></test>
+              <edit name="family" mode="assign" binding="strong">
+                <string>${monoFont}</string>
+              </edit>
+            </match>
+          </fontconfig>
+        '';
+      };
+    };
+  };
 
   stylix = lib.mkIf cfg.enable {
     enable = true;
@@ -41,12 +78,12 @@ in {
         name = "JetBrainsMono Nerd Font";
       };
       sansSerif = {
-        package = pkgs.montserrat;
-        name = "Montserrat";
+        package = pkgs.inter;
+        name = "Inter";
       };
       serif = {
-        package = pkgs.montserrat;
-        name = "Montserrat";
+        package = pkgs.inter;
+        name = "Inter";
       };
     };
 
