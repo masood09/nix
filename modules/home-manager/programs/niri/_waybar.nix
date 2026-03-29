@@ -1,14 +1,16 @@
 # Waybar — status bar for niri.
-# Modules: clock, workspaces, window title, tray, PipeWire audio, network, battery, swaync notifications.
+# Modules: workspaces, window title (left), tray (center), PipeWire audio, network, battery, clock, swaync notifications (right).
 # Stylix provides base16 color variables and fonts (addCss = false in _stylix.nix
 # disables its layout CSS). Custom styles use lib.mkAfter to append after Stylix.
 {
+  config,
   homelabCfg,
   lib,
   pkgs,
   ...
 }: let
   niriEnabled = (homelabCfg.desktop.niri.enable or false) && pkgs.stdenv.isLinux;
+  monoFont = config.stylix.fonts.monospace.name;
 in {
   config = lib.mkIf niriEnabled {
     programs = {
@@ -23,7 +25,8 @@ in {
           * {
             border: none;
             border-radius: 0px;
-            font-family: "Adwaita Sans", "JetBrainsMono Nerd Font Propo", sans-serif;
+            font-family: "${monoFont} Propo", "${monoFont}", sans-serif;
+            font-size: 12pt;
             font-weight: bold;
             min-height: 0;
             padding: 0;
@@ -69,7 +72,6 @@ in {
             color: @base00;
             min-width: 50px;
             transition: all 0.3s ease-in-out;
-            font-size: 13px;
           }
 
           #workspaces button.active:hover {
