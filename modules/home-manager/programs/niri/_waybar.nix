@@ -1,5 +1,5 @@
 # Waybar — status bar for niri.
-# Modules: clock, workspaces, tray, PipeWire audio, network, battery, swaync notifications.
+# Modules: clock, workspaces, window title, tray, PipeWire audio, network, battery, swaync notifications.
 # Stylix provides base16 color variables and fonts (addCss = false in _stylix.nix
 # disables its layout CSS). Custom styles use lib.mkAfter to append after Stylix.
 {
@@ -102,6 +102,15 @@ in {
             color: @base0A;
           }
 
+          #window {
+            background-color: @base00;
+            padding: 0 15px;
+            margin: 0 0 0 12px;
+            border-radius: 50px;
+            border: 1px solid @base01;
+            color: @base0A;
+          }
+
           .modules-right {
             background-color: @base00;
             margin: 0 12px 0 0;
@@ -126,6 +135,7 @@ in {
             modules-left = [
               "clock"
               "niri/workspaces"
+              "niri/window"
             ];
 
             modules-center = [
@@ -151,6 +161,11 @@ in {
                 active = "";
                 default = "";
               };
+            };
+
+            "niri/window" = {
+              format = "{}";
+              seperate-outputs = true;
             };
 
             tray = {
