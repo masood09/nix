@@ -66,7 +66,7 @@ PAM evaluation order for tuigreet with fingerprint enabled:
 
 Niri is a scrollable-tiling Wayland compositor. System-level enablement (~programs.niri.enable~ and ~programs.light.enable~ for backlight control) is in ~_niri.nix~. User configuration lives in ~$XDG_CONFIG_HOME/niri/config.kdl~ (not managed declaratively by this flake).
 
-When Niri is enabled on Linux, home-manager installs and configures: rofi (app launcher), waybar (status bar, configured in ~_waybar.nix~ with clock, workspaces, PipeWire audio via pwvucontrol, network, battery, and swaync notification widget), swaync (notifications), swayidle (idle management), swaylock (screen locker), playerctld (MPRIS daemon), and udiskie (auto-mount). Packages without HM modules (swaybg, wl-clipboard, xwayland-satellite) are installed directly.
+When Niri is enabled on Linux, home-manager installs and configures: rofi (app launcher), waybar (status bar managed by systemd, configured in ~_waybar.nix~ with custom CSS using Stylix base16 color variables and ~addCss = false~ to avoid layout conflicts), swaync (notifications), swayidle (idle management), swaylock (screen locker), playerctld (MPRIS daemon), and udiskie (auto-mount). Packages without HM modules (swaybg, wl-clipboard, xwayland-satellite) are installed directly.
 
 * Graphics
 
