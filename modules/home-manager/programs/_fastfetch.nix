@@ -1,7 +1,8 @@
 # Fastfetch — system info display (neofetch successor).
-# When showOnLogin is enabled, runs fastfetch on interactive shell login.
-# Configures the default modules plus custom ones for role, reboot status,
-# and ZFS pool health (if applicable).
+# Uses fastfetch's built-in logo auto-detection (run `fastfetch --list-logos`
+# to see available logos). When showOnLogin is enabled, runs fastfetch on
+# interactive shell login. Configures the default modules plus custom ones
+# for role, reboot status, and ZFS pool health (if applicable).
 {
   homelabCfg,
   lib,
@@ -68,48 +69,37 @@ in {
     fastfetch = {
       inherit (cfg) enable;
 
-      settings = lib.mkIf cfg.enable ({
-          # Module order: title → custom (role, reboot) → defaults → ZFS → colors
-          modules =
-            [
-              "title"
-              "separator"
-            ]
-            ++ roleModule
-            ++ rebootModule
-            ++ [
-              "os"
-              "host"
-              "kernel"
-              "uptime"
-              "shell"
-              "terminal"
-              "terminalfont"
-              "cpu"
-              "memory"
-              "swap"
-              "disk"
-              "localip"
-              "locale"
-            ]
-            ++ desktopModules
-            ++ zpoolModules
-            ++ [
-              "break"
-              "colors"
-            ];
-        }
-        # TODO: kitty-direct requires a Kitty-compatible terminal. If machines
-        # are accessed from non-Kitty terminals (plain SSH, tmux without
-        # passthrough), the logo will render as garbage or fail silently.
-        # Revisit: either let fastfetch auto-detect by dropping `type`, or
-        # expose `logoType` as a configurable option with kitty-direct default.
-        // lib.optionalAttrs (cfg.logo != null) {
-          logo = {
-            source = toString cfg.logo;
-            type = "kitty-direct";
-          };
-        });
+      settings = lib.mkIf cfg.enable {
+        # Module order: title → custom (role, reboot) → defaults → ZFS → colors
+        modules =
+          [
+            "title"
+            "separator"
+          ]
+          ++ roleModule
+          ++ rebootModule
+          ++ [
+            "os"
+            "host"
+            "kernel"
+            "uptime"
+            "shell"
+            "terminal"
+            "terminalfont"
+            "cpu"
+            "memory"
+            "swap"
+            "disk"
+            "localip"
+            "locale"
+          ]
+          ++ desktopModules
+          ++ zpoolModules
+          ++ [
+            "break"
+            "colors"
+          ];
+      };
     };
 
     # Shell integration — show fastfetch on interactive login

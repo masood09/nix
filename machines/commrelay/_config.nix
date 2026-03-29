@@ -17,7 +17,6 @@
 
       programs = {
         fastfetch = {
-          logo = ../../nix/logos/commrelay.png;
           zpools = ["rpool"];
         };
       };
