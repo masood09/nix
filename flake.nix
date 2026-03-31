@@ -174,6 +174,7 @@
       heartbeat = mkNixOSConfig ./machines/heartbeat;
       trialunit = mkNixOSConfig ./machines/trialunit;
 
+      arrakis = mkNixOSConfig ./machines/arrakis;
       sonic = mkNixOSConfig ./machines/sonic;
 
       # Minimal NixOS installer ISO with SSH key baked in

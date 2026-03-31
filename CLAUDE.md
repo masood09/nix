@@ -120,6 +120,6 @@ Before adding services, check `docs/service-registry.org` for:
 ## Machines
 
 **NixOS servers**: accesscontrolsystem, commrelay, meshcontrol, watchfulsystem, caretaker, heartbeat, trialunit
-**NixOS desktops**: commandmodule (primary dev, laptop), sonic (desktop)
+**NixOS desktops**: arrakis (primary laptop), commandmodule (laptop), sonic (desktop)
 **macOS**: murderbot, work-pantheon
 **Other**: nixiso (minimal NixOS installer ISO)

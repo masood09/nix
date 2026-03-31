@@ -13,6 +13,8 @@ keys:
     age1gqvw59226drpwn8942x55jcf5zca5gfupj9eppmeagfevx3pupzs78dfs6
   - &heartbeat
     age1r84yxudulk0jgdtgcmu0qx79ztuxzrzrk4jl5s9n52x4874q35cqzu4enh
+  - &arrakis
+    age1qpdxlfwgwwnym09qjzr94chzwjnxj5f449nvvz4sgz8r2qrrn3sqtvvvzx
   - &sonic
     age1nsg2cqxkudumqj362mfeg5zfydgld9e78rwceancqx7lt3gr0dkqjnp9kp
   - &trialunit
@@ -31,6 +33,7 @@ creation_rules:
           - *meshcontrol
           - *watchfulsystem
           - *caretaker
+          - *arrakis
           - *commandmodule
           - *heartbeat
           - *sonic
@@ -100,6 +103,13 @@ creation_rules:
     key_groups:
       - age:
         - *heartbeat
+        - *masoodahmed
+        - *murderbot
+
+  - path_regex: ^machines/arrakis/secrets\.sops\.yaml$
+    key_groups:
+      - age:
+        - *arrakis
         - *masoodahmed
         - *murderbot
 
