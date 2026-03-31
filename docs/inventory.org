@@ -675,6 +675,7 @@ Zen Browser, Google Chrome, Emacs, Slack, Zoom, System Settings
 
 **** Services
 
-| Service | Purpose                                   |
-|---------+-------------------------------------------|
-| openssh | SSH server for remote installation access |
+| Service        | Purpose                                   |
+|----------------+-------------------------------------------|
+| networkmanager | WiFi connectivity via nmcli               |
+| openssh        | SSH server for remote installation access |
