@@ -503,6 +503,40 @@ Defined in =nix/pkgs/= and auto-discovered.
 | fastfetch | zpools: rpool |
 
 ** NixOS Desktops
+*** arrakis
+
+- *Purpose:* Primary Laptop (NixOS Desktop)
+- *Storage:* ZFS root (encrypted, impermanence)
+- *GPU:* AMD (Radeon, ThinkPad T14 Gen 3)
+- *Desktop:* Niri compositor + greetd
+- *Kernel params:* =amd_pstate=active= (AMD P-State driver)
+
+**** Hardware Features
+
+| Feature     | Enabled |
+|-------------+---------|
+| Audio       | yes     |
+| Bluetooth   | yes     |
+| Fingerprint | yes     |
+| Graphics    | yes     |
+| Wireless    | yes     |
+
+**** Programs
+
+| Program     | Notes                    |
+|-------------+--------------------------|
+| claude-code | Anthropic CLI + MCP      |
+| emacs       | Editor with LSP/Go tools |
+| fastfetch   | zpools: rpool            |
+| fish        | Interactive shell        |
+| git         | Version control          |
+| kitty       | Terminal emulator        |
+| neovim      | Editor                   |
+| oci-cli     | Oracle Cloud CLI         |
+| opentofu    | Infrastructure-as-code   |
+| stylix      | Theming                  |
+| zen         | Web browser              |
+
 *** commandmodule
 
 - *Purpose:* Primary Laptop (NixOS Desktop)
