@@ -20,6 +20,7 @@
           authorizedKeys = {
             keys = [
               "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfTOXZ6W+DhUQcytGQ1ob+eFPQwbyiTB8wXnRSiYqpK"
+              "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBv3kEMJd555u7Rb8ofRfC3K2k5v9qjnz9tsbxli9tp8 me@ahmedmasood.com"
             ];
           };
         };
@@ -57,6 +58,15 @@
 
   networking = {
     hostName = "nixiso";
+
+    # Use NetworkManager for WiFi — nmcli is easier than wpa_cli on a live ISO.
+    # Disables standalone wpa_supplicant to avoid socket/conflict issues.
+    networkmanager = {
+      enable = true;
+    };
+    wireless = {
+      enable = false;
+    };
   };
 
   system = {
