@@ -41,6 +41,11 @@
         };
       };
 
+      stylix = {
+        enable = true;
+        wallpaper = ../../nix/wallpapers/cosy-retreat-sunset.png;
+      };
+
       programs = {
         claude-code = {
           enable = true;

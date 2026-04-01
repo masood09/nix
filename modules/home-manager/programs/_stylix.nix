@@ -1,5 +1,6 @@
-# Stylix — Base16 theming system providing consistent theming for all programs.
-# Uses base16 color schemes to automatically theme supported applications.
+# Home-Manager Stylix — Base16 theming for user-level programs (terminal, GTK,
+# cursor, waybar, etc.).  System-level theming (Plymouth, GRUB, console) is
+# handled by the NixOS-level module in modules/nixos/_stylix.nix.
 {
   config,
   homelabCfg,
