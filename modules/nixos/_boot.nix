@@ -1,13 +1,15 @@
-# Boot configuration — bootloader selection, kernel params, and initrd setup.
+# Boot configuration — bootloader selection, kernel params, initrd, and Plymouth.
 # Automatically chooses between systemd-boot (non-ZFS) and GRUB (ZFS),
 # with support for mirrored boot partitions on multi-disk setups.
 # Desktops get graphical GRUB; servers stay text-only.
+# Non-ZFS desktops get Plymouth with systemd initrd for seamless LUKS unlock.
 {
   config,
   lib,
   ...
 }: let
   homelabCfg = config.homelab;
+  isDesktopSystemdBoot = homelabCfg.role == "desktop" && !homelabCfg.isRootZFS;
 in {
   options = {
     homelab = {
@@ -81,6 +83,23 @@ in {
         timeout = 10;
       };
 
+      # Plymouth boot splash for non-ZFS desktops (systemd-boot + systemd initrd)
+      plymouth = lib.mkIf isDesktopSystemdBoot {
+        enable = true;
+      };
+
+      # Quiet boot for Plymouth — suppress kernel and udev messages so the
+      # splash renders uninterrupted from bootloader through LUKS prompt to greeter.
+      # "auto" for show_status prints only on errors or significant delays.
+      kernelParams = lib.mkIf isDesktopSystemdBoot [
+        "quiet"
+        "splash"
+        "loglevel=3"
+        "rd.udev.log_level=3"
+        "systemd.show_status=auto"
+        "rd.systemd.show_status=auto"
+      ];
+
       # IPv6 disabled across the homelab
       kernel = {
         sysctl = {
@@ -91,6 +110,12 @@ in {
       };
 
       initrd = {
+        # systemd-based initrd for LUKS unlock via systemd-cryptsetup —
+        # required for Plymouth's password agent integration
+        systemd = lib.mkIf isDesktopSystemdBoot {
+          enable = true;
+        };
+
         network = {
           flushBeforeStage2 = true;
         };

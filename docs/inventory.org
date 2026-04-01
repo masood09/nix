@@ -506,7 +506,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 - *Purpose:* Primary Laptop (NixOS Desktop)
 - *Storage:* LUKS-encrypted ext4 + tmpfs root (impermanence), LVM swap (40G, hibernate)
-- *Boot:* systemd-boot + systemd initrd (Plymouth-ready)
+- *Boot:* systemd-boot + systemd initrd + Plymouth
 - *GPU:* AMD (Radeon, ThinkPad T14 Gen 3)
 - *Desktop:* Niri compositor + greetd
 - *Kernel params:* =amd_pstate=active= (AMD P-State driver)

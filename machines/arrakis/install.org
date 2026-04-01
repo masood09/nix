@@ -8,7 +8,7 @@ This document describes the end-to-end process for installing NixOS on the
 - NixOS Live ISO (booted via USB)
 - LUKS-encrypted ext4 with LVM (swap + nix)
 - tmpfs root with impermanence (ephemeral root, persistent /home)
-- systemd-boot + systemd initrd (Plymouth-ready)
+- systemd-boot + systemd initrd + Plymouth boot splash
 - Flake-based configuration
 
 * Overview
