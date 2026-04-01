@@ -69,7 +69,7 @@
         };
 
         stylix = {
-          wallpaper = ../../nix/wallpapers/romantic-night-sky-5120x2880.jpg;
+          wallpaper = ../../nix/wallpapers/cosy-retreat-sunset.png;
         };
 
         zen = {
