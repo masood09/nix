@@ -1,5 +1,5 @@
 # arrakis — ThinkPad T14 Gen 3 laptop, NixOS desktop with Niri compositor.
-# Single NVMe root, encrypted ZFS, impermanence.
+# Single NVMe root, LUKS-encrypted ext4 with tmpfs impermanence.
 {
   imports = [
     ./disko

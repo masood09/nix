@@ -1,5 +1,6 @@
 # Impermanence — ephemeral root filesystem with explicit persistence.
-# Root is rolled back to a blank ZFS snapshot on every boot (see _boot.nix).
+# ZFS machines: root rolled back to blank snapshot on every boot (see _boot.nix).
+# Non-ZFS machines: tmpfs root wiped on every reboot.
 # Only paths listed here survive reboots; everything else is wiped.
 {
   config,
@@ -26,6 +27,10 @@ in {
               "/var/log"
               # https://github.com/nix-community/impermanence/issues/178
               "/var/lib/nixos"
+            ])
+            # Non-ZFS desktops need /home persisted (ZFS desktops get it as a dataset)
+            (lib.mkIf (!homelabCfg.isRootZFS && homelabCfg.role == "desktop") [
+              "/home"
             ])
             # Desktop-specific state (login manager, bluetooth pairings, fingerprints, WiFi)
             (lib.mkIf (homelabCfg.role == "desktop") (
@@ -55,33 +60,42 @@ in {
       };
     };
 
-    # ZFS datasets need neededForBoot so they mount early enough for impermanence
-    fileSystems = lib.mkIf homelabCfg.isRootZFS (lib.mkMerge [
-      {
-        "/" = {
-          neededForBoot = true;
-        };
+    # Filesystems must mount early enough for impermanence bind-mounts
+    fileSystems = lib.mkMerge [
+      # ZFS datasets need neededForBoot
+      (lib.mkIf homelabCfg.isRootZFS (lib.mkMerge [
+        {
+          "/" = {
+            neededForBoot = true;
+          };
+          "/nix" = {
+            neededForBoot = true;
+          };
+          "/nix/persist" = {
+            neededForBoot = true;
+          };
+          "/var/backup" = {
+            neededForBoot = true;
+          };
+          "/var/lib/nixos" = {
+            neededForBoot = true;
+          };
+          "/var/log" = {
+            neededForBoot = true;
+          };
+        }
+        (lib.mkIf (homelabCfg.role == "desktop") {
+          "/home" = {
+            neededForBoot = true;
+          };
+        })
+      ]))
+      # Non-ZFS: /nix (ext4) must mount early so /nix/persist is available
+      (lib.mkIf (!homelabCfg.isRootZFS) {
         "/nix" = {
           neededForBoot = true;
         };
-        "/nix/persist" = {
-          neededForBoot = true;
-        };
-        "/var/backup" = {
-          neededForBoot = true;
-        };
-        "/var/lib/nixos" = {
-          neededForBoot = true;
-        };
-        "/var/log" = {
-          neededForBoot = true;
-        };
-      }
-      (lib.mkIf (homelabCfg.role == "desktop") {
-        "/home" = {
-          neededForBoot = true;
-        };
       })
-    ]);
+    ];
   };
 }

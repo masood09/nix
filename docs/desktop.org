@@ -5,12 +5,13 @@
 
 * Overview
 
-Two NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. Both use ZFS root with impermanence (ephemeral root, persistent ~/home~). macOS desktops (murderbot, work-pantheon) use nix-darwin and are out of scope for this document.
+Three NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. commandmodule and sonic use ZFS root with impermanence (ephemeral root via ZFS rollback). arrakis uses LUKS-encrypted ext4 with tmpfs impermanence and systemd-boot. macOS desktops (murderbot, work-pantheon) use nix-darwin and are out of scope for this document.
 
-| Machine       | Hardware           | GPU            | Primary User       | Theme               |
-|---------------+--------------------+----------------+--------------------+---------------------|
-| commandmodule | ThinkPad (Intel)   | Intel UHD 620  | masoodahmed (1000) | gruvbox-dark        |
-| sonic         | ThinkPad T14 Gen 3 | AMD Ryzen iGPU | zainahmed (1001)   | sonic-dark (custom) |
+| Machine       | Hardware           | GPU            | Primary User       | Theme               | Root FS    | Boot         |
+|---------------+--------------------+----------------+--------------------+---------------------+------------+--------------|
+| arrakis       | ThinkPad T14 Gen 3 | AMD Radeon     | masoodahmed (1000) | gruvbox-dark        | ext4/LUKS  | systemd-boot |
+| commandmodule | ThinkPad (Intel)   | Intel UHD 620  | masoodahmed (1000) | gruvbox-dark        | ZFS        | GRUB         |
+| sonic         | ThinkPad T14 Gen 3 | AMD Ryzen iGPU | zainahmed (1001)   | sonic-dark (custom) | ZFS        | GRUB         |
 
 * Module Structure
 
@@ -119,7 +120,7 @@ Starship prompt is excluded from Stylix targets — it uses hardcoded Catppuccin
 
 * Persistence
 
-Both desktops run ZFS root with impermanence. Root is rolled back to a blank snapshot on every boot (~zfs rollback -r rpool/root/empty@start~). Desktop-specific persistent directories in ~/nix/persist~:
+All desktops use impermanence with ~/nix/persist~ as the persistence root. ZFS desktops (commandmodule, sonic) roll back root to a blank snapshot on every boot (~zfs rollback -r rpool/root/empty@start~). Non-ZFS desktops (arrakis) use tmpfs root, which is inherently wiped on reboot. Desktop-specific persistent directories:
 
 | Path                                   | Purpose                   |
 |----------------------------------------+---------------------------|
@@ -172,7 +173,7 @@ ananicy-cpp is an auto-nice daemon that adjusts process niceness, I/O priority, 
 
 * Boot
 
-ZFS machines use GRUB (systemd-boot lacks ZFS support). Desktop-specific: ~gfxmodeEfi = "auto"~ for graphical framebuffer. Servers use ~gfxmodeEfi = "text"~.
+ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer). Non-ZFS desktops (arrakis) use systemd-boot with systemd-based initrd, which integrates with ~systemd-cryptsetup~ for LUKS unlock and is Plymouth-ready.
 
 * Pain Points
 
@@ -192,21 +193,17 @@ Niri user configuration (~config.kdl~) is not managed by this flake. Changes to 
 
 ** ZFS requires GRUB
 
-systemd-boot does not support ZFS. Both desktops are locked to GRUB, which is functional but lacks the cleaner systemd-boot UX and its integration with ~bootctl~.
+systemd-boot does not support ZFS. commandmodule and sonic are locked to GRUB. arrakis has migrated to ext4+LUKS and uses systemd-boot.
 
 * Future Improvements
 
-** LUKS + systemd-boot migration
-
-Migrating desktops from ZFS root to ext4 + LUKS would enable systemd-boot and unlock ~pam_fde_boot_pw~ (packaged in nixpkgs as ~pam_fde_boot_pw~). This PAM module retrieves the disk encryption passphrase from the kernel keyring and passes it through PAM at login, enabling both auto-login and GNOME Keyring auto-unlock without typing a password twice. Blocked on ZFS-to-ext4+LUKS migration.
-
 ** Auto-login on encrypted desktops
 
-With encrypted root, the user already proves identity at boot. Typing the same password at greetd is redundant. ~pam_fde_boot_pw~ solves this by forwarding the disk passphrase through PAM, but requires LUKS (not ZFS native encryption) and systemd-boot. Depends on the LUKS migration above.
+With encrypted root, the user already proves identity at boot. Typing the same password at greetd is redundant. ~pam_fde_boot_pw~ (packaged in nixpkgs) retrieves the disk encryption passphrase from the kernel keyring and passes it through PAM at login, enabling both auto-login and GNOME Keyring auto-unlock without typing a password twice. Requires LUKS (not ZFS native encryption) and systemd-boot — arrakis is eligible now; commandmodule and sonic would need the same LUKS migration first.
 
 ** Plymouth boot splash
 
-Add Plymouth for a graphical boot splash between GRUB (or systemd-boot after LUKS migration) and the greeter. Provides a polished boot experience instead of scrolling systemd output. NixOS has ~boot.plymouth.enable~ upstream.
+Add Plymouth for a graphical boot splash between bootloader and greeter. arrakis already runs systemd-boot with systemd initrd, so enabling ~boot.plymouth.enable~ should work directly. ZFS desktops would need LUKS migration first.
 
 ** Noctalia Shell
 

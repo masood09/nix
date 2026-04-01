@@ -82,7 +82,7 @@ flake.nix
   |     +-- secrets.sops.yaml            Per-machine encrypted secrets
   |
   +-- modules/nixos/default.nix          NixOS system base
-  |     +-- _boot.nix                    Bootloader, ZFS initrd rollback
+  |     +-- _boot.nix                    Bootloader (systemd-boot or GRUB), initrd
   |     +-- _networking.nix              Hostname, firewall, hostId
   |     +-- _users.nix                   Immutable users (passwords via sops)
   |     +-- _sops.nix                    sops-nix configuration
@@ -93,7 +93,7 @@ flake.nix
   |     +-- _nixpkgs.nix                Nixpkgs settings
   |     +-- _auto-update.nix            Automatic system updates
   |     +-- _reboot-required-check.nix  Reboot notification
-  |     +-- _remote-unlock.nix          ZFS remote unlock via SSH
+  |     +-- _remote-unlock.nix          Initrd SSH for encrypted disk unlock
   |     +-- zfs/                         ZFS dataset provisioning
   |     +-- desktop/                     Desktop (Niri, GPU, audio, Bluetooth)
   |
@@ -184,7 +184,7 @@ See [[file:secrets-rotation.org][secrets-rotation.org]] for rotation procedures 
 
 * Storage Architecture
 
-NixOS servers use ZFS with encryption and ephemeral root:
+Most machines use ZFS with encryption and ephemeral root:
 
 #+begin_example
 Boot:     /boot (mirrored ESP on multi-disk machines)
@@ -192,6 +192,15 @@ Root:     rpool/root (rolled back to blank snapshot on every boot)
 Persist:  /nix/persist (bind-mounted via impermanence)
 Services: rpool/root/var/lib/<service> (dedicated datasets per service)
 Backup:   rpool/root/var/backup/postgresql (pg_dump target)
+#+end_example
+
+Non-ZFS machines (arrakis, caretaker) use LUKS-encrypted ext4 with tmpfs root:
+
+#+begin_example
+Boot:     /boot (EFI, vfat)
+Root:     tmpfs (wiped on every reboot)
+Nix:      /dev/mapper/cryptroot → /nix (ext4, persistent)
+Persist:  /nix/persist (bind-mounted via impermanence)
 #+end_example
 
 See [[file:backup.org][backup.org]] for the nightly backup pipeline.

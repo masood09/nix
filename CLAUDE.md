@@ -77,7 +77,8 @@ homelab = {
   - This applies to all top-level options: `services`, `programs`, `security`, `environment`, etc.
 
 ### Persistence Model
-- Servers use ZFS root with impermanence: ephemeral root wipes on boot, persistent data in `/nix/persist`
+- ZFS machines: ephemeral root via ZFS rollback to blank snapshot, persistent data in `/nix/persist`
+- Non-ZFS machines (arrakis, caretaker): tmpfs root wiped on reboot, LUKS-encrypted ext4 at `/nix`, persistent data in `/nix/persist`
 - Services that manage their own ZFS dataset bypass impermanence bind-mounts entirely
 - The three-part guard in `lib/persistence-helpers.nix` handles all scenarios: `impermanence && !isRootZFS && !zfsEnable`
 - Import the helper as: `persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};`
@@ -91,7 +92,7 @@ homelab = {
 - macOS key location: `~/.config/sops/age/keys.txt`
 
 ### NixOS Servers
-- ZFS root filesystem with encryption
+- ZFS root filesystem with encryption (or LUKS+ext4 for non-ZFS machines)
 - Impermanence: ephemeral root, persistent data in `/nix/persist`
 - Immutable users (mutableUsers = false, passwords via sops)
 - disko for declarative disk management
