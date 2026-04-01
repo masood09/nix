@@ -7,11 +7,11 @@
 
 Three NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. commandmodule and sonic use ZFS root with impermanence (ephemeral root via ZFS rollback). arrakis uses LUKS-encrypted ext4 with tmpfs impermanence and systemd-boot. macOS desktops (murderbot, work-pantheon) use nix-darwin and are out of scope for this document.
 
-| Machine       | Hardware           | GPU            | Primary User       | Theme               | Root FS    | Boot         |
-|---------------+--------------------+----------------+--------------------+---------------------+------------+--------------|
-| arrakis       | ThinkPad T14 Gen 3 | AMD Radeon     | masoodahmed (1000) | gruvbox-dark        | ext4/LUKS  | systemd-boot |
-| commandmodule | ThinkPad (Intel)   | Intel UHD 620  | masoodahmed (1000) | gruvbox-dark        | ZFS        | GRUB         |
-| sonic         | ThinkPad T14 Gen 3 | AMD Ryzen iGPU | zainahmed (1001)   | sonic-dark (custom) | ZFS        | GRUB         |
+| Machine       | Hardware           | GPU            | Primary User       | Theme               | Root FS    | Boot                    |
+|---------------+--------------------+----------------+--------------------+---------------------+------------+-------------------------|
+| arrakis       | ThinkPad T14 Gen 3 | AMD Radeon     | masoodahmed (1000) | gruvbox-dark        | ext4/LUKS  | systemd-boot + Plymouth |
+| commandmodule | ThinkPad (Intel)   | Intel UHD 620  | masoodahmed (1000) | gruvbox-dark        | ZFS        | GRUB                    |
+| sonic         | ThinkPad T14 Gen 3 | AMD Ryzen iGPU | zainahmed (1001)   | sonic-dark (custom) | ZFS        | GRUB                    |
 
 * Module Structure
 
@@ -170,7 +170,7 @@ ananicy-cpp is an auto-nice daemon that adjusts process niceness, I/O priority, 
 
 * Boot
 
-ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer). Non-ZFS desktops (arrakis) use systemd-boot with systemd-based initrd, which integrates with ~systemd-cryptsetup~ for LUKS unlock and is Plymouth-ready.
+ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer). Non-ZFS desktops (arrakis) use systemd-boot with systemd-based initrd and Plymouth. The boot sequence is: systemd-boot → Plymouth splash → LUKS passphrase (via Plymouth's password agent) → greeter. Kernel params ~quiet splash loglevel=3~ suppress console output so the splash is uninterrupted. Plymouth and systemd initrd are auto-enabled for any machine with ~role = "desktop"~ and ~isRootZFS = false~ (the ~isDesktopSystemdBoot~ guard in ~_boot.nix~).
 
 * Pain Points
 
@@ -193,10 +193,6 @@ systemd-boot does not support ZFS. commandmodule and sonic are locked to GRUB. a
 ** Auto-login on encrypted desktops
 
 With encrypted root, the user already proves identity at boot. Typing the same password at greetd is redundant. ~pam_fde_boot_pw~ (packaged in nixpkgs) retrieves the disk encryption passphrase from the kernel keyring and passes it through PAM at login, enabling both auto-login and GNOME Keyring auto-unlock without typing a password twice. Requires LUKS (not ZFS native encryption) and systemd-boot — arrakis is eligible now; commandmodule and sonic would need the same LUKS migration first.
-
-** Plymouth boot splash
-
-Add Plymouth for a graphical boot splash between bootloader and greeter. arrakis already runs systemd-boot with systemd initrd, so enabling ~boot.plymouth.enable~ should work directly. ZFS desktops would need LUKS migration first.
 
 ** Noctalia Shell
 
