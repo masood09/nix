@@ -126,7 +126,7 @@ All desktops use impermanence with ~/nix/persist~ as the persistence root. ZFS d
 | /var/lib/NetworkManager                | WiFi connections          |
 | /etc/NetworkManager/system-connections | WiFi connection configs   |
 | /var/cache/tuigreet                    | Greeter session cache     |
-| /home                                  | User data (neededForBoot) |
+| /home/<user>                           | User home (non-ZFS: auto-created with ownership; ZFS: dataset) |
 
 * Kernel & Performance
 
