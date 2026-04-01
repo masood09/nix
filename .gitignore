@@ -82,3 +82,4 @@ build/Release
 node_modules
 
 result/
+/result
