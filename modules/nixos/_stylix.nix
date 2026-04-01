@@ -1,7 +1,12 @@
-# NixOS-level Stylix — system-wide Base16 theming for boot and console.
-# Themes Plymouth splash, GRUB boot menu, and the Linux virtual console.
-# User-application theming (terminal, GTK, cursor) is handled separately by
-# Home-Manager Stylix in modules/home-manager/programs/_stylix.nix.
+# NixOS-level Stylix — single source of truth for Base16 theming.
+# Scheme, polarity, wallpaper, fonts, cursor, and opacity are defined here
+# once and propagate to Home-Manager automatically via Stylix's autoImport
+# (imports homeModules.stylix for every HM user) and followSystem (copies
+# these values into HM config with mkDefault priority).
+# HM-only target overrides (starship, waybar, zen-browser) are injected
+# through home-manager.sharedModules since those targets don't exist at the
+# NixOS level.
+# Darwin counterpart: modules/macos/_stylix.nix.
 {
   config,
   lib,
@@ -13,7 +18,7 @@ in {
   options = {
     homelab = {
       stylix = {
-        enable = lib.mkEnableOption "NixOS-level Stylix theming (Plymouth, GRUB, console)";
+        enable = lib.mkEnableOption "Stylix Base16 theming (system + home-manager)";
 
         polarity = lib.mkOption {
           default = "dark";
@@ -47,16 +52,6 @@ in {
   config = lib.mkIf cfg.enable {
     stylix = {
       enable = true;
-      autoEnable = false;
-
-      # Prevent the NixOS module from injecting its own Stylix config into
-      # home-manager users — HM imports homeModules.stylix independently
-      # in modules/home-manager/programs/_stylix.nix with its own options.
-      # Without this, both modules set the read-only stylix.base16 attr and
-      # evaluation fails.
-      homeManagerIntegration = {
-        autoImport = false;
-      };
 
       base16Scheme =
         if builtins.isPath cfg.scheme
@@ -67,8 +62,12 @@ in {
 
       image = lib.mkIf (cfg.wallpaper != null) cfg.wallpaper;
 
-      # Fonts — match HM Stylix config for visual consistency
       fonts = {
+        sizes = {
+          terminal = 12;
+          applications = 12;
+        };
+
         monospace = {
           package = pkgs.nerd-fonts.jetbrains-mono;
           name = "JetBrainsMono Nerd Font";
@@ -83,30 +82,40 @@ in {
         };
       };
 
-      # Cursor — match HM Stylix config
       cursor = {
         package = pkgs.bibata-cursors;
         name = "Bibata-Modern-Classic";
         size = 24;
       };
 
-      # Only enable system-level targets — autoEnable is false above so we
-      # must opt in explicitly.  HM Stylix handles user-facing targets
-      # (terminal, GTK, Qt, waybar, etc.).
-      # Plymouth: themed splash on non-ZFS desktops (gated by _boot.nix)
-      # GRUB: themed boot menu on ZFS desktops/servers
-      # Console: base16 colors on the Linux virtual console (all machines)
-      targets = {
-        plymouth = {
-          enable = true;
-        };
-        grub = {
-          enable = true;
-        };
-        console = {
-          enable = true;
-        };
+      opacity = {
+        terminal = 0.90;
+        popups = 0.90;
       };
+    };
+
+    # HM-only target overrides — injected via sharedModules so they apply
+    # after the Stylix HM module is auto-imported.
+    home-manager = {
+      sharedModules = [
+        {
+          stylix = {
+            targets = {
+              # Starship uses hardcoded Catppuccin colors
+              starship = {
+                enable = false;
+              };
+              # Keep color variables and fonts, drop layout/padding/tooltip CSS
+              waybar = {
+                addCss = false;
+              };
+              zen-browser = {
+                profileNames = ["default"];
+              };
+            };
+          };
+        }
+      ];
     };
   };
 }

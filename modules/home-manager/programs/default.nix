@@ -39,9 +39,6 @@
     # Applications
     ./zen
 
-    # Theming & UX
-    ./_stylix.nix
-
     # Per-role package lists
     ./_packages.nix
   ];

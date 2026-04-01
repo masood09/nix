@@ -13,6 +13,10 @@
   homelab = {
     role = "desktop";
 
+    stylix = {
+      enable = true;
+    };
+
     networking = {
       hostName = "murderbot";
     };

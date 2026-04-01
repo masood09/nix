@@ -1,7 +1,8 @@
 # Waybar — status bar for niri.
 # Modules: workspaces, window title (left), tray (center), PipeWire audio, network, battery, clock, swaync notifications (right).
-# Stylix provides base16 color variables and fonts (addCss = false in _stylix.nix
-# disables its layout CSS). Custom styles use lib.mkAfter to append after Stylix.
+# Stylix provides base16 color variables and fonts; addCss = false (set via
+# sharedModules in modules/nixos/_stylix.nix) disables its layout CSS.
+# Custom styles use lib.mkAfter to append after Stylix.
 {
   config,
   homelabCfg,

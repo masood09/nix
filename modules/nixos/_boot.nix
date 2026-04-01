@@ -84,7 +84,7 @@ in {
       };
 
       # Plymouth boot splash for non-ZFS desktops (systemd-boot + systemd initrd).
-      # Stylix (_stylix.nix) applies Base16 colors to the splash automatically.
+      # Stylix applies Base16 colors to the splash automatically when enabled.
       plymouth = lib.mkIf isDesktopSystemdBoot {
         enable = true;
       };
