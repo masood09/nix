@@ -65,15 +65,6 @@
       url = "github:yokoffing/Betterfox";
       flake = false;
     };
-    # Graphical greeter for greetd (ASCII art + themes in kitty terminal)
-    sysc-greet = {
-      url = "github:Nomadcxx/sysc-greet";
-      inputs = {
-        nixpkgs = {
-          follows = "nixpkgs";
-        };
-      };
-    };
   };
 
   outputs = {
@@ -115,7 +106,6 @@
           inputs.impermanence.nixosModules.impermanence
           inputs.headplane.nixosModules.headplane
           inputs.stylix.nixosModules.stylix
-          inputs.sysc-greet.nixosModules.default
 
           (import ./nix/services/default.nix)
 

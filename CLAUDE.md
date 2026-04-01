@@ -116,7 +116,7 @@ Before adding services, check `docs/service-registry.org` for:
 - home-manager: `release-25.11`
 - nix-darwin: `nix-darwin-25.11`
 - stylix: `release-25.11`
-- Other inputs: disko, impermanence, sops-nix, nix-homebrew, authentik-nix, headplane, claude-code, zen-browser, betterfox, sysc-greet
+- Other inputs: disko, impermanence, sops-nix, nix-homebrew, authentik-nix, headplane, claude-code, zen-browser, betterfox
 
 ## Machines
 
