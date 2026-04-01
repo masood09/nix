@@ -61,6 +61,7 @@ homelab = {
   purpose = "Main NAS";
   primaryUser = { userName = "masoodahmed"; userId = 1000; };
   networking = { hostName = "heartbeat"; domain = "mantannest.com"; };
+  desktop = { enable = true; niri = { enable = true; }; shell = "none"; };
   stylix = { enable = true; wallpaper = ../../nix/wallpapers/cosy-retreat-sunset.png; };
   programs.emacs.enable = true;
   services.immich.enable = true;
