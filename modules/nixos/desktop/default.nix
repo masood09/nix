@@ -1,5 +1,7 @@
 # Desktop modules — shared desktop services, hardware, and compositor(s).
 # desktop.enable gates shared services (accounts-daemon, printing, fonts, etc.).
+# desktop.shell selects a desktop shell (e.g. quickshell); when set, individual
+# bar/notification/launcher programs in the HM niri module are skipped.
 # Hardware features and compositors are individually gated behind their own enable flags.
 {
   config,
@@ -21,6 +23,14 @@ in {
     homelab = {
       desktop = {
         enable = lib.mkEnableOption "desktop environment (shared services, login manager)";
+
+        shell = lib.mkOption {
+          default = "none";
+          type = lib.types.enum [
+            "none"
+          ];
+          description = "Desktop shell providing bar, notifications, launcher, lock screen, and wallpaper. When set, individual replacements (waybar, swaync, rofi, swaylock, swaybg, udiskie) are not installed.";
+        };
       };
 
       hardware = {

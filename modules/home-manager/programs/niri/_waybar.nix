@@ -3,6 +3,9 @@
 # Stylix provides base16 color variables and fonts; addCss = false (set via
 # sharedModules in modules/nixos/_stylix.nix) disables its layout CSS.
 # Custom styles use lib.mkAfter to append after Stylix.
+#
+# Shell guard: entire module is disabled when homelab.desktop.shell != "none"
+# because the desktop shell provides its own status bar.
 {
   config,
   homelabCfg,
@@ -11,9 +14,11 @@
   ...
 }: let
   niriEnabled = (homelabCfg.desktop.niri.enable or false) && pkgs.stdenv.isLinux;
+  # true when a desktop shell (e.g. quickshell) replaces individual bar/notification/launcher programs
+  shellEnabled = (homelabCfg.desktop.shell or "none") != "none";
   monoFont = config.stylix.fonts.monospace.name;
 in {
-  config = lib.mkIf niriEnabled {
+  config = lib.mkIf (niriEnabled && !shellEnabled) {
     programs = {
       waybar = {
         enable = true;

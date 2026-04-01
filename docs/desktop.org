@@ -22,7 +22,7 @@ modules/nixos/
   _stylix.nix        Stylix — single source of truth for Base16 theming (system + HM via autoImport)
 
 modules/nixos/desktop/
-  default.nix        Shared services, hardware, kernel (Zen), VM tuning, ananicy-cpp, fontconfig, fonts
+  default.nix        Shared services, hardware, kernel (Zen), VM tuning, ananicy-cpp, fontconfig, fonts; defines desktop.shell option
   _greetd.nix        Login manager (tuigreet) with PAM config
   _niri.nix          Niri compositor + backlight control (light)
 
@@ -39,7 +39,7 @@ modules/home-manager/programs/
   zen/               Browser (privacy hardening, extensions, containers, pinned tabs)
 #+end_example
 
-Everything is gated behind ~homelab.*~ options. A machine opts into the desktop stack by setting ~homelab.desktop.enable = true~ and ~homelab.desktop.niri.enable = true~ in its ~_config.nix~.
+Everything is gated behind ~homelab.*~ options. A machine opts into the desktop stack by setting ~homelab.desktop.enable = true~ and ~homelab.desktop.niri.enable = true~ in its ~_config.nix~. ~homelab.desktop.shell~ (enum, default ~"none"~) selects a desktop shell; when set, individual bar/notification/launcher programs are skipped.
 
 * Login Flow
 
@@ -70,6 +70,8 @@ PAM evaluation order for tuigreet with fingerprint enabled:
 Niri is a scrollable-tiling Wayland compositor. System-level enablement (~programs.niri.enable~ and ~programs.light.enable~ for backlight control) is in ~_niri.nix~. User configuration lives in ~$XDG_CONFIG_HOME/niri/config.kdl~ (not managed declaratively by this flake).
 
 When Niri is enabled on Linux, home-manager installs and configures: rofi (app launcher), waybar (status bar managed by systemd, configured in ~_waybar.nix~ with custom CSS using Stylix base16 color variables and ~addCss = false~ to avoid layout conflicts), swaync (notifications), swayidle (idle management), swaylock (screen locker), playerctld (MPRIS daemon), and udiskie (auto-mount). Packages without HM modules (swaybg, wl-clipboard, xwayland-satellite) are installed directly.
+
+~homelab.desktop.shell~ (enum, default ~"none"~) selects a desktop shell that replaces individual bar/notification/launcher/lock/wallpaper programs. When set to anything other than ~"none"~, waybar, swaync, rofi, swaylock, swaybg, swayidle, and udiskie are skipped. Compositor-level utilities (wl-clipboard, xwayland-satellite) and playerctld remain unconditional.
 
 * Graphics
 
@@ -207,7 +209,7 @@ With encrypted root, the user already proves identity at boot. Typing the same p
 
 ** Noctalia Shell
 
-[[https://noctalia.dev/][Noctalia]] is a minimal Wayland desktop shell built on Quickshell. It provides panels, notifications, and system UI with a clean aesthetic and 83+ community plugins. Noctalia supports Niri natively, making it a natural fit for the current compositor stack. Would replace ad-hoc status bar / notification tooling with a unified shell layer.
+[[https://noctalia.dev/][Noctalia]] is a minimal Wayland desktop shell built on Quickshell. It provides panels, notifications, and system UI with a clean aesthetic and 83+ community plugins. Noctalia supports Niri natively, making it a natural fit for the current compositor stack. The ~homelab.desktop.shell~ option is already in place — adding Noctalia means extending the enum and writing its module; individual bar/notification/launcher programs are automatically skipped when a shell is selected.
 
 ** Declarative Niri configuration
 
