@@ -506,7 +506,8 @@ Defined in =nix/pkgs/= and auto-discovered.
 *** arrakis
 
 - *Purpose:* Primary Laptop (NixOS Desktop)
-- *Storage:* ZFS root (encrypted, impermanence)
+- *Storage:* LUKS-encrypted ext4 + tmpfs root (impermanence), LVM swap (40G, hibernate)
+- *Boot:* systemd-boot + systemd initrd (Plymouth-ready)
 - *GPU:* AMD (Radeon, ThinkPad T14 Gen 3)
 - *Desktop:* Niri compositor + greetd
 - *Kernel params:* =amd_pstate=active= (AMD P-State driver)
@@ -527,7 +528,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 |-------------+--------------------------|
 | claude-code | Anthropic CLI + MCP      |
 | emacs       | Editor with LSP/Go tools |
-| fastfetch   | zpools: rpool            |
+| fastfetch   | System info              |
 | fish        | Interactive shell        |
 | git         | Version control          |
 | kitty       | Terminal emulator        |

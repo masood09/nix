@@ -12,6 +12,13 @@
 
   boot = {
     initrd = {
+      # systemd-based initrd for LUKS unlock via systemd-cryptsetup.
+      # Required for Plymouth integration (future) — the scripted initrd's
+      # cryptsetup-askpass does not integrate with Plymouth's password agent.
+      systemd = {
+        enable = true;
+      };
+
       availableKernelModules = [
         "nvme"
         "xhci_pci"

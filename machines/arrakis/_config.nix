@@ -4,7 +4,7 @@
     homelab = {
       role = "desktop";
       purpose = "Primary Laptop (NixOS Desktop)";
-      isRootZFS = true;
+      isRootZFS = false;
       isEncryptedRoot = true;
       impermanence = true;
 
@@ -42,9 +42,6 @@
       };
 
       programs = {
-        fastfetch = {
-          zpools = ["rpool"];
-        };
         claude-code = {
           enable = true;
         };
