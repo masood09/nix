@@ -20,7 +20,7 @@ Desktop configuration is split across NixOS system modules and home-manager user
 #+begin_example
 modules/nixos/desktop/
   default.nix        Shared services, hardware, kernel (Zen), VM tuning, ananicy-cpp, fontconfig, fonts
-  _greetd.nix        Login manager (tuigreet or sysc-greet) with PAM config
+  _greetd.nix        Login manager (tuigreet) with PAM config
   _niri.nix          Niri compositor + backlight control (light)
 
 modules/home-manager/
@@ -40,17 +40,14 @@ Everything is gated behind ~homelab.*~ options. A machine opts into the desktop 
 
 ** Greeter
 
-greetd manages login sessions. Two greeters are available via ~homelab.desktop.greeter~:
-
-- *tuigreet* (default) — TUI greeter that launches ~niri-session~. Supports fingerprint auth when ~homelab.hardware.fingerprint.enable = true~.
-- *sysc-greet* — graphical greeter using Niri as compositor. Fingerprint PAM is explicitly disabled because sysc-greet handles only a single password prompt; fprintd's concurrent PAM conversation causes "Connection refused" on the greetd IPC socket.
+greetd manages login sessions with tuigreet, a TUI greeter that launches ~niri-session~. Supports fingerprint auth when ~homelab.hardware.fingerprint.enable = true~.
 
 ** PAM Stack
 
-The greetd PAM service is configured per-greeter in ~_greetd.nix~:
+The greetd PAM service is configured in ~_greetd.nix~:
 
 - ~enableGnomeKeyring = true~ — passes the login password to gnome-keyring-daemon for auto-unlock
-- ~fprintAuth~ — conditional on greeter type and hardware support
+- ~fprintAuth~ — conditional on hardware fingerprint support
 
 PAM evaluation order for tuigreet with fingerprint enabled:
 
@@ -128,7 +125,7 @@ All desktops use impermanence with ~/nix/persist~ as the persistence root. ZFS d
 | /var/lib/fprint                        | Fingerprint templates     |
 | /var/lib/NetworkManager                | WiFi connections          |
 | /etc/NetworkManager/system-connections | WiFi connection configs   |
-| /var/cache/tuigreet (or sysc-greet)    | Greeter session cache     |
+| /var/cache/tuigreet                    | Greeter session cache     |
 | /home                                  | User data (neededForBoot) |
 
 * Kernel & Performance
@@ -182,10 +179,6 @@ ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer). Non-ZFS
 When ~pam_fprintd.so~ succeeds (marked ~sufficient~), PAM short-circuits the auth stack. ~pam_gnome_keyring.so~ never receives a password, so the ~login~ keyring stays locked. Apps that use the Secret Service API (Element, Discord) will prompt for credentials each session.
 
 *Workaround:* log in with password instead of fingerprint. The keyring unlocks automatically.
-
-** sysc-greet cannot use fingerprint auth
-
-sysc-greet handles only a single password prompt. fprintd's concurrent PAM conversation causes "Connection refused" on the greetd IPC socket, failing all authentication. Fingerprint PAM is hardcoded to ~false~ for the sysc-greet greeter.
 
 ** Niri config is not declarative
 

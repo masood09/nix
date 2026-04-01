@@ -149,8 +149,7 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 | power-profiles-daemon | CPU power profile management                    |
 | printing (CUPS)       | Print server                                    |
 | upower                | Battery/power monitoring                        |
-| greetd + tuigreet     | TUI login manager (default greeter)             |
-| greetd + sysc-greet   | Graphical greeter (ASCII art + themes in kitty) |
+| greetd + tuigreet     | TUI login manager                               |
 | light                 | Backlight control (udev rules for video group)  |
 | niri                  | Scrollable-tiling Wayland compositor            |
 

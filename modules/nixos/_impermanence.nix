@@ -40,11 +40,7 @@ in {
                 "/var/lib/NetworkManager"
                 "/etc/NetworkManager/system-connections"
               ]
-              ++ (
-                if homelabCfg.desktop.greeter == "sysc-greet"
-                then ["/var/cache/sysc-greet"]
-                else ["/var/cache/tuigreet"]
-              )
+              ++ ["/var/cache/tuigreet"]
             ))
           ];
 
