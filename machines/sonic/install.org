@@ -34,22 +34,11 @@ contains your SSH public key as an authorized key.
 
 * Connect to WiFi
 
-The live ISO uses =wpa_supplicant=. Connect using =wpa_cli=:
+The live ISO uses NetworkManager. Connect using =nmcli=:
 
 #+begin_src bash
-wpa_cli
-#+end_src
-
-Inside the =wpa_cli= interactive shell:
-
-#+begin_src
-> scan
-> scan_results
-> add_network
-> set_network 0 ssid "<SSID>"
-> set_network 0 psk "<PASSWORD>"
-> enable_network 0
-> quit
+nmcli device wifi list
+nmcli device wifi connect "<SSID>" password "<PASSWORD>"
 #+end_src
 
 Verify connectivity:
