@@ -28,9 +28,17 @@ in {
               # https://github.com/nix-community/impermanence/issues/178
               "/var/lib/nixos"
             ])
-            # Non-ZFS desktops need /home persisted (ZFS desktops get it as a dataset)
+            # Non-ZFS desktops: persist user home with explicit ownership so
+            # impermanence creates the directory in /nix/persist automatically.
+            # Bare "/home" won't create subdirectories, leaving the user homeless
+            # after a fresh install. ZFS desktops get /home as a dataset instead.
             (lib.mkIf (!homelabCfg.isRootZFS && homelabCfg.role == "desktop") [
-              "/home"
+              {
+                directory = "/home/${homelabCfg.primaryUser.userName}";
+                user = homelabCfg.primaryUser.userName;
+                group = "users";
+                mode = "0700";
+              }
             ])
             # Desktop-specific state (login manager, bluetooth pairings, fingerprints, WiFi)
             (lib.mkIf (homelabCfg.role == "desktop") (
