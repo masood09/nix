@@ -14,13 +14,13 @@
 
   # Custom command modules — role and reboot are prepended after the title,
   # desktop-only and zpool modules are appended after the common defaults.
-  # The reboot guard uses `or false` because rebootRequiredCheck is a
-  # NixOS-only option absent on macOS.
+  # Several options below use `or` fallbacks (purpose, rebootRequiredCheck,
+  # role) because they are NixOS-only and absent on macOS.
 
-  roleModule = lib.optional (homelabCfg.purpose != "") {
+  roleModule = lib.optional ((homelabCfg.purpose or "") != "") {
     type = "command";
     key = "Role";
-    text = "echo '${homelabCfg.purpose}'";
+    text = "echo '${homelabCfg.purpose or ""}'";
   };
 
   rebootModule = lib.optionals (homelabCfg.services.rebootRequiredCheck.enable or false) [
