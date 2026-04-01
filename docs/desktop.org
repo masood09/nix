@@ -18,6 +18,9 @@ Three NixOS desktops run a Wayland-native stack: Niri compositor, greetd login m
 Desktop configuration is split across NixOS system modules and home-manager user modules.
 
 #+begin_example
+modules/nixos/
+  _stylix.nix        NixOS-level Stylix (Plymouth, GRUB, console theming)
+
 modules/nixos/desktop/
   default.nix        Shared services, hardware, kernel (Zen), VM tuning, ananicy-cpp, fontconfig, fonts
   _greetd.nix        Login manager (tuigreet) with PAM config
@@ -30,7 +33,7 @@ modules/home-manager/programs/
   niri/default.nix   Niri user-level config (rofi, swaync, swayidle, swaylock, playerctld, udiskie)
   niri/_waybar.nix   Waybar status bar (workspaces, window title, tray, audio, network, battery, clock, notifications)
   _kitty.nix         Terminal emulator
-  _stylix.nix        Base16 theming (fonts, cursor, opacity, color scheme)
+  _stylix.nix        HM-level Stylix (fonts, cursor, opacity, color scheme for user apps)
   zen/               Browser (privacy hardening, extensions, containers, pinned tabs)
 #+end_example
 
@@ -100,16 +103,32 @@ PipeWire replaces PulseAudio and ALSA with a unified daemon. Enabled when ~homel
 
 * Theming
 
-Stylix provides Base16 theming across all applications (terminal, browser, editor, compositor). Configured in ~_stylix.nix~:
+Stylix provides Base16 theming at two levels, each with its own options and module:
+
+** NixOS-level (~modules/nixos/_stylix.nix~, ~homelab.stylix.*~)
+
+Themes system-level boot and console targets. Enabled per-machine via ~homelab.stylix.enable = true~. Uses ~autoEnable = false~ and ~homeManagerIntegration.autoImport = false~ to avoid conflicts with the HM module (both set the read-only ~stylix.base16~ attr).
+
+| Target   | Effect                                                          |
+|----------+-----------------------------------------------------------------|
+| Plymouth | Base16-themed boot splash (non-ZFS desktops only, see Boot)     |
+| GRUB     | Base16-themed boot menu (ZFS machines)                          |
+| Console  | Base16 colors on the Linux virtual console (all enabled machines) |
+
+** Home-Manager-level (~modules/home-manager/programs/_stylix.nix~, ~homelab.programs.stylix.*~)
+
+Themes user applications (terminal, GTK, cursor, waybar, etc.):
 
 | Setting    | Default                        | Notes                                |
 |------------+--------------------------------+--------------------------------------|
 | Scheme     | gruvbox-dark                   | String (named) or path (custom YAML) |
-| Polarity   | dark                           | ~dark~ or ~light~                        |
+| Polarity   | dark                           | ~dark~ or ~light~                    |
 | Monospace  | JetBrainsMono Nerd Font (12pt) | Nerd Font variant                    |
 | Sans-serif | Inter (12pt)                   |                                      |
 | Cursor     | Bibata Modern Classic          | Size 24                              |
 | Opacity    | 0.90                           | Terminal and popups                  |
+
+Both levels share the same scheme, polarity, wallpaper, font, and cursor values — set per-machine in ~_config.nix~ under ~homelab.stylix.*~ (NixOS) and ~homelab.programs.stylix.*~ (HM).
 
 sonic uses a custom scheme (~nix/themes/sonic-dark.yaml~) with a Sonic the Hedgehog-inspired palette.
 
@@ -170,7 +189,7 @@ ananicy-cpp is an auto-nice daemon that adjusts process niceness, I/O priority, 
 
 * Boot
 
-ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer). Non-ZFS desktops (arrakis) use systemd-boot with systemd-based initrd and Plymouth. The boot sequence is: systemd-boot → Plymouth splash → LUKS passphrase (via Plymouth's password agent) → greeter. Kernel params ~quiet splash loglevel=3~ suppress console output so the splash is uninterrupted. Plymouth and systemd initrd are auto-enabled for any machine with ~role = "desktop"~ and ~isRootZFS = false~ (the ~isDesktopSystemdBoot~ guard in ~_boot.nix~).
+ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix themes the GRUB menu with Base16 colors when ~homelab.stylix.enable = true~. Non-ZFS desktops (arrakis) use systemd-boot with systemd-based initrd and Plymouth. The boot sequence is: systemd-boot → Plymouth splash (themed by Stylix) → LUKS passphrase (via Plymouth's password agent) → greeter. Kernel params ~quiet splash loglevel=3~ suppress console output so the splash is uninterrupted. Plymouth and systemd initrd are auto-enabled for any machine with ~role = "desktop"~ and ~isRootZFS = false~ (the ~isDesktopSystemdBoot~ guard in ~_boot.nix~).
 
 * Pain Points
 

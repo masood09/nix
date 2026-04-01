@@ -143,7 +143,9 @@ homelab
   +-- networking       { hostName, domain }
   +-- impermanence     bool — ephemeral root enabled
   +-- isRootZFS        bool — root is on ZFS
+  +-- stylix          { enable, scheme, polarity, wallpaper } (NixOS-level theming)
   +-- programs
+  |     +-- stylix    { enable, scheme, polarity, wallpaper } (HM-level theming)
   |     +-- emacs.enable
   |     +-- ...
   +-- services

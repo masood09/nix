@@ -19,6 +19,7 @@
     ./_remote-unlock.nix
     ./_security.nix
     ./_sops.nix
+    ./_stylix.nix
     ./_users.nix
 
     # Desktop modules (gated on role == "desktop" internally)
