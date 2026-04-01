@@ -4,6 +4,10 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    # Unstable channel — used by inputs that require latest nixpkgs (e.g. noctalia)
+    nixpkgs-unstable = {
+      url = "github:nixos/nixpkgs/nixos-unstable";
+    };
 
     # NixOS infrastructure
     impermanence = {
@@ -64,6 +68,15 @@
     betterfox = {
       url = "github:yokoffing/Betterfox";
       flake = false;
+    };
+    # Noctalia desktop shell (requires unstable nixpkgs for latest Quickshell)
+    noctalia = {
+      url = "github:noctalia-dev/noctalia-shell";
+      inputs = {
+        nixpkgs = {
+          follows = "nixpkgs-unstable";
+        };
+      };
     };
   };
 

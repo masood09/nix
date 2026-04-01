@@ -81,17 +81,28 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 |---------+--------------+-------------------------------------|
 | zen/    | zen-browser  | Privacy-focused Firefox fork        |
 
+*** Noctalia Desktop Shell (=desktop/_noctalia.nix=, default for desktops)
+
+| Package        | Purpose                                                       |
+|----------------+---------------------------------------------------------------|
+| noctalia-shell | Desktop shell (bar, notifications, launcher, lock, wallpaper) |
+
 *** Niri Desktop (=niri/default.nix=, Linux desktops with Niri)
 
-**** Packages
+**** Packages (unconditional)
 
-| Package             | Purpose                              |
-|---------------------+--------------------------------------|
-| swaybg              | Wallpaper setter                     |
-| wl-clipboard        | Wayland clipboard utilities          |
-| xwayland-satellite  | XWayland support for Niri            |
+| Package            | Purpose                   |
+|--------------------+---------------------------|
+| wl-clipboard       | Wayland clipboard utilities |
+| xwayland-satellite | XWayland support for Niri |
 
-**** Programs (home-manager modules)
+**** Packages (=shell = "none"= only)
+
+| Package  | Purpose          |
+|----------+------------------|
+| swaybg   | Wallpaper setter |
+
+**** Programs (=shell = "none"= only, home-manager modules)
 
 | Program  | Purpose                    |
 |----------+----------------------------|
@@ -101,12 +112,12 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 
 **** Services (home-manager modules)
 
-| Service    | Purpose                               |
-|------------+---------------------------------------|
-| swaync     | Notification center (D-Bus activated) |
-| playerctld | MPRIS media player daemon             |
-| swayidle   | Idle management                       |
-| udiskie    | Auto-mount removable media            |
+| Service    | Condition          | Purpose                               |
+|------------+--------------------+---------------------------------------|
+| playerctld | unconditional      | MPRIS media player daemon             |
+| swaync     | =shell = "none"= | Notification center (D-Bus activated) |
+| swayidle   | =shell = "none"= | Idle management                       |
+| udiskie    | =shell = "none"= | Auto-mount removable media            |
 
 ** Desktop Role Packages (=role == "desktop"=)
 

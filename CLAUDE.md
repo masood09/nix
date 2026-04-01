@@ -122,10 +122,11 @@ Before adding services, check `docs/service-registry.org` for:
 ## Key Dependencies
 
 - nixpkgs: `nixos-25.11`
+- nixpkgs-unstable: `nixos-unstable` (used by noctalia)
 - home-manager: `release-25.11`
 - nix-darwin: `nix-darwin-25.11`
 - stylix: `release-25.11`
-- Other inputs: disko, impermanence, sops-nix, nix-homebrew, authentik-nix, headplane, claude-code, zen-browser, betterfox
+- Other inputs: disko, impermanence, sops-nix, nix-homebrew, authentik-nix, headplane, claude-code, zen-browser, betterfox, noctalia
 
 ## Machines
 
