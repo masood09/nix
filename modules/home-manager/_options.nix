@@ -194,42 +194,6 @@
           };
         };
 
-        stylix = {
-          enable = lib.mkOption {
-            default = true;
-            type = lib.types.bool;
-            description = ''
-              Whether to enable stylix base16 theming.
-            '';
-          };
-
-          polarity = lib.mkOption {
-            default = "dark";
-            type = lib.types.enum ["dark" "light"];
-            description = ''
-              Theme polarity (dark or light mode).
-            '';
-          };
-
-          scheme = lib.mkOption {
-            default = "gruvbox-dark";
-            type = lib.types.either lib.types.str lib.types.path;
-            description = ''
-              Base16 color scheme. Either a scheme name from the base16-schemes
-              package (e.g. "gruvbox-dark", "catppuccin-mocha") or a path to a
-              custom Base16 YAML file (e.g. ../../nix/themes/sonic-dark.yaml).
-            '';
-          };
-
-          wallpaper = lib.mkOption {
-            type = lib.types.nullOr lib.types.path;
-            default = null;
-            description = ''
-              Path to wallpaper image. Stylix will extract colors from this if set.
-            '';
-          };
-        };
-
         tmux = {
           enable = lib.mkOption {
             default = true;

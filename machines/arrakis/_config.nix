@@ -72,10 +72,6 @@
           enable = true;
         };
 
-        stylix = {
-          wallpaper = ../../nix/wallpapers/cosy-retreat-sunset.png;
-        };
-
         zen = {
           enable = true;
         };

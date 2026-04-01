@@ -18,15 +18,6 @@
     ./pins.nix
   ];
 
-  # Enable Stylix theming for Zen browser
-  stylix = {
-    targets = {
-      zen-browser = {
-        profileNames = ["default"];
-      };
-    };
-  };
-
   # Workaround for https://github.com/0xc000022070/zen-browser-flake/issues/63
   home = {
     sessionVariables = {

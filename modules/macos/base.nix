@@ -12,6 +12,7 @@ in {
     ./_dock.nix
     ./_networking.nix
     ./_packages.nix
+    ./_stylix.nix
   ];
 
   nixpkgs = {

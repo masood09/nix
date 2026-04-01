@@ -1,12 +1,9 @@
-# NixOS-level Stylix — single source of truth for Base16 theming.
-# Scheme, polarity, wallpaper, fonts, cursor, and opacity are defined here
-# once and propagate to Home-Manager automatically via Stylix's autoImport
-# (imports homeModules.stylix for every HM user) and followSystem (copies
-# these values into HM config with mkDefault priority).
-# HM-only target overrides (starship, waybar, zen-browser) are injected
-# through home-manager.sharedModules since those targets don't exist at the
-# NixOS level.
-# Darwin counterpart: modules/macos/_stylix.nix.
+# macOS-level Stylix — single source of truth for Base16 theming on Darwin.
+# Mirrors modules/nixos/_stylix.nix but without NixOS-specific options
+# (cursor is not supported by Stylix's darwinModules).
+# Scheme, polarity, wallpaper, fonts, and opacity propagate to Home-Manager
+# automatically via Stylix's autoImport + followSystem.
+# HM-only target overrides are injected through home-manager.sharedModules.
 {
   config,
   lib,
@@ -80,12 +77,6 @@ in {
           package = pkgs.inter;
           name = "Inter";
         };
-      };
-
-      cursor = {
-        package = pkgs.bibata-cursors;
-        name = "Bibata-Modern-Classic";
-        size = 24;
       };
 
       opacity = {

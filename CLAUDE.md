@@ -61,10 +61,18 @@ homelab = {
   purpose = "Main NAS";
   primaryUser = { userName = "masoodahmed"; userId = 1000; };
   networking = { hostName = "heartbeat"; domain = "mantannest.com"; };
+  stylix = { enable = true; wallpaper = ../../nix/wallpapers/cosy-retreat-sunset.png; };
   programs.emacs.enable = true;
   services.immich.enable = true;
 };
 ```
+
+### Theming (Stylix)
+- Single source of truth at system level: `modules/nixos/_stylix.nix` (NixOS), `modules/macos/_stylix.nix` (Darwin)
+- All settings (`homelab.stylix.*`) propagate to Home-Manager via Stylix's `autoImport` + `followSystem`
+- HM-only target overrides (starship, waybar, zen-browser) are injected via `home-manager.sharedModules` in the system module
+- Servers don't enable Stylix — the HM module is only auto-imported when `homelab.stylix.enable = true`
+- Darwin Stylix does not support `stylix.cursor` (no cursor module in `darwinModules`)
 
 ### File Naming Convention
 - `_` prefix for private/internal config files (e.g., `_config.nix`, `_networking.nix`)

@@ -5,7 +5,7 @@
 
 * Overview
 
-Three NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. commandmodule and sonic use ZFS root with impermanence (ephemeral root via ZFS rollback). arrakis uses LUKS-encrypted ext4 with tmpfs impermanence and systemd-boot. macOS desktops (murderbot, work-pantheon) use nix-darwin and are out of scope for this document.
+Three NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. commandmodule and sonic use ZFS root with impermanence (ephemeral root via ZFS rollback). arrakis uses LUKS-encrypted ext4 with tmpfs impermanence and systemd-boot. macOS desktops (murderbot, work-pantheon) use nix-darwin with Stylix for HM-level theming (fonts, opacity, terminal colors) but are otherwise out of scope for this document.
 
 | Machine       | Hardware           | GPU            | Primary User       | Theme               | Root FS    | Boot                    |
 |---------------+--------------------+----------------+--------------------+---------------------+------------+-------------------------|
@@ -19,21 +19,23 @@ Desktop configuration is split across NixOS system modules and home-manager user
 
 #+begin_example
 modules/nixos/
-  _stylix.nix        NixOS-level Stylix (Plymouth, GRUB, console theming)
+  _stylix.nix        Stylix — single source of truth for Base16 theming (system + HM via autoImport)
 
 modules/nixos/desktop/
   default.nix        Shared services, hardware, kernel (Zen), VM tuning, ananicy-cpp, fontconfig, fonts
   _greetd.nix        Login manager (tuigreet) with PAM config
   _niri.nix          Niri compositor + backlight control (light)
 
+modules/macos/
+  _stylix.nix        Stylix — Darwin counterpart (same options, no cursor/Plymouth/GRUB/console)
+
 modules/home-manager/
-  home.nix           Base HM config: home path, session vars, XDG user directories (Desktop, Documents, etc.)
+  home.nix           Base HM config: home path, session vars, XDG user directories, fontconfig Nerd Font override
 
 modules/home-manager/programs/
   niri/default.nix   Niri user-level config (rofi, swaync, swayidle, swaylock, playerctld, udiskie)
   niri/_waybar.nix   Waybar status bar (workspaces, window title, tray, audio, network, battery, clock, notifications)
   _kitty.nix         Terminal emulator
-  _stylix.nix        HM-level Stylix (fonts, cursor, opacity, color scheme for user apps)
   zen/               Browser (privacy hardening, extensions, containers, pinned tabs)
 #+end_example
 
@@ -103,21 +105,9 @@ PipeWire replaces PulseAudio and ALSA with a unified daemon. Enabled when ~homel
 
 * Theming
 
-Stylix provides Base16 theming at two levels, each with its own options and module:
+Stylix provides Base16 theming from a single source of truth at the system level (~modules/nixos/_stylix.nix~ on NixOS, ~modules/macos/_stylix.nix~ on Darwin). All settings are defined once under ~homelab.stylix.*~ and propagate to Home-Manager automatically via Stylix's ~autoImport~ (injects ~homeModules.stylix~ for every HM user) and ~followSystem~ (copies values with ~mkDefault~ priority).
 
-** NixOS-level (~modules/nixos/_stylix.nix~, ~homelab.stylix.*~)
-
-Themes system-level boot and console targets. Enabled per-machine via ~homelab.stylix.enable = true~. Uses ~autoEnable = false~ and ~homeManagerIntegration.autoImport = false~ to avoid conflicts with the HM module (both set the read-only ~stylix.base16~ attr).
-
-| Target   | Effect                                                          |
-|----------+-----------------------------------------------------------------|
-| Plymouth | Base16-themed boot splash (non-ZFS desktops only, see Boot)     |
-| GRUB     | Base16-themed boot menu (ZFS machines)                          |
-| Console  | Base16 colors on the Linux virtual console (all enabled machines) |
-
-** Home-Manager-level (~modules/home-manager/programs/_stylix.nix~, ~homelab.programs.stylix.*~)
-
-Themes user applications (terminal, GTK, cursor, waybar, etc.):
+Enabled per-machine via ~homelab.stylix.enable = true~ in ~_config.nix~. Servers leave it disabled.
 
 | Setting    | Default                        | Notes                                |
 |------------+--------------------------------+--------------------------------------|
@@ -125,14 +115,16 @@ Themes user applications (terminal, GTK, cursor, waybar, etc.):
 | Polarity   | dark                           | ~dark~ or ~light~                    |
 | Monospace  | JetBrainsMono Nerd Font (12pt) | Nerd Font variant                    |
 | Sans-serif | Inter (12pt)                   |                                      |
-| Cursor     | Bibata Modern Classic          | Size 24                              |
+| Cursor     | Bibata Modern Classic          | Size 24 (NixOS only, not on Darwin)  |
 | Opacity    | 0.90                           | Terminal and popups                  |
 
-Both levels share the same scheme, polarity, wallpaper, font, and cursor values — set per-machine in ~_config.nix~ under ~homelab.stylix.*~ (NixOS) and ~homelab.programs.stylix.*~ (HM).
+NixOS system-level targets (Plymouth, GRUB, console) auto-enable when their underlying program is active. HM-only target overrides (starship disabled, waybar ~addCss = false~, zen-browser profile) are injected via ~home-manager.sharedModules~ in the system-level module.
 
 sonic uses a custom scheme (~nix/themes/sonic-dark.yaml~) with a Sonic the Hedgehog-inspired palette.
 
 Starship prompt is excluded from Stylix targets — it uses hardcoded Catppuccin colors. Fish uses tide instead of Starship; tide prompt colors are derived from Stylix base16 slots in ~_fish.nix~ so they adapt automatically per scheme.
+
+A fontconfig override in ~home.nix~ redirects common monospace fonts (Liberation Mono, DejaVu Sans Mono, Noto Sans Mono) to the Stylix monospace font to preserve Nerd Font PUA icon glyphs in web pages and apps.
 
 * Persistence
 
