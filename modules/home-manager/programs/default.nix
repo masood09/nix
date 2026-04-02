@@ -24,6 +24,7 @@
 
     # Development
     ./_claude-code.nix
+    ./_codex-cli.nix
     ./_emacs.nix
     ./_git.nix
     ./_gpg.nix

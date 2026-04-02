@@ -50,6 +50,9 @@
         claude-code = {
           enable = true;
         };
+        codex-cli = {
+          enable = true;
+        };
         emacs = {
           enable = true;
         };

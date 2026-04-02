@@ -30,6 +30,10 @@
           enable = lib.mkEnableOption "Whether to enable Claude Code.";
         };
 
+        codex-cli = {
+          enable = lib.mkEnableOption "Whether to enable Codex CLI.";
+        };
+
         direnv = {
           enable = lib.mkOption {
             default = true;
