@@ -14,10 +14,11 @@
   ...
 }: let
   niriEnabled = (homelabCfg.desktop.niri.enable or false) && pkgs.stdenv.isLinux;
-  # true when a desktop shell (e.g. quickshell) replaces individual bar/notification/launcher programs
+  # true when a desktop shell (e.g. Noctalia) replaces individual bar/notification/launcher programs
   shellEnabled = (homelabCfg.desktop.shell or "none") != "none";
 in {
   imports = [
+    ./_noctalia.nix
     ./_waybar.nix
   ];
 

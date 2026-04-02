@@ -1,9 +1,10 @@
 # NixOS-level Stylix — single source of truth for Base16 theming.
-# Scheme, polarity, wallpaper, fonts, cursor, and opacity are defined here
+# Scheme, polarity, wallpaper, fonts, cursor, icons, and opacity are defined here
 # once and propagate to Home-Manager automatically via Stylix's autoImport
 # (imports homeModules.stylix for every HM user) and followSystem (copies
 # these values into HM config with mkDefault priority).
-# HM-only target overrides (starship, waybar, zen-browser) are injected
+# HM-only target overrides (starship, waybar, zen-browser) and the Papirus
+# icon theme are injected
 # through home-manager.sharedModules since those targets don't exist at the
 # NixOS level.
 # Darwin counterpart: modules/macos/_stylix.nix.
@@ -94,11 +95,20 @@ in {
       };
     };
 
-    # HM-only target overrides — injected via sharedModules so they apply
-    # after the Stylix HM module is auto-imported.
+    # HM-only target overrides and icon theme — injected via sharedModules
+    # so they apply after the Stylix HM module is auto-imported.
     home-manager = {
       sharedModules = [
         {
+          # Papirus icon theme — provides application icons for desktop shells
+          # (Noctalia, launchers, etc.) and GTK apps.
+          gtk = {
+            iconTheme = {
+              package = pkgs.papirus-icon-theme;
+              name = "Papirus-Dark";
+            };
+          };
+
           stylix = {
             targets = {
               # Starship uses hardcoded Catppuccin colors

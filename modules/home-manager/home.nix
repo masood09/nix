@@ -26,6 +26,8 @@ in {
     ./programs
     # Zen browser home-manager module (beta variant)
     inputs.zen-browser.homeModules.beta
+    # Noctalia desktop shell home-manager module
+    inputs.noctalia.homeModules.default
   ];
 
   home = {

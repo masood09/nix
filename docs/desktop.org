@@ -31,10 +31,11 @@ modules/macos/
   _stylix.nix        Stylix — Darwin counterpart (same options, no cursor/Plymouth/GRUB/console)
 
 modules/home-manager/
-  home.nix           Base HM config: home path, session vars, XDG user directories, fontconfig Nerd Font override
+  home.nix           Base HM config: home path, session vars, XDG user directories, fontconfig Nerd Font override; imports Noctalia HM module
 
 modules/home-manager/programs/
   niri/default.nix   Niri user-level config (rofi, swaync, swayidle, swaylock, playerctld, udiskie)
+  niri/_noctalia.nix Noctalia HM module enablement (guarded on desktop.shell == "noctalia")
   niri/_waybar.nix   Waybar status bar (workspaces, window title, tray, audio, network, battery, clock, notifications)
   _kitty.nix         Terminal emulator
   zen/               Browser (privacy hardening, extensions, containers, pinned tabs)
@@ -210,7 +211,7 @@ With encrypted root, the user already proves identity at boot. Typing the same p
 
 ** Noctalia Shell
 
-[[https://noctalia.dev/][Noctalia]] is a minimal Wayland desktop shell built on Quickshell. It provides panels, notifications, and system UI with a clean aesthetic and 83+ community plugins. Noctalia supports Niri natively, making it a natural fit for the current compositor stack. Installed as a system package via ~_noctalia.nix~ (not the HM module) and enabled by default (~homelab.desktop.shell = "noctalia"~). Requires nixos-unstable (provided via the ~nixpkgs-unstable~ flake input) and uses the ~noctalia.cachix.org~ binary cache.
+[[https://noctalia.dev/][Noctalia]] is a minimal Wayland desktop shell built on Quickshell. It provides panels, notifications, and system UI with a clean aesthetic and 83+ community plugins. Noctalia supports Niri natively, making it a natural fit for the current compositor stack. Enabled by default (~homelab.desktop.shell = "noctalia"~). System package installed via ~modules/nixos/desktop/_noctalia.nix~; HM module imported in ~home.nix~ and activated in ~modules/home-manager/programs/niri/_noctalia.nix~. Requires nixos-unstable (provided via the ~nixpkgs-unstable~ flake input) and uses the ~noctalia.cachix.org~ binary cache.
 
 ** Declarative Niri configuration
 
