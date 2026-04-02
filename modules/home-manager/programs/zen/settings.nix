@@ -83,13 +83,15 @@ _: {
             "zen.theme.use-system-colors" = false;
             "zen.watermark.enabled" = false;
 
-            # Zen — Compact view and layout
+            # Zen — Sidebar and compact mode
+            # Expanded sidebar shows tab labels alongside icons; compact mode
+            # still hides the tab bar and toolbar until hover.
             "zen.view.compact.enable-at-startup" = true;
             "zen.view.compact.animate-sidebar" = false;
             "zen.view.compact.hide-tabbar" = true;
             "zen.view.compact.hide-toolbar" = true;
             "zen.view.experimental-no-window-controls" = true;
-            "zen.view.sidebar-expanded" = false;
+            "zen.view.sidebar-expanded" = true;
             "zen.view.use-single-toolbar" = true;
 
             # Zen — URL bar
