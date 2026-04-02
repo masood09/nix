@@ -35,7 +35,7 @@ modules/home-manager/
 
 modules/home-manager/programs/
   niri/default.nix   Niri user-level config (rofi, swaync, swayidle, swaylock, playerctld, udiskie)
-  niri/_noctalia.nix Noctalia HM module enablement (guarded on desktop.shell == "noctalia")
+  niri/_noctalia.nix Noctalia HM module enablement and settings (guarded on desktop.shell == "noctalia")
   niri/_waybar.nix   Waybar status bar (workspaces, window title, tray, audio, network, battery, clock, notifications)
   _kitty.nix         Terminal emulator
   zen/               Browser (privacy hardening, extensions, containers, pinned tabs)
