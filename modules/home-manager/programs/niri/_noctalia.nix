@@ -14,9 +14,9 @@
 }: let
   shellIsNoctalia = ((homelabCfg.desktop.shell or "none") == "noctalia") && pkgs.stdenv.isLinux;
   claudeCodeEnabled = homelabCfg.programs.claude-code.enable or false;
-  # codexEnabled = homelabCfg.programs.codex.enable or false;
+  codexEnabled = homelabCfg.programs.codex-cli.enable or false;
   # Enable the model-usage plugin when any AI coding assistant is active
-  modelUsageEnabled = claudeCodeEnabled; # || codexEnabled
+  modelUsageEnabled = claudeCodeEnabled || codexEnabled;
 in {
   config = lib.mkIf shellIsNoctalia {
     programs = {
@@ -108,7 +108,7 @@ in {
                 credentialsPath = "~/.claude/.credentials.json";
               };
               codex = {
-                enabled = false; # codexEnabled
+                enabled = codexEnabled;
               };
               copilot = {
                 enabled = false;

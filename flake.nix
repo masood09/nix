@@ -58,6 +58,11 @@
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Codex CLI (hourly auto-updates, binary cache)
+    codex-cli-nix = {
+      url = "github:sadjow/codex-cli-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs = {
@@ -99,6 +104,7 @@
     # Applied to all NixOS, Darwin, and package builds
     sharedOverlays = [
       inputs.claude-code.overlays.default
+      inputs.codex-cli-nix.overlays.default
       inputs.headplane.overlays.default
       (import ./nix/overlays/default.nix)
       (import ./nix/overlays/darwin-setproctitle.nix)
