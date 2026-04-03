@@ -5,7 +5,7 @@
 
 * Overview
 
-Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 2 NixOS desktops, and 2 macOS machines with home-manager, sops-nix secrets, ZFS, and impermanence.
+Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 3 NixOS desktops, and 2 macOS machines with home-manager, sops-nix secrets, ZFS, and impermanence.
 
 * Repository Layout
 
@@ -172,7 +172,7 @@ homelab
 | Role    | Machines                                                                                     | Characteristics                                |
 |---------+----------------------------------------------------------------------------------------------+------------------------------------------------|
 | server  | heartbeat, trialunit, accesscontrolsystem, meshcontrol, commrelay, watchfulsystem, caretaker | ZFS root, impermanence, headless, backup       |
-| desktop | commandmodule, sonic                                                                         | Niri compositor, GPU, audio, Bluetooth, Stylix |
+| desktop | arrakis, commandmodule, sonic                                                                | Niri compositor, GPU, audio, Bluetooth, Stylix |
 | macOS   | murderbot, work-pantheon                                                                     | nix-darwin, Homebrew, Dock management          |
 
 * Secrets Architecture
