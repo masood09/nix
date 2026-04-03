@@ -30,13 +30,13 @@ in {
 
           bar = {
             barType = "floating";
-            # mkForce: the HM module sets a default of 1.0; fully transparent
-            # bar lets the floating capsules stand on their own
-            backgroundOpacity = lib.mkForce 0.0;
+            # mkForce: the HM module defaults to 1.0; semi-transparent bar
+            # gives floating capsules a subtle backdrop
+            backgroundOpacity = lib.mkForce 0.50;
             useSeparateOpacity = true;
             density = "spacious";
-            marginVertical = 8;
-            marginHorizontal = 6;
+            marginVertical = 12;
+            marginHorizontal = 12;
             widgets = {
               left = [
                 {
@@ -83,6 +83,11 @@ in {
             };
           };
 
+          # Settings panel opens as a centered overlay instead of attached to the bar
+          ui = {
+            settingsPanelMode = "centered";
+          };
+
           dock = {
             enabled = false;
           };
@@ -96,6 +101,54 @@ in {
 
           idle = {
             enabled = true;
+          };
+
+          # On-screen display (volume/brightness) centred at the bottom
+          osd = {
+            location = "bottom_center";
+          };
+
+          # Power menu: 5s countdown (halved from default 10s), UEFI reboot
+          # hidden since it's rarely needed on these machines
+          sessionMenu = {
+            countdownDuration = 5000;
+            powerOptions = [
+              {
+                action = "lock";
+                enabled = true;
+                keybind = "1";
+              }
+              {
+                action = "suspend";
+                enabled = true;
+                keybind = "2";
+              }
+              {
+                action = "hibernate";
+                enabled = true;
+                keybind = "3";
+              }
+              {
+                action = "reboot";
+                enabled = true;
+                keybind = "4";
+              }
+              {
+                action = "logout";
+                enabled = true;
+                keybind = "5";
+              }
+              {
+                action = "shutdown";
+                enabled = true;
+                keybind = "6";
+              }
+              {
+                action = "rebootToUefi";
+                enabled = false;
+                keybind = "7";
+              }
+            ];
           };
         };
 
