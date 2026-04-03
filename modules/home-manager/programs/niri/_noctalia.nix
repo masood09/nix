@@ -45,15 +45,45 @@ in {
                 }
                 {
                   id = "ActiveWindow";
+                  colorizeIcons = true;
+                  # Vanish when no window is focused; scroll only on hover to
+                  # avoid accidental workspace switches
+                  hideMode = "hidden";
                   maxWidth = 500;
+                  scrollingMode = "hover";
+                  showIcon = true;
+                  showText = true;
+                  textColor = "none";
+                  useFixedWidth = false;
                 }
                 {
                   id = "MediaMini";
+                  # Compact now-playing capsule: album art + progress ring,
+                  # artist before title, no audio visualiser
+                  hideMode = "hidden";
+                  hideWhenIdle = false;
+                  maxWidth = 500;
+                  panelShowAlbumArt = true;
+                  scrollingMode = "hover";
+                  showAlbumArt = true;
+                  showArtistFirst = true;
+                  showProgressRing = true;
+                  showVisualizer = false;
+                  textColor = "none";
+                  useFixedWidth = false;
+                  visualizerType = "linear";
                 }
               ];
               center = [
                 {
                   id = "Tray";
+                  # Show all tray icons colourised with a collapsible drawer
+                  blacklist = [];
+                  chevronColor = "none";
+                  colorizeIcons = true;
+                  drawerEnabled = true;
+                  hidePassive = false;
+                  pinned = [];
                 }
               ];
               right =
@@ -63,21 +93,43 @@ in {
                 ++ [
                   {
                     id = "Battery";
+                    # Icon-only in the bar; auto-hide on desktops without a battery;
+                    # expose performance-mode and power-profile toggles in the popup
+                    displayMode = "icon-always";
+                    hideIfIdle = false;
+                    hideIfNotDetected = true;
+                    showNoctaliaPerformance = true;
+                    showPowerProfiles = true;
                   }
                   {
                     id = "Volume";
+                    # Middle-click opens pwvucontrol (PipeWire) with pavucontrol fallback
+                    middleClickCommand = "pwvucontrol || pavucontrol";
                   }
                   {
                     id = "Brightness";
+                    applyToAllMonitors = false;
+                    displayMode = "alwaysShow";
+                    iconColor = "none";
+                    textColor = "none";
                   }
                   {
                     id = "Clock";
+                    # Widget-level format (time-first); general.clockFormat is
+                    # used for lock screen and other shell surfaces
+                    formatHorizontal = "HH:mm ddd, MMM dd";
+                    tooltipFormat = "HH:mm ddd, MMM dd";
                   }
                   {
                     id = "NotificationHistory";
                   }
                   {
                     id = "ControlCenter";
+                    colorizeDistroLogo = false;
+                    colorizeSystemIcon = "none";
+                    enableColorization = true;
+                    icon = "noctalia";
+                    useDistroLogo = true;
                   }
                 ];
             };
@@ -101,6 +153,15 @@ in {
 
           idle = {
             enabled = true;
+            # Screen off after 10 min, lock 1 min later, suspend at 30 min
+            screenOffTimeout = 600;
+            lockTimeout = 660;
+            suspendTimeout = 1800;
+            fadeDuration = 5;
+          };
+
+          noctaliaPerformance = {
+            disableWallpaper = false;
           };
 
           # On-screen display (volume/brightness) centred at the bottom
