@@ -32,6 +32,7 @@ just sops-update                     # Update sops key files (interactive)
   - `modules/home-manager/` - User environment (programs as `_<name>.nix` files in `programs/`)
   - `modules/nixos/` - NixOS system config (boot, networking, users, impermanence, zfs)
   - `modules/macos/` - nix-darwin system config
+  - `modules/shared/` - Cross-platform option schemas imported by both NixOS and Darwin (role, purpose, primaryUser, networking)
   - `modules/services/` - 27 declarative services (each in own directory)
 - `lib/` - Shared helper libraries:
   - `persistence-helpers.nix` - Impermanence bind-mount guard (three-part condition: `impermanence && !isRootZFS && !zfsEnable`)
@@ -49,11 +50,12 @@ just sops-update                     # Update sops key files (interactive)
   - `inventory.org` - Packages, services, and fonts per machine
   - `desktop.org` - Desktop architecture (login, graphics, theming)
   - `analysis.org` - Codebase review findings and recommendations
+  - `openai-analyze.org` - Current Codex analysis and follow-up findings
   - `zen.org` - Zen Browser configuration notes
 
 ### Custom Options Namespace
 
-All configuration uses `homelab.*` options defined in the modules:
+All configuration uses `homelab.*` options defined in the modules. The cross-platform identity schema lives in `modules/shared/options.nix`; platform-specific behavior lives in the NixOS and Darwin module trees.
 
 ```nix
 homelab = {

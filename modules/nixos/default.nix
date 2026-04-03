@@ -1,12 +1,15 @@
 # Root NixOS module — shared by all NixOS machines.
-# Imports every sub-module and defines the top-level homelab options
-# (role, purpose) that other modules key off of.
+# Imports every sub-module and the cross-platform homelab options
+# (role, purpose, primaryUser, networking) from modules/shared/options.nix.
+# NixOS-only options (hardware.isVM) are defined here.
 {
   config,
   lib,
   ...
 }: {
   imports = [
+    ../shared/options.nix
+
     # System-level modules
     ./_auto-update.nix
     ./_boot.nix
@@ -34,19 +37,6 @@
 
   options = {
     homelab = {
-      role = lib.mkOption {
-        default = "server";
-        type = lib.types.enum ["desktop" "server"];
-        description = ''
-          The role of this machine. Could be server or desktop.
-        '';
-      };
-
-      purpose = lib.mkOption {
-        type = lib.types.str;
-        default = "";
-      };
-
       hardware = {
         isVM = lib.mkEnableOption "virtual machine mode (disables fwupd and other bare-metal services)";
       };

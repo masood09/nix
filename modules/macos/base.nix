@@ -9,6 +9,7 @@
   homelabCfg = config.homelab;
 in {
   imports = [
+    ../shared/options.nix
     ./_dock.nix
     ./_networking.nix
     ./_packages.nix
