@@ -9,39 +9,6 @@
 }: let
   homelabCfg = config.homelab;
 in {
-  options = {
-    homelab = {
-      primaryUser = {
-        userId = lib.mkOption {
-          default = 1000;
-          type = lib.types.int;
-          description = ''
-            User ID of the user
-          '';
-        };
-
-        userName = lib.mkOption {
-          default = "masoodahmed";
-          type = lib.types.str;
-          description = ''
-            Primary User of the system
-          '';
-        };
-
-        sshPublicKeys = lib.mkOption {
-          default = [
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfTOXZ6W+DhUQcytGQ1ob+eFPQwbyiTB8wXnRSiYqpK"
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBv3kEMJd555u7Rb8ofRfC3K2k5v9qjnz9tsbxli9tp8 me@ahmedmasood.com"
-          ];
-          type = lib.types.listOf lib.types.str;
-          description = ''
-            Public SSH keys to be added to authorized keys and git allowed signers
-          '';
-        };
-      };
-    };
-  };
-
   config = {
     users = {
       defaultUserShell =

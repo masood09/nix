@@ -28,6 +28,7 @@ machines/                          Per-machine configurations
   nixiso/                            NixOS installer ISO
 
 modules/                           Reusable configuration modules
+  shared/                            Cross-platform homelab option schemas
   nixos/                             NixOS system (boot, networking, users, ZFS, impermanence)
   nixos/desktop/                     Desktop-specific (Niri, GPU, audio, Bluetooth)
   nixos/zfs/                         ZFS dataset provisioning
@@ -80,6 +81,12 @@ flake.nix
   |     +-- _config.nix                  homelab.* options for this machine
   |     +-- hardware-configuration.nix   Hardware-specific (auto-generated)
   |     +-- secrets.sops.yaml            Per-machine encrypted secrets
+  |
+  +-- modules/shared/options.nix         Cross-platform homelab.* schema
+  |     +-- role                         "server" | "desktop"
+  |     +-- purpose                      Free-text machine description
+  |     +-- primaryUser                  { userName, userId, sshPublicKeys }
+  |     +-- networking.hostName          Shared hostname option
   |
   +-- modules/nixos/default.nix          NixOS system base
   |     +-- _boot.nix                    Bootloader (systemd-boot or GRUB), initrd
@@ -134,6 +141,8 @@ Each service module can optionally integrate with:
 * homelab.* Option Namespace
 
 All machine identity and service configuration flows through the =homelab.*= namespace:
+
+Core cross-platform identity options (=role=, =purpose=, =primaryUser=, and =networking.hostName=) are declared once in =modules/shared/options.nix= and then consumed by the NixOS and Darwin module trees.
 
 #+begin_example
 homelab
