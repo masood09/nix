@@ -34,11 +34,16 @@ modules/home-manager/
   home.nix           Base HM config: home path, session vars, XDG user directories, fontconfig Nerd Font override; imports Noctalia HM module
 
 modules/home-manager/programs/
-  niri/default.nix   Niri user-level config (rofi, swaync, swayidle, swaylock, playerctld, udiskie)
+  niri/default.nix   Niri HM config (programs.niri.settings, rofi, swaync, swaylock, playerctld, udiskie, user services)
   niri/_noctalia.nix Noctalia HM module enablement and settings (guarded on desktop.shell == "noctalia")
   niri/_waybar.nix   Waybar status bar (workspaces, window title, tray, audio, network, battery, clock, notifications)
   _kitty.nix         Terminal emulator
   zen/               Browser (privacy hardening, extensions, containers, pinned tabs)
+
+machines/commandmodule/
+  _niri.nix          Machine-local Niri laptop panel output placement
+machines/sonic/
+  _niri.nix          Machine-local Niri laptop panel output placement
 #+end_example
 
 Everything is gated behind ~homelab.*~ options. A machine opts into the desktop stack by setting ~homelab.desktop.enable = true~ and ~homelab.desktop.niri.enable = true~ in its ~_config.nix~. ~homelab.desktop.shell~ (enum, default ~"noctalia"~) selects a desktop shell; when set, individual bar/notification/launcher programs are skipped. Set to ~"none"~ to use individual programs (waybar, swaync, rofi, etc.) instead.
@@ -69,11 +74,13 @@ PAM evaluation order for tuigreet with fingerprint enabled:
 
 * Compositor
 
-Niri is a scrollable-tiling Wayland compositor. System-level enablement (~programs.niri.enable~ and ~programs.light.enable~ for backlight control) is in ~_niri.nix~. User configuration lives in ~$XDG_CONFIG_HOME/niri/config.kdl~ (not managed declaratively by this flake).
+Niri is a scrollable-tiling Wayland compositor. System-level enablement (~programs.niri.enable~ and ~programs.light.enable~ for backlight control) is in ~_niri.nix~. The package/session integration comes from ~sodiboo/niri-flake~'s NixOS module. User configuration is managed declaratively through home-manager via ~programs.niri.settings~, and Stylix themes Niri through the same flake integration.
 
-When Niri is enabled on Linux, home-manager installs and configures: rofi (app launcher), waybar (status bar managed by systemd, configured in ~_waybar.nix~ with custom CSS using Stylix base16 color variables and ~addCss = false~ to avoid layout conflicts), swaync (notifications), swayidle (idle management), swaylock (screen locker), playerctld (MPRIS daemon), and udiskie (auto-mount). Packages without HM modules (swaybg, wl-clipboard, xwayland-satellite) are installed directly.
+When Niri is enabled on Linux, home-manager configures: Niri settings, rofi (app launcher), waybar (status bar managed by systemd, configured in ~_waybar.nix~ with custom CSS using Stylix base16 color variables and ~addCss = false~ to avoid layout conflicts), swaync (notifications), swaylock (screen locker), playerctld (MPRIS daemon), and udiskie (auto-mount). Packages without HM modules (wl-clipboard, xwayland-satellite, swaybg, swayidle) are installed directly. ~xwayland-satellite~ is always started as a user service; ~swaybg~ and ~swayidle~ are started as user services only when ~desktop.shell = "none"~.
 
 ~homelab.desktop.shell~ (enum, default ~"noctalia"~) selects a desktop shell that replaces individual bar/notification/launcher/lock/wallpaper programs. When set to anything other than ~"none"~, waybar, swaync, rofi, swaylock, swaybg, swayidle, and udiskie are skipped. Compositor-level utilities (wl-clipboard, xwayland-satellite) and playerctld remain unconditional.
+
+The shared Niri config defines the external LG 4K monitor using a stable logical key and matches the actual hardware by monitor name (~LG Electronics LG ULTRAFINE 110NTHM20241~) rather than a transient connector like ~DP-2~. Laptop panel placement remains machine-local in ~machines/{commandmodule,sonic}/_niri.nix~ so the shared desktop module only owns output state that is common across both laptops.
 
 * Graphics
 
@@ -195,10 +202,6 @@ When ~pam_fprintd.so~ succeeds (marked ~sufficient~), PAM short-circuits the aut
 
 *Workaround:* log in with password instead of fingerprint. The keyring unlocks automatically.
 
-** Niri config is not declarative
-
-Niri user configuration (~config.kdl~) is not managed by this flake. Changes to keybindings, window rules, and layout settings are manual and not reproducible across machines.
-
 ** ZFS requires GRUB
 
 systemd-boot does not support ZFS. commandmodule and sonic are locked to GRUB. arrakis has migrated to ext4+LUKS and uses systemd-boot.
@@ -212,7 +215,3 @@ With encrypted root, the user already proves identity at boot. Typing the same p
 ** Noctalia Shell
 
 [[https://noctalia.dev/][Noctalia]] is a minimal Wayland desktop shell built on Quickshell. It provides panels, notifications, and system UI with a clean aesthetic and 83+ community plugins. Noctalia supports Niri natively, making it a natural fit for the current compositor stack. Enabled by default (~homelab.desktop.shell = "noctalia"~). System package installed via ~modules/nixos/desktop/_noctalia.nix~; HM module imported in ~home.nix~ and activated in ~modules/home-manager/programs/niri/_noctalia.nix~. Requires nixos-unstable (provided via the ~nixpkgs-unstable~ flake input) and uses the ~noctalia.cachix.org~ binary cache. The plugin registry (~plugins.json~) is managed declaratively via ~xdg.configFile~; the ~model-usage~ plugin (AI coding assistant stats bar widget) is conditionally enabled when ~homelab.programs.claude-code.enable~ is true.
-
-** Declarative Niri configuration
-
-Manage Niri's ~config.kdl~ via home-manager to make keybindings, window rules, and layout settings reproducible across commandmodule and sonic.

@@ -95,13 +95,14 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 | Package            | Purpose                   |
 |--------------------+---------------------------|
 | wl-clipboard       | Wayland clipboard utilities |
-| xwayland-satellite | XWayland support for Niri |
+| xwayland-satellite | XWayland support for Niri (started as user service) |
 
 **** Packages (=shell = "none"= only)
 
 | Package  | Purpose          |
 |----------+------------------|
 | swaybg   | Wallpaper setter |
+| swayidle | Idle manager     |
 
 **** Programs (=shell = "none"= only, home-manager modules)
 
@@ -117,8 +118,23 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 |------------+--------------------+---------------------------------------|
 | playerctld | unconditional      | MPRIS media player daemon             |
 | swaync     | =shell = "none"= | Notification center (D-Bus activated) |
-| swayidle   | =shell = "none"= | Idle management                       |
 | udiskie    | =shell = "none"= | Auto-mount removable media            |
+
+**** User Services (declared in HM module)
+
+| Service            | Condition          | Purpose                       |
+|--------------------+--------------------+-------------------------------|
+| xwayland-satellite | unconditional      | XWayland bridge for Niri      |
+| swaybg             | =shell = "none"= | Wallpaper process             |
+| swayidle           | =shell = "none"= | Idle management and locking   |
+
+**** Output Configuration
+
+| Scope        | Output Key     | Purpose                                                         |
+|--------------+----------------+-----------------------------------------------------------------|
+| shared HM    | =lg-ultrafine= | Stable external monitor profile matched by LG monitor name       |
+| commandmodule | =eDP-1=       | Laptop panel placed to the right of the shared external monitor  |
+| sonic        | =eDP-1=        | Laptop panel placed to the right of the shared external monitor  |
 
 ** Desktop Role Packages (=role == "desktop"=)
 

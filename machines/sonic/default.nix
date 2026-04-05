@@ -6,6 +6,7 @@
     ./hardware-configuration.nix
     ./_config.nix
     ./_networking.nix
+    ./_niri.nix
     ./_secrets.nix
 
     ./../../modules/nixos

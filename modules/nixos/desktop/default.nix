@@ -31,7 +31,7 @@ in {
             "none"
             "noctalia"
           ];
-          description = "Desktop shell providing bar, notifications, launcher, lock screen, and wallpaper. When set, individual replacements (waybar, swaync, rofi, swaylock, swaybg, udiskie) are not installed.";
+          description = "Desktop shell providing bar, notifications, launcher, lock screen, wallpaper, and idle handling. When set, individual replacements (waybar, swaync, rofi, swaylock, swaybg, swayidle, udiskie) are not installed.";
         };
       };
 
