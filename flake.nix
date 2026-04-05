@@ -28,6 +28,10 @@
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     stylix = {
       url = "github:nix-community/stylix/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -121,6 +125,7 @@
           inputs.disko.nixosModules.disko
           inputs.sops-nix.nixosModules.sops
           inputs.home-manager.nixosModules.home-manager
+          inputs.niri.nixosModules.niri
           inputs.authentik-nix.nixosModules.default
           inputs.impermanence.nixosModules.impermanence
           inputs.headplane.nixosModules.headplane

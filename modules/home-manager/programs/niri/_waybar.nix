@@ -130,6 +130,7 @@ in {
         settings = {
           mainBar = {
             position = "top";
+            layer = "top"; # ensure bar renders above niri's window layer
             margin-top = 12;
 
             modules-left = [

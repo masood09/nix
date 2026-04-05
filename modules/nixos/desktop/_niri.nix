@@ -1,11 +1,10 @@
 # Niri compositor — NixOS system-level module.
 # Enables the compositor and backlight control (udev rules for the video group).
-# User-level tooling (rofi, waybar, swaync, etc.) lives in
-# modules/home-manager/programs/niri/default.nix.
+# User-level tooling and compositor config live in
+# modules/home-manager/programs/niri/default.nix via niri-flake's HM module.
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   homelabCfg = config.homelab;
@@ -27,9 +26,10 @@ in {
       light = {
         enable = true;
       };
+      # Package provided by niri-flake's NixOS module (inputs.niri.nixosModules.niri
+      # in flake.nix); no explicit `package` needed here.
       niri = {
         enable = true;
-        package = pkgs.niri;
       };
     };
   };
