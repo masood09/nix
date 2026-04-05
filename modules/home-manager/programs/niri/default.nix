@@ -4,9 +4,11 @@
 # Backlight control (light) is system-level — see modules/nixos/desktop/_niri.nix.
 #
 # Shell guard: when homelab.desktop.shell != "none", shell-replaceable programs
-# (swaybg, swayidle, swaync, rofi, swaylock, udiskie) are skipped — the
-# desktop shell provides equivalent functionality. Compositor-level utilities
-# (wl-clipboard, xwayland-satellite) and playerctld remain unconditional.
+# (swaybg, swayidle, swaync, swaylock, udiskie) are skipped — the desktop
+# shell provides equivalent functionality. Rofi remains enabled regardless so
+# the compositor-level launcher key stays consistent across shell choices.
+# Compositor-level utilities (wl-clipboard, xwayland-satellite) and playerctld
+# remain unconditional.
 {
   config,
   homelabCfg,
@@ -15,7 +17,8 @@
   ...
 }: let
   niriEnabled = (homelabCfg.desktop.niri.enable or false) && pkgs.stdenv.isLinux;
-  # true when a desktop shell (e.g. Noctalia) replaces individual bar/notification/launcher programs
+  # true when a desktop shell (e.g. Noctalia) replaces shell-owned desktop UI
+  # such as the bar, notifications, lock screen, wallpaper, and idle handling
   shellEnabled = (homelabCfg.desktop.shell or "none") != "none";
   stylixEnabled = config.stylix.enable or false;
   wallpaper =
@@ -295,18 +298,18 @@ in {
           };
         };
 
-        # Compositor-native binds. Shell-owned launcher/lock keys are only
-        # added when desktop.shell = "none" so we don't point at absent tools.
+        # Compositor-native binds. Keep the launcher on Mod+D regardless of the
+        # selected desktop shell; shell-owned lock integration stays conditional.
         binds =
           lib.optionalAttrs (!shellEnabled) {
-            "Mod+D" = {
-              action.spawn = ["rofi" "-show" "drun"];
-            };
             "Super+Alt+L" = {
               action.spawn = ["swaylock"];
             };
           }
           // {
+            "Mod+D" = {
+              action.spawn = ["rofi" "-show" "drun"];
+            };
             "Mod+Shift+Slash".action.show-hotkey-overlay = {};
 
             "Mod+Return" = {
@@ -509,11 +512,11 @@ in {
           };
       };
 
-      # Programs managed by home-manager (Stylix auto-themes these) —
-      # shell-replaceable; skipped when a desktop shell is active.
-      rofi = lib.mkIf (!shellEnabled) {
+      # Programs managed by home-manager (Stylix auto-themes these).
+      rofi = {
         enable = true;
       };
+      # Shell-replaceable; skipped when a desktop shell is active.
       swaylock = lib.mkIf (!shellEnabled) {
         enable = true;
       };

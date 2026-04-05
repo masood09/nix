@@ -14,7 +14,8 @@
   ...
 }: let
   niriEnabled = (homelabCfg.desktop.niri.enable or false) && pkgs.stdenv.isLinux;
-  # true when a desktop shell (e.g. quickshell) replaces individual bar/notification/launcher programs
+  # true when a desktop shell replaces shell-owned desktop UI; this module only
+  # cares because Waybar itself is one of the shell-owned components
   shellEnabled = (homelabCfg.desktop.shell or "none") != "none";
   monoFont = config.stylix.fonts.monospace.name;
 in {

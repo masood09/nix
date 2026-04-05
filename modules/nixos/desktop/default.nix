@@ -1,7 +1,8 @@
 # Desktop modules — shared desktop services, hardware, and compositor(s).
 # desktop.enable gates shared services (accounts-daemon, printing, fonts, etc.).
-# desktop.shell selects a desktop shell (default: Noctalia); when set, individual
-# bar/notification/launcher programs in the HM niri module are skipped.
+# desktop.shell selects a desktop shell (default: Noctalia); when set, shell-owned
+# bar/notification/lock/wallpaper programs in the HM niri module are skipped.
+# Rofi remains available as the launcher on Mod+D across shell choices.
 # Hardware features and compositors are individually gated behind their own enable flags.
 {
   config,
@@ -31,7 +32,7 @@ in {
             "none"
             "noctalia"
           ];
-          description = "Desktop shell providing bar, notifications, launcher, lock screen, wallpaper, and idle handling. When set, individual replacements (waybar, swaync, rofi, swaylock, swaybg, swayidle, udiskie) are not installed.";
+          description = "Desktop shell providing bar, notifications, lock screen, wallpaper, and idle handling. When set, individual replacements (waybar, swaync, swaylock, swaybg, swayidle, udiskie) are not installed. Rofi remains available as the launcher on Mod+D.";
         };
       };
 
