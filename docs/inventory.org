@@ -104,11 +104,16 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 | swaybg   | Wallpaper setter |
 | swayidle | Idle manager     |
 
-**** Programs (=shell = "none"= only, home-manager modules)
+**** Programs (home-manager modules)
 
 | Program  | Purpose                    |
 |----------+----------------------------|
 | rofi     | Application launcher       |
+
+**** Programs (=shell = "none"= only, home-manager modules)
+
+| Program  | Purpose                    |
+|----------+----------------------------|
 | swaylock | Screen locker              |
 | waybar   | Status bar                 |
 
