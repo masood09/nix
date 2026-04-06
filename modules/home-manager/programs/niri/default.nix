@@ -378,29 +378,36 @@ in {
             };
 
             # — Navigation (arrow keys + vim hjkl) —
-            "Mod+Left".action.focus-column-left = {};
-            "Mod+Down".action.focus-window-down = {};
-            "Mod+Up".action.focus-window-up = {};
-            "Mod+Right".action.focus-column-right = {};
-            "Mod+H".action.focus-column-left = {};
-            "Mod+J".action.focus-window-down = {};
-            "Mod+K".action.focus-window-up = {};
-            "Mod+L".action.focus-column-right = {};
+            # Primary navigation stays local first, but falls through to the
+            # adjacent monitor/workspace at the edge so directional movement
+            # does not dead-end on the current container.
+            "Mod+Left".action.focus-column-or-monitor-left = {};
+            "Mod+Down".action.focus-window-or-workspace-down = {};
+            "Mod+Up".action.focus-window-or-workspace-up = {};
+            "Mod+Right".action.focus-column-or-monitor-right = {};
+            "Mod+H".action.focus-column-or-monitor-left = {};
+            "Mod+J".action.focus-window-or-workspace-down = {};
+            "Mod+K".action.focus-window-or-workspace-up = {};
+            "Mod+L".action.focus-column-or-monitor-right = {};
 
-            "Mod+Shift+Left".action.move-column-left = {};
-            "Mod+Shift+Down".action.move-window-down = {};
-            "Mod+Shift+Up".action.move-window-up = {};
-            "Mod+Shift+Right".action.move-column-right = {};
-            "Mod+Shift+H".action.move-column-left = {};
-            "Mod+Shift+J".action.move-window-down = {};
-            "Mod+Shift+K".action.move-window-up = {};
-            "Mod+Shift+L".action.move-column-right = {};
+            # Shift keeps the same fallback semantics while moving the focused
+            # column/window instead of only changing focus.
+            "Mod+Shift+Left".action.move-column-left-or-to-monitor-left = {};
+            "Mod+Shift+Down".action.move-window-down-or-to-workspace-down = {};
+            "Mod+Shift+Up".action.move-window-up-or-to-workspace-up = {};
+            "Mod+Shift+Right".action.move-column-right-or-to-monitor-right = {};
+            "Mod+Shift+H".action.move-column-left-or-to-monitor-left = {};
+            "Mod+Shift+J".action.move-window-down-or-to-workspace-down = {};
+            "Mod+Shift+K".action.move-window-up-or-to-workspace-up = {};
+            "Mod+Shift+L".action.move-column-right-or-to-monitor-right = {};
 
             "Mod+Home".action.focus-column-first = {};
             "Mod+End".action.focus-column-last = {};
             "Mod+Ctrl+Home".action.move-column-to-first = {};
             "Mod+Ctrl+End".action.move-column-to-last = {};
 
+            # Ctrl variants remain explicit monitor-to-monitor navigation and
+            # bypass the local-first fallback behavior above.
             "Mod+Ctrl+Left".action.focus-monitor-left = {};
             "Mod+Ctrl+Down".action.focus-monitor-down = {};
             "Mod+Ctrl+Up".action.focus-monitor-up = {};
@@ -410,6 +417,8 @@ in {
             "Mod+Ctrl+K".action.focus-monitor-up = {};
             "Mod+Ctrl+L".action.focus-monitor-right = {};
 
+            # Shift+Ctrl moves the entire column to a specific monitor
+            # (no local-first fallback — always crosses monitor boundary).
             "Mod+Shift+Ctrl+Left".action.move-column-to-monitor-left = {};
             "Mod+Shift+Ctrl+Down".action.move-column-to-monitor-down = {};
             "Mod+Shift+Ctrl+Up".action.move-column-to-monitor-up = {};

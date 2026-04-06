@@ -82,6 +82,8 @@ When Niri is enabled on Linux, home-manager configures: Niri settings, rofi (app
 
 The shared Niri config defines the external LG 4K monitor using a stable logical key and matches the actual hardware by monitor name (~LG Electronics LG ULTRAFINE 110NTHM20241~) rather than a transient connector like ~DP-2~. Laptop panel placement remains machine-local in ~machines/{commandmodule,sonic}/_niri.nix~ so the shared desktop module only owns output state that is common across both laptops.
 
+The primary directional bindings use edge-aware fallbacks so movement stays continuous across the desktop topology. ~Mod+Left/Right~ and ~Mod+H/L~ focus the adjacent column, then fall through to the monitor on that side when already at the edge. ~Mod+Up/Down~ and ~Mod+K/J~ focus the adjacent window, then fall through to the workspace above or below when already at the first or last window. The matching ~Mod+Shift+...~ bindings move the focused column or window with the same fallback behavior, while the ~Mod+Ctrl+...~ bindings remain explicit monitor navigation.
+
 * Graphics
 
 GPU acceleration is configured per-driver via ~homelab.hardware.graphics.driver~:

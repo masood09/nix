@@ -90,6 +90,8 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 
 *** Niri Desktop (=niri/default.nix=, Linux desktops with Niri)
 
+Directional navigation is edge-aware: left/right focus or move columns across monitors when the current workspace edge is reached, and up/down focus or move windows across workspaces when the current column edge is reached. Explicit monitor-to-monitor focus remains on the =Mod+Ctrl+{H,J,K,L}= and arrow-key equivalents.
+
 **** Packages (unconditional)
 
 | Package            | Purpose                   |
