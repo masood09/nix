@@ -9,6 +9,14 @@
 # the compositor-level launcher key stays consistent across shell choices.
 # Compositor-level utilities (wl-clipboard, xwayland-satellite) and playerctld
 # remain unconditional.
+#
+# Noctalia IPC dispatch: hardware keys (volume, mute, media, brightness) and
+# vendor function keys (Wi-Fi, Bluetooth, lock, power-profile, settings) are
+# routed through `noctalia-shell ipc call …` when desktop.shell == "noctalia"
+# so the shell owns its OSD and internal state. Non-Noctalia shells fall back
+# to direct CLI tools (wpctl, playerctl, light, swaylock). The routing is
+# intentionally keyed on shellIsNoctalia, not shellEnabled, so future shells
+# do not silently inherit Noctalia-specific IPC commands.
 {
   config,
   homelabCfg,
@@ -20,6 +28,9 @@
   # true when a desktop shell (e.g. Noctalia) replaces shell-owned desktop UI
   # such as the bar, notifications, lock screen, wallpaper, and idle handling
   shellEnabled = (homelabCfg.desktop.shell or "none") != "none";
+  # Keep Noctalia IPC routing explicit so future shells do not accidentally
+  # inherit commands that only Noctalia implements.
+  shellIsNoctalia = (homelabCfg.desktop.shell or "none") == "noctalia";
   stylixEnabled = config.stylix.enable or false;
   wallpaper =
     if stylixEnabled
@@ -300,14 +311,54 @@ in {
 
         # Compositor-native binds. Keep the launcher on Mod+D regardless of the
         # selected desktop shell; shell-owned lock integration stays conditional.
+        #
+        # Three-way key dispatch:
+        #   shell="none"     → swaylock lock, wpctl/playerctl/light direct CLI
+        #   shell="noctalia" → noctalia-shell IPC for lock + hardware controls
+        #   shell=<other>    → no lock bind; media/brightness still direct CLI
         binds =
           lib.optionalAttrs (!shellEnabled) {
             "Super+Alt+L" = {
               action.spawn = ["swaylock"];
             };
           }
+          # Vendor hardware keys that should only exist when Noctalia owns the
+          # corresponding desktop surface. Future shells must opt in explicitly.
+          // lib.optionalAttrs shellIsNoctalia {
+            "Super+Alt+L" = {
+              allow-when-locked = true;
+              action.spawn = ["noctalia-shell" "ipc" "call" "lockScreen" "lock"];
+            };
+            "XF86WLAN" = {
+              allow-when-locked = true;
+              action.spawn = ["noctalia-shell" "ipc" "call" "wifi" "toggle"];
+            };
+            "XF86Bluetooth" = {
+              allow-when-locked = true;
+              action.spawn = ["noctalia-shell" "ipc" "call" "bluetooth" "toggle"];
+            };
+            # Fn+F7 on ThinkPads — repurposed as a secondary lock trigger
+            "XF86Display" = {
+              allow-when-locked = true;
+              action.spawn = ["noctalia-shell" "ipc" "call" "lockScreen" "lock"];
+            };
+            # Fn+F11 on ThinkPads — cycles through power profiles via Noctalia
+            "XF86Keyboard" = {
+              allow-when-locked = true;
+              action.spawn = ["noctalia-shell" "ipc" "call" "powerProfile" "cycle"];
+            };
+            # Fn+F9 on ThinkPads — opens/closes the Noctalia settings panel
+            "XF86Tools" = {
+              allow-when-locked = true;
+              action.spawn = ["noctalia-shell" "ipc" "call" "settings" "toggle"];
+            };
+          }
           // {
             "Mod+D" = {
+              action.spawn = ["rofi" "-show" "drun"];
+            };
+            # Mirrors Mod+D — some ThinkPads emit XF86Favorites from Fn+F12
+            "XF86Favorites" = {
               action.spawn = ["rofi" "-show" "drun"];
             };
             "Mod+Shift+Slash".action.show-hotkey-overlay = {};
@@ -324,48 +375,81 @@ in {
               action.spawn-sh = "pkill orca || exec orca";
             };
 
-            # — Media / hardware keys (allow-when-locked for lock-screen use) —
+            # Media and brightness keys prefer Noctalia IPC when available so
+            # the shell drives its own OSD/state, but retain the direct CLI
+            # fallbacks for shell="none" and any future non-Noctalia shell.
+            # The else branch uses action.spawn with ["sh" "-c" ...] instead
+            # of action.spawn-sh so both arms share the same attribute key.
             "XF86AudioRaiseVolume" = {
               allow-when-locked = true;
-              action.spawn-sh = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+ -l 1.0";
+              action.spawn =
+                if shellIsNoctalia
+                then ["noctalia-shell" "ipc" "call" "volume" "increase"]
+                else ["sh" "-c" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+ -l 1.0"];
             };
             "XF86AudioLowerVolume" = {
               allow-when-locked = true;
-              action.spawn-sh = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-";
+              action.spawn =
+                if shellIsNoctalia
+                then ["noctalia-shell" "ipc" "call" "volume" "decrease"]
+                else ["sh" "-c" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"];
             };
             "XF86AudioMute" = {
               allow-when-locked = true;
-              action.spawn-sh = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+              action.spawn =
+                if shellIsNoctalia
+                then ["noctalia-shell" "ipc" "call" "volume" "muteOutput"]
+                else ["sh" "-c" "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"];
             };
             "XF86AudioMicMute" = {
               allow-when-locked = true;
-              action.spawn-sh = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+              action.spawn =
+                if shellIsNoctalia
+                then ["noctalia-shell" "ipc" "call" "volume" "muteInput"]
+                else ["sh" "-c" "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"];
             };
 
             "XF86AudioPlay" = {
               allow-when-locked = true;
-              action.spawn-sh = "playerctl play-pause";
+              action.spawn =
+                if shellIsNoctalia
+                then ["noctalia-shell" "ipc" "call" "media" "playPause"]
+                else ["sh" "-c" "playerctl play-pause"];
             };
             "XF86AudioStop" = {
               allow-when-locked = true;
+              # No documented Noctalia stop action yet; keep the direct MPRIS
+              # fallback until the shell exposes a native equivalent.
               action.spawn-sh = "playerctl stop";
             };
             "XF86AudioPrev" = {
               allow-when-locked = true;
-              action.spawn-sh = "playerctl previous";
+              action.spawn =
+                if shellIsNoctalia
+                then ["noctalia-shell" "ipc" "call" "media" "previous"]
+                else ["sh" "-c" "playerctl previous"];
             };
             "XF86AudioNext" = {
               allow-when-locked = true;
-              action.spawn-sh = "playerctl next";
+              action.spawn =
+                if shellIsNoctalia
+                then ["noctalia-shell" "ipc" "call" "media" "next"]
+                else ["sh" "-c" "playerctl next"];
             };
 
             "XF86MonBrightnessUp" = {
               allow-when-locked = true;
-              action.spawn = ["light" "-A" "10"];
+              action.spawn =
+                if shellIsNoctalia
+                then ["noctalia-shell" "ipc" "call" "brightness" "increase"]
+                else ["light" "-A" "10"];
             };
             "XF86MonBrightnessDown" = {
               allow-when-locked = true;
-              action.spawn = ["light" "-U" "10"];
+              action.spawn =
+                if shellIsNoctalia
+                then ["noctalia-shell" "ipc" "call" "brightness" "decrease"]
+                else ["light" "-U" "10"];
             };
 
             "Mod+O" = {
