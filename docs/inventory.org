@@ -94,17 +94,17 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 
 **** Packages (unconditional)
 
-| Package            | Purpose                   |
-|--------------------+---------------------------|
-| wl-clipboard       | Wayland clipboard utilities |
+| Package            | Purpose                                    |
+|--------------------+--------------------------------------------|
+| wl-clipboard       | Wayland clipboard utilities                |
 | xwayland-satellite | XWayland support for Niri (started as user service) |
+| swayidle           | Before-sleep locking and idle management    |
 
 **** Packages (=shell = "none"= only)
 
 | Package  | Purpose          |
 |----------+------------------|
 | swaybg   | Wallpaper setter |
-| swayidle | Idle manager     |
 
 **** Programs (home-manager modules)
 
@@ -129,11 +129,13 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 
 **** User Services (declared in HM module)
 
-| Service            | Condition          | Purpose                       |
-|--------------------+--------------------+-------------------------------|
-| xwayland-satellite | unconditional      | XWayland bridge for Niri      |
-| swaybg             | =shell = "none"= | Wallpaper process             |
-| swayidle           | =shell = "none"= | Idle management and locking   |
+| Service                      | Condition            | Purpose                                    |
+|------------------------------+----------------------+--------------------------------------------|
+| xwayland-satellite           | unconditional        | XWayland bridge for Niri                   |
+| swaybg                       | =shell = "none"=   | Wallpaper process                          |
+| swayidle                     | =shell = "none"=   | Idle timeouts, DPMS, and before-sleep lock |
+| swaylock                     | =shell = "none"=   | Lock on =lock.target= (loginctl)           |
+| noctalia-before-sleep-lock   | =shell = "noctalia"= | Before-sleep lock via Noctalia IPC         |
 
 **** Output Configuration
 

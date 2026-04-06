@@ -5,7 +5,8 @@
 # Keep Noctalia's experimental systemd user service disabled here to avoid
 # double-starting the shell from both systemd and the compositor session.
 # When active, the HM niri module skips shell-replaceable programs
-# (waybar, swaync, swaylock, swaybg, swayidle, udiskie) via the shellEnabled guard.
+# (waybar, swaync, swaylock, swaybg, udiskie) via the shellEnabled guard.
+# swayidle remains unconditional for session-side before-sleep locking.
 {
   config,
   inputs,
