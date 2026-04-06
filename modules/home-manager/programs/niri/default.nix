@@ -4,19 +4,23 @@
 # Backlight control (light) is system-level — see modules/nixos/desktop/_niri.nix.
 #
 # Shell guard: when homelab.desktop.shell != "none", shell-replaceable programs
-# (swaybg, swayidle, swaync, swaylock, udiskie) are skipped — the desktop
-# shell provides equivalent functionality. Rofi remains enabled regardless so
-# the compositor-level launcher key stays consistent across shell choices.
-# Compositor-level utilities (wl-clipboard, xwayland-satellite) and playerctld
-# remain unconditional.
+# (swaybg, swaync, swaylock, udiskie) are skipped — the desktop shell provides
+# equivalent UI. swayidle is the exception: it remains installed because both
+# shell and non-shell sessions use it for session-side before-sleep locking.
+# Rofi remains enabled regardless so the compositor-level launcher key stays
+# consistent across shell choices. Compositor-level utilities
+# (wl-clipboard, xwayland-satellite), swayidle, and playerctld remain
+# unconditional.
 #
 # Noctalia IPC dispatch: hardware keys (volume, mute, media, brightness) and
 # vendor function keys (Wi-Fi, Bluetooth, lock, power-profile, settings) are
 # routed through `noctalia-shell ipc call …` when desktop.shell == "noctalia"
-# so the shell owns its OSD and internal state. Non-Noctalia shells fall back
-# to direct CLI tools (wpctl, playerctl, light, swaylock). The routing is
-# intentionally keyed on shellIsNoctalia, not shellEnabled, so future shells
-# do not silently inherit Noctalia-specific IPC commands.
+# so the shell owns its OSD and internal state. Noctalia also uses a small
+# swayidle helper so lid-close suspend locks from the user session before
+# logind freezes user.slice. Non-Noctalia shells fall back to direct CLI tools
+# (wpctl, playerctl, light, swaylock). The routing is intentionally keyed on
+# shellIsNoctalia, not shellEnabled, so future shells do not silently inherit
+# Noctalia-specific IPC commands.
 {
   config,
   homelabCfg,
@@ -26,7 +30,9 @@
 }: let
   niriEnabled = (homelabCfg.desktop.niri.enable or false) && pkgs.stdenv.isLinux;
   # true when a desktop shell (e.g. Noctalia) replaces shell-owned desktop UI
-  # such as the bar, notifications, lock screen, wallpaper, and idle handling
+  # such as the bar, notifications, lock screen, wallpaper, and idle timeouts.
+  # swayidle stays unconditional — the shell replaces timeout policy but every
+  # session still needs a user-side before-sleep hook.
   shellEnabled = (homelabCfg.desktop.shell or "none") != "none";
   # Keep Noctalia IPC routing explicit so future shells do not accidentally
   # inherit commands that only Noctalia implements.
@@ -37,6 +43,9 @@
     then (config.stylix.image or null)
     else null;
   niriBin = "${config.programs.niri.package}/bin/niri";
+  # Use the Home Manager package path directly so user services don't depend on
+  # PATH or /run/current-system.
+  noctaliaShellBin = lib.getExe config.programs.noctalia-shell.package;
 in {
   imports = [
     ./_noctalia.nix
@@ -46,15 +55,17 @@ in {
   config = lib.mkIf niriEnabled {
     home = {
       # Packages without home-manager modules — compositor utilities are always
-      # installed; shell-replaceable packages are conditional on !shellEnabled.
+      # installed. swayidle is unconditional because both the plain Niri setup
+      # and the Noctalia shell use it for session-side before-sleep locking.
+      # Shell-replaceable packages such as swaybg remain conditional.
       packages = with pkgs;
         [
           wl-clipboard # clipboard utilities (no HM module)
           xwayland-satellite # XWayland support for niri (started as a user service)
+          swayidle # before-sleep hook for lock-before-suspend
         ]
         ++ lib.optionals (!shellEnabled) [
           swaybg # wallpaper helper (started as a user service)
-          swayidle # idle manager (started as a user service)
         ];
     };
 
@@ -319,7 +330,8 @@ in {
         };
 
         # Compositor-native binds. Keep the launcher on Mod+D regardless of the
-        # selected desktop shell; shell-owned lock integration stays conditional.
+        # selected desktop shell; shell-owned lock bindings stay conditional.
+        # Lid-close locking is handled separately by user services below.
         #
         # Three-way key dispatch:
         #   shell="none"     → swaylock lock, wpctl/playerctl/light direct CLI
@@ -662,7 +674,55 @@ in {
               };
             };
           }
+          // lib.optionalAttrs shellIsNoctalia {
+            # Runs swayidle purely as a before-sleep hook so the Noctalia lock
+            # screen activates while the user session is still alive. The `-w`
+            # flag holds logind's sleep inhibitor until the lock command exits,
+            # preventing suspend from racing ahead of the lock paint.
+            noctalia-before-sleep-lock = {
+              Unit = {
+                Description = "Lock Noctalia before system sleep";
+                PartOf = ["graphical-session.target"];
+                After = ["graphical-session-pre.target"];
+                # Keep the existing helper running during `sd-switch` so deploys
+                # do not bounce the service and trigger an unexpected lock.
+                X-SwitchMethod = "keep-old";
+              };
+
+              Service = {
+                ExecStart = "${pkgs.swayidle}/bin/swayidle -w before-sleep '${noctaliaShellBin} ipc call lockScreen lock'";
+                Restart = "on-failure";
+                RestartSec = 1;
+              };
+
+              Install = {
+                WantedBy = ["graphical-session.target"];
+              };
+            };
+          }
           // lib.optionalAttrs (!shellEnabled) {
+            # Targets systemd lock.target so `loginctl lock-session` triggers
+            # swaylock. Type=forking + `-f` lets swaylock daemonise and report
+            # readiness once the lock surface is painted.
+            swaylock = {
+              Unit = {
+                Description = "Lock the session with swaylock";
+                PartOf = ["lock.target"];
+                Before = ["lock.target"];
+              };
+
+              Service = {
+                Type = "forking";
+                ExecStart = "${pkgs.swaylock}/bin/swaylock -f";
+                Restart = "on-failure";
+                RestartSec = 0;
+              };
+
+              Install = {
+                WantedBy = ["lock.target"];
+              };
+            };
+
             # Keep wallpaper and idle handling outside `spawn-at-startup` so
             # Home Manager can supervise them like the rest of the user session.
             swaybg = lib.mkIf (wallpaper != null) {

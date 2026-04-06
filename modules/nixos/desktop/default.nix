@@ -2,7 +2,9 @@
 # desktop.enable gates shared services (accounts-daemon, printing, fonts, etc.).
 # desktop.shell selects a desktop shell (default: Noctalia); when set, shell-owned
 # bar/notification/lock/wallpaper programs in the HM niri module are skipped.
-# Rofi remains available as the launcher on Mod+D across shell choices.
+# swayidle remains session-side because lid-close locking still needs a user
+# session hook before suspend. Rofi stays available on Mod+D across shell
+# choices.
 # Hardware features and compositors are individually gated behind their own enable flags.
 {
   config,
@@ -32,7 +34,7 @@ in {
             "none"
             "noctalia"
           ];
-          description = "Desktop shell providing bar, notifications, lock screen, wallpaper, and idle handling. When set, individual replacements (waybar, swaync, swaylock, swaybg, swayidle, udiskie) are not installed. Rofi remains available as the launcher on Mod+D.";
+          description = "Desktop shell providing bar, notifications, lock screen, wallpaper, and idle handling. When set, individual replacements (waybar, swaync, swaylock, swaybg, udiskie) are not installed. swayidle remains available for session-side before-sleep locking. Rofi remains available as the launcher on Mod+D.";
         };
       };
 
@@ -66,6 +68,23 @@ in {
   };
 
   config = lib.mkIf homelabCfg.desktop.enable {
+    services = {
+      logind = {
+        # Laptop lid handling is owned by logind, not the compositor. Suspend on
+        # lid close whether on battery or AC; keep docked systems awake so an
+        # external monitor/keyboard setup can continue running with the lid shut.
+        # The matching lock happens from the user session via swayidle so the
+        # shell/compositor can still paint the lock screen before suspend.
+        settings = {
+          Login = {
+            HandleLidSwitch = "suspend";
+            HandleLidSwitchExternalPower = "suspend";
+            HandleLidSwitchDocked = "ignore";
+          };
+        };
+      };
+    };
+
     hardware = {
       bluetooth = lib.mkIf homelabCfg.hardware.bluetooth.enable {
         enable = true;
