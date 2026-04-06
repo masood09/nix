@@ -7,11 +7,11 @@
 
 Three NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. commandmodule and sonic use ZFS root with impermanence (ephemeral root via ZFS rollback). arrakis uses LUKS-encrypted ext4 with tmpfs impermanence and systemd-boot. macOS desktops (murderbot, work-pantheon) use nix-darwin with Stylix for HM-level theming (fonts, opacity, terminal colors) but are otherwise out of scope for this document.
 
-| Machine       | Hardware           | GPU            | Primary User       | Theme               | Root FS    | Boot                    |
-|---------------+--------------------+----------------+--------------------+---------------------+------------+-------------------------|
-| arrakis       | ThinkPad T14 Gen 3 | AMD Radeon     | masoodahmed (1000) | gruvbox-dark        | ext4/LUKS  | systemd-boot + Plymouth |
-| commandmodule | ThinkPad (Intel)   | Intel UHD 620  | masoodahmed (1000) | gruvbox-dark        | ZFS        | GRUB                    |
-| sonic         | ThinkPad T14 Gen 3 | AMD Ryzen iGPU | zainahmed (1001)   | sonic-dark (custom) | ZFS        | GRUB                    |
+| Machine       | Hardware           | GPU            | Primary User       | Theme               | Root FS    | Boot                    | Fingerprint |
+|---------------+--------------------+----------------+--------------------+---------------------+------------+-------------------------+-------------|
+| arrakis       | ThinkPad T14 Gen 3 | AMD Radeon     | masoodahmed (1000) | gruvbox-dark        | ext4/LUKS  | systemd-boot + Plymouth | no          |
+| commandmodule | ThinkPad (Intel)   | Intel UHD 620  | masoodahmed (1000) | gruvbox-dark        | ZFS        | GRUB                    | yes         |
+| sonic         | ThinkPad T14 Gen 3 | AMD Ryzen iGPU | zainahmed (1001)   | sonic-dark (custom) | ZFS        | GRUB                    | yes         |
 
 * Module Structure
 
@@ -54,6 +54,8 @@ Everything is gated behind ~homelab.*~ options. A machine opts into the desktop 
 
 greetd manages login sessions for all NixOS desktops. By default it runs tuigreet, a TUI greeter that launches ~niri-session~. On encrypted non-ZFS desktops (~homelab.isEncryptedRoot = true~ and ~homelab.isRootZFS = false~), greetd instead starts ~initial_session~ for the primary user immediately after boot-time disk unlock. Supports fingerprint auth when ~homelab.hardware.fingerprint.enable = true~.
 
+Today that means fingerprint auth is available on ~commandmodule~ and ~sonic~. ~arrakis~ is explicitly password-only.
+
 ** PAM Stack
 
 The greetd PAM service is configured in ~_greetd.nix~:
@@ -74,7 +76,7 @@ PAM evaluation order for tuigreet with fingerprint enabled:
 
 ** Bitwarden Desktop
 
-Bitwarden Desktop is installed for Linux desktops from ~modules/home-manager/programs/_packages.nix~. Fingerprint-capable NixOS desktops also install a generated polkit action (~com.bitwarden.Bitwarden.unlock~) from ~modules/nixos/desktop/default.nix~ so Bitwarden's "system authentication" unlock path can delegate to polkit instead of failing because the action is undefined.
+Bitwarden Desktop is installed for Linux desktops from ~modules/home-manager/programs/_packages.nix~. Fingerprint-capable NixOS desktops also install a generated polkit action (~com.bitwarden.Bitwarden.unlock~) from ~modules/nixos/desktop/default.nix~ so Bitwarden's "system authentication" unlock path can delegate to polkit instead of failing because the action is undefined. In the current fleet that action is present on ~commandmodule~ and ~sonic~, but not on ~arrakis~.
 
 This split is intentional: the application belongs with the user-facing desktop package set, while the polkit action is machine-wide OS integration and belongs in the NixOS desktop module.
 
@@ -156,7 +158,7 @@ All desktops use impermanence with ~/nix/persist~ as the persistence root. ZFS d
 | Path                                   | Purpose                   |
 |----------------------------------------+---------------------------|
 | /var/lib/bluetooth                     | Bluetooth pairings        |
-| /var/lib/fprint                        | Fingerprint templates     |
+| /var/lib/fprint                        | Fingerprint templates (used on fingerprint-enabled desktops) |
 | /var/lib/NetworkManager                | WiFi connections          |
 | /etc/NetworkManager/system-connections | WiFi connection configs   |
 | /var/cache/tuigreet                    | Greeter session cache     |

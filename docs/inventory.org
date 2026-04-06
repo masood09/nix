@@ -554,7 +554,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 |-------------+---------|
 | Audio       | yes     |
 | Bluetooth   | yes     |
-| Fingerprint | yes     |
+| Fingerprint | no      |
 | Graphics    | yes     |
 | Wireless    | yes     |
 

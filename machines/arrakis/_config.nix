@@ -1,4 +1,4 @@
-# Homelab options — ThinkPad T14 Gen 3 laptop with Niri desktop, bluetooth, fingerprint.
+# Homelab options — ThinkPad T14 Gen 3 laptop with Niri desktop, bluetooth.
 {
   config = {
     homelab = {
@@ -30,8 +30,11 @@
           enable = true;
         };
 
+        # Leave fingerprint support off on arrakis. Shared desktop modules gate
+        # fprintd, PAM fingerprint auth, and Bitwarden's polkit action on this
+        # flag, so disabling it keeps the machine on the password-only path.
         fingerprint = {
-          enable = true;
+          enable = false;
         };
 
         graphics = {
