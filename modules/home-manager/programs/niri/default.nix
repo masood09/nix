@@ -77,6 +77,15 @@ in {
           NIXOS_OZONE_WL = "1";
         };
 
+        # Keep shell startup colocated with the compositor session so Noctalia
+        # only launches inside Niri, matching upstream guidance and avoiding a
+        # second startup path via Noctalia's experimental systemd user service.
+        spawn-at-startup = lib.optionals shellIsNoctalia [
+          {
+            command = ["noctalia-shell"];
+          }
+        ];
+
         gestures.hot-corners.enable = false;
 
         input = {
