@@ -22,7 +22,7 @@ modules/nixos/
   _stylix.nix        Stylix — single source of truth for Base16 theming (system + HM via autoImport)
 
 modules/nixos/desktop/
-  default.nix        Shared services, hardware, kernel (Zen), VM tuning, ananicy-cpp, fontconfig, fonts; defines desktop.shell option
+  default.nix        Shared services, hardware, kernel (Zen), VM tuning, ananicy-cpp, fontconfig, fonts, Bitwarden polkit action; defines desktop.shell option
   _greetd.nix        Login manager (tuigreet + auto-login for encrypted non-ZFS desktops) with PAM config
   _niri.nix          Niri compositor + backlight control (light)
   _noctalia.nix      Noctalia desktop shell (system package, guarded on desktop.shell)
@@ -71,6 +71,12 @@ PAM evaluation order for tuigreet with fingerprint enabled:
 ** GNOME Keyring
 
 ~services.gnome.gnome-keyring~ is enabled for all desktops. The PAM module auto-unlocks the ~login~ keyring on password login. Fingerprint login cannot unlock the keyring because no password flows through PAM (see Pain Points). Auto-login on encrypted desktops currently has the same limitation: the session starts without a greetd password prompt, so the ~login~ keyring remains locked until ~pam_fde_boot_pw~ (or equivalent) is wired into the PAM stack.
+
+** Bitwarden Desktop
+
+Bitwarden Desktop is installed for Linux desktops from ~modules/home-manager/programs/_packages.nix~. Fingerprint-capable NixOS desktops also install a generated polkit action (~com.bitwarden.Bitwarden.unlock~) from ~modules/nixos/desktop/default.nix~ so Bitwarden's "system authentication" unlock path can delegate to polkit instead of failing because the action is undefined.
+
+This split is intentional: the application belongs with the user-facing desktop package set, while the polkit action is machine-wide OS integration and belongs in the NixOS desktop module.
 
 * Compositor
 
@@ -207,6 +213,10 @@ ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix 
 When ~pam_fprintd.so~ succeeds (marked ~sufficient~), PAM short-circuits the auth stack. ~pam_gnome_keyring.so~ never receives a password, so the ~login~ keyring stays locked. Apps that use the Secret Service API (Element, Discord) will prompt for credentials each session.
 
 *Workaround:* log in with password instead of fingerprint. The keyring unlocks automatically.
+
+** Bitwarden system-auth unlock is only wired on fingerprint desktops
+
+The repo currently installs ~com.bitwarden.Bitwarden.unlock~ only when ~homelab.hardware.fingerprint.enable = true~. That matches the immediate requirement: make Bitwarden biometric unlock work on laptops with fingerprint readers. If a future non-fingerprint Linux desktop wants Bitwarden's polkit-backed system-auth flow via password only, this guard should be widened and the behavior re-evaluated.
 
 ** ZFS requires GRUB
 
