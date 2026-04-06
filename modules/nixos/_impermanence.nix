@@ -40,7 +40,9 @@ in {
                 mode = "0700";
               }
             ])
-            # Desktop-specific state (login manager, bluetooth pairings, fingerprints, WiFi)
+            # Desktop-specific state (login manager, bluetooth pairings, fingerprints, WiFi).
+            # /var/lib/fprint is persisted unconditionally — harmless empty dir on
+            # desktops without fingerprint hardware enabled.
             (lib.mkIf (homelabCfg.role == "desktop") (
               [
                 "/var/lib/bluetooth"
