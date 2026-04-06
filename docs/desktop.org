@@ -23,7 +23,7 @@ modules/nixos/
 
 modules/nixos/desktop/
   default.nix        Shared services, hardware, kernel (Zen), VM tuning, ananicy-cpp, fontconfig, fonts; defines desktop.shell option
-  _greetd.nix        Login manager (tuigreet) with PAM config
+  _greetd.nix        Login manager (tuigreet + auto-login for encrypted non-ZFS desktops) with PAM config
   _niri.nix          Niri compositor + backlight control (light)
   _noctalia.nix      Noctalia desktop shell (system package, guarded on desktop.shell)
 
@@ -52,7 +52,7 @@ Everything is gated behind ~homelab.*~ options. A machine opts into the desktop 
 
 ** Greeter
 
-greetd manages login sessions with tuigreet, a TUI greeter that launches ~niri-session~. Supports fingerprint auth when ~homelab.hardware.fingerprint.enable = true~.
+greetd manages login sessions for all NixOS desktops. By default it runs tuigreet, a TUI greeter that launches ~niri-session~. On encrypted non-ZFS desktops (~homelab.isEncryptedRoot = true~ and ~homelab.isRootZFS = false~), greetd instead starts ~initial_session~ for the primary user immediately after boot-time disk unlock. Supports fingerprint auth when ~homelab.hardware.fingerprint.enable = true~.
 
 ** PAM Stack
 
@@ -70,7 +70,7 @@ PAM evaluation order for tuigreet with fingerprint enabled:
 
 ** GNOME Keyring
 
-~services.gnome.gnome-keyring~ is enabled for all desktops. The PAM module auto-unlocks the ~login~ keyring on password login. Fingerprint login cannot unlock the keyring because no password flows through PAM (see Pain Points).
+~services.gnome.gnome-keyring~ is enabled for all desktops. The PAM module auto-unlocks the ~login~ keyring on password login. Fingerprint login cannot unlock the keyring because no password flows through PAM (see Pain Points). Auto-login on encrypted desktops currently has the same limitation: the session starts without a greetd password prompt, so the ~login~ keyring remains locked until ~pam_fde_boot_pw~ (or equivalent) is wired into the PAM stack.
 
 * Compositor
 
@@ -198,7 +198,7 @@ ananicy-cpp is an auto-nice daemon that adjusts process niceness, I/O priority, 
 
 * Boot
 
-ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix themes the GRUB menu with Base16 colors when ~homelab.stylix.enable = true~. Non-ZFS desktops (arrakis) use systemd-boot with systemd-based initrd and Plymouth. The boot sequence is: systemd-boot → Plymouth splash (themed by Stylix) → LUKS passphrase (via Plymouth's password agent) → greeter. Kernel params ~quiet splash loglevel=3~ suppress console output so the splash is uninterrupted. Plymouth and systemd initrd are auto-enabled for any machine with ~role = "desktop"~ and ~isRootZFS = false~ (the ~isDesktopSystemdBoot~ guard in ~_boot.nix~).
+ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix themes the GRUB menu with Base16 colors when ~homelab.stylix.enable = true~. Non-ZFS desktops (arrakis) use systemd-boot with systemd-based initrd and Plymouth. The boot sequence there is: systemd-boot → Plymouth splash (themed by Stylix) → LUKS passphrase (via Plymouth's password agent) → desktop session. If the machine is an unencrypted or ZFS desktop, greetd falls back to the normal greeter path instead. Kernel params ~quiet splash loglevel=3~ suppress console output so the splash is uninterrupted. Plymouth and systemd initrd are auto-enabled for any machine with ~role = "desktop"~ and ~isRootZFS = false~ (the ~isDesktopSystemdBoot~ guard in ~_boot.nix~).
 
 * Pain Points
 
@@ -214,9 +214,9 @@ systemd-boot does not support ZFS. commandmodule and sonic are locked to GRUB. a
 
 * Future Improvements
 
-** Auto-login on encrypted desktops
+** GNOME Keyring unlock for auto-login
 
-With encrypted root, the user already proves identity at boot. Typing the same password at greetd is redundant. ~pam_fde_boot_pw~ (packaged in nixpkgs) retrieves the disk encryption passphrase from the kernel keyring and passes it through PAM at login, enabling both auto-login and GNOME Keyring auto-unlock without typing a password twice. Requires LUKS (not ZFS native encryption) and systemd-boot — arrakis is eligible now; commandmodule and sonic would need the same LUKS migration first.
+Encrypted non-ZFS desktops already auto-login after disk unlock, but GNOME Keyring still does not auto-unlock in that path because no password reaches PAM. ~pam_fde_boot_pw~ (packaged in nixpkgs) is the intended fix: retrieve the disk encryption passphrase from the kernel keyring and pass it through PAM at session start. This remains limited to LUKS + systemd-boot desktops; commandmodule and sonic would still need the same ZFS-to-LUKS migration first.
 
 ** Noctalia Shell
 
