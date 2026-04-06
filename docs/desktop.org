@@ -74,11 +74,13 @@ PAM evaluation order for tuigreet with fingerprint enabled:
 
 ~services.gnome.gnome-keyring~ is enabled for all desktops. The PAM module auto-unlocks the ~login~ keyring on password login. Fingerprint login cannot unlock the keyring because no password flows through PAM (see Pain Points). Auto-login on encrypted desktops currently has the same limitation: the session starts without a greetd password prompt, so the ~login~ keyring remains locked until ~pam_fde_boot_pw~ (or equivalent) is wired into the PAM stack.
 
-** Bitwarden Desktop
+** Desktop Applications
 
-Bitwarden Desktop is installed for Linux desktops from ~modules/home-manager/programs/_packages.nix~. Fingerprint-capable NixOS desktops also install a generated polkit action (~com.bitwarden.Bitwarden.unlock~) from ~modules/nixos/desktop/default.nix~ so Bitwarden's "system authentication" unlock path can delegate to polkit instead of failing because the action is undefined. In the current fleet that action is present on ~commandmodule~ and ~sonic~, but not on ~arrakis~.
+Linux desktops install both Bitwarden Desktop and Element Desktop from ~modules/home-manager/programs/_packages.nix~. They live in the home-manager desktop package set because they are user-facing applications that should follow the ~desktop~ role instead of being repeated in per-machine configs.
 
-This split is intentional: the application belongs with the user-facing desktop package set, while the polkit action is machine-wide OS integration and belongs in the NixOS desktop module.
+Bitwarden also needs machine-wide integration: fingerprint-capable NixOS desktops install a generated polkit action (~com.bitwarden.Bitwarden.unlock~) from ~modules/nixos/desktop/default.nix~ so Bitwarden's "system authentication" unlock path can delegate to polkit instead of failing because the action is undefined. In the current fleet that action is present on ~commandmodule~ and ~sonic~, but not on ~arrakis~.
+
+Element Desktop currently has no comparable system-wide integration in this repo, so its Nix surface is just package installation plus any future user-level config managed through home-manager.
 
 * Compositor
 

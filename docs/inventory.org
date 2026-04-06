@@ -565,6 +565,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | bitwarden-desktop | Password manager         |
 | claude-code       | Anthropic CLI + MCP      |
 | codex-cli         | OpenAI CLI               |
+| element-desktop   | Matrix chat client       |
 | emacs             | Editor with LSP/Go tools |
 | fastfetch         | System info              |
 | fish              | Interactive shell        |
@@ -601,6 +602,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | bitwarden-desktop | Password manager         |
 | claude-code       | Anthropic CLI + MCP      |
 | codex-cli         | OpenAI CLI               |
+| element-desktop   | Matrix chat client       |
 | emacs             | Editor with LSP/Go tools |
 | fastfetch         | zpools: rpool            |
 | fish              | Interactive shell        |
@@ -635,6 +637,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Program           | Notes                              |
 |-------------------+------------------------------------|
 | bitwarden-desktop | Password manager                   |
+| element-desktop   | Matrix chat client                 |
 | emacs             | Editor                             |
 | fastfetch         | zpools: rpool                      |
 | fish              | Interactive shell                  |
