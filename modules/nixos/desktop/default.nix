@@ -68,6 +68,32 @@ in {
   };
 
   config = lib.mkIf homelabCfg.desktop.enable {
+    # System-wide desktop glue that is not owned by a single service module.
+    # Today this is only the Bitwarden polkit action used for "system auth"
+    # unlocks. Keep it gated to fingerprint-capable desktops because that is
+    # the only path in this repo that currently relies on the action.
+    environment.systemPackages = lib.optionals homelabCfg.hardware.fingerprint.enable [
+      # Install the policy file via the Nix store so polkit sees the
+      # com.bitwarden.Bitwarden.unlock action during desktop sessions.
+      (pkgs.writeTextDir "share/polkit-1/actions/com.bitwarden.Bitwarden.policy" ''
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE policyconfig PUBLIC
+         "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+         "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
+        <policyconfig>
+          <action id="com.bitwarden.Bitwarden.unlock">
+            <description>Unlock Bitwarden</description>
+            <message>Authenticate to unlock Bitwarden</message>
+            <defaults>
+              <allow_any>auth_self</allow_any>
+              <allow_inactive>auth_self</allow_inactive>
+              <allow_active>auth_self</allow_active>
+            </defaults>
+          </action>
+        </policyconfig>
+      '')
+    ];
+
     services = {
       logind = {
         # Laptop lid handling is owned by logind, not the compositor. Suspend on

@@ -560,20 +560,21 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 **** Programs
 
-| Program     | Notes                    |
-|-------------+--------------------------|
-| claude-code | Anthropic CLI + MCP      |
-| codex-cli   | OpenAI CLI               |
-| emacs       | Editor with LSP/Go tools |
-| fastfetch   | System info              |
-| fish        | Interactive shell        |
-| git         | Version control          |
-| kitty       | Terminal emulator        |
-| neovim      | Editor                   |
-| oci-cli     | Oracle Cloud CLI         |
-| opentofu    | Infrastructure-as-code   |
-| stylix      | Theming                  |
-| zen         | Web browser              |
+| Program           | Notes                    |
+|-------------------+--------------------------|
+| bitwarden-desktop | Password manager         |
+| claude-code       | Anthropic CLI + MCP      |
+| codex-cli         | OpenAI CLI               |
+| emacs             | Editor with LSP/Go tools |
+| fastfetch         | System info              |
+| fish              | Interactive shell        |
+| git               | Version control          |
+| kitty             | Terminal emulator        |
+| neovim            | Editor                   |
+| oci-cli           | Oracle Cloud CLI         |
+| opentofu          | Infrastructure-as-code   |
+| stylix            | Theming                  |
+| zen               | Web browser              |
 
 *** commandmodule
 
@@ -595,20 +596,21 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 **** Programs
 
-| Program     | Notes                    |
-|-------------+--------------------------|
-| claude-code | Anthropic CLI + MCP      |
-| codex-cli   | OpenAI CLI               |
-| emacs       | Editor with LSP/Go tools |
-| fastfetch   | zpools: rpool            |
-| fish        | Interactive shell        |
-| git         | Version control          |
-| kitty       | Terminal emulator        |
-| neovim      | Editor                   |
-| oci-cli     | Oracle Cloud CLI         |
-| opentofu    | Infrastructure-as-code   |
-| stylix      | Theming                  |
-| zen         | Web browser              |
+| Program           | Notes                    |
+|-------------------+--------------------------|
+| bitwarden-desktop | Password manager         |
+| claude-code       | Anthropic CLI + MCP      |
+| codex-cli         | OpenAI CLI               |
+| emacs             | Editor with LSP/Go tools |
+| fastfetch         | zpools: rpool            |
+| fish              | Interactive shell        |
+| git               | Version control          |
+| kitty             | Terminal emulator        |
+| neovim            | Editor                   |
+| oci-cli           | Oracle Cloud CLI         |
+| opentofu          | Infrastructure-as-code   |
+| stylix            | Theming                  |
+| zen               | Web browser              |
 
 *** sonic
 
@@ -630,16 +632,17 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 **** Programs
 
-| Program   | Notes                              |
-|-----------+------------------------------------|
-| emacs     | Editor                             |
-| fastfetch | zpools: rpool                      |
-| fish      | Interactive shell                  |
-| git       | Zain Ahmed / zain@ahmedmasood.com  |
-| kitty     | Terminal emulator                  |
-| neovim    | Editor                             |
-| stylix    | Custom scheme (sonic-dark.yaml)    |
-| zen       | Web browser (family container)     |
+| Program           | Notes                              |
+|-------------------+------------------------------------|
+| bitwarden-desktop | Password manager                   |
+| emacs             | Editor                             |
+| fastfetch         | zpools: rpool                      |
+| fish              | Interactive shell                  |
+| git               | Zain Ahmed / zain@ahmedmasood.com  |
+| kitty             | Terminal emulator                  |
+| neovim            | Editor                             |
+| stylix            | Custom scheme (sonic-dark.yaml)    |
+| zen               | Web browser (family container)     |
 
 ** macOS Machines
 *** murderbot

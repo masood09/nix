@@ -32,6 +32,12 @@ in {
         statix
         stow
       ])
+      ++ lib.optionals (role == "desktop" && pkgs.stdenv.isLinux) (with pkgs; [
+        # Linux-only desktop GUI apps. Keep Bitwarden here with the user-facing
+        # desktop package set; the matching system-auth policy lives in the
+        # NixOS desktop module because polkit actions are system-wide state.
+        bitwarden-desktop
+      ])
       # macOS-specific (coreutils for GNU compat, nixos-rebuild for remote deploys)
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
         coreutils
