@@ -44,6 +44,10 @@
           };
         };
 
+        element-desktop = {
+          enable = lib.mkEnableOption "Whether to enable Element Desktop.";
+        };
+
         emacs = {
           enable = lib.mkEnableOption "Whether to enable emacs.";
         };

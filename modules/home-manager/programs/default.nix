@@ -15,6 +15,7 @@
     ./_bat.nix
     ./_btop.nix
     ./_direnv.nix
+    ./_element-desktop.nix
     ./_eza.nix
     ./_fastfetch.nix
     ./_fd.nix

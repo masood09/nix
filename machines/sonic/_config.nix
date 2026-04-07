@@ -57,6 +57,9 @@
         fastfetch = {
           zpools = ["rpool"];
         };
+        element-desktop = {
+          enable = true;
+        };
         emacs = {
           enable = true;
         };
