@@ -29,6 +29,13 @@ in {
       noctalia-shell = {
         enable = true;
         settings = {
+          # Pin the current upstream settings schema version so Noctalia reads
+          # the Home Manager-generated JSON as already migrated state. Without
+          # this, cold starts treat the file as legacy v0 settings and can
+          # silently remap bar options such as `barType` back to upstream
+          # defaults during migration.
+          settingsVersion = 59;
+
           appLauncher = {
             enableClipboardHistory = true;
             terminalCommand = "kitty -e";
