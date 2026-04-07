@@ -13,6 +13,10 @@
   ...
 }: let
   shellIsNoctalia = ((homelabCfg.desktop.shell or "none") == "noctalia") && pkgs.stdenv.isLinux;
+  # Only render the bar widget on machines that actually expose Bluetooth in
+  # the machine-level hardware profile; desktops without an adapter should not
+  # show a dead control.
+  bluetoothEnabled = homelabCfg.hardware.bluetooth.enable or false;
   claudeCodeEnabled = homelabCfg.programs.claude-code.enable or false;
   codexEnabled = homelabCfg.programs.codex-cli.enable or false;
   opencodeEnabled = homelabCfg.programs.opencode.enable or false;
@@ -76,21 +80,31 @@ in {
                   visualizerType = "linear";
                 }
               ];
-              center = [
-                {
-                  id = "Tray";
-                  # Show all tray icons colourised with a collapsible drawer
-                  blacklist = [];
-                  chevronColor = "none";
-                  colorizeIcons = true;
-                  drawerEnabled = true;
-                  hidePassive = false;
-                  pinned = [];
-                }
-              ];
+              # Mirror the current GUI-customized layout: keep the middle empty,
+              # anchor the tray on the right, and only render the Bluetooth
+              # control when the machine enables Bluetooth hardware.
+              center = [];
               right =
-                lib.optional modelUsageEnabled {
+                [
+                  {
+                    id = "Tray";
+                    # Flat tray: no drawer chevron, no icon recolouring.
+                    blacklist = [];
+                    chevronColor = "none";
+                    colorizeIcons = false;
+                    drawerEnabled = false;
+                    hidePassive = false;
+                    pinned = [];
+                  }
+                ]
+                ++ lib.optional modelUsageEnabled {
                   id = "plugin:model-usage";
+                }
+                ++ lib.optional bluetoothEnabled {
+                  id = "Bluetooth";
+                  displayMode = "onhover";
+                  iconColor = "none";
+                  textColor = "none";
                 }
                 ++ [
                   {
@@ -105,7 +119,9 @@ in {
                   }
                   {
                     id = "Volume";
-                    # Middle-click opens pwvucontrol (PipeWire) with pavucontrol fallback
+                    # Keep the volume readout always visible; middle-click opens
+                    # pwvucontrol (PipeWire) with pavucontrol fallback.
+                    displayMode = "alwaysShow";
                     middleClickCommand = "pwvucontrol || pavucontrol";
                   }
                   {
