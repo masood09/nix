@@ -53,8 +53,9 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 
 | Module           | Package(s)                                                         | Purpose                            |
 |------------------+--------------------------------------------------------------------+------------------------------------|
-| _claude-code.nix | claude-code, mcp-nixos                                             | Anthropic CLI + NixOS MCP server   |
-| _codex-cli.nix   | codex, bubblewrap                                                  | OpenAI CLI coding assistant        |
+| _mcp.nix         | mcp-nixos (referenced via =lib.getExe=)                            | Shared MCP server registry         |
+| _claude-code.nix | claude-code                                                        | Anthropic CLI via HM module        |
+| _codex-cli.nix   | codex, bubblewrap                                                  | OpenAI CLI via HM module           |
 | _emacs.nix       | emacs-pgtk, cmake, gcc, gnumake, libtool, gopls, nil, nodejs,      | Editor with LSP, Go tooling,       |
 |                  | gomodifytags, gore, gotests, html-tidy, jsbeautifier,              | formatters, tree-sitter grammars   |
 |                  | nixfmt-rfc-style, shellcheck, stylelint, multimarkdown, terraform, |                                    |
@@ -563,8 +564,8 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Program           | Notes                    |
 |-------------------+--------------------------|
 | bitwarden-desktop | Password manager         |
-| claude-code       | Anthropic CLI + MCP      |
-| codex-cli         | OpenAI CLI               |
+| claude-code       | Anthropic CLI + shared MCP |
+| codex-cli         | OpenAI CLI + shared MCP  |
 | element-desktop   | Matrix chat client       |
 | emacs             | Editor with LSP/Go tools |
 | fastfetch         | System info              |
@@ -600,8 +601,8 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Program           | Notes                    |
 |-------------------+--------------------------|
 | bitwarden-desktop | Password manager         |
-| claude-code       | Anthropic CLI + MCP      |
-| codex-cli         | OpenAI CLI               |
+| claude-code       | Anthropic CLI + shared MCP |
+| codex-cli         | OpenAI CLI + shared MCP  |
 | element-desktop   | Matrix chat client       |
 | emacs             | Editor with LSP/Go tools |
 | fastfetch         | zpools: rpool            |

@@ -24,6 +24,8 @@
     ./_zoxide.nix
 
     # Development
+    # Shared MCP registry imported before assistant modules that consume it.
+    ./_mcp.nix
     ./_claude-code.nix
     ./_codex-cli.nix
     ./_emacs.nix
