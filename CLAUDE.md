@@ -86,6 +86,7 @@ homelab = {
   - Good: `services = { greetd = { enable = true; }; };`
   - Bad: `services.greetd = { enable = true; };`
   - This applies to all top-level options: `services`, `programs`, `security`, `environment`, etc.
+- **Cross-platform HM modules**: If a shared Home Manager module writes to an option namespace provided only on one platform, guard the subtree with `options.<path> ? <name>` or `lib.optionalAttrs`. Do not try to make `imports` depend on `pkgs`/`config` to avoid missing-option errors; that causes module recursion.
 
 ### Persistence Model
 - ZFS machines: ephemeral root via ZFS rollback to blank snapshot, persistent data in `/nix/persist`
