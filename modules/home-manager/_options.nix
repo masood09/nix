@@ -46,6 +46,18 @@
 
         element-desktop = {
           enable = lib.mkEnableOption "Whether to enable Element Desktop.";
+
+          baseUrl = lib.mkOption {
+            type = lib.types.str;
+            default = "https://chat.mantannest.com";
+            description = "Default Matrix homeserver base URL for Element Desktop.";
+          };
+
+          serverName = lib.mkOption {
+            type = lib.types.str;
+            default = "chat.mantannest.com";
+            description = "Default Matrix server name for Element Desktop.";
+          };
         };
 
         emacs = {
