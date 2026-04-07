@@ -48,10 +48,12 @@ in {
         force_verification = false;
         show_labs_settings = false;
 
+        # Keep the default homeserver overridable per machine via
+        # homelab.programs.element-desktop.{baseUrl,serverName}.
         default_server_config = {
           "m.homeserver" = {
-            base_url = "https://chat.mantannest.com";
-            server_name = "chat.mantannest.com";
+            base_url = cfg.baseUrl;
+            server_name = cfg.serverName;
           };
         };
 
