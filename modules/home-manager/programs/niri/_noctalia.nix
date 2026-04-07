@@ -3,9 +3,8 @@
 # imported in home.nix; this file activates and configures it when
 # desktop.shell == "noctalia". Settings are captured from the GUI via
 # IPC diff and declared here so Nix remains the source of truth.
-# Plugins: the model-usage bar widget (AI coding assistant stats) is
-# conditionally enabled when any supported assistant (Claude Code, Codex,
-# opencode) is active.
+# Plugins: the model-usage bar widget (AI model provider stats) is
+# conditionally enabled when any supported AI model provider is selected.
 {
   homelabCfg,
   lib,
@@ -13,16 +12,31 @@
   ...
 }: let
   shellIsNoctalia = ((homelabCfg.desktop.shell or "none") == "noctalia") && pkgs.stdenv.isLinux;
+  aiToolsCfg = homelabCfg.programs.ai_tools;
+  aiToolsEnabled = aiToolsCfg.enable or false;
+  # The widget is driven by provider selection, not installed CLIs. That lets a
+  # machine expose usage for a provider even if the corresponding executable is
+  # delivered some other way later, and keeps tool installation separate from UI
+  # state.
+  hasAiModel = model: aiToolsEnabled && lib.elem model (aiToolsCfg.models or []);
   # Only render the bar widget on machines that actually expose Bluetooth in
   # the machine-level hardware profile; desktops without an adapter should not
   # show a dead control.
   bluetoothEnabled = homelabCfg.hardware.bluetooth.enable or false;
-  claudeCodeEnabled = homelabCfg.programs.claude-code.enable or false;
-  codexEnabled = homelabCfg.programs.codex-cli.enable or false;
-  opencodeEnabled = homelabCfg.programs.opencode.enable or false;
-  # Install and configure the model-usage plugin when any supported assistant
-  # is active so the bar widget and plugin registry stay in sync.
-  modelUsageEnabled = claudeCodeEnabled || codexEnabled || opencodeEnabled;
+  claudeModelEnabled = hasAiModel "claude-code";
+  # Noctalia's plugin exposes an `codex` provider toggle; keep `openai` as a
+  # higher-level machine-facing alias so configs can describe the vendor while
+  # still mapping cleanly onto the plugin's schema.
+  codexModelEnabled = hasAiModel "codex" || hasAiModel "openai";
+  openrouterModelEnabled = hasAiModel "openrouter";
+  zenModelEnabled = hasAiModel "zen";
+  copilotModelEnabled = hasAiModel "copilot";
+  modelUsageEnabled =
+    claudeModelEnabled
+    || codexModelEnabled
+    || openrouterModelEnabled
+    || zenModelEnabled
+    || copilotModelEnabled;
 in {
   config = lib.mkIf shellIsNoctalia {
     programs = {
@@ -242,22 +256,22 @@ in {
           model-usage = lib.mkIf modelUsageEnabled {
             providers = {
               claude = {
-                enabled = claudeCodeEnabled;
+                enabled = claudeModelEnabled;
                 statsPath = "~/.claude/stats-cache.json";
                 credentialsPath = "~/.claude/.credentials.json";
               };
               codex = {
-                enabled = codexEnabled;
+                enabled = codexModelEnabled;
               };
               copilot = {
-                enabled = false;
+                enabled = copilotModelEnabled;
               };
               openrouter = {
-                enabled = false;
+                enabled = openrouterModelEnabled;
                 apiKey = "";
               };
               zen = {
-                enabled = false;
+                enabled = zenModelEnabled;
                 apiKey = "";
               };
             };
