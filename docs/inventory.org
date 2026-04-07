@@ -56,7 +56,7 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 | _mcp.nix         | mcp-nixos (referenced via =lib.getExe=)                            | Shared MCP server registry         |
 | _claude-code.nix | claude-code                                                        | Anthropic CLI via HM module        |
 | _codex-cli.nix   | codex, bubblewrap                                                  | OpenAI CLI via HM module           |
-| _opencode.nix    | opencode                                                           | opencode via HM module             |
+| _opencode.nix    | opencode (from =nixpkgs-unstable=)                                 | opencode via HM module             |
 | _emacs.nix       | emacs-pgtk, cmake, gcc, gnumake, libtool, gopls, nil, nodejs,      | Editor with LSP, Go tooling,       |
 |                  | gomodifytags, gore, gotests, html-tidy, jsbeautifier,              | formatters, tree-sitter grammars   |
 |                  | nixfmt-rfc-style, shellcheck, stylelint, multimarkdown, terraform, |                                    |
@@ -575,7 +575,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | kitty             | Terminal emulator        |
 | neovim            | Editor                   |
 | oci-cli           | Oracle Cloud CLI         |
-| opencode          | AI coding assistant + shared MCP |
+| opencode          | AI coding assistant + shared MCP, package from unstable |
 | opentofu          | Infrastructure-as-code   |
 | stylix            | Theming                  |
 | zen               | Web browser              |
@@ -613,7 +613,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | kitty             | Terminal emulator        |
 | neovim            | Editor                   |
 | oci-cli           | Oracle Cloud CLI         |
-| opencode          | AI coding assistant + shared MCP |
+| opencode          | AI coding assistant + shared MCP, package from unstable |
 | opentofu          | Infrastructure-as-code   |
 | stylix            | Theming                  |
 | zen               | Web browser              |

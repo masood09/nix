@@ -4,8 +4,8 @@
 # desktop.shell == "noctalia". Settings are captured from the GUI via
 # IPC diff and declared here so Nix remains the source of truth.
 # Plugins: the model-usage bar widget (AI coding assistant stats) is
-# conditionally enabled when any supported assistant (claude-code, etc.)
-# is active.
+# conditionally enabled when any supported assistant (Claude Code, Codex,
+# opencode) is active.
 {
   homelabCfg,
   lib,
@@ -15,8 +15,10 @@
   shellIsNoctalia = ((homelabCfg.desktop.shell or "none") == "noctalia") && pkgs.stdenv.isLinux;
   claudeCodeEnabled = homelabCfg.programs.claude-code.enable or false;
   codexEnabled = homelabCfg.programs.codex-cli.enable or false;
-  # Enable the model-usage plugin when any AI coding assistant is active
-  modelUsageEnabled = claudeCodeEnabled || codexEnabled;
+  opencodeEnabled = homelabCfg.programs.opencode.enable or false;
+  # Install and configure the model-usage plugin when any supported assistant
+  # is active so the bar widget and plugin registry stay in sync.
+  modelUsageEnabled = claudeCodeEnabled || codexEnabled || opencodeEnabled;
 in {
   config = lib.mkIf shellIsNoctalia {
     programs = {
