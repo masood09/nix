@@ -75,6 +75,9 @@
         oci-cli = {
           enable = true;
         };
+        opencode = {
+          enable = true;
+        };
         opentofu = {
           enable = true;
         };

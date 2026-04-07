@@ -190,6 +190,10 @@
           enable = lib.mkEnableOption "Whether to enable Oracle Cloud CLI.";
         };
 
+        opencode = {
+          enable = lib.mkEnableOption "Whether to enable opencode.";
+        };
+
         opentofu = {
           enable = lib.mkEnableOption "Whether to enable OpenTofu.";
         };

@@ -32,6 +32,8 @@
     ./_git.nix
     ./_gpg.nix
     ./_neovim.nix
+    # Assistant module consuming the shared MCP registry from `_mcp.nix`.
+    ./_opencode.nix
 
     # Cloud & infrastructure
     ./_oci-cli.nix
