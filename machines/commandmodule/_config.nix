@@ -48,11 +48,12 @@
         fastfetch = {
           zpools = ["rpool"];
         };
-        claude-code = {
+        # Central AI registry: install opencode locally and expose Codex usage in
+        # Noctalia's model-usage widget.
+        ai_tools = {
           enable = true;
-        };
-        codex-cli = {
-          enable = true;
+          models = ["codex"];
+          tools = ["opencode"];
         };
         element-desktop = {
           enable = true;
@@ -73,9 +74,6 @@
           enable = true;
         };
         oci-cli = {
-          enable = true;
-        };
-        opencode = {
           enable = true;
         };
         opentofu = {

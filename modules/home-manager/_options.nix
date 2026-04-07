@@ -2,10 +2,61 @@
 # Each program module reads its flag from here to decide whether to activate.
 # Programs default to true (always-on) or false (opt-in) depending on how
 # commonly they're used across machines.
-{lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: let
+  aiToolsCfg = config.homelab.programs.ai_tools;
+  aiToolsEnabled = aiToolsCfg.enable;
+  # Keep the existing per-tool flags as the module activation point so the
+  # concrete Home Manager program modules stay small and machine configs can
+  # move to a single AI registry without changing their internals.
+  hasAiTool = tool: aiToolsEnabled && lib.elem tool aiToolsCfg.tools;
+in {
   options = {
     homelab = {
       programs = {
+        ai_tools = {
+          enable = lib.mkEnableOption "Whether to enable AI tooling selection.";
+
+          models = lib.mkOption {
+            type = lib.types.listOf (
+              lib.types.enum [
+                "claude-code"
+                "codex"
+                "openai"
+                "copilot"
+                "openrouter"
+                "zen"
+              ]
+            );
+            default = [];
+            description = ''
+              Model providers to expose to AI-related integrations such as
+              Noctalia's model-usage widget. Values are validated against a
+              fixed enum so machine configs cannot drift from supported
+              provider identifiers.
+            '';
+          };
+
+          tools = lib.mkOption {
+            type = lib.types.listOf (
+              lib.types.enum [
+                "claude-code"
+                "codex"
+                "opencode"
+              ]
+            );
+            default = [];
+            description = ''
+              AI coding tools to install on this machine. Values are validated
+              against a fixed enum so only supported tool modules can be
+              selected.
+            '';
+          };
+        };
+
         bat = {
           enable = lib.mkOption {
             default = true;
@@ -155,7 +206,10 @@
 
           signing = {
             method = lib.mkOption {
-              type = lib.types.enum ["ssh" "gpg"];
+              type = lib.types.enum [
+                "ssh"
+                "gpg"
+              ];
               default = "ssh";
               description = "Git commit signing method. 'ssh' (default) or 'gpg' (OpenPGP).";
             };
@@ -232,7 +286,11 @@
           enable = lib.mkEnableOption "Whether to enable Zen browser.";
 
           containerProfile = lib.mkOption {
-            type = lib.types.enum ["homelab" "family" "work"];
+            type = lib.types.enum [
+              "homelab"
+              "family"
+              "work"
+            ];
             default = "homelab";
             description = ''
               Which container/workspace set to configure.
@@ -261,6 +319,27 @@
               Whether to enable zsh.
             '';
           };
+        };
+      };
+    };
+  };
+
+  config = {
+    homelab = {
+      programs = {
+        # `mkDefault` keeps the new aggregate selector as the preferred machine
+        # interface while still allowing an explicit per-tool override if a
+        # machine ever needs to diverge temporarily.
+        claude-code = {
+          enable = lib.mkDefault (hasAiTool "claude-code");
+        };
+
+        codex-cli = {
+          enable = lib.mkDefault (hasAiTool "codex");
+        };
+
+        opencode = {
+          enable = lib.mkDefault (hasAiTool "opencode");
         };
       };
     };

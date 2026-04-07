@@ -22,7 +22,7 @@ System programs enabled conditionally via =homelab.programs.*=:
 
 ** Home-Manager Programs (all machines via home-manager)
 
-Each program module guards itself with its own =homelab.programs.<name>.enable= flag. Machines opt in via =_config.nix=.
+Each program module guards itself with its own =homelab.programs.<name>.enable= flag. Machines opt in via =_config.nix=. AI-related CLIs now also share an aggregate selector at =homelab.programs.ai_tools=, which fans out to the underlying per-tool flags and declares the provider list used by Noctalia's model-usage widget.
 
 *** Shell & Terminal
 
@@ -64,6 +64,8 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 | _git.nix         | git, delta                                                         | Version control with pretty diffs  |
 | _gpg.nix         | gpg, gpg-agent (SSH agent mode)                                    | GPG encryption + smartcard/YubiKey |
 | _neovim.nix      | neovim                                                             | Editor (vi/vim aliases)            |
+
+The =homelab.programs.ai_tools= selector uses enum-backed =tools= and =models= lists. =tools= controls CLI installation (currently =claude-code=, =codex=, =opencode=) while =models= controls provider visibility in Noctalia's =model-usage= plugin (currently =claude-code=, =codex=, =openai=, =copilot=, =openrouter=, =zen=).
 
 *** Cloud & Infrastructure
 
@@ -564,9 +566,8 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 | Program           | Notes                    |
 |-------------------+--------------------------|
+| ai_tools          | enabled; models: =codex=; tools: =opencode= |
 | bitwarden-desktop | Password manager         |
-| claude-code       | Anthropic CLI + shared MCP |
-| codex-cli         | OpenAI CLI + shared MCP  |
 | element-desktop   | Matrix chat client       |
 | emacs             | Editor with LSP/Go tools |
 | fastfetch         | System info              |
@@ -602,9 +603,8 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 | Program           | Notes                    |
 |-------------------+--------------------------|
+| ai_tools          | enabled; models: =codex=; tools: =opencode= |
 | bitwarden-desktop | Password manager         |
-| claude-code       | Anthropic CLI + shared MCP |
-| codex-cli         | OpenAI CLI + shared MCP  |
 | element-desktop   | Matrix chat client       |
 | emacs             | Editor with LSP/Go tools |
 | fastfetch         | zpools: rpool            |
@@ -660,7 +660,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 | Program     | Notes                  |
 |-------------+------------------------|
-| claude-code | Anthropic CLI          |
+| ai_tools    | enabled; models: =codex=; tools: =opencode= |
 | emacs       | Editor                 |
 | element-desktop | Matrix chat client  |
 | fastfetch   | System info            |
@@ -668,6 +668,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | kitty       | Terminal emulator      |
 | neovim      | Editor                 |
 | oci-cli     | Oracle Cloud CLI       |
+| opencode    | AI coding assistant + shared MCP, package from unstable |
 | opentofu    | Infrastructure-as-code |
 | zen         | Web browser            |
 

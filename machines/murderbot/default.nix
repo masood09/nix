@@ -23,8 +23,12 @@
 
     programs = {
       fastfetch = {};
-      claude-code = {
+      # Central AI registry: install opencode locally; the shared selector also
+      # keeps Noctalia-compatible provider choices in one machine-facing place.
+      ai_tools = {
         enable = true;
+        models = ["codex"];
+        tools = ["opencode"];
       };
       element-desktop = {
         enable = true;
