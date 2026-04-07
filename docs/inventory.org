@@ -658,6 +658,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 |-------------+------------------------|
 | claude-code | Anthropic CLI          |
 | emacs       | Editor                 |
+| element-desktop | Matrix chat client  |
 | fastfetch   | System info            |
 | git         | Version control        |
 | kitty       | Terminal emulator      |
@@ -673,7 +674,6 @@ Defined in =nix/pkgs/= and auto-discovered.
 | balenaetcher   | USB/SD card image flasher              |
 | discord        | Chat client                            |
 | docker-desktop | Container runtime (GUI)                |
-| element        | Matrix chat client                     |
 | opencloud      | File sync client                       |
 | pgadmin4       | PostgreSQL admin GUI                   |
 | zoom           | Video conferencing                     |

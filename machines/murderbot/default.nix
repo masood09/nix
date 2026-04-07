@@ -26,6 +26,9 @@
       claude-code = {
         enable = true;
       };
+      element-desktop = {
+        enable = true;
+      };
       emacs = {
         enable = true;
       };
