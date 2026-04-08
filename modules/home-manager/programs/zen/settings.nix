@@ -84,15 +84,16 @@ _: {
             "zen.watermark.enabled" = false;
 
             # Zen — Sidebar and compact mode
-            # Expanded sidebar shows tab labels alongside icons; compact mode
-            # still hides the tab bar and toolbar until hover.
+            # Keep the sidebar expanded for readable workspace labels, and leave
+            # the toolbar visible so workspace navigation is not hidden behind
+            # compact-mode chrome while the tab bar stays collapsed.
             "zen.view.compact.enable-at-startup" = true;
             "zen.view.compact.animate-sidebar" = false;
             "zen.view.compact.hide-tabbar" = true;
-            "zen.view.compact.hide-toolbar" = true;
+            "zen.view.compact.hide-toolbar" = false;
             "zen.view.experimental-no-window-controls" = true;
             "zen.view.sidebar-expanded" = true;
-            "zen.view.use-single-toolbar" = true;
+            "zen.view.use-single-toolbar" = false;
 
             # Zen — URL bar
             "zen.urlbar.behavior" = "float";

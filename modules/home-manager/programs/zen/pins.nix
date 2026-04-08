@@ -1,7 +1,7 @@
 # Pinned tabs — declaratively managed per profile, keyed by stable UUID.
 # Positions are 1-indexed within each space.
 # "homelab": Personal → proton mail, keep, ittools, mailarchiver
-#            Homelab  → router, uptime, uptime.test
+#            Homelab  → router, uptime, grafana, uptime.test, grafana.test
 #            Admin    → auth, auth.test
 #            Google   → gmail, youtube
 # "work":    Personal → proton mail, keep, ittools, passwords
@@ -42,7 +42,12 @@ in {
               };
             }
             # Personal space — homelab + work (shared base)
-            // lib.optionalAttrs (builtins.elem profile ["homelab" "work"]) {
+            // lib.optionalAttrs
+            (builtins.elem profile [
+              "homelab"
+              "work"
+            ])
+            {
               "a1b2c3d4-e5f6-4890-abcd-ef1234567890" = {
                 id = "a1b2c3d4-e5f6-4890-abcd-ef1234567890";
                 url = "https://mail.proton.me/";
@@ -86,7 +91,12 @@ in {
               };
             }
             # Google space — homelab + work
-            // lib.optionalAttrs (builtins.elem profile ["homelab" "work"]) {
+            // lib.optionalAttrs
+            (builtins.elem profile [
+              "homelab"
+              "work"
+            ])
+            {
               "d4e5f6a7-b8c9-4123-def0-234567890123" = {
                 id = "d4e5f6a7-b8c9-4123-def0-234567890123";
                 url = "https://mail.google.com";
@@ -118,12 +128,26 @@ in {
                 workspace = homelabSpace;
                 position = 2;
               };
+              "4f7c2d91-8e3a-4b6f-a1d4-92c5e7f8b103" = {
+                id = "4f7c2d91-8e3a-4b6f-a1d4-92c5e7f8b103";
+                url = "https://grafana.mantannest.com";
+                container = 3;
+                workspace = homelabSpace;
+                position = 3;
+              };
               "c9d0e1f2-a3b4-4678-2345-789012345678" = {
                 id = "c9d0e1f2-a3b4-4678-2345-789012345678";
                 url = "https://uptime.test.mantannest.com";
                 container = 3;
                 workspace = homelabSpace;
-                position = 3;
+                position = 4;
+              };
+              "9a1e6c44-2b7f-4d8a-b5c9-1f3e7a2d6b80" = {
+                id = "9a1e6c44-2b7f-4d8a-b5c9-1f3e7a2d6b80";
+                url = "https://grafana.test.mantannest.com";
+                container = 3;
+                workspace = homelabSpace;
+                position = 5;
               };
             }
             # Admin space — homelab only
