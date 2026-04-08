@@ -106,18 +106,21 @@ This ID is consistent for a given Zen installation path. If you change the Zen a
 
 * Configuration Files
 
-The Zen Browser configuration is split across:
+The Zen Browser configuration is split across ~modules/home-manager/programs/zen/~:
 
-- ~modules/home-manager/programs/_zen.nix~ - Main browser configuration
-  - Policies (privacy, tracking protection, DNS-over-HTTPS)
-  - Profiles and extensions
-  - Browser settings (preferences)
-  - Search engines
+- ~default.nix~ - Main browser configuration and enterprise policies
+- ~settings.nix~ - Browser preferences, including compact-mode behavior
+- ~extensions.nix~ - Extensions and Zen Mods
+- ~search.nix~ - Search engines
+- ~containers.nix~ - Container tabs and workspace/container wiring
+- ~pins.nix~ - Declarative pinned tabs keyed by stable UUIDs
 
-- ~modules/home-manager/programs/_zen.nix~ (stylix section) - Theming
-  - Applies base16 colors to browser UI
-  - Configures fonts
-  - Manages CSS themes
+Theming is applied separately from the platform Stylix modules:
+
+- ~modules/nixos/_stylix.nix~ - Linux HM-targeted Zen theme overrides
+- ~modules/macos/_stylix.nix~ - Darwin HM-targeted Zen theme overrides
+
+Pinned tabs are arranged per container profile. In the homelab profile, the Homelab workspace currently pins the router, uptime, Grafana, uptime.test, and grafana.test. Compact mode now keeps the main toolbar visible while the tab bar stays collapsed, so workspace navigation remains available without fully expanding Zen's chrome.
 
 * Common Issues
 
