@@ -566,7 +566,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 | Program           | Notes                    |
 |-------------------+--------------------------|
-| ai_tools          | enabled; models: =codex=; tools: =opencode= |
+| ai_tools          | enabled; models: =codex=; tools: =codex=, =opencode= |
 | bitwarden-desktop | Password manager         |
 | element-desktop   | Matrix chat client       |
 | emacs             | Editor with LSP/Go tools |
@@ -576,6 +576,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | kitty             | Terminal emulator        |
 | neovim            | Editor                   |
 | oci-cli           | Oracle Cloud CLI         |
+| codex-cli         | OpenAI CLI + shared MCP  |
 | opencode          | AI coding assistant + shared MCP, package from unstable |
 | opentofu          | Infrastructure-as-code   |
 | stylix            | Theming                  |
@@ -603,7 +604,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 | Program           | Notes                    |
 |-------------------+--------------------------|
-| ai_tools          | enabled; models: =codex=; tools: =opencode= |
+| ai_tools          | enabled; models: =codex=; tools: =codex=, =opencode= |
 | bitwarden-desktop | Password manager         |
 | element-desktop   | Matrix chat client       |
 | emacs             | Editor with LSP/Go tools |
@@ -613,6 +614,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | kitty             | Terminal emulator        |
 | neovim            | Editor                   |
 | oci-cli           | Oracle Cloud CLI         |
+| codex-cli         | OpenAI CLI + shared MCP  |
 | opencode          | AI coding assistant + shared MCP, package from unstable |
 | opentofu          | Infrastructure-as-code   |
 | stylix            | Theming                  |
