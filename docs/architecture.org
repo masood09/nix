@@ -1,6 +1,6 @@
 #+TITLE: Repository Architecture
 #+AUTHOR: Masood Ahmed
-#+DATE: 2026-03-25
+#+DATE: 2026-04-07
 #+STARTUP: overview
 
 * Overview
@@ -21,6 +21,7 @@ machines/                          Per-machine configurations
   commrelay/                         NixOS server (Matrix, monitoring)
   watchfulsystem/                    NixOS server (monitoring, uptime)
   caretaker/                         NixOS server (DNS, Tailscale)
+  arrakis/                           NixOS desktop (primary laptop)
   commandmodule/                     NixOS desktop (laptop)
   sonic/                             NixOS desktop (laptop)
   murderbot/                         macOS (primary dev)
