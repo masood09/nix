@@ -27,7 +27,7 @@ in {
           listenAddress = lib.mkOption {
             default = "127.0.0.1";
             type = lib.types.str;
-            description = "Address for Vaultwarden to bind to.";
+            description = "Address for Vaultwarden to bind to. Defaults to loopback so a local reverse proxy can publish the service without exposing Vaultwarden directly.";
           };
 
           listenPort = lib.mkOption {
@@ -51,7 +51,7 @@ in {
           openFirewall = lib.mkOption {
             default = false;
             type = lib.types.bool;
-            description = "Whether to open the listen port in the firewall.";
+            description = "Whether to open the listen port in the firewall. Keep this disabled when Vaultwarden is only meant to be reachable through a local reverse proxy.";
           };
 
           oauth = {
