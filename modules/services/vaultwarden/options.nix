@@ -1,4 +1,4 @@
-# Options — Vaultwarden password manager (domain, port, ZFS).
+# Options — Vaultwarden password manager (domain, port, OAuth, ZFS).
 {
   config,
   lib,
@@ -55,6 +55,12 @@ in {
           };
 
           oauth = {
+            enable = lib.mkOption {
+              type = lib.types.bool;
+              default = false;
+              description = "Whether to enable OAuth/OIDC SSO for Vaultwarden.";
+            };
+
             providerHost = lib.mkOption {
               type = lib.types.str;
               default = "auth.${config.networking.domain}";
