@@ -292,7 +292,7 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 
 | Service     | Module Dir    | Purpose                                     |
 |-------------+---------------+---------------------------------------------|
-| Vaultwarden | vaultwarden/  | Bitwarden-compatible password manager (SSO) |
+| Vaultwarden | vaultwarden/  | Bitwarden-compatible password manager        |
 
 ** Media & Storage
 
