@@ -140,7 +140,7 @@ PipeWire replaces PulseAudio and ALSA with a unified daemon. Enabled when ~homel
 
 Stylix provides Base16 theming from a single source of truth at the system level (~modules/nixos/_stylix.nix~ on NixOS, ~modules/macos/_stylix.nix~ on Darwin). All settings are defined once under ~homelab.stylix.*~ and propagate to Home-Manager automatically via Stylix's ~autoImport~ (injects ~homeModules.stylix~ for every HM user) and ~followSystem~ (copies values with ~mkDefault~ priority).
 
-Enabled per-machine via ~homelab.stylix.enable = true~ in ~_config.nix~. Servers leave it disabled.
+Stylix is enabled by default for all machines. Override ~homelab.stylix.enable = false~ only when a host needs to opt out.
 
 | Setting    | Default                        | Notes                                |
 |------------+--------------------------------+--------------------------------------|
@@ -214,7 +214,7 @@ ananicy-cpp is an auto-nice daemon that adjusts process niceness, I/O priority, 
 
 * Boot
 
-ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix themes the GRUB menu with Base16 colors when ~homelab.stylix.enable = true~. Non-ZFS desktops (arrakis) use systemd-boot with systemd-based initrd and Plymouth. The boot sequence there is: systemd-boot → Plymouth splash (themed by Stylix) → LUKS passphrase (via Plymouth's password agent) → desktop session. If the machine is an unencrypted or ZFS desktop, greetd falls back to the normal greeter path instead. Kernel params ~quiet splash loglevel=3~ suppress console output so the splash is uninterrupted. Plymouth and systemd initrd are auto-enabled for any machine with ~role = "desktop"~ and ~isRootZFS = false~ (the ~isDesktopSystemdBoot~ guard in ~_boot.nix~).
+ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix themes the GRUB menu with Base16 colors by default. Non-ZFS desktops (arrakis) use systemd-boot with systemd-based initrd and Plymouth. The boot sequence there is: systemd-boot → Plymouth splash (themed by Stylix) → LUKS passphrase (via Plymouth's password agent) → desktop session. If the machine explicitly disables Stylix, the boot path remains the same but the Base16 theming pieces fall away. If the machine is an unencrypted or ZFS desktop, greetd falls back to the normal greeter path instead. Kernel params ~quiet splash loglevel=3~ suppress console output so the splash is uninterrupted. Plymouth and systemd initrd are auto-enabled for any machine with ~role = "desktop"~ and ~isRootZFS = false~ (the ~isDesktopSystemdBoot~ guard in ~_boot.nix~).
 
 * Pain Points
 

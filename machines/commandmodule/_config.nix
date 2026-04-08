@@ -40,7 +40,6 @@
       };
 
       stylix = {
-        enable = true;
         wallpaper = ../../nix/wallpapers/cosy-retreat-sunset.png;
       };
 
