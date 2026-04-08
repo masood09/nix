@@ -53,10 +53,10 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 
 | Module           | Package(s)                                                         | Purpose                            |
 |------------------+--------------------------------------------------------------------+------------------------------------|
-| _mcp.nix         | mcp-nixos (referenced via =lib.getExe=)                            | Shared MCP server registry         |
+| _mcp.nix         | mcp-nixos (referenced via =lib.getExe=)                              | Shared MCP server registry         |
 | _claude-code.nix | claude-code                                                        | Anthropic CLI via HM module        |
 | _codex-cli.nix   | codex, bubblewrap                                                  | OpenAI CLI via HM module           |
-| _opencode.nix    | opencode (from =nixpkgs-unstable=)                                 | opencode via HM module             |
+| _opencode.nix    | opencode (from =nixpkgs-unstable=)                                   | opencode via HM module             |
 | _emacs.nix       | emacs-pgtk, cmake, gcc, gnumake, libtool, gopls, nil, nodejs,      | Editor with LSP, Go tooling,       |
 |                  | gomodifytags, gore, gotests, html-tidy, jsbeautifier,              | formatters, tree-sitter grammars   |
 |                  | nixfmt-rfc-style, shellcheck, stylelint, multimarkdown, terraform, |                                    |
@@ -76,8 +76,8 @@ The =homelab.programs.ai_tools= selector uses enum-backed =tools= and =models= l
 
 *** Theming
 
-| Module      | Package(s)                                                                                          | Purpose                   |
-|-------------+-----------------------------------------------------------------------------------------------------+---------------------------|
+| Module      | Package(s)                                                                                                           | Purpose                   |
+|-------------+----------------------------------------------------------------------------------------------------------------------+---------------------------|
 | _stylix.nix | JetBrainsMono Nerd Font (monospace), Inter (sansSerif & serif), Bibata-Modern-Classic (cursor), Papirus-Dark (icons) | Base16 theming via Stylix |
 
 *** Applications
@@ -98,11 +98,11 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 
 **** Packages (unconditional)
 
-| Package            | Purpose                                    |
-|--------------------+--------------------------------------------|
-| wl-clipboard       | Wayland clipboard utilities                |
+| Package            | Purpose                                             |
+|--------------------+-----------------------------------------------------|
+| wl-clipboard       | Wayland clipboard utilities                         |
 | xwayland-satellite | XWayland support for Niri (started as user service) |
-| swayidle           | Before-sleep locking and idle management    |
+| swayidle           | Before-sleep locking and idle management            |
 
 **** Packages (=shell = "none"= only)
 
@@ -125,29 +125,29 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 
 **** Services (home-manager modules)
 
-| Service    | Condition          | Purpose                               |
-|------------+--------------------+---------------------------------------|
-| playerctld | unconditional      | MPRIS media player daemon             |
+| Service    | Condition      | Purpose                               |
+|------------+----------------+---------------------------------------|
+| playerctld | unconditional  | MPRIS media player daemon             |
 | swaync     | =shell = "none"= | Notification center (D-Bus activated) |
 | udiskie    | =shell = "none"= | Auto-mount removable media            |
 
 **** User Services (declared in HM module)
 
-| Service                      | Condition            | Purpose                                    |
-|------------------------------+----------------------+--------------------------------------------|
-| xwayland-satellite           | unconditional        | XWayland bridge for Niri                   |
-| swaybg                       | =shell = "none"=   | Wallpaper process                          |
-| swayidle                     | =shell = "none"=   | Idle timeouts, DPMS, and before-sleep lock |
-| swaylock                     | =shell = "none"=   | Lock on =lock.target= (loginctl)           |
-| noctalia-before-sleep-lock   | =shell = "noctalia"= | Before-sleep lock via Noctalia IPC         |
+| Service                    | Condition          | Purpose                                    |
+|----------------------------+--------------------+--------------------------------------------|
+| xwayland-satellite         | unconditional      | XWayland bridge for Niri                   |
+| swaybg                     | =shell = "none"=     | Wallpaper process                          |
+| swayidle                   | =shell = "none"=     | Idle timeouts, DPMS, and before-sleep lock |
+| swaylock                   | =shell = "none"=     | Lock on =lock.target= (loginctl)             |
+| noctalia-before-sleep-lock | =shell = "noctalia"= | Before-sleep lock via Noctalia IPC         |
 
 **** Output Configuration
 
-| Scope        | Output Key     | Purpose                                                         |
-|--------------+----------------+-----------------------------------------------------------------|
-| shared HM    | =lg-ultrafine= | Stable external monitor profile matched by LG monitor name       |
-| commandmodule | =eDP-1=       | Laptop panel placed to the right of the shared external monitor  |
-| sonic        | =eDP-1=        | Laptop panel placed to the right of the shared external monitor  |
+| Scope         | Output Key   | Purpose                                                         |
+|---------------+--------------+-----------------------------------------------------------------|
+| shared HM     | =lg-ultrafine= | Stable external monitor profile matched by LG monitor name      |
+| commandmodule | =eDP-1=        | Laptop panel placed to the right of the shared external monitor |
+| sonic         | =eDP-1=        | Laptop panel placed to the right of the shared external monitor |
 
 ** Desktop Role Packages (=role == "desktop"=)
 
@@ -290,9 +290,9 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 
 ** Passwords & Secrets
 
-| Service     | Module Dir    | Purpose                                     |
-|-------------+---------------+---------------------------------------------|
-| Vaultwarden | vaultwarden/  | Bitwarden-compatible password manager        |
+| Service     | Module Dir   | Purpose                               |
+|-------------+--------------+---------------------------------------|
+| Vaultwarden | vaultwarden/ | Bitwarden-compatible password manager |
 
 ** Media & Storage
 
@@ -564,23 +564,23 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 **** Programs
 
-| Program           | Notes                    |
-|-------------------+--------------------------|
-| ai_tools          | enabled; models: =codex=; tools: =codex=, =opencode= |
-| bitwarden-desktop | Password manager         |
-| element-desktop   | Matrix chat client       |
-| emacs             | Editor with LSP/Go tools |
-| fastfetch         | System info              |
-| fish              | Interactive shell        |
-| git               | Version control          |
-| kitty             | Terminal emulator        |
-| neovim            | Editor                   |
-| oci-cli           | Oracle Cloud CLI         |
-| codex-cli         | OpenAI CLI + shared MCP  |
-| opencode          | AI coding assistant + shared MCP, package from unstable |
-| opentofu          | Infrastructure-as-code   |
-| stylix            | Theming                  |
-| zen               | Web browser              |
+| Program           | Notes                                                                    |
+|-------------------+--------------------------------------------------------------------------|
+| ai_tools          | enabled; models: =claude-code=, =codex=; tools: =claude-code=, =codex=, =opencode= |
+| bitwarden-desktop | Password manager                                                         |
+| element-desktop   | Matrix chat client                                                       |
+| emacs             | Editor with LSP/Go tools                                                 |
+| fastfetch         | System info                                                              |
+| fish              | Interactive shell                                                        |
+| git               | Version control                                                          |
+| kitty             | Terminal emulator                                                        |
+| neovim            | Editor                                                                   |
+| oci-cli           | Oracle Cloud CLI                                                         |
+| codex-cli         | OpenAI CLI + shared MCP                                                  |
+| opencode          | AI coding assistant + shared MCP, package from unstable                  |
+| opentofu          | Infrastructure-as-code                                                   |
+| stylix            | Theming                                                                  |
+| zen               | Web browser                                                              |
 
 *** commandmodule
 
@@ -602,23 +602,23 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 **** Programs
 
-| Program           | Notes                    |
-|-------------------+--------------------------|
-| ai_tools          | enabled; models: =codex=; tools: =codex=, =opencode= |
-| bitwarden-desktop | Password manager         |
-| element-desktop   | Matrix chat client       |
-| emacs             | Editor with LSP/Go tools |
-| fastfetch         | zpools: rpool            |
-| fish              | Interactive shell        |
-| git               | Version control          |
-| kitty             | Terminal emulator        |
-| neovim            | Editor                   |
-| oci-cli           | Oracle Cloud CLI         |
-| codex-cli         | OpenAI CLI + shared MCP  |
-| opencode          | AI coding assistant + shared MCP, package from unstable |
-| opentofu          | Infrastructure-as-code   |
-| stylix            | Theming                  |
-| zen               | Web browser              |
+| Program           | Notes                                                                    |
+|-------------------+--------------------------------------------------------------------------|
+| ai_tools          | enabled; models: =claude-code=, =codex=; tools: =claude-code=, =codex=, =opencode= |
+| bitwarden-desktop | Password manager                                                         |
+| element-desktop   | Matrix chat client                                                       |
+| emacs             | Editor with LSP/Go tools                                                 |
+| fastfetch         | zpools: rpool                                                            |
+| fish              | Interactive shell                                                        |
+| git               | Version control                                                          |
+| kitty             | Terminal emulator                                                        |
+| neovim            | Editor                                                                   |
+| oci-cli           | Oracle Cloud CLI                                                         |
+| codex-cli         | OpenAI CLI + shared MCP                                                  |
+| opencode          | AI coding assistant + shared MCP, package from unstable                  |
+| opentofu          | Infrastructure-as-code                                                   |
+| stylix            | Theming                                                                  |
+| zen               | Web browser                                                              |
 
 *** sonic
 
@@ -660,19 +660,19 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 **** Programs (home-manager)
 
-| Program     | Notes                  |
-|-------------+------------------------|
-| ai_tools    | enabled; models: =codex=; tools: =opencode= |
-| emacs       | Editor                 |
-| element-desktop | Matrix chat client  |
-| fastfetch   | System info            |
-| git         | Version control        |
-| kitty       | Terminal emulator      |
-| neovim      | Editor                 |
-| oci-cli     | Oracle Cloud CLI       |
-| opencode    | AI coding assistant + shared MCP, package from unstable |
-| opentofu    | Infrastructure-as-code |
-| zen         | Web browser            |
+| Program         | Notes                                                   |
+|-----------------+---------------------------------------------------------|
+| ai_tools        | enabled; models: =codex=; tools: =opencode=                 |
+| emacs           | Editor                                                  |
+| element-desktop | Matrix chat client                                      |
+| fastfetch       | System info                                             |
+| git             | Version control                                         |
+| kitty           | Terminal emulator                                       |
+| neovim          | Editor                                                  |
+| oci-cli         | Oracle Cloud CLI                                        |
+| opencode        | AI coding assistant + shared MCP, package from unstable |
+| opentofu        | Infrastructure-as-code                                  |
+| zen             | Web browser                                             |
 
 **** Machine-Specific Homebrew Casks
 

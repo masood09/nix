@@ -49,12 +49,16 @@
       };
 
       programs = {
-        # Central AI registry: install opencode locally and expose Codex usage in
-        # Noctalia's model-usage widget.
+        # Central AI registry: install AI tools locally and expose Claude Code
+        # and Codex usage in Noctalia's model-usage widget.
         ai_tools = {
           enable = true;
-          models = ["codex"];
+          models = [
+            "claude-code"
+            "codex"
+          ];
           tools = [
+            "claude-code"
             "codex"
             "opencode"
           ];
