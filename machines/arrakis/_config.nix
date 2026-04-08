@@ -55,7 +55,10 @@
         ai_tools = {
           enable = true;
           models = ["codex"];
-          tools = ["opencode"];
+          tools = [
+            "codex"
+            "opencode"
+          ];
         };
         element-desktop = {
           enable = true;

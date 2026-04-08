@@ -4,7 +4,8 @@
 # desktop.shell == "noctalia". Settings are captured from the GUI via
 # IPC diff and declared here so Nix remains the source of truth.
 # Plugins: the model-usage bar widget (AI model provider stats) is
-# conditionally enabled when any supported AI model provider is selected.
+# conditionally enabled when a supported provider is selected and its backing
+# local data source is available.
 {
   homelabCfg,
   lib,
@@ -14,6 +15,7 @@
   shellIsNoctalia = ((homelabCfg.desktop.shell or "none") == "noctalia") && pkgs.stdenv.isLinux;
   aiToolsCfg = homelabCfg.programs.ai_tools;
   aiToolsEnabled = aiToolsCfg.enable or false;
+  hasAiTool = tool: aiToolsEnabled && lib.elem tool (aiToolsCfg.tools or []);
   # The widget is driven by provider selection, not installed CLIs. That lets a
   # machine expose usage for a provider even if the corresponding executable is
   # delivered some other way later, and keeps tool installation separate from UI
@@ -24,10 +26,13 @@
   # show a dead control.
   bluetoothEnabled = homelabCfg.hardware.bluetooth.enable or false;
   claudeModelEnabled = hasAiModel "claude-code";
-  # Noctalia's plugin exposes an `codex` provider toggle; keep `openai` as a
-  # higher-level machine-facing alias so configs can describe the vendor while
-  # still mapping cleanly onto the plugin's schema.
-  codexModelEnabled = hasAiModel "codex" || hasAiModel "openai";
+  # Noctalia's Codex provider reads local Codex CLI state from `~/.codex`, so
+  # only enable it when the machine selects the provider and actually installs
+  # the Codex tool. That keeps the widget from probing missing local files and
+  # spamming warnings on hosts that use opencode without Codex CLI. Keep
+  # `openai` as the higher-level machine-facing alias while still mapping onto
+  # the plugin's `codex` provider toggle.
+  codexModelEnabled = (hasAiModel "codex" || hasAiModel "openai") && hasAiTool "codex";
   openrouterModelEnabled = hasAiModel "openrouter";
   zenModelEnabled = hasAiModel "zen";
   copilotModelEnabled = hasAiModel "copilot";
