@@ -14,10 +14,6 @@
   homelab = {
     role = "desktop";
 
-    stylix = {
-      enable = true;
-    };
-
     networking = {
       hostName = "work-pantheon";
     };

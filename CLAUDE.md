@@ -74,7 +74,7 @@ homelab = {
 - Single source of truth at system level: `modules/nixos/_stylix.nix` (NixOS), `modules/macos/_stylix.nix` (Darwin)
 - All settings (`homelab.stylix.*`) propagate to Home-Manager via Stylix's `autoImport` + `followSystem`
 - HM-only target overrides (starship, waybar, zen-browser) are injected via `home-manager.sharedModules` in the system module
-- Servers don't enable Stylix — the HM module is only auto-imported when `homelab.stylix.enable = true`
+- Stylix is enabled by default on all machines; set `homelab.stylix.enable = false` only for an explicit opt-out
 - Darwin Stylix does not support `stylix.cursor` (no cursor module in `darwinModules`)
 
 ### File Naming Convention

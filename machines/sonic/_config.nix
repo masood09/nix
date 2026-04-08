@@ -47,7 +47,6 @@
       };
 
       stylix = {
-        enable = true;
         scheme = ../../nix/themes/sonic-dark.yaml;
         polarity = "dark";
         wallpaper = ../../nix/wallpapers/sonic-the-hedgehog-3840x2160.jpg;

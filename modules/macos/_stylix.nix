@@ -15,11 +15,21 @@ in {
   options = {
     homelab = {
       stylix = {
-        enable = lib.mkEnableOption "Stylix Base16 theming (system + home-manager)";
+        enable = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = ''
+            Stylix Base16 theming (system + home-manager). Enabled by default;
+            set to false to opt a machine out.
+          '';
+        };
 
         polarity = lib.mkOption {
           default = "dark";
-          type = lib.types.enum ["dark" "light"];
+          type = lib.types.enum [
+            "dark"
+            "light"
+          ];
           description = ''
             Theme polarity (dark or light mode).
           '';
