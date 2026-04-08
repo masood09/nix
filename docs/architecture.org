@@ -10,7 +10,7 @@ Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 
 * Repository Layout
 
 #+begin_example
-flake.nix                          Entry point — inputs, mkNixOSConfig, mkDarwinConfig
+flake.nix                          Entry point — inputs, mkNixOSConfig (server-safe), mkDarwinConfig
 flake.lock                         Pinned dependency versions
 
 machines/                          Per-machine configurations

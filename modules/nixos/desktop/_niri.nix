@@ -27,7 +27,7 @@ in {
         enable = true;
       };
       # Package provided by niri-flake's NixOS module (inputs.niri.nixosModules.niri
-      # in flake.nix); no explicit `package` needed here.
+      # imported per desktop machine); no explicit `package` needed here.
       niri = {
         enable = true;
       };
