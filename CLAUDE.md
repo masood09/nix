@@ -10,7 +10,7 @@ Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 
 
 ```bash
 just deploy                          # Deploy to current machine (runs preflight first)
-just deploy machine=heartbeat        # Build and deploy on remote machine via SSH
+just machine=heartbeat deploy        # Build and deploy on remote machine via SSH
 just preflight                       # Check formatting + lint (no auto-fix)
 just up                              # Update flake.lock
 just lint                            # Check with statix

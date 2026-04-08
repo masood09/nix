@@ -2,8 +2,13 @@ default:
     just --list
 
 user := 'masoodahmed'
+# Override on CLI to deploy remotely: just machine=heartbeat deploy
+machine := ''
 
-deploy machine='': preflight
+# Build and activate the system configuration.
+# Local: rebuilds the current machine (Darwin or NixOS).
+# Remote: builds on and deploys to the target machine via SSH.
+deploy: preflight
     @if [ "$(uname)" = "Darwin" ] && [ -z "{{ machine }}" ]; then \
       sudo darwin-rebuild switch --flake .; \
     elif [ -z "{{ machine }}" ]; then \
