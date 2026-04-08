@@ -80,17 +80,6 @@ in {
             '';
           };
 
-          "passwords.${config.networking.domain}" = {
-            useACMEHost = config.networking.domain;
-            extraConfig = ''
-              # Block Vaultwarden admin panel from external access
-              @admin path /admin /admin/*
-              respond @admin 403
-
-              reverse_proxy http://100.64.0.21:8222
-            '';
-          };
-
           "nightscout.${config.networking.domain}" = {
             useACMEHost = config.networking.domain;
             extraConfig = ''

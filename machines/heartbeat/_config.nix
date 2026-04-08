@@ -13,7 +13,11 @@
 
       programs = {
         fastfetch = {
-          zpools = ["rpool" "fpool" "dpool"];
+          zpools = [
+            "rpool"
+            "fpool"
+            "dpool"
+          ];
         };
       };
 
@@ -202,8 +206,6 @@
 
         vaultwarden = {
           enable = true;
-          listenAddress = "0.0.0.0";
-          openFirewall = true;
 
           zfs = {
             enable = true;

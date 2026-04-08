@@ -446,7 +446,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | PostgreSQL                | ZFS, TCP/IP enabled, backed up                    |
 | Prometheus                | ZFS-backed metrics                                |
 | Tailscale                 | ZFS state                                         |
-| Vaultwarden               | ZFS, open firewall                                |
+| Vaultwarden               | ZFS, loopback-only behind local Caddy             |
 
 **** Programs
 
