@@ -25,7 +25,7 @@ lint:
     statix check .
 
 fmt:
-    nix fmt
+    nix fmt .
 
 gc age='7d':
     sudo nix-collect-garbage --delete-older-than {{ age }} && nix-collect-garbage --delete-older-than {{ age }}
