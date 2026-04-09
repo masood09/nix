@@ -53,8 +53,13 @@
     then "${config.programs.niri.package}/bin/niri"
     else null;
   # Use the Home Manager package path directly so user services don't depend on
-  # PATH or /run/current-system.
-  noctaliaShellBin = lib.getExe config.programs.noctalia-shell.package;
+  # PATH or /run/current-system. Guarded: the noctalia HM module is only
+  # imported on desktop machines, so the option may be absent on servers.
+  hasNoctaliaOption = options.programs ? noctalia-shell;
+  noctaliaShellBin =
+    if hasNoctaliaOption
+    then lib.getExe config.programs.noctalia-shell.package
+    else null;
 in {
   imports = [
     ./_noctalia.nix
