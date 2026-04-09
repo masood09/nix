@@ -24,6 +24,10 @@ just sops-rotate                     # Rotate all sops keys (requires clean git)
 just sops-update                     # Update sops key files (interactive)
 ```
 
+## Deployment
+
+After making config changes, stop at preflight (`just preflight`, or `nix fmt --check` + `statix check`). Do not run `just deploy`, `darwin-rebuild switch`, or `nixos-rebuild switch` — the user runs activation themselves so they can watch the output and decide when to apply. Only run a deploy command if the user explicitly asks.
+
 ## Architecture
 
 ### Flake Structure
@@ -111,6 +115,17 @@ homelab = {
 - Immutable users (mutableUsers = false, passwords via sops)
 - disko for declarative disk management
 
+### Darwin / Homebrew Policy
+
+Long-term direction on macOS machines (`murderbot`, `work-pantheon`) is to phase out Homebrew casks and `masApps` in favor of nixpkgs / Home Manager. Homebrew is a fallback for packages that don't yet build cleanly on Darwin via nixpkgs, not a permanent choice.
+
+- For new Darwin packages, default to nixpkgs/HM. Only fall back to Homebrew when there's a concrete blocker.
+- When falling back to a cask, leave a `TECH DEBT:` comment near the cask entry explaining what's blocking the nixpkgs route, and re-evaluate periodically.
+- When a Darwin build breaks and the easy fix is "just use the cask," frame it as tech debt rather than the preferred solution.
+
+**Known exceptions** are tracked inline at the cask entry and in `docs/desktop.org`. Current entries:
+- `element` cask in `machines/murderbot/_packages.nix` — nixpkgs `element-desktop` fails to build on Darwin (electron-builder/actool issue). HM `programs.element-desktop` is disabled on murderbot until upstream is fixed. See the "Element on Darwin (tech debt)" section in `docs/desktop.org` for the full diagnosis and the inline `TECH DEBT:` comment in `_packages.nix` for the in-file note.
+
 ### Service Registry
 Before adding services, check `docs/service-registry.org` for:
 - Service user UIDs (start at 3000)
@@ -123,6 +138,18 @@ Before adding services, check `docs/service-registry.org` for:
 - Use `lib/persistence-helpers.nix` for impermanence bind-mounts
 - Use `lib/systemd-helpers.nix` for permission-fixing oneshot services
 - Use `lib/zfs-options.nix` for ZFS dataset options
+
+## Research & Tool Routing
+
+When the user describes a problem, pick the right tool yourself — they shouldn't have to name it. Rough routing for Nix work in this repo:
+
+- **Option schema / type / default / which channel** → `mcp__nixos__*` (`darwin_search`, `home_manager_options_by_prefix`, `nixos_info`, etc.). Authoritative for the channels pinned in this flake.
+- **Package version availability / nixpkgs commit lookup** → `mcp__nixos__nixhub_package_versions` / `nixhub_find_version`.
+- **Idiomatic example, manual prose, third-party flake usage patterns** → `context7` (`resolve-library-id` then `get-library-docs` with a `topic` filter — never call `get-library-docs` without a topic).
+- **Anything in this repo** → `Read` / `Grep` / `Glob`, no MCP.
+- **Fast-moving flake inputs** (niri, noctalia, mcp-servers-nix, claude-code, codex-cli-nix, zen-browser, betterfox) → `WebFetch` the upstream repo, since context7's cache may lag the flake input.
+
+Combine sources when useful: nixos MCP for the exact option name, then context7 for an example of how to use it. Don't narrate routing decisions unless they matter.
 
 ## Key Dependencies
 
