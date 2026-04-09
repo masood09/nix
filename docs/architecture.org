@@ -101,6 +101,7 @@ flake.nix
   |     +-- _disks.nix                   Disko disk layouts
   |     +-- _nixpkgs.nix                Nixpkgs settings
   |     +-- _auto-update.nix            Automatic system updates
+  |     +-- _gc.nix                     Weekly nix-collect-garbage (Sun 06:00, 14d)
   |     +-- _reboot-required-check.nix  Reboot notification
   |     +-- _remote-unlock.nix          Initrd SSH for encrypted disk unlock
   |     +-- zfs/                         ZFS dataset provisioning
