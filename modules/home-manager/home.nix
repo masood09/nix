@@ -19,7 +19,8 @@
 in {
   # Servers have no D-Bus session, so dconf writes (e.g. Stylix GTK/cursor
   # themes) fail with "ca.desrt.dconf was not provided by any .service files".
-  dconf = {
+  # Darwin has no dconf at all, so disable there too.
+  dconf = lib.mkIf pkgs.stdenv.isLinux {
     enable = lib.mkDefault (homelabCfg.role == "desktop");
   };
   imports = [
@@ -57,7 +58,9 @@ in {
   # Linux desktops only — skipped on macOS (xdg-user-dirs is freedesktop-only)
   # and servers (no interactive desktop session).
   xdg = {
-    configFile = lib.mkIf stylixEnabled {
+    # Fontconfig is freedesktop-only — macOS uses Core Text, so this file is
+    # dead config there. Gate by isLinux to keep the Darwin home clean.
+    configFile = lib.mkIf (stylixEnabled && pkgs.stdenv.isLinux) {
       "fontconfig/conf.d/60-nerd-font-override.conf" = {
         text = ''
           <?xml version="1.0"?>
