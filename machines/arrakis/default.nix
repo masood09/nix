@@ -8,11 +8,19 @@
     ./_networking.nix
     ./_secrets.nix
 
+    # Desktop-only flake modules kept out of mkNixOSConfig to avoid pulling
+    # heavyweight packages (niri, quickshell) into server closures.
     inputs.niri.nixosModules.niri
 
     ./../../modules/nixos
     ./../../modules/home-manager
   ];
+
+  home-manager = {
+    sharedModules = [
+      inputs.noctalia.homeModules.default
+    ];
+  };
 
   homelab = {
     disks = {

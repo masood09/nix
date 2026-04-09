@@ -130,7 +130,8 @@ Before adding services, check `docs/service-registry.org` for:
 - nix-darwin: `nix-darwin-25.11`
 - stylix: `release-25.11`
 - niri: `sodiboo/niri-flake` (declarative Niri compositor config + Stylix integration; NixOS module imported per desktop machine, not in `mkNixOSConfig`, to avoid pulling niri into server closures)
-- Other inputs: disko, impermanence, sops-nix, nix-homebrew, authentik-nix, headplane, claude-code, codex-cli-nix, zen-browser, betterfox, noctalia
+- noctalia: `noctalia-dev/noctalia-shell` (desktop shell; HM module imported per desktop machine via `home-manager.sharedModules`, not in shared `home.nix`, because the flake wrapper unconditionally sets a default package via `mkDefault`)
+- Other inputs: disko, impermanence, sops-nix, nix-homebrew, authentik-nix, headplane, claude-code, codex-cli-nix, zen-browser, betterfox
 
 ## Machines
 

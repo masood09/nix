@@ -1,18 +1,24 @@
 # Noctalia desktop shell (home-manager side) — enables the HM module,
-# declares settings, and manages the plugin registry. The HM module is
-# imported in home.nix; this file activates and configures it when
-# desktop.shell == "noctalia". Settings are captured from the GUI via
-# IPC diff and declared here so Nix remains the source of truth.
+# declares settings, and manages the plugin registry. The noctalia HM
+# module is imported per desktop machine (not in the shared home.nix);
+# this file activates and configures it when desktop.shell == "noctalia".
+# Settings are captured from the GUI via IPC diff and declared here so
+# Nix remains the source of truth.
 # Plugins: the model-usage bar widget (AI model provider stats) is
 # conditionally enabled when a supported provider is selected and its backing
 # local data source is available.
 {
   homelabCfg,
   lib,
+  options,
   pkgs,
   ...
 }: let
-  shellIsNoctalia = ((homelabCfg.desktop.shell or "none") == "noctalia") && pkgs.stdenv.isLinux;
+  # Guard against machines where the noctalia HM module is not imported
+  # (servers, macOS). The flake wrapper is only added via sharedModules
+  # on desktop machines, so the option namespace may be absent.
+  hasNoctaliaOption = options.programs ? noctalia-shell;
+  shellIsNoctalia = hasNoctaliaOption && ((homelabCfg.desktop.shell or "none") == "noctalia") && pkgs.stdenv.isLinux;
   aiToolsCfg = homelabCfg.programs.ai_tools;
   aiToolsEnabled = aiToolsCfg.enable or false;
   hasAiTool = tool: aiToolsEnabled && lib.elem tool (aiToolsCfg.tools or []);
@@ -43,7 +49,7 @@
     || zenModelEnabled
     || copilotModelEnabled;
 in {
-  config = lib.mkIf shellIsNoctalia {
+  config = lib.mkIf shellIsNoctalia (lib.optionalAttrs hasNoctaliaOption {
     programs = {
       noctalia-shell = {
         enable = true;
@@ -313,5 +319,5 @@ in {
         };
       };
     };
-  };
+  });
 }

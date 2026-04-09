@@ -26,8 +26,10 @@ in {
     ./programs
     # Zen browser home-manager module (beta variant)
     inputs.zen-browser.homeModules.beta
-    # Noctalia desktop shell home-manager module
-    inputs.noctalia.homeModules.default
+    # Noctalia HM module is imported per desktop machine (not here) because
+    # its flake wrapper unconditionally sets programs.noctalia-shell.package
+    # via mkDefault, which forces the noctalia/quickshell build into every
+    # machine closure even when the shell is never enabled.
   ];
 
   home = {

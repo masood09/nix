@@ -119,8 +119,9 @@
     # Shared NixOS configuration builder. Each machine provides its own
     # path (e.g. ./machines/heartbeat) which is appended to the common
     # module list containing disko, sops, home-manager, etc.
-    # Desktop-only flake modules (niri) are imported per-machine instead
-    # of here to avoid pulling heavyweight packages into server closures.
+    # Desktop-only flake modules (niri, noctalia) are imported per-machine
+    # instead of here to avoid pulling heavyweight packages into server
+    # closures.
     mkNixOSConfig = path:
       nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
