@@ -28,7 +28,7 @@ Use this file as the fast-start guide for coding agents working in `/home/masood
 
 ## Build, Lint, And Validation Commands
 
-Primary commands live in `.justfile`.
+Primary commands live in `justfile`.
 
 - List available tasks: `just`
 - Format repo: `just fmt`

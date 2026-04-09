@@ -4,6 +4,9 @@ default:
 user := 'masoodahmed'
 # Override on CLI to deploy remotely: just machine=heartbeat deploy
 machine := ''
+# Wrapper that enables experimental features regardless of system nix.conf
+# (some Determinate-based Darwin installs don't have them on by default)
+nix := "nix --extra-experimental-features 'nix-command flakes'"
 
 # Build and activate the system configuration.
 # Local: rebuilds the current machine (Darwin or NixOS).
@@ -20,17 +23,17 @@ deploy: preflight
 # Pre-flight checks — run before deploy to catch formatting and lint errors early
 preflight:
     @echo "Running pre-flight checks..."
-    @nix fmt -- --check .
+    @{{ nix }} fmt -- --check .
     @just lint
 
 up:
-    nix flake update
+    {{ nix }} flake update
 
 lint:
     statix check .
 
 fmt:
-    nix fmt .
+    {{ nix }} fmt .
 
 gc age='7d':
     sudo nix-collect-garbage --delete-older-than {{ age }} && nix-collect-garbage --delete-older-than {{ age }}
@@ -50,4 +53,4 @@ sops-update:
     find . -name "*.sops.yaml" -type f ! -name ".sops.yaml" -exec sops updatekeys {} \;
 
 build-iso:
-    nix build .#nixosConfigurations.nixiso.config.system.build.isoImage
+    {{ nix }} build .#nixosConfigurations.nixiso.config.system.build.isoImage
