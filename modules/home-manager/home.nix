@@ -27,6 +27,12 @@ in {
     ./programs
     # Zen browser home-manager module (beta variant)
     inputs.zen-browser.homeModules.beta
+    # MCP server bridge — translates `mcp-servers.programs.<name>.enable`
+    # declarations in `programs/_mcp.nix` into entries under
+    # `programs.mcp.servers`. Imported unconditionally; the registry itself
+    # is gated on `homelab.programs.ai_tools` inside `_mcp.nix`, so this
+    # contributes nothing to closures on machines without AI tooling.
+    inputs.mcp-servers-nix.homeManagerModules.default
     # Noctalia HM module is imported per desktop machine (not here) because
     # its flake wrapper unconditionally sets programs.noctalia-shell.package
     # via mkDefault, which forces the noctalia/quickshell build into every

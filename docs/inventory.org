@@ -53,7 +53,7 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 
 | Module           | Package(s)                                                         | Purpose                            |
 |------------------+--------------------------------------------------------------------+------------------------------------|
-| _mcp.nix         | mcp-nixos (referenced via =lib.getExe=)                              | Shared MCP server registry         |
+| _mcp.nix         | mcp-nixos, context7-mcp (via =mcp-servers-nix=, gated on =ai_tools=) | Shared MCP server registry         |
 | _claude-code.nix | claude-code                                                        | Anthropic CLI via HM module        |
 | _codex-cli.nix   | codex, bubblewrap                                                  | OpenAI CLI via HM module           |
 | _opencode.nix    | opencode (from =nixpkgs-unstable=)                                   | opencode via HM module             |
@@ -66,6 +66,8 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 | _neovim.nix      | neovim                                                             | Editor (vi/vim aliases)            |
 
 The =homelab.programs.ai_tools= selector uses enum-backed =tools= and =models= lists. =tools= controls CLI installation (currently =claude-code=, =codex=, =opencode=) while =models= controls provider visibility in Noctalia's =model-usage= plugin (currently =claude-code=, =codex=, =openai=, =copilot=, =openrouter=, =zen=).
+
+The shared MCP registry in =_mcp.nix= is gated on the same =ai_tools= selector: when no AI CLI is enabled, =programs.mcp= stays disabled and neither =mcp-nixos= nor =context7-mcp= enters the closure. Declarative server entries (via =mcp-servers-nix='s HM bridge) and the manual =nixos= entry both write into =programs.mcp.servers=, which =_claude-code.nix=, =_codex-cli.nix=, and =_opencode.nix= consume.
 
 *** Cloud & Infrastructure
 

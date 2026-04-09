@@ -69,6 +69,17 @@
       url = "github:sadjow/codex-cli-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Declarative MCP server registry. Provides per-server modules
+    # (context7, filesystem, playwright, …) and a Home Manager bridge module
+    # that translates `mcp-servers.programs.<name>.enable` into entries
+    # under `programs.mcp.servers`. The bridge is imported in
+    # `modules/home-manager/home.nix` and consumed by `_mcp.nix`. Gated on
+    # `homelab.programs.ai_tools` so server closures stay free of MCP
+    # packages.
+    mcp-servers-nix = {
+      url = "github:natsukium/mcp-servers-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs = {
