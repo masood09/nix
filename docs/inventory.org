@@ -664,7 +664,6 @@ Defined in =nix/pkgs/= and auto-discovered.
 |-----------------+---------------------------------------------------------|
 | ai_tools        | enabled; models: =codex=; tools: =opencode=                 |
 | emacs           | Editor                                                  |
-| element-desktop | Matrix chat client                                      |
 | fastfetch       | System info                                             |
 | git             | Version control                                         |
 | kitty           | Terminal emulator                                       |
@@ -681,6 +680,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | balenaetcher   | USB/SD card image flasher              |
 | discord        | Chat client                            |
 | docker-desktop | Container runtime (GUI)                |
+| element        | Matrix chat client (tech debt; nixpkgs build broken on Darwin — see docs/desktop.org) |
 | opencloud      | File sync client                       |
 | pgadmin4       | PostgreSQL admin GUI                   |
 | zoom           | Video conferencing                     |
