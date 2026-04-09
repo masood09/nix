@@ -17,6 +17,7 @@ just lint                            # Check with statix
 just fmt                             # Format with alejandra
 just gc                              # Garbage collect (default: 7d retention)
 just gc age=30d                      # Garbage collect with custom retention
+                                     # (automatic GC also runs Sun 06:00 with 14d retention — see modules/nixos/_gc.nix)
 just repair                          # Verify and repair nix store
 just build-iso                       # Build NixOS installer ISO
 just sops-rotate                     # Rotate all sops keys (requires clean git)

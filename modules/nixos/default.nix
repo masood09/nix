@@ -14,6 +14,7 @@
     ./_auto-update.nix
     ./_boot.nix
     ./_disks.nix
+    ./_gc.nix
     ./_impermanence.nix
     ./_networking.nix
     ./_nixpkgs.nix
@@ -60,6 +61,8 @@
       enable = true;
     };
 
+    # Core nix daemon settings. Automatic garbage collection lives in the
+    # sibling `_gc.nix` module to keep the schedule isolated from cache config.
     nix = {
       settings = {
         experimental-features = "nix-command flakes";
