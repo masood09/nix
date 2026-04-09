@@ -26,9 +26,13 @@
         models = ["codex"];
         tools = ["opencode"];
       };
-      element-desktop = {
-        enable = true;
-      };
+      # element-desktop disabled on Darwin — provided by the Homebrew `element`
+      # cask in ./_packages.nix as a temporary workaround. See that file for the
+      # tech-debt note (nixpkgs build is broken on Darwin). Re-enable here once
+      # the cask is dropped.
+      # element-desktop = {
+      #   enable = true;
+      # };
       emacs = {
         enable = true;
       };
