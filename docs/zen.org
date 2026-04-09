@@ -1,170 +1,163 @@
 #+TITLE: Zen Browser Configuration & Troubleshooting
 #+AUTHOR: Masood Ahmed
-#+DATE: 2026-03-22
+#+DATE: 2026-04-09
 
 * Overview
 
-Zen Browser is configured via home-manager with Stylix theming, privacy settings, and custom extensions. This document covers common issues and how to reset the browser profile.
+Zen Browser is configured via home-manager with Stylix theming, privacy
+settings, custom extensions, declarative containers, spaces and pinned tabs.
+This document covers the architecture, the macOS profile-pinning workaround,
+and the most common operational gotchas.
 
 * Architecture
 
-** Profile Management
+** Profile management
 
-Zen Browser uses two key files to manage profiles:
+Zen (a Firefox fork) uses two files to decide which profile to load:
 
-1. ~profiles.ini~ - Lists available profiles and which one is default (managed by home-manager)
-2. ~installs.ini~ - Maps Zen installations to specific profiles (created by Zen on first launch)
+1. ~profiles.ini~ — lists available profiles and which one is the default.
+   Home Manager owns this file (symlinked into the nix store).
+2. ~installs.ini~ — pins a specific profile to a specific installation hash.
+   Created and rewritten by Zen itself on every launch.
 
-** The Problem
+When both files exist, modern Firefox/Zen prefers ~installs.ini~ over
+~profiles.ini~ — this is the per-installation profile feature that was added
+to Firefox to keep multiple installs from sharing state.  For a Home
+Manager-managed Zen this is exactly the wrong behaviour: HM declares the
+~default~ profile in ~profiles.ini~, but Zen quietly creates and pins its own
+auto-named profile (e.g. ~3pav4xio.Default (release)~) via ~installs.ini~ on
+first launch and ignores the declared one.
 
-When you rebuild nix-darwin:
-- home-manager creates ~profiles.ini~ pointing to ~Profiles/default~
-- home-manager via Stylix creates theme files in ~Profiles/default~
-- When Zen launches for the first time, it creates its own profile (e.g., ~dxo5exh8.Default (release)~)
-- Zen creates ~installs.ini~ pointing to its new profile, NOT the home-manager one
-- This mismatch causes: "Your Zen profile cannot be loaded. It may be missing or inaccessible."
+The user-visible symptom is the error "Your Zen profile cannot be loaded.
+It may be missing or inaccessible." — typically after a brew→nix migration or
+after the Zen binary path changes (which invalidates the install hash).
 
-** The Solution
+** The fix: ~MOZ_LEGACY_PROFILES=1~
 
-The ~installs.ini~ file must point to ~Profiles/default~ to match home-manager's configuration.
+Setting ~MOZ_LEGACY_PROFILES=1~ in Zen's environment makes it behave like
+older Firefox versions did: skip ~installs.ini~ entirely and use the default
+profile from ~profiles.ini~.  This is the upstream-recommended workaround
+tracked in [[https://github.com/0xc000022070/zen-browser-flake/issues/63][zen-browser-flake#63]].
 
-* Clearing Zen and Starting Fresh
+The variable is set in two places, both in
+~modules/home-manager/programs/zen/default.nix~:
 
-** Complete Reset Command
+1. ~home.sessionVariables.MOZ_LEGACY_PROFILES = "1"~ — covers Zen launched
+   from a shell (Linux desktops, terminal launches on macOS).
+2. A Darwin-only LaunchAgent (~launchd.agents.moz-legacy-profiles~) that
+   runs ~launchctl setenv MOZ_LEGACY_PROFILES 1~ at user login — covers Zen
+   launched from Spotlight, Finder, or the Dock on macOS.
 
-#+begin_src bash
-# 1. Kill all Zen processes
-pkill -9 "Zen Browser" 2>/dev/null || true
+The second piece is necessary because **macOS GUI apps inherit their
+environment from launchd, not from the user's shell**.  ~home.sessionVariables~
+on its own only reaches shell sessions; GUI launches see whatever is in the
+launchd context, which is set by ~launchctl setenv~.
 
-# 2. Remove all Zen data
-rm -rf "$HOME/Library/Application Support/Zen" \
-       "$HOME/Library/Caches/Zen" \
-       "$HOME/Library/Preferences/org.mozilla.zen."*
+* Configuration files
 
-# 3. Rebuild nix-darwin
-just deploy
+Zen browser configuration is split across ~modules/home-manager/programs/zen/~:
 
-# 4. Create installs.ini before launching Zen
-cat > "$HOME/Library/Application Support/Zen/installs.ini" << 'EOF'
-[86B0D1EEB84199DD]
-Default=Profiles/default
-Locked=1
-EOF
-
-# 5. Launch Zen
-open -a "Zen Browser (Beta)"
-#+end_src
-
-** What Each Step Does
-
-1. *Kill Zen* - Ensures no processes are holding files open
-2. *Remove data* - Deletes all profiles, caches, and preferences
-3. *Rebuild* - home-manager recreates the profile structure with your config
-4. *Create installs.ini* - Tells Zen to use the home-manager managed profile
-5. *Launch* - Zen starts with the correct profile
-
-* Making It Reproducible
-
-To make this fully declarative, add ~installs.ini~ to your home-manager configuration:
-
-#+begin_src nix
-# In modules/home-manager/programs/_zen.nix
-
-home = {
-  file = {
-    "Library/Application Support/Zen/installs.ini" = {
-      text = ''
-        [86B0D1EEB84199DD]
-        Default=Profiles/default
-        Locked=1
-      '';
-    };
-  };
-};
-#+end_src
-
-This ensures that ~installs.ini~ always points to the correct profile, even after a clean rebuild.
-
-* Understanding the Installation ID
-
-The installation ID (~86B0D1EEB84199DD~) is a unique identifier for your Zen Browser installation. It's used to:
-- Track which profile belongs to which installation (important if you have multiple Zen versions)
-- Prevent profile conflicts between different installations
-
-This ID is consistent for a given Zen installation path. If you change the Zen app location, you might need a new ID.
-
-* File Locations
-
-| File                                                    | Purpose                          | Managed By   |
-|---------------------------------------------------------+----------------------------------+--------------|
-| ~Library/Application Support/Zen/profiles.ini~         | Profile list and default         | home-manager |
-| ~Library/Application Support/Zen/installs.ini~         | Installation to profile mapping  | Manual/Zen   |
-| ~Library/Application Support/Zen/Profiles/default/~    | Profile data and settings        | home-manager |
-| ~Library/Application Support/Zen/Profiles/default/user.js~ | Firefox prefs (symlink)      | home-manager |
-| ~Library/Caches/Zen/~                                  | Browser cache                    | Zen          |
-| ~Library/Preferences/org.mozilla.zen.*~                | macOS preferences                | Zen          |
-
-* Configuration Files
-
-The Zen Browser configuration is split across ~modules/home-manager/programs/zen/~:
-
-- ~default.nix~ - Main browser configuration and enterprise policies
-- ~settings.nix~ - Browser preferences, including compact-mode behavior
-- ~extensions.nix~ - Extensions and Zen Mods
-- ~search.nix~ - Search engines
-- ~containers.nix~ - Container tabs and workspace/container wiring
-- ~pins.nix~ - Declarative pinned tabs keyed by stable UUIDs
+| File             | Responsibility                                       |
+|------------------+------------------------------------------------------|
+| ~default.nix~    | Module entry point, enterprise policies, Betterfox  |
+|                  | profile, ~MOZ_LEGACY_PROFILES~ workaround           |
+| ~settings.nix~   | Browser preferences (compact-mode behaviour, etc.)  |
+| ~extensions.nix~ | Extensions and Zen Mods                             |
+| ~search.nix~     | Search engines                                      |
+| ~containers.nix~ | Container tabs and Zen spaces                       |
+| ~pins.nix~       | Declarative pinned tabs keyed by stable UUIDs       |
 
 Theming is applied separately from the platform Stylix modules:
 
-- ~modules/nixos/_stylix.nix~ - Linux HM-targeted Zen theme overrides
-- ~modules/macos/_stylix.nix~ - Darwin HM-targeted Zen theme overrides
+- ~modules/nixos/_stylix.nix~ — Linux HM-targeted Zen theme overrides
+- ~modules/macos/_stylix.nix~ — Darwin HM-targeted Zen theme overrides
 
-Pinned tabs are arranged per container profile. In the homelab profile, the Homelab workspace currently pins the router, uptime, Grafana, uptime.test, and grafana.test. Compact mode now keeps the main toolbar visible while the tab bar stays collapsed, so workspace navigation remains available without fully expanding Zen's chrome.
+* On-disk file locations (macOS)
 
-* Common Issues
+| File                                                              | Purpose                                  | Managed by               |
+|-------------------------------------------------------------------+------------------------------------------+--------------------------|
+| ~Library/Application Support/Zen/profiles.ini~                   | Profile list and default                 | home-manager (symlink)   |
+| ~Library/Application Support/Zen/installs.ini~                   | Per-install profile pin                  | Zen — *ignored* with ~MOZ_LEGACY_PROFILES=1~ |
+| ~Library/Application Support/Zen/Profiles/default/~              | Profile data                             | home-manager + Zen       |
+| ~Library/Application Support/Zen/Profiles/default/containers.json~ | Container definitions                  | home-manager (symlink)   |
+| ~Library/Application Support/Zen/Profiles/default/zen-sessions.jsonlz4~ | Spaces, pinned tabs, session state | home-manager activation script (merge) |
+| ~Library/Caches/Zen/~                                            | Browser cache                            | Zen                      |
+| ~Library/Preferences/app.zen-browser.zen.plist~                  | macOS preferences                        | Zen                      |
 
-** "Profile cannot be loaded" Error
+The Linux equivalent lives under ~$XDG_CONFIG_HOME/zen/~.
 
-*Cause:* Mismatch between ~installs.ini~ and ~profiles.ini~
+* Operational gotchas
 
-*Solution:* Run the complete reset command above
+** Quit Zen before rebuilding
 
-** Extensions Not Loading
+Spaces and pins are written by an *activation script* in the upstream
+zen-browser-flake (~hm-module/places.nix~) that merges declared spaces/pins
+into ~zen-sessions.jsonlz4~ via ~mozlz4a~ + ~jq~.  The script refuses to
+touch the file if Zen is currently running:
 
-*Cause:* NUR might not be available in your nixpkgs overlay
-
-*Solution:* Check that NUR is configured in ~flake.nix~
-
-** Settings Not Applying
-
-*Cause:* Zen might be using the wrong profile
-
-*Solution:* Verify ~installs.ini~ points to ~Profiles/default~:
-
-#+begin_src bash
-cat "$HOME/Library/Application Support/Zen/installs.ini"
-#+end_src
-
-Should show:
 #+begin_example
-[86B0D1EEB84199DD]
-Default=Profiles/default
-Locked=1
+zen-sessions: Zen Browser appears to be running.
+zen-sessions: Close Zen Browser and rebuild to apply spaces/pins changes.
 #+end_example
 
-** Multiple Profiles Created
+Always Cmd+Q Zen (not just close the window) before
+~sudo darwin-rebuild switch~ when iterating on spaces or pins.
 
-*Cause:* Zen created its own profile instead of using home-manager's
+** First-install spaces are not applied
 
-*Solution:*
-1. Check ~ls -la "$HOME/Library/Application Support/Zen/Profiles/"~
-2. Remove any profiles that aren't ~default~
-3. Fix ~installs.ini~ to point to ~Profiles/default~
+The same activation script also no-ops on the very first build when
+~zen-sessions.jsonlz4~ does not yet exist — it prints "Zen Browser will
+create it on first run" and exits 0.  After the first launch creates the
+file, *re-run* the deploy (with Zen quit) to merge the declared spaces in.
 
-* Tips
+** LaunchAgent only takes effect for processes spawned after login
 
-- Always close Zen before rebuilding nix-darwin
-- Don't manually delete Zen files while the browser is running
-- If you see a new auto-generated profile (e.g., ~abc123.Default (release)~), it means ~installs.ini~ wasn't set correctly
-- The ~Locked=1~ setting in ~installs.ini~ prevents Zen from changing the profile path
+The ~moz-legacy-profiles~ LaunchAgent runs ~launchctl setenv~ at user login
+(~RunAtLoad = true~).  Apps that were already running before activation
+will not see the new variable.  After the first deploy that adds this
+agent, either log out and back in or run the ~setenv~ once by hand to
+seed the current session:
+
+#+begin_src bash
+launchctl setenv MOZ_LEGACY_PROFILES 1
+#+end_src
+
+** Extensions not loading
+
+Zen extensions come from NUR.  If they fail to install, check that NUR is
+configured in ~flake.nix~ and that the overlay is reaching the home-manager
+modules.
+
+* Nuking Zen and starting fresh
+
+If profile state has gotten into a corrupt place, the safe sequence is:
+
+#+begin_src bash
+# 1. Quit Zen completely
+osascript -e 'tell application "Zen Browser (Beta)" to quit' 2>/dev/null || true
+pkill -9 "Zen Browser" 2>/dev/null || true
+
+# 2. Remove all Zen state (HM-managed symlinks will be recreated on activation)
+rm -rf "$HOME/Library/Application Support/Zen" \
+       "$HOME/Library/Caches/Zen" \
+       "$HOME/Library/Preferences/app.zen-browser.zen.plist"
+
+# 3. Rebuild — HM activation re-creates profiles.ini, containers.json, etc.
+sudo darwin-rebuild switch --flake .
+
+# 4. Make sure MOZ_LEGACY_PROFILES is in the current launchd context
+#    (the LaunchAgent will set this automatically on next login).
+launchctl setenv MOZ_LEGACY_PROFILES 1
+
+# 5. Launch Zen
+open -a "Zen Browser (Beta)"
+
+# 6. Optional: quit Zen and re-deploy once so the spaces activation script
+#    can merge declared spaces into the freshly-created zen-sessions.jsonlz4.
+#    See "First-install spaces are not applied" above.
+#+end_src
+
+You should *not* need to create ~installs.ini~ by hand — that was the
+manual workaround used before ~MOZ_LEGACY_PROFILES~ was wired up via the
+LaunchAgent.  With the variable in the GUI launchd environment, Zen ignores
+~installs.ini~ entirely.

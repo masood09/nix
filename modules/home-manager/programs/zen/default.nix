@@ -6,6 +6,8 @@
 #   containers.nix  — container tabs and spaces
 #   pins.nix        — pinned tabs
 {
+  lib,
+  pkgs,
   homelabCfg,
   inputs,
   ...
@@ -19,9 +21,31 @@
   ];
 
   # Workaround for https://github.com/0xc000022070/zen-browser-flake/issues/63
+  # MOZ_LEGACY_PROFILES=1 makes Zen skip per-installation profile pinning
+  # (installs.ini) and use the default profile from profiles.ini, which is
+  # the one Home Manager declares.  See the launchd block below for the
+  # macOS-specific half of this workaround.
   home = {
     sessionVariables = {
       MOZ_LEGACY_PROFILES = "1";
+    };
+  };
+
+  # macOS GUI apps inherit their environment from launchd, not the user's
+  # shell, so home.sessionVariables alone does not reach Zen when launched
+  # from Spotlight, Finder, or the Dock.  Register a LaunchAgent that runs
+  # `launchctl setenv MOZ_LEGACY_PROFILES 1` at login so the variable is
+  # exported into the GUI environment for every subsequently-spawned app.
+  launchd = lib.mkIf pkgs.stdenv.isDarwin {
+    agents = {
+      moz-legacy-profiles = {
+        inherit (homelabCfg.programs.zen) enable;
+        config = {
+          Label = "org.nix-community.home.moz-legacy-profiles";
+          ProgramArguments = ["/bin/launchctl" "setenv" "MOZ_LEGACY_PROFILES" "1"];
+          RunAtLoad = true;
+        };
+      };
     };
   };
 
