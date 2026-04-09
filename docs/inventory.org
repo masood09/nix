@@ -662,7 +662,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 | Program         | Notes                                                   |
 |-----------------+---------------------------------------------------------|
-| ai_tools        | enabled; models: =codex=; tools: =opencode=                 |
+| ai_tools        | enabled; tools: =claude-code=, =codex=, =opencode= (no =models=: Noctalia is Linux-only) |
 | emacs           | Editor                                                  |
 | fastfetch       | System info                                             |
 | git             | Version control                                         |

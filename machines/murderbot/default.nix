@@ -19,12 +19,16 @@
 
     programs = {
       fastfetch = {};
-      # Central AI registry: install opencode locally; the shared selector also
-      # keeps Noctalia-compatible provider choices in one machine-facing place.
+      # Central AI registry: install AI tool CLIs locally. No `models` list
+      # because the only consumer (Noctalia's model-usage widget) is Linux-only,
+      # so on Darwin it would be dead config.
       ai_tools = {
         enable = true;
-        models = ["codex"];
-        tools = ["opencode"];
+        tools = [
+          "claude-code"
+          "codex"
+          "opencode"
+        ];
       };
       # element-desktop disabled on Darwin — provided by the Homebrew `element`
       # cask in ./_packages.nix as a temporary workaround. See that file for the
