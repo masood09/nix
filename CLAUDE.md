@@ -26,7 +26,7 @@ just sops-update                     # Update sops key files (interactive)
 ## Architecture
 
 ### Flake Structure
-- `flake.nix` - Entry point defining all NixOS and Darwin configurations
+- `flake.nix` - Entry point defining all NixOS and Darwin configurations (`mkNixOSConfig` for servers, `mkNixOSDesktopConfig` for desktops, `mkDarwinConfig` for macOS)
 - `machines/` - Per-machine configs (each has `default.nix`, `_config.nix`, `hardware-configuration.nix`)
 - `modules/` - Reusable modules split by concern:
   - `modules/home-manager/` - User environment (programs as `_<name>.nix` files in `programs/`)
@@ -129,8 +129,8 @@ Before adding services, check `docs/service-registry.org` for:
 - home-manager: `release-25.11`
 - nix-darwin: `nix-darwin-25.11`
 - stylix: `release-25.11`
-- niri: `sodiboo/niri-flake` (declarative Niri compositor config + Stylix integration; NixOS module imported per desktop machine, not in `mkNixOSConfig`, to avoid pulling niri into server closures)
-- noctalia: `noctalia-dev/noctalia-shell` (desktop shell; HM module imported per desktop machine via `home-manager.sharedModules`, not in shared `home.nix`, because the flake wrapper unconditionally sets a default package via `mkDefault`)
+- niri: `sodiboo/niri-flake` (declarative Niri compositor config + Stylix integration; included in `mkNixOSDesktopConfig`, not `mkNixOSConfig`, to avoid pulling niri into server closures)
+- noctalia: `noctalia-dev/noctalia-shell` (desktop shell; HM module included in `mkNixOSDesktopConfig` via `home-manager.sharedModules`, not in shared `home.nix`, because the flake wrapper unconditionally sets a default package via `mkDefault`)
 - Other inputs: disko, impermanence, sops-nix, nix-homebrew, authentik-nix, headplane, claude-code, codex-cli-nix, zen-browser, betterfox
 
 ## Machines
