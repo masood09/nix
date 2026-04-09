@@ -25,8 +25,10 @@
     };
 
     home = {
-      packages = with pkgs; [
-        bubblewrap # Sandbox runtime required by Codex CLI
+      # bubblewrap is the Linux-only sandbox runtime Codex shells out to;
+      # Darwin uses Apple's sandbox-exec instead, so skip it there.
+      packages = lib.optionals pkgs.stdenv.isLinux [
+        pkgs.bubblewrap
       ];
     };
   };
