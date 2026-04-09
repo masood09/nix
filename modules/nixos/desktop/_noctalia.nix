@@ -1,5 +1,5 @@
 # Noctalia desktop shell — bar, notifications, lock screen, wallpaper.
-# Installs the package; the HM module is imported per desktop machine via
+# Installs the package; the HM module is included via mkNixOSDesktopConfig's
 # home-manager.sharedModules and configured in
 # modules/home-manager/programs/niri/_noctalia.nix, while Niri owns startup via
 # programs.niri.settings.spawn-at-startup in modules/home-manager/programs/niri/default.nix.

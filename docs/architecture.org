@@ -10,7 +10,7 @@ Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 
 * Repository Layout
 
 #+begin_example
-flake.nix                          Entry point — inputs, mkNixOSConfig (server-safe), mkDarwinConfig
+flake.nix                          Entry point — inputs, mkNixOSConfig, mkNixOSDesktopConfig, mkDarwinConfig
 flake.lock                         Pinned dependency versions
 
 machines/                          Per-machine configurations
@@ -55,22 +55,23 @@ docs/                              Documentation
 * Flake Data Flow
 
 #+begin_example
-                              flake.nix
-                                  |
-                    +-------------+-------------+
-                    |             |             |
-              mkNixOSConfig  mkDarwinConfig  packages
-                    |             |             |
-                    v             v             v
-            +-- sharedOverlays --+-- sharedOverlays --+
-            |                    |                    |
-    NixOS modules        Darwin modules        import nixpkgs
-            |                    |                    |
-   machines/<name>      machines/<name>        nix/pkgs/
-            |                    |
-     +------+------+      +-----+-----+
-     |      |      |      |     |     |
-   nixos  services hm   macos  hm  homebrew
+                                    flake.nix
+                                        |
+                    +-------------------+-------------------+
+                    |                   |                   |
+              mkNixOSConfig    mkNixOSDesktopConfig    mkDarwinConfig    packages
+              (servers)        (desktops)               (macOS)
+                    |                   |                   |               |
+                    v                   v                   v               v
+            sharedNixOSModules  sharedNixOSModules   Darwin modules   import nixpkgs
+                                + desktopNixOSModules
+                                  (niri, noctalia)
+                    |                   |                   |               |
+               machines/<name>    machines/<name>     machines/<name>   nix/pkgs/
+                    |                   |                   |
+             +------+------+     +------+------+     +-----+-----+
+             |      |      |     |      |      |     |     |     |
+           nixos  services hm  nixos  services hm  macos  hm  homebrew
 #+end_example
 
 * Module Dependency Graph

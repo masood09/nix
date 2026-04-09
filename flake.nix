@@ -116,31 +116,45 @@
       (import ./nix/overlays/darwin-setproctitle.nix)
     ];
 
-    # Shared NixOS configuration builder. Each machine provides its own
-    # path (e.g. ./machines/heartbeat) which is appended to the common
-    # module list containing disko, sops, home-manager, etc.
-    # Desktop-only flake modules (niri, noctalia) are imported per-machine
-    # instead of here to avoid pulling heavyweight packages into server
-    # closures.
+    # Shared module list for all NixOS machines (servers + desktops).
+    sharedNixOSModules = [
+      inputs.disko.nixosModules.disko
+      inputs.sops-nix.nixosModules.sops
+      inputs.home-manager.nixosModules.home-manager
+      inputs.authentik-nix.nixosModules.default
+      inputs.impermanence.nixosModules.impermanence
+      inputs.headplane.nixosModules.headplane
+      inputs.stylix.nixosModules.stylix
+
+      (import ./nix/services/default.nix)
+
+      {nixpkgs.overlays = sharedOverlays;}
+    ];
+
+    # Desktop-only modules. Kept out of sharedNixOSModules because the
+    # niri-flake NixOS module unconditionally injects its HM module (with
+    # a default niri package) into home-manager.sharedModules, and the
+    # noctalia flake wrapper sets programs.noctalia-shell.package via
+    # mkDefault — both force heavyweight packages into every closure even
+    # when the desktop is never enabled.
+    desktopNixOSModules = [
+      inputs.niri.nixosModules.niri
+      {home-manager.sharedModules = [inputs.noctalia.homeModules.default];}
+    ];
+
+    # NixOS configuration builder for servers.
     mkNixOSConfig = path:
       nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
+        modules = sharedNixOSModules ++ [path];
+      };
 
-        modules = [
-          inputs.disko.nixosModules.disko
-          inputs.sops-nix.nixosModules.sops
-          inputs.home-manager.nixosModules.home-manager
-          inputs.authentik-nix.nixosModules.default
-          inputs.impermanence.nixosModules.impermanence
-          inputs.headplane.nixosModules.headplane
-          inputs.stylix.nixosModules.stylix
-
-          (import ./nix/services/default.nix)
-
-          {nixpkgs.overlays = sharedOverlays;}
-
-          path
-        ];
+    # NixOS configuration builder for desktops. Extends mkNixOSConfig
+    # with niri and noctalia flake modules that are too heavy for servers.
+    mkNixOSDesktopConfig = path:
+      nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules = sharedNixOSModules ++ desktopNixOSModules ++ [path];
       };
 
     # Shared nix-darwin configuration builder for macOS machines.
@@ -188,12 +202,13 @@
       watchfulsystem = mkNixOSConfig ./machines/watchfulsystem;
 
       caretaker = mkNixOSConfig ./machines/caretaker;
-      commandmodule = mkNixOSConfig ./machines/commandmodule;
       heartbeat = mkNixOSConfig ./machines/heartbeat;
       trialunit = mkNixOSConfig ./machines/trialunit;
 
-      arrakis = mkNixOSConfig ./machines/arrakis;
-      sonic = mkNixOSConfig ./machines/sonic;
+      # Desktops — use mkNixOSDesktopConfig for niri + noctalia modules
+      arrakis = mkNixOSDesktopConfig ./machines/arrakis;
+      commandmodule = mkNixOSDesktopConfig ./machines/commandmodule;
+      sonic = mkNixOSDesktopConfig ./machines/sonic;
 
       # Minimal NixOS installer ISO with SSH key baked in
       nixiso = nixpkgs.lib.nixosSystem {

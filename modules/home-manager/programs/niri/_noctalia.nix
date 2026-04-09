@@ -1,6 +1,6 @@
 # Noctalia desktop shell (home-manager side) — enables the HM module,
 # declares settings, and manages the plugin registry. The noctalia HM
-# module is imported per desktop machine (not in the shared home.nix);
+# module is included via mkNixOSDesktopConfig (not in the shared home.nix);
 # this file activates and configures it when desktop.shell == "noctalia".
 # Settings are captured from the GUI via IPC diff and declared here so
 # Nix remains the source of truth.
@@ -15,8 +15,8 @@
   ...
 }: let
   # Guard against machines where the noctalia HM module is not imported
-  # (servers, macOS). The flake wrapper is only added via sharedModules
-  # on desktop machines, so the option namespace may be absent.
+  # (servers, macOS). The flake wrapper is only included via
+  # mkNixOSDesktopConfig, so the option namespace is absent elsewhere.
   hasNoctaliaOption = options.programs ? noctalia-shell;
   shellIsNoctalia = hasNoctaliaOption && ((homelabCfg.desktop.shell or "none") == "noctalia") && pkgs.stdenv.isLinux;
   aiToolsCfg = homelabCfg.programs.ai_tools;
