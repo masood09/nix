@@ -177,7 +177,7 @@ NixOS system-level targets (Plymouth, GRUB, console) auto-enable when their unde
 
 sonic uses a custom scheme (~nix/themes/sonic-dark.yaml~) with a Sonic the Hedgehog-inspired palette.
 
-Starship prompt is excluded from Stylix targets — it uses hardcoded Catppuccin colors. Fish uses tide instead of Starship; tide prompt colors are derived from Stylix base16 slots in ~_fish.nix~ so they adapt automatically per scheme.
+Starship prompt is excluded from Stylix targets — it uses hardcoded Catppuccin colors. Fish uses tide instead of Starship; tide prompt colors are derived from Stylix base16 slots in ~_fish.nix~ so they adapt automatically per scheme. The prompt layout (style, separators, icons, transient prompt) is set by a home-manager activation script that runs ~tide configure --auto~ after ~writeBoundary~. The ~--auto~ flags are version-coupled to the tide release in nixpkgs (currently v6.2.0) — each flag maps to a choice file under ~functions/tide/configure/choices/~ in the tide repo, and a nixpkgs bump that adds or renames a choice will cause the activation to fail visibly.
 
 A fontconfig override in ~home.nix~ redirects common monospace fonts (Liberation Mono, DejaVu Sans Mono, Noto Sans Mono) to the Stylix monospace font to preserve Nerd Font PUA icon glyphs in web pages and apps.
 
