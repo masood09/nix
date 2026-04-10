@@ -1,4 +1,8 @@
 # Kitty — GPU-accelerated terminal emulator themed by Stylix.
+#
+# Settings are mostly platform-agnostic; the one split lives on `font_size`,
+# where Linux and Darwin use different defaults (see the comment at the
+# `font_size` line for the rationale and history).
 {
   homelabCfg,
   lib,
@@ -16,8 +20,25 @@ in {
         # avoiding home-manager activation issues with non-POSIX shells.
         shell = lib.mkIf fishEnabled "${pkgs.fish}/bin/fish";
 
-        # Font configuration
-        font_size = lib.mkDefault 12;
+        # Font configuration.
+        #
+        # Linux baseline is 12. That value has been in place since the module
+        # was first written and happens to match Doom Emacs at `:size 16`
+        # visually on the current NixOS desktops (gruvbox/JetBrainsMono).
+        #
+        # Darwin defaults to 16 as a user comfort preference, not a measured
+        # Emacs-equivalence — 12 rendered too small on Retina, and although
+        # 14 was the closest visual match to Doom's `:size 16`, the user
+        # preferred the slightly-larger 16 for day-to-day reading. If you're
+        # tempted to "fix" this to 14 to match Emacs, don't: it's intentional.
+        #
+        # Kept as `mkDefault` so any machine can still override locally via
+        # `programs.kitty.settings.font_size` without touching this module.
+        font_size = lib.mkDefault (
+          if pkgs.stdenv.isDarwin
+          then 16
+          else 12
+        );
 
         # Cursor
         cursor_shape = "underline";
