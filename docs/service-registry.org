@@ -46,10 +46,10 @@ Next available UID/GID: *3014*
 * Port Registry
 
 ** Infrastructure
-| Service           |  Port | Notes                            |
-|-------------------+-------+----------------------------------|
-| Blocky (DNS)      |    53 | TCP + UDP                        |
-| SSH               | 22222 | Non-standard port, key-only auth |
+| Service      |  Port | Notes                            |
+|--------------+-------+----------------------------------|
+| Blocky (DNS) |    53 | TCP + UDP                        |
+| SSH          | 22222 | Non-standard port, key-only auth |
 
 ** Application Services
 | Service                              |  Port | Notes                             |

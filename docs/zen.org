@@ -57,15 +57,15 @@ launchd context, which is set by ~launchctl setenv~.
 
 Zen browser configuration is split across ~modules/home-manager/programs/zen/~:
 
-| File             | Responsibility                                       |
-|------------------+------------------------------------------------------|
-| ~default.nix~    | Module entry point, enterprise policies, Betterfox  |
-|                  | profile, ~MOZ_LEGACY_PROFILES~ workaround           |
-| ~settings.nix~   | Browser preferences (compact-mode behaviour, etc.)  |
-| ~extensions.nix~ | Extensions and Zen Mods                             |
-| ~search.nix~     | Search engines                                      |
-| ~containers.nix~ | Container tabs and Zen spaces                       |
-| ~pins.nix~       | Declarative pinned tabs keyed by stable UUIDs       |
+| File           | Responsibility                                     |
+|----------------+----------------------------------------------------|
+| ~default.nix~    | Module entry point, enterprise policies, Betterfox |
+|                | profile, ~MOZ_LEGACY_PROFILES~ workaround            |
+| ~settings.nix~   | Browser preferences (compact-mode behaviour, etc.) |
+| ~extensions.nix~ | Extensions and Zen Mods                            |
+| ~search.nix~     | Search engines                                     |
+| ~containers.nix~ | Container tabs and Zen spaces                      |
+| ~pins.nix~       | Declarative pinned tabs keyed by stable UUIDs      |
 
 Theming is applied separately from the platform Stylix modules:
 
@@ -74,15 +74,15 @@ Theming is applied separately from the platform Stylix modules:
 
 * On-disk file locations (macOS)
 
-| File                                                              | Purpose                                  | Managed by               |
-|-------------------------------------------------------------------+------------------------------------------+--------------------------|
-| ~Library/Application Support/Zen/profiles.ini~                   | Profile list and default                 | home-manager (symlink)   |
-| ~Library/Application Support/Zen/installs.ini~                   | Per-install profile pin                  | Zen — *ignored* with ~MOZ_LEGACY_PROFILES=1~ |
-| ~Library/Application Support/Zen/Profiles/default/~              | Profile data                             | home-manager + Zen       |
-| ~Library/Application Support/Zen/Profiles/default/containers.json~ | Container definitions                  | home-manager (symlink)   |
-| ~Library/Application Support/Zen/Profiles/default/zen-sessions.jsonlz4~ | Spaces, pinned tabs, session state | home-manager activation script (merge) |
-| ~Library/Caches/Zen/~                                            | Browser cache                            | Zen                      |
-| ~Library/Preferences/app.zen-browser.zen.plist~                  | macOS preferences                        | Zen                      |
+| File                                                                  | Purpose                            | Managed by                               |
+|-----------------------------------------------------------------------+------------------------------------+------------------------------------------|
+| ~Library/Application Support/Zen/profiles.ini~                          | Profile list and default           | home-manager (symlink)                   |
+| ~Library/Application Support/Zen/installs.ini~                        | Per-install profile pin            | Zen — *ignored* with ~MOZ_LEGACY_PROFILES=1~ |
+| ~Library/Application Support/Zen/Profiles/default/~                     | Profile data                       | home-manager + Zen                       |
+| ~Library/Application Support/Zen/Profiles/default/containers.json~      | Container definitions              | home-manager (symlink)                   |
+| ~Library/Application Support/Zen/Profiles/default/zen-sessions.jsonlz4~ | Spaces, pinned tabs, session state | home-manager activation script (merge)   |
+| ~Library/Caches/Zen/~                                                   | Browser cache                      | Zen                                      |
+| ~Library/Preferences/app.zen-browser.zen.plist~                         | macOS preferences                  | Zen                                      |
 
 The Linux equivalent lives under ~$XDG_CONFIG_HOME/zen/~.
 
