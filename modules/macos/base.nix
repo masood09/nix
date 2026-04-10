@@ -1,6 +1,11 @@
 # macOS base — shared nix-darwin config for all macOS machines.
 # Sets system defaults (dark mode, dock, finder, keyboard), Touch ID sudo,
 # and Homebrew integration for GUI apps not available in nixpkgs.
+#
+# Keyboard repeat (NSGlobalDomain.{InitialKeyRepeat,KeyRepeat}) is the source
+# of truth for typing feel across the fleet; the matching values live in
+# modules/home-manager/programs/niri/default.nix (input.keyboard). Keep both
+# sides in sync — see the inline comment near the InitialKeyRepeat entry.
 {
   config,
   pkgs,
@@ -86,6 +91,11 @@ in {
         AppleShowAllExtensions = true;
         AppleShowAllFiles = true;
         AppleShowScrollBars = "WhenScrolling";
+        # Keyboard repeat — units are 15ms ticks. Mirrored on Linux desktops in
+        # modules/home-manager/programs/niri/default.nix (input.keyboard) so the
+        # typing feel matches across the fleet. If you change these, update the
+        # niri repeat-delay/repeat-rate values too.
+        # 15 ticks → 225ms initial delay, 2 ticks → 30ms ≈ 33Hz repeat.
         InitialKeyRepeat = 15;
         KeyRepeat = 2;
         NSAutomaticCapitalizationEnabled = false;

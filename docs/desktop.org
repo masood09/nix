@@ -113,6 +113,19 @@ The primary directional bindings use edge-aware fallbacks so movement stays cont
 
 [[https://noctalia.dev/][Noctalia]] is a minimal Wayland desktop shell built on Quickshell. It provides panels, notifications, and system UI with a clean aesthetic and 83+ community plugins. Noctalia supports Niri natively, making it a natural fit for the current compositor stack. Enabled by default (~homelab.desktop.shell = "noctalia"~). The system package is installed via ~modules/nixos/desktop/_noctalia.nix~; the HM module is included via ~mkNixOSDesktopConfig~'s ~home-manager.sharedModules~ and activated in ~modules/home-manager/programs/niri/_noctalia.nix~; and Niri starts the shell via ~spawn-at-startup~ in ~modules/home-manager/programs/niri/default.nix~. The repo intentionally does not enable Noctalia's experimental systemd user service so the shell has a single startup path. Requires nixos-unstable (provided via the ~nixpkgs-unstable~ flake input) and uses the ~noctalia.cachix.org~ binary cache. The plugin registry (~plugins.json~) is managed declaratively via ~xdg.configFile~; the ~model-usage~ plugin is driven by ~homelab.programs.ai_tools.models~, but providers that read local CLI state still require the matching tool to be installed. In particular, the OpenAI/Codex widget path only turns on when the machine selects the ~codex~ or ~openai~ model and also installs the ~codex~ CLI, because the upstream plugin reads usage from =~/.codex=. The companion ~homelab.programs.ai_tools.tools~ enum list controls which assistant CLIs are installed. The default bar layout now follows the GUI-customized arrangement captured from the running shell: the tray lives on the right with its drawer disabled and icons left uncolourized, the bar stays in floating mode, the volume widget is always shown, and the Bluetooth widget is only rendered on machines where ~homelab.hardware.bluetooth.enable = true~. The generated ~settings.json~ also pins Noctalia's current ~settingsVersion~ so fresh launches do not re-run legacy migrations and silently coerce declarative bar settings back to upstream defaults.
 
+* Input
+
+Keyboard repeat is tuned to match macOS so the typing feel is consistent across the laptop fleet (NixOS desktops + Darwin machines). macOS is the source of truth — Darwin's defaults app uses 15ms ticks for ~InitialKeyRepeat~ and ~KeyRepeat~, and the equivalent libinput values are mirrored on Linux desktops via Niri's ~input.keyboard.repeat-delay~ / ~repeat-rate~.
+
+| Setting       | Darwin (modules/macos/base.nix) | Linux (niri input.keyboard) | Effective value         |
+|---------------+---------------------------------+-----------------------------+-------------------------|
+| Initial delay | ~InitialKeyRepeat = 15~ (ticks) | ~repeat-delay = 225~ (ms)   | 225 ms                  |
+| Repeat rate   | ~KeyRepeat = 2~ (ticks)         | ~repeat-rate = 33~ (Hz)     | ~30 ms / repeat (~33Hz) |
+
+Conversion: Darwin ticks × 15ms = Linux ms; ~1000 / (KeyRepeat * 15)~ ≈ Linux Hz. If you change one side, change the other — both files carry inline comments pointing at each other.
+
+Niri's defaults (600ms delay, 25Hz) feel sluggish next to macOS, which is why we override here rather than relying on upstream defaults. Greetd's TTY prompt is unaffected, but the desktop session begins immediately after login so it does not matter in practice.
+
 * Graphics
 
 GPU acceleration is configured per-driver via ~homelab.hardware.graphics.driver~:

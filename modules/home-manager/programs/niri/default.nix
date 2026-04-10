@@ -3,6 +3,11 @@
 # Stylix can theme it; surrounding desktop helpers stay split by desktop.shell.
 # Backlight control (light) is system-level — see modules/nixos/desktop/_niri.nix.
 #
+# Input tuning: keyboard repeat-delay/repeat-rate are tuned to match Darwin's
+# NSGlobalDomain.{InitialKeyRepeat,KeyRepeat} from modules/macos/base.nix so the
+# typing feel is consistent across the laptop fleet. See the input.keyboard
+# block below for the tick-to-ms/Hz conversion.
+#
 # Shell guard: when homelab.desktop.shell != "none", shell-replaceable programs
 # (swaybg, swaync, swaylock, udiskie) are skipped — the desktop shell provides
 # equivalent UI. swayidle is the exception: it remains installed because both
@@ -130,6 +135,14 @@ in {
             keyboard = {
               xkb.options = "caps:escape";
               numlock = true;
+              # Keyboard repeat — kept in sync with Darwin
+              # (modules/macos/base.nix NSGlobalDomain.{InitialKeyRepeat,KeyRepeat})
+              # so typing feel matches across Linux desktops and macOS laptops.
+              # Darwin units are 15ms ticks: InitialKeyRepeat=15 → 15×15=225ms,
+              # KeyRepeat=2 → 2×15=30ms ≈ 33Hz. Niri (libinput) uses ms + Hz directly.
+              # If you change one side, change the other.
+              repeat-delay = 225;
+              repeat-rate = 33;
             };
 
             touchpad = {
