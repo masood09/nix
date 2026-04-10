@@ -62,6 +62,7 @@ The greetd PAM service is configured in ~_greetd.nix~:
 
 - ~enableGnomeKeyring = true~ — passes the login password to gnome-keyring-daemon for auto-unlock
 - ~fprintAuth~ — conditional on hardware fingerprint support
+- ~pam_fde_boot_pw.so inject_for=gkr~ (session, optional) — added only on encrypted non-ZFS desktops (~autoLoginFromBootPassword = true~). Ordered to run just before ~pam_gnome_keyring~'s session rule. Sourced from ~nixpkgs-unstable~ because the package has not landed in ~nixos-25.11~ yet.
 
 PAM evaluation order for tuigreet with fingerprint enabled:
 
@@ -72,7 +73,9 @@ PAM evaluation order for tuigreet with fingerprint enabled:
 
 ** GNOME Keyring
 
-~services.gnome.gnome-keyring~ is enabled for all desktops. The PAM module auto-unlocks the ~login~ keyring on password login. Fingerprint login cannot unlock the keyring because no password flows through PAM (see Pain Points). Auto-login on encrypted desktops currently has the same limitation: the session starts without a greetd password prompt, so the ~login~ keyring remains locked until ~pam_fde_boot_pw~ (or equivalent) is wired into the PAM stack.
+~services.gnome.gnome-keyring~ is enabled for all desktops. The PAM module auto-unlocks the ~login~ keyring on password login. Fingerprint login cannot unlock the keyring because no password flows through PAM (see Pain Points).
+
+On encrypted non-ZFS desktops (currently just ~arrakis~), auto-login from the boot password is covered by ~pam_fde_boot_pw.so inject_for=gkr~ in the greetd session stack. ~systemd-cryptsetup~ runs inside the systemd initrd (~boot.initrd.systemd.enable = true~ via the ~isDesktopSystemdBoot~ guard in ~modules/nixos/_boot.nix~) and caches the LUKS passphrase in the kernel keyring under the ~cryptsetup~ description. ~pam_fde_boot_pw~ reads that cached passphrase at session start and injects it so ~pam_gnome_keyring~ can unlock the ~login~ keyring as if the user had typed it. This requires the user's login password to match the LUKS passphrase; if they diverge, the session starts but the keyring stays locked (apps fall back to prompting).
 
 ** Desktop Applications
 
@@ -228,6 +231,8 @@ ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix 
 
 When ~pam_fprintd.so~ succeeds (marked ~sufficient~), PAM short-circuits the auth stack. ~pam_gnome_keyring.so~ never receives a password, so the ~login~ keyring stays locked. Apps that use the Secret Service API (Element, Discord) will prompt for credentials each session.
 
+Note that the analogous auto-login pain point on encrypted non-ZFS desktops (~arrakis~) is now resolved by ~pam_fde_boot_pw~ in the greetd session stack — see Login Flow / GNOME Keyring above. The same trick does not help fingerprint logins because ~commandmodule~ and ~sonic~ are ZFS desktops with no LUKS passphrase cached in the kernel keyring; the only password source available to PAM during a fingerprint login is the user's typed password, which is exactly what fingerprint replaces.
+
 *Workaround:* log in with password instead of fingerprint. The keyring unlocks automatically.
 
 ** Bitwarden system-auth unlock is only wired on fingerprint desktops
@@ -237,9 +242,3 @@ The repo currently installs ~com.bitwarden.Bitwarden.unlock~ only when ~homelab.
 ** ZFS requires GRUB
 
 systemd-boot does not support ZFS. commandmodule and sonic are locked to GRUB. arrakis has migrated to ext4+LUKS and uses systemd-boot.
-
-* Future Improvements
-
-** GNOME Keyring unlock for auto-login
-
-Encrypted non-ZFS desktops already auto-login after disk unlock, but GNOME Keyring still does not auto-unlock in that path because no password reaches PAM. ~pam_fde_boot_pw~ (packaged in nixpkgs) is the intended fix: retrieve the disk encryption passphrase from the kernel keyring and pass it through PAM at session start. This remains limited to LUKS + systemd-boot desktops; commandmodule and sonic would still need the same ZFS-to-LUKS migration first.

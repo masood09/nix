@@ -188,7 +188,7 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 | ananicy-cpp           | Auto-nice daemon (CachyOS rules)                |
 | pipewire              | Unified audio daemon (replaces PulseAudio/ALSA) |
 | fprintd               | Fingerprint authentication                      |
-| gnome-keyring         | Credential storage, auto-unlocked via PAM       |
+| gnome-keyring         | Credential storage; auto-unlocked via PAM (password login + LUKS auto-login on arrakis) |
 | power-profiles-daemon | CPU power profile management                    |
 | printing (CUPS)       | Print server                                    |
 | upower                | Battery/power monitoring                        |
