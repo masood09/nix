@@ -1,13 +1,14 @@
 #+TITLE: Zen Browser Configuration & Troubleshooting
 #+AUTHOR: Masood Ahmed
-#+DATE: 2026-04-09
+#+DATE: 2026-04-10
 
 * Overview
 
 Zen Browser is configured via home-manager with Stylix theming, privacy
 settings, custom extensions, declarative containers, spaces and pinned tabs.
-This document covers the architecture, the macOS profile-pinning workaround,
-and the most common operational gotchas.
+This document covers the architecture, platform-specific details for both
+Linux and macOS, the profile-pinning workaround, and the most common
+operational gotchas.
 
 * Architecture
 
@@ -48,7 +49,12 @@ The variable is set in two places, both in
    runs ~launchctl setenv MOZ_LEGACY_PROFILES 1~ at user login — covers Zen
    launched from Spotlight, Finder, or the Dock on macOS.
 
-The second piece is necessary because **macOS GUI apps inherit their
+On Linux, the ~home.sessionVariables~ entry is sufficient because the Niri
+compositor inherits the user's environment and passes it to child processes.
+Zen launched via the ~Super+B~ keybinding or any shell session picks up the
+variable automatically.
+
+The Darwin LaunchAgent is necessary because **macOS GUI apps inherit their
 environment from launchd, not from the user's shell**.  ~home.sessionVariables~
 on its own only reaches shell sessions; GUI launches see whatever is in the
 launchd context, which is set by ~launchctl setenv~.
@@ -72,19 +78,64 @@ Theming is applied separately from the platform Stylix modules:
 - ~modules/nixos/_stylix.nix~ — Linux HM-targeted Zen theme overrides
 - ~modules/macos/_stylix.nix~ — Darwin HM-targeted Zen theme overrides
 
-* On-disk file locations (macOS)
+* On-disk file locations
+
+** Linux (~$XDG_CONFIG_HOME/zen/~, typically ~~/.config/zen/~)
+
+| File                                                  | Purpose                            | Managed by                               |
+|-------------------------------------------------------+------------------------------------+------------------------------------------|
+| ~.config/zen/profiles.ini~                              | Profile list and default           | home-manager (symlink)                   |
+| ~.config/zen/installs.ini~                              | Per-install profile pin            | Zen — *ignored* with ~MOZ_LEGACY_PROFILES=1~ |
+| ~.config/zen/Profiles/default/~                         | Profile data                       | home-manager + Zen                       |
+| ~.config/zen/Profiles/default/containers.json~          | Container definitions              | home-manager (symlink)                   |
+| ~.config/zen/Profiles/default/zen-sessions.jsonlz4~     | Spaces, pinned tabs, session state | home-manager activation script (merge)   |
+| ~.cache/zen/~                                           | Browser cache                      | Zen                                      |
+
+** macOS (~Library/Application Support/Zen/~)
 
 | File                                                                  | Purpose                            | Managed by                               |
 |-----------------------------------------------------------------------+------------------------------------+------------------------------------------|
 | ~Library/Application Support/Zen/profiles.ini~                          | Profile list and default           | home-manager (symlink)                   |
-| ~Library/Application Support/Zen/installs.ini~                        | Per-install profile pin            | Zen — *ignored* with ~MOZ_LEGACY_PROFILES=1~ |
+| ~Library/Application Support/Zen/installs.ini~                          | Per-install profile pin            | Zen — *ignored* with ~MOZ_LEGACY_PROFILES=1~ |
 | ~Library/Application Support/Zen/Profiles/default/~                     | Profile data                       | home-manager + Zen                       |
 | ~Library/Application Support/Zen/Profiles/default/containers.json~      | Container definitions              | home-manager (symlink)                   |
 | ~Library/Application Support/Zen/Profiles/default/zen-sessions.jsonlz4~ | Spaces, pinned tabs, session state | home-manager activation script (merge)   |
 | ~Library/Caches/Zen/~                                                   | Browser cache                      | Zen                                      |
 | ~Library/Preferences/app.zen-browser.zen.plist~                         | macOS preferences                  | Zen                                      |
 
-The Linux equivalent lives under ~$XDG_CONFIG_HOME/zen/~.
+* Platform-specific configuration (Linux / NixOS)
+
+** Wayland integration
+
+All NixOS desktops run the Niri Wayland compositor.  The desktop module
+(~modules/nixos/desktop/default.nix~) sets ~MOZ_ENABLE_WAYLAND=1~ as a
+system-level session variable so Zen uses native Wayland rendering instead
+of XWayland.
+
+** ananicy-cpp priority
+
+The desktop module registers a ~zen-beta~ rule with ananicy-cpp
+(~services.ananicy.extraRules~) so Zen is classified as a ~Doc-View~ process
+and given higher interactive scheduling priority over background work like
+builds and indexers.
+
+** Launching Zen
+
+On NixOS desktops the Niri keybinding ~Super+B~ launches ~zen-beta~
+(~modules/home-manager/programs/niri/default.nix~).  Zen is also available
+in the Noctalia application launcher.
+
+** Impermanence
+
+Zen profile data lives under ~~/.config/zen/~ which is inside the user home
+directory.  On NixOS desktops the entire home directory is persisted (either
+via a ZFS dataset or an impermanence bind-mount to ~/nix/persist~), so Zen
+state survives reboots without any Zen-specific persistence rules.
+
+** Machines
+
+Zen is enabled on all three NixOS desktops: arrakis, commandmodule, and sonic.
+On macOS it is enabled on murderbot and work-pantheon.
 
 * Operational gotchas
 
@@ -100,8 +151,10 @@ zen-sessions: Zen Browser appears to be running.
 zen-sessions: Close Zen Browser and rebuild to apply spaces/pins changes.
 #+end_example
 
-Always Cmd+Q Zen (not just close the window) before
-~sudo darwin-rebuild switch~ when iterating on spaces or pins.
+Always quit Zen completely before rebuilding when iterating on spaces or
+pins.  On macOS use Cmd+Q (not just close the window) before
+~sudo darwin-rebuild switch~; on Linux close all Zen windows or run
+~pkill zen-beta~ before ~sudo nixos-rebuild switch~.
 
 ** First-install spaces are not applied
 
@@ -110,7 +163,7 @@ The same activation script also no-ops on the very first build when
 create it on first run" and exits 0.  After the first launch creates the
 file, *re-run* the deploy (with Zen quit) to merge the declared spaces in.
 
-** LaunchAgent only takes effect for processes spawned after login
+** LaunchAgent only takes effect for processes spawned after login (macOS only)
 
 The ~moz-legacy-profiles~ LaunchAgent runs ~launchctl setenv~ at user login
 (~RunAtLoad = true~).  Apps that were already running before activation
@@ -122,6 +175,9 @@ seed the current session:
 launchctl setenv MOZ_LEGACY_PROFILES 1
 #+end_src
 
+This is not an issue on Linux — ~home.sessionVariables~ is sourced by the
+shell profile and inherited by the compositor, so Zen always sees it.
+
 ** Extensions not loading
 
 Zen extensions come from NUR.  If they fail to install, check that NUR is
@@ -131,6 +187,33 @@ modules.
 * Nuking Zen and starting fresh
 
 If profile state has gotten into a corrupt place, the safe sequence is:
+
+** Linux
+
+#+begin_src bash
+# 1. Quit Zen completely
+pkill zen-beta 2>/dev/null || true
+
+# 2. Remove all Zen state (HM-managed symlinks will be recreated on activation)
+rm -rf "$HOME/.config/zen" \
+       "$HOME/.cache/zen"
+
+# 3. Rebuild — HM activation re-creates profiles.ini, containers.json, etc.
+sudo nixos-rebuild switch --flake .
+
+# 4. Launch Zen
+zen-beta
+
+# 5. Optional: quit Zen and re-deploy once so the spaces activation script
+#    can merge declared spaces into the freshly-created zen-sessions.jsonlz4.
+#    See "First-install spaces are not applied" above.
+#+end_src
+
+During normal operation use ~just deploy~ instead of calling the rebuild
+command directly.  The raw commands are shown here because a nuke is a
+manual recovery step outside the normal workflow.
+
+** macOS
 
 #+begin_src bash
 # 1. Quit Zen completely
@@ -159,5 +242,5 @@ open -a "Zen Browser (Beta)"
 
 You should *not* need to create ~installs.ini~ by hand — that was the
 manual workaround used before ~MOZ_LEGACY_PROFILES~ was wired up via the
-LaunchAgent.  With the variable in the GUI launchd environment, Zen ignores
-~installs.ini~ entirely.
+LaunchAgent.  With the variable in the macOS GUI launchd environment (and
+via ~home.sessionVariables~ on Linux), Zen ignores ~installs.ini~ entirely.
