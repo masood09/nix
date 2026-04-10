@@ -123,6 +123,12 @@ in {
   # Run tide's non-interactive configurator after home-manager writes files.
   # This sets the prompt layout (style, separators, icons, etc.); colors are
   # overridden separately via interactiveShellInit above.
+  #
+  # The --auto flags below must cover every choice in the tide version shipped
+  # by nixpkgs (currently v6.2.0). Choices live under
+  # functions/tide/configure/choices/{all,rainbow,powerline}/ in the tide repo.
+  # If a nixpkgs bump adds or renames a choice, this activation will fail and
+  # log a warning — check `tide configure --auto` output to diagnose.
   home = lib.mkIf homelabCfg.programs.fish.enable {
     activation = {
       configure-tide = lib.hm.dag.entryAfter ["writeBoundary"] ''
@@ -135,10 +141,11 @@ in {
           --powerline_prompt_tails=Flat \
           --powerline_prompt_style='Two lines, character and frame' \
           --prompt_connection=Dotted \
+          --prompt_connection_andor_frame_color=Dark \
           --powerline_right_prompt_frame=Yes \
           --prompt_spacing=Compact \
           --icons='Many icons' \
-          --transient=Yes" 2> /dev/null || true
+          --transient=Yes" 2>&1 || echo "WARNING: tide configure --auto failed — prompt layout may be missing"
       '';
     };
   };
