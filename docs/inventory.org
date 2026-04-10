@@ -226,6 +226,8 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 
 ** macOS Shared Module (all Darwin machines)
 
+System-level shell enablement in =modules/macos/base.nix= mirrors =modules/nixos/_packages.nix=: =programs.fish.enable= is driven by =homelab.programs.fish.enable= so nix-darwin generates =/etc/fish/nixos-env-preinit.fish=, which injects nix profile paths into fish's PATH. Without this, fish launched by kitty would not find nix-installed tools.
+
 *** Homebrew Brews
 
 | Package    | Purpose                              |
