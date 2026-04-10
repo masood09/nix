@@ -678,6 +678,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | ai_tools  | enabled; tools: =claude-code=, =codex=, =opencode= (no =models=: Noctalia is Linux-only) |
 | emacs     | Editor                                                                           |
 | fastfetch | System info                                                                      |
+| fish      | Interactive shell                                                                |
 | git       | Version control                                                                  |
 | kitty     | Terminal emulator                                                                |
 | neovim    | Editor                                                                           |
@@ -722,8 +723,10 @@ Zen Browser, Emacs, kitty, Element, Discord, Messages, Reminders, Notes, Infuse,
 | Program | Notes                                                       |
 |---------+-------------------------------------------------------------|
 | emacs   | Editor                                                      |
+| fish    | Interactive shell                                           |
 | git     | masoodahmed@pantheon.io, GPG signing (key 27F12F49A6098D65) |
 | gpg     | GPG + smartcard/YubiKey SSH agent                           |
+| kitty   | Terminal emulator                                           |
 | neovim  | Editor                                                      |
 
 **** Machine-Specific System Packages

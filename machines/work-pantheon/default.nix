@@ -30,6 +30,10 @@
         enable = true;
       };
 
+      fish = {
+        enable = true;
+      };
+
       git = {
         userEmail = "masoodahmed@pantheon.io";
         enable = true;
@@ -42,6 +46,10 @@
       };
 
       gpg = {
+        enable = true;
+      };
+
+      kitty = {
         enable = true;
       };
 
