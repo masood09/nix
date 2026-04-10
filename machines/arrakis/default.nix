@@ -5,6 +5,7 @@
     ./disko
     ./hardware-configuration.nix
     ./_config.nix
+    ./_niri.nix
     ./_networking.nix
     ./_secrets.nix
 

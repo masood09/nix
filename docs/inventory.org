@@ -148,6 +148,7 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 | Scope         | Output Key   | Purpose                                                         |
 |---------------+--------------+-----------------------------------------------------------------|
 | shared HM     | =lg-ultrafine= | Stable external monitor profile matched by LG monitor name      |
+| arrakis       | =eDP-1=        | Laptop panel placed to the right of the shared external monitor |
 | commandmodule | =eDP-1=        | Laptop panel placed to the right of the shared external monitor |
 | sonic         | =eDP-1=        | Laptop panel placed to the right of the shared external monitor |
 
