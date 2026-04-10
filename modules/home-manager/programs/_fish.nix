@@ -145,7 +145,7 @@ in {
           --powerline_right_prompt_frame=Yes \
           --prompt_spacing=Compact \
           --icons='Many icons' \
-          --transient=Yes" 2>&1 || echo "WARNING: tide configure --auto failed — prompt layout may be missing"
+          --transient=Yes" > /dev/null 2>&1 || echo "WARNING: tide configure --auto failed — prompt layout may be missing"
       '';
     };
   };
