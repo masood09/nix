@@ -54,8 +54,6 @@ After making config changes, stop at preflight (`just preflight`, or `nix fmt --
   - `secrets-rotation.org` - Secrets rotation runbook
   - `inventory.org` - Packages, services, and fonts per machine
   - `desktop.org` - Desktop architecture (login, graphics, theming)
-  - `analysis.org` - Codebase review findings and recommendations
-  - `openai-analyze.org` - Current Codex analysis and follow-up findings
   - `zen.org` - Zen Browser configuration notes
 
 ### Custom Options Namespace
@@ -154,7 +152,7 @@ Combine sources when useful: nixos MCP for the exact option name, then context7 
 ## Key Dependencies
 
 - nixpkgs: `nixos-25.11`
-- nixpkgs-unstable: `nixos-unstable` (used by noctalia)
+- nixpkgs-unstable: `nixos-unstable` (used by noctalia and to source the latest `opencode` package)
 - home-manager: `release-25.11`
 - nix-darwin: `nix-darwin-25.11`
 - stylix: `release-25.11`

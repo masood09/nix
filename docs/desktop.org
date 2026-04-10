@@ -119,8 +119,8 @@ Keyboard repeat is tuned to match macOS so the typing feel is consistent across 
 
 | Setting       | Darwin (modules/macos/base.nix) | Linux (niri input.keyboard) | Effective value         |
 |---------------+---------------------------------+-----------------------------+-------------------------|
-| Initial delay | ~InitialKeyRepeat = 15~ (ticks) | ~repeat-delay = 225~ (ms)   | 225 ms                  |
-| Repeat rate   | ~KeyRepeat = 2~ (ticks)         | ~repeat-rate = 33~ (Hz)     | ~30 ms / repeat (~33Hz) |
+| Initial delay | ~InitialKeyRepeat = 15~ (ticks)   | ~repeat-delay = 225~ (ms)     | 225 ms                  |
+| Repeat rate   | ~KeyRepeat = 2~ (ticks)           | ~repeat-rate = 33~ (Hz)       | ~30 ms / repeat (~33Hz) |
 
 Conversion: Darwin ticks × 15ms = Linux ms; ~1000 / (KeyRepeat * 15)~ ≈ Linux Hz. If you change one side, change the other — both files carry inline comments pointing at each other.
 
@@ -185,13 +185,13 @@ A fontconfig override in ~home.nix~ redirects common monospace fonts (Liberation
 
 All desktops use impermanence with ~/nix/persist~ as the persistence root. ZFS desktops (commandmodule, sonic) roll back root to a blank snapshot on every boot (~zfs rollback -r rpool/root/empty@start~). Non-ZFS desktops (arrakis) use tmpfs root, which is inherently wiped on reboot. Desktop-specific persistent directories:
 
-| Path                                   | Purpose                   |
-|----------------------------------------+---------------------------|
-| /var/lib/bluetooth                     | Bluetooth pairings        |
-| /var/lib/fprint                        | Fingerprint templates (used on fingerprint-enabled desktops) |
-| /var/lib/NetworkManager                | WiFi connections          |
-| /etc/NetworkManager/system-connections | WiFi connection configs   |
-| /var/cache/tuigreet                    | Greeter session cache     |
+| Path                                   | Purpose                                                        |
+|----------------------------------------+----------------------------------------------------------------|
+| /var/lib/bluetooth                     | Bluetooth pairings                                             |
+| /var/lib/fprint                        | Fingerprint templates (used on fingerprint-enabled desktops)   |
+| /var/lib/NetworkManager                | WiFi connections                                               |
+| /etc/NetworkManager/system-connections | WiFi connection configs                                        |
+| /var/cache/tuigreet                    | Greeter session cache                                          |
 | /home/<user>                           | User home (non-ZFS: auto-created with ownership; ZFS: dataset) |
 
 * Kernel & Performance
