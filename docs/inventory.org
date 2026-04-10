@@ -261,6 +261,16 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 | noto-fonts-cjk-sans   | CJK character coverage               |
 | noto-fonts-color-emoji | Emoji rendering                     |
 
+*** Kitty Font Size (Darwin vs Linux)
+
+=modules/home-manager/programs/_kitty.nix= sets a platform-conditional
+=font_size= default: =12= on Linux, =16= on Darwin. Linux =12= is the
+historic baseline (visually matches Doom Emacs at =:size 16= on the NixOS
+desktops). Darwin =16= is a user comfort preference on Retina displays, not
+a measured Emacs match — see the inline comment in =_kitty.nix= for the
+full rationale. Still =mkDefault=, so any machine can override via
+=programs.kitty.settings.font_size=.
+
 * NixOS Services
 
 Services defined in =modules/services/= and enabled per-machine via =homelab.services.<name>.enable=.
