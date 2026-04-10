@@ -1,5 +1,6 @@
 # macOS base — shared nix-darwin config for all macOS machines.
 # Sets system defaults (dark mode, dock, finder, keyboard), Touch ID sudo,
+# system-level shell enablement (fish PATH via nix-darwin programs.fish),
 # and Homebrew integration for GUI apps not available in nixpkgs.
 #
 # Keyboard repeat (NSGlobalDomain.{InitialKeyRepeat,KeyRepeat}) is the source
@@ -49,6 +50,16 @@ in {
           reattach = true;
         };
       };
+    };
+  };
+
+  # System-level shell enablement — mirrors modules/nixos/_packages.nix.
+  # nix-darwin's programs.fish.enable sets up /etc/fish/nixos-env-preinit.fish
+  # which injects nix profile paths into fish's PATH. Without this, fish
+  # launched by kitty won't find nix-installed tools (fzf, eza, zoxide, etc.).
+  programs = {
+    fish = {
+      inherit (homelabCfg.programs.fish) enable;
     };
   };
 
