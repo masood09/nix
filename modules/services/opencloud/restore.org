@@ -185,6 +185,17 @@ Verify:
 zfs list -t snapshot | grep pre-restore || echo "Pre-restore snapshots removed"
 #+end_src
 
+* Content-Security-Policy (CSP)
+
+The OpenCloud proxy reads its CSP directives from =config/csp.yaml=
+(mounted into the container at =/etc/opencloud/csp.yaml= via
+=PROXY_CSP_CONFIG_FILE_LOCATION=).
+
+The web UI's bundled JavaScript requires both =unsafe-inline= and
+=unsafe-eval= in the =script-src= directive. Without =unsafe-eval=,
+browser-side operations such as file downloads silently fail with a CSP
+violation in the browser console.
+
 * Notes & Best Practices
 
 - Always use =rsync -aAX= (not just =-a=) to preserve xattrs required by decomposedfs.
