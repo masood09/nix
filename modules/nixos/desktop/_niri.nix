@@ -1,10 +1,12 @@
 # Niri compositor — NixOS system-level module.
-# Enables the compositor and backlight control (udev rules for the video group).
+# Enables the compositor, backlight control (udev rules for the video group),
+# and the GTK portal backend for FileChooser (Save As dialogs).
 # User-level tooling and compositor config live in
 # modules/home-manager/programs/niri/default.nix via niri-flake's HM module.
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   homelabCfg = config.homelab;
@@ -30,6 +32,16 @@ in {
       # included via mkNixOSDesktopConfig); no explicit `package` needed here.
       niri = {
         enable = true;
+      };
+    };
+
+    # niri-flake conditionally adds xdg-desktop-portal-gnome (for screencasting)
+    # but that backend does not implement FileChooser. Without the GTK backend,
+    # "Save As" dialogs (e.g. browser downloads with useDownloadDir=false) silently
+    # fail because no portal can present the file picker.
+    xdg = {
+      portal = {
+        extraPortals = [pkgs.xdg-desktop-portal-gtk];
       };
     };
   };
