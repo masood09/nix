@@ -71,7 +71,7 @@ Zen browser configuration is split across ~modules/home-manager/programs/zen/~:
 | ~extensions.nix~ | Extensions and Zen Mods                            |
 | ~search.nix~     | Search engines                                     |
 | ~containers.nix~ | Container tabs and Zen spaces                      |
-| ~pins.nix~       | Declarative pinned tabs keyed by stable UUIDs      |
+| ~pins.nix~       | Declarative pinned tabs keyed by human-readable names |
 
 Theming is applied separately from the platform Stylix modules:
 
