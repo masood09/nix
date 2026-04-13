@@ -35,13 +35,21 @@ in {
       };
     };
 
-    # niri-flake conditionally adds xdg-desktop-portal-gnome (for screencasting)
-    # but that backend does not implement FileChooser. Without the GTK backend,
-    # "Save As" dialogs (e.g. browser downloads with useDownloadDir=false) silently
-    # fail because no portal can present the file picker.
+    # niri-flake sets `default=gnome;gtk;` in its portal config and conditionally
+    # adds xdg-desktop-portal-gnome (for screencasting). The GNOME backend
+    # implements FileChooser but requires a full GNOME session to render the
+    # dialog — on a bare niri compositor it accepts the D-Bus request then
+    # silently fails. Adding xdg-desktop-portal-gtk and explicitly routing
+    # FileChooser to it ensures "Save As" dialogs (e.g. browser downloads
+    # with useDownloadDir=false) always appear.
     xdg = {
       portal = {
         extraPortals = [pkgs.xdg-desktop-portal-gtk];
+        config = {
+          niri = {
+            "org.freedesktop.impl.portal.FileChooser" = "gtk";
+          };
+        };
       };
     };
   };
