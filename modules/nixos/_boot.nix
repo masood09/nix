@@ -81,7 +81,7 @@ in {
           ];
         };
 
-        timeout = 10;
+        timeout = 3;
       };
 
       # Plymouth boot splash for non-ZFS desktops (systemd-boot + systemd initrd).
