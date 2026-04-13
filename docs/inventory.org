@@ -148,7 +148,7 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 | Scope         | Output Key   | Purpose                                                         |
 |---------------+--------------+-----------------------------------------------------------------|
 | shared HM     | =lg-ultrafine= | Stable external monitor profile matched by LG monitor name      |
-| arrakis       | =eDP-1=        | Laptop panel placed to the right of the shared external monitor |
+| usul          | =eDP-1=        | Laptop panel placed to the right of the shared external monitor |
 | commandmodule | =eDP-1=        | Laptop panel placed to the right of the shared external monitor |
 | sonic         | =eDP-1=        | Laptop panel placed to the right of the shared external monitor |
 
@@ -183,19 +183,19 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 
 *** Services
 
-| Service               | Purpose                                                                                 |
-|-----------------------+-----------------------------------------------------------------------------------------|
-| accounts-daemon       | User account information service                                                        |
-| ananicy-cpp           | Auto-nice daemon (CachyOS rules)                                                        |
-| pipewire              | Unified audio daemon (replaces PulseAudio/ALSA)                                         |
-| fprintd               | Fingerprint authentication                                                              |
-| gnome-keyring         | Credential storage; auto-unlocked via PAM (password login + LUKS auto-login on arrakis) |
-| power-profiles-daemon | CPU power profile management                                                            |
-| printing (CUPS)       | Print server                                                                            |
-| upower                | Battery/power monitoring                                                                |
-| greetd + tuigreet     | TUI login manager                                                                       |
-| light                 | Backlight control (udev rules for video group)                                          |
-| niri                  | Scrollable-tiling Wayland compositor                                                    |
+| Service               | Purpose                                                                              |
+|-----------------------+--------------------------------------------------------------------------------------|
+| accounts-daemon       | User account information service                                                     |
+| ananicy-cpp           | Auto-nice daemon (CachyOS rules)                                                     |
+| pipewire              | Unified audio daemon (replaces PulseAudio/ALSA)                                      |
+| fprintd               | Fingerprint authentication                                                           |
+| gnome-keyring         | Credential storage; auto-unlocked via PAM (password login + LUKS auto-login on usul) |
+| power-profiles-daemon | CPU power profile management                                                         |
+| printing (CUPS)       | Print server                                                                         |
+| upower                | Battery/power monitoring                                                             |
+| greetd + tuigreet     | TUI login manager                                                                    |
+| light                 | Backlight control (udev rules for video group)                                       |
+| niri                  | Scrollable-tiling Wayland compositor                                                 |
 
 *** Graphics Packages
 
@@ -558,7 +558,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | fastfetch | zpools: rpool |
 
 ** NixOS Desktops
-*** arrakis
+*** usul
 
 - *Purpose:* Primary Laptop (NixOS Desktop)
 - *Storage:* LUKS-encrypted ext4 + tmpfs root (impermanence), LVM swap (40G, hibernate)

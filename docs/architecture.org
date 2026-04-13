@@ -21,7 +21,7 @@ machines/                          Per-machine configurations
   commrelay/                         NixOS server (Matrix, monitoring)
   watchfulsystem/                    NixOS server (monitoring, uptime)
   caretaker/                         NixOS server (DNS, Tailscale)
-  arrakis/                           NixOS desktop (primary laptop)
+  usul/                              NixOS desktop (primary laptop)
   commandmodule/                     NixOS desktop (laptop)
   sonic/                             NixOS desktop (laptop)
   murderbot/                         macOS (primary dev)
@@ -175,7 +175,7 @@ homelab
 | Role    | Machines                                                                                     | Characteristics                                |
 |---------+----------------------------------------------------------------------------------------------+------------------------------------------------|
 | server  | heartbeat, trialunit, accesscontrolsystem, meshcontrol, commrelay, watchfulsystem, caretaker | ZFS root, impermanence, headless, backup       |
-| desktop | arrakis, commandmodule, sonic                                                                | Niri compositor, GPU, audio, Bluetooth, Stylix |
+| desktop | usul, commandmodule, sonic                                                                   | Niri compositor, GPU, audio, Bluetooth, Stylix |
 | macOS   | murderbot, work-pantheon                                                                     | nix-darwin, Homebrew, Dock management          |
 
 * Secrets Architecture
@@ -208,7 +208,7 @@ Services: rpool/root/var/lib/<service> (dedicated datasets per service)
 Backup:   rpool/root/var/backup/postgresql (pg_dump target)
 #+end_example
 
-Non-ZFS machines (arrakis, caretaker) use LUKS-encrypted ext4 with tmpfs root:
+Non-ZFS machines (usul, caretaker) use LUKS-encrypted ext4 with tmpfs root:
 
 #+begin_example
 Boot:     /boot (EFI, vfat)

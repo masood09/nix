@@ -18,7 +18,7 @@ keys:
     age1gqvw59226drpwn8942x55jcf5zca5gfupj9eppmeagfevx3pupzs78dfs6
   - &heartbeat
     age1r84yxudulk0jgdtgcmu0qx79ztuxzrzrk4jl5s9n52x4874q35cqzu4enh
-  - &arrakis
+  - &usul
     age1qpdxlfwgwwnym09qjzr94chzwjnxj5f449nvvz4sgz8r2qrrn3sqtvvvzx
   - &sonic
     age1nsg2cqxkudumqj362mfeg5zfydgld9e78rwceancqx7lt3gr0dkqjnp9kp
@@ -41,7 +41,7 @@ creation_rules:
           - *meshcontrol
           - *watchfulsystem
           - *caretaker
-          - *arrakis
+          - *usul
           - *commandmodule
           - *heartbeat
           - *sonic
@@ -106,10 +106,10 @@ creation_rules:
         - *heartbeat
         - *masoodahmed
 
-  - path_regex: ^machines/arrakis/secrets\.sops\.yaml$
+  - path_regex: ^machines/usul/secrets\.sops\.yaml$
     key_groups:
       - age:
-        - *arrakis
+        - *usul
         - *masoodahmed
 
   # sonic shares secrets with commandmodule (paired laptops)

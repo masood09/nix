@@ -1,4 +1,4 @@
-# arrakis — ThinkPad T14 Gen 3 laptop, NixOS desktop with Niri compositor.
+# usul — ThinkPad T14 Gen 3 laptop, NixOS desktop with Niri compositor.
 # Single NVMe root, LUKS-encrypted ext4 with tmpfs impermanence.
 {
   imports = [

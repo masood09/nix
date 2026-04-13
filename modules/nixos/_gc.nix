@@ -28,7 +28,7 @@
       # every /nix store simultaneously. Mirrors _auto-update.nix.
       randomizedDelaySec = "10m";
 
-      # Critical for the three NixOS laptops (arrakis, commandmodule, sonic)
+      # Critical for the three NixOS laptops (usul, commandmodule, sonic)
       # which are typically asleep or powered off at 06:00 Sunday: systemd
       # records the last run in /var/lib/systemd/timers and fires the unit
       # shortly after the next boot if the scheduled slot was missed.

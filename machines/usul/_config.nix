@@ -9,7 +9,7 @@
       impermanence = true;
 
       networking = {
-        hostName = "arrakis";
+        hostName = "usul";
         wireless_enable = true;
       };
 
@@ -30,7 +30,7 @@
           enable = true;
         };
 
-        # Leave fingerprint support off on arrakis. Shared desktop modules gate
+        # Leave fingerprint support off on usul. Shared desktop modules gate
         # fprintd, PAM fingerprint auth, and Bitwarden's polkit action on this
         # flag, so disabling it keeps the machine on the password-only path.
         fingerprint = {
