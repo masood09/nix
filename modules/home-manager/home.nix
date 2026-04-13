@@ -25,18 +25,17 @@ in {
   };
   imports = [
     ./programs
-    # Zen browser home-manager module (beta variant)
-    inputs.zen-browser.homeModules.beta
     # MCP server bridge — translates `mcp-servers.programs.<name>.enable`
     # declarations in `programs/_mcp.nix` into entries under
     # `programs.mcp.servers`. Imported unconditionally; the registry itself
     # is gated on `homelab.programs.ai_tools` inside `_mcp.nix`, so this
     # contributes nothing to closures on machines without AI tooling.
     inputs.mcp-servers-nix.homeManagerModules.default
-    # Noctalia HM module is imported per desktop machine (not here) because
-    # its flake wrapper unconditionally sets programs.noctalia-shell.package
-    # via mkDefault, which forces the noctalia/quickshell build into every
-    # machine closure even when the shell is never enabled.
+    # Zen browser and Noctalia HM modules are imported per-machine (not
+    # here) because their flake wrappers unconditionally pull heavyweight
+    # packages into every closure even when the program is never enabled.
+    # Zen: desktopNixOSModules (NixOS) + mkDarwinConfig (macOS) in flake.nix
+    # Noctalia: desktopNixOSModules in flake.nix (NixOS desktops only)
   ];
 
   home = {

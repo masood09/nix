@@ -145,12 +145,17 @@
     # Desktop-only modules. Kept out of sharedNixOSModules because the
     # niri-flake NixOS module unconditionally injects its HM module (with
     # a default niri package) into home-manager.sharedModules, and the
-    # noctalia flake wrapper sets programs.noctalia-shell.package via
-    # mkDefault — both force heavyweight packages into every closure even
-    # when the desktop is never enabled.
+    # noctalia and zen-browser flake wrappers unconditionally pull
+    # heavyweight packages (quickshell, qt-wayland) into every closure
+    # even when the program is never enabled.
     desktopNixOSModules = [
       inputs.niri.nixosModules.niri
-      {home-manager.sharedModules = [inputs.noctalia.homeModules.default];}
+      {
+        home-manager.sharedModules = [
+          inputs.noctalia.homeModules.default
+          inputs.zen-browser.homeModules.beta
+        ];
+      }
     ];
 
     # NixOS configuration builder for servers.
@@ -161,7 +166,8 @@
       };
 
     # NixOS configuration builder for desktops. Extends mkNixOSConfig
-    # with niri and noctalia flake modules that are too heavy for servers.
+    # with niri, noctalia, and zen-browser flake modules that are too
+    # heavy for servers.
     mkNixOSDesktopConfig = path:
       nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
@@ -169,6 +175,9 @@
       };
 
     # Shared nix-darwin configuration builder for macOS machines.
+    # Zen browser HM module is included here (not in shared home.nix)
+    # for the same reason it's in desktopNixOSModules: its flake wrapper
+    # unconditionally pulls heavyweight browser packages into the closure.
     mkDarwinConfig = path:
       nix-darwin.lib.darwinSystem {
         specialArgs = {inherit inputs outputs;};
@@ -177,7 +186,10 @@
           inputs.home-manager.darwinModules.home-manager
           inputs.stylix.darwinModules.stylix
 
-          {nixpkgs.overlays = sharedOverlays;}
+          {
+            nixpkgs.overlays = sharedOverlays;
+            home-manager.sharedModules = [inputs.zen-browser.homeModules.beta];
+          }
 
           path
         ];
