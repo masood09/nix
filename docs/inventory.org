@@ -143,6 +143,15 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 | swaylock                   | =shell = "none"=     | Lock on =lock.target= (loginctl)             |
 | noctalia-before-sleep-lock | =shell = "noctalia"= | Before-sleep lock via Noctalia IPC         |
 
+**** Spawn-at-startup
+
+| Process         | Condition                               | Purpose                            |
+|-----------------+-----------------------------------------+------------------------------------|
+| =noctalia-shell=  | =shell = "noctalia"=                      | Desktop shell (bar, notifications) |
+| =bitwarden=       | =role == "desktop"=                        | Password manager                   |
+| =element-desktop= | =homelab.programs.element-desktop.enable= | Matrix client                      |
+| =emacs --daemon=  | =homelab.programs.emacs.enable=           | Emacs daemon (connect via Mod+E)   |
+
 **** Output Configuration
 
 | Scope         | Output Key   | Purpose                                                         |
