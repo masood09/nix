@@ -120,14 +120,21 @@ in {
             NIXOS_OZONE_WL = "1";
           };
 
-          # Keep shell startup colocated with the compositor session so Noctalia
-          # only launches inside Niri, matching upstream guidance and avoiding a
-          # second startup path via Noctalia's experimental systemd user service.
-          spawn-at-startup = lib.optionals shellIsNoctalia [
-            {
-              command = ["noctalia-shell"];
-            }
-          ];
+          # Session-startup processes launched alongside the compositor.
+          # Noctalia is first so the shell owns OSD/notifications before apps
+          # appear. Desktop apps follow, each gated on its own enable flag so
+          # server and headless closures stay free of GUI packages.
+          # Emacs starts as a daemon; the matching Mod+E keybinding opens a
+          # graphical client frame via emacsclient.
+          spawn-at-startup =
+            lib.optionals shellIsNoctalia [
+              {
+                command = ["noctalia-shell"];
+              }
+            ]
+            ++ lib.optional (homelabCfg.role == "desktop") {command = ["bitwarden"];}
+            ++ lib.optional (homelabCfg.programs.element-desktop.enable or false) {command = ["element-desktop"];}
+            ++ lib.optional (homelabCfg.programs.emacs.enable or false) {command = ["emacs" "--daemon"];};
 
           gestures.hot-corners.enable = false;
 
@@ -430,6 +437,14 @@ in {
               "Super+B" = {
                 action.spawn = ["zen-beta"];
               };
+            }
+            // lib.optionalAttrs (homelabCfg.programs.emacs.enable or false) {
+              # Connects to the Emacs daemon started in spawn-at-startup.
+              "Mod+E" = {
+                action.spawn = ["emacsclient" "-c"];
+              };
+            }
+            // {
               # Orca screen reader — toggle on/off with a single key.
               "Super+Alt+S" = {
                 allow-when-locked = true;
