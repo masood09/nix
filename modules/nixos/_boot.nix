@@ -1,4 +1,5 @@
-# Boot configuration — bootloader selection, kernel params, initrd, and Plymouth.
+# Boot configuration — bootloader selection, console log level, kernel params,
+# initrd, and Plymouth.
 # Automatically chooses between systemd-boot (non-ZFS) and GRUB (ZFS),
 # with support for mirrored boot partitions on multi-disk setups.
 # Desktops get graphical GRUB; servers stay text-only.
@@ -89,13 +90,25 @@ in {
         enable = true;
       };
 
-      # Quiet boot for Plymouth — suppress kernel and udev messages so the
-      # splash renders uninterrupted from bootloader through LUKS prompt to greeter.
-      # "auto" for show_status prints only on errors or significant delays.
+      # Quiet boot — suppress kernel/udev/systemd messages so the Plymouth
+      # splash renders uninterrupted from bootloader through LUKS prompt to
+      # greeter.  Messages are still captured in the journal (journalctl -b -k).
+      #
+      # consoleLogLevel sets the kernel's printk level for the physical console.
+      # It MUST be used instead of a "loglevel=N" kernelParam because the NixOS
+      # kernel module (nixos/modules/system/boot/kernel.nix) unconditionally
+      # appends "loglevel=<consoleLogLevel>" after all kernelParams — the kernel
+      # honours the last occurrence, so a kernelParam entry would be silently
+      # overridden by the default (4).  Level 3 = KERN_ERR + KERN_CRIT +
+      # KERN_ALERT + KERN_EMERG only.
+      #
+      # Plymouth's NixOS module already adds "splash" to kernelParams, so we
+      # don't duplicate it here.  "auto" for show_status prints systemd status
+      # lines only on errors or significant delays.
+      consoleLogLevel = lib.mkIf isDesktopSystemdBoot 3;
+
       kernelParams = lib.mkIf isDesktopSystemdBoot [
         "quiet"
-        "splash"
-        "loglevel=3"
         "rd.udev.log_level=3"
         "systemd.show_status=auto"
         "rd.systemd.show_status=auto"
