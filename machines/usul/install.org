@@ -1,9 +1,9 @@
-#+TITLE: Installing NixOS on arrakis
+#+TITLE: Installing NixOS on usul
 #+AUTHOR: Masood Ahmed
 #+OPTIONS: toc:nil num:nil
 
 This document describes the end-to-end process for installing NixOS on the
-=arrakis= laptop using:
+=usul= laptop using:
 
 - NixOS Live ISO (booted via USB)
 - LUKS-encrypted ext4 with LVM (swap + nix)
@@ -70,18 +70,18 @@ ls -la /dev/disk/by-id/ | grep nvme
 #+end_src
 
 Note the disk ID (e.g., =nvme-Patriot_M.2_P300_512GB_...=). This must match
-the ID configured in =homelab.disks.root= in =machines/arrakis/default.nix=.
+the ID configured in =homelab.disks.root= in =machines/usul/default.nix=.
 
 * Partition and Format Disk with Disko
 
-Run Disko using the flake configuration for =arrakis=:
+Run Disko using the flake configuration for =usul=:
 
 #+begin_src bash
 nix --experimental-features "nix-command flakes" \
   --option tarball-ttl 0 \
   run --refresh github:nix-community/disko -- \
   --mode destroy,format,mount \
-  --flake "github:masood09/nix#arrakis"
+  --flake "github:masood09/nix#usul"
 #+end_src
 
 During LUKS container creation, you will be prompted for the encryption
@@ -141,7 +141,7 @@ the flake repository and secrets re-encrypted before the first deploy.
 * Generate hardware-configuration.nix (First Install Only)
 
 Only needed if the hardware has changed or this is a brand-new machine.
-arrakis already has a checked-in =hardware-configuration.nix=. Skip this
+usul already has a checked-in =hardware-configuration.nix=. Skip this
 step if reinstalling on the same hardware.
 
 #+begin_src bash
@@ -149,18 +149,18 @@ nixos-generate-config --root /mnt --no-filesystems --show-hardware-config \
   > /tmp/hardware-configuration.nix
 #+end_src
 
-Compare with =machines/arrakis/hardware-configuration.nix= in the flake
+Compare with =machines/usul/hardware-configuration.nix= in the flake
 repository. If hardware has changed, update and commit before proceeding.
 
 * Install NixOS
 
-Install NixOS using the flake configuration for =arrakis=:
+Install NixOS using the flake configuration for =usul=:
 
 #+begin_src bash
 nixos-install \
   --no-root-passwd \
   --root /mnt \
-  --flake github:masood09/nix#arrakis \
+  --flake github:masood09/nix#usul \
   --option tarball-ttl 0
 #+end_src
 

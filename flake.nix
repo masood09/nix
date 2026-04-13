@@ -229,7 +229,7 @@
       trialunit = mkNixOSConfig ./machines/trialunit;
 
       # Desktops — use mkNixOSDesktopConfig for niri + noctalia modules
-      arrakis = mkNixOSDesktopConfig ./machines/arrakis;
+      usul = mkNixOSDesktopConfig ./machines/usul;
       commandmodule = mkNixOSDesktopConfig ./machines/commandmodule;
       sonic = mkNixOSDesktopConfig ./machines/sonic;
 

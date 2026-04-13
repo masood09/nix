@@ -1,4 +1,4 @@
-# arrakis — machine-specific Niri output configuration.
+# usul — machine-specific Niri output configuration.
 {
   config,
   lib,

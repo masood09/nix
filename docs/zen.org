@@ -63,14 +63,14 @@ launchd context, which is set by ~launchctl setenv~.
 
 Zen browser configuration is split across ~modules/home-manager/programs/zen/~:
 
-| File           | Responsibility                                     |
-|----------------+----------------------------------------------------|
-| ~default.nix~    | Module entry point, enterprise policies, Betterfox |
-|                | profile, ~MOZ_LEGACY_PROFILES~ workaround            |
-| ~settings.nix~   | Browser preferences (compact-mode behaviour, etc.) |
-| ~extensions.nix~ | Extensions and Zen Mods                            |
-| ~search.nix~     | Search engines                                     |
-| ~containers.nix~ | Container tabs and Zen spaces                      |
+| File           | Responsibility                                        |
+|----------------+-------------------------------------------------------|
+| ~default.nix~    | Module entry point, enterprise policies, Betterfox    |
+|                | profile, ~MOZ_LEGACY_PROFILES~ workaround               |
+| ~settings.nix~   | Browser preferences (compact-mode behaviour, etc.)    |
+| ~extensions.nix~ | Extensions and Zen Mods                               |
+| ~search.nix~     | Search engines                                        |
+| ~containers.nix~ | Container tabs and Zen spaces                         |
 | ~pins.nix~       | Declarative pinned tabs keyed by human-readable names |
 
 Theming is applied separately from the platform Stylix modules:
@@ -134,7 +134,7 @@ state survives reboots without any Zen-specific persistence rules.
 
 ** Machines
 
-Zen is enabled on all three NixOS desktops: arrakis, commandmodule, and sonic.
+Zen is enabled on all three NixOS desktops: usul, commandmodule, and sonic.
 On macOS it is enabled on murderbot and work-pantheon.
 
 * Operational gotchas

@@ -5,11 +5,11 @@
 
 * Overview
 
-Three NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. commandmodule and sonic use ZFS root with impermanence (ephemeral root via ZFS rollback). arrakis uses LUKS-encrypted ext4 with tmpfs impermanence and systemd-boot. macOS desktops (murderbot, work-pantheon) use nix-darwin with Stylix for HM-level theming (fonts, opacity, terminal colors) but are otherwise out of scope for this document.
+Three NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. commandmodule and sonic use ZFS root with impermanence (ephemeral root via ZFS rollback). usul uses LUKS-encrypted ext4 with tmpfs impermanence and systemd-boot. macOS desktops (murderbot, work-pantheon) use nix-darwin with Stylix for HM-level theming (fonts, opacity, terminal colors) but are otherwise out of scope for this document.
 
 | Machine       | Hardware           | GPU            | Primary User       | Theme               | Root FS    | Boot                    | Fingerprint |
 |---------------+--------------------+----------------+--------------------+---------------------+------------+-------------------------+-------------|
-| arrakis       | ThinkPad T14 Gen 3 | AMD Radeon     | masoodahmed (1000) | gruvbox-dark        | ext4/LUKS  | systemd-boot + Plymouth | no          |
+| usul          | ThinkPad T14 Gen 3 | AMD Radeon     | masoodahmed (1000) | gruvbox-dark        | ext4/LUKS  | systemd-boot + Plymouth | no          |
 | commandmodule | ThinkPad (Intel)   | Intel UHD 620  | masoodahmed (1000) | gruvbox-dark        | ZFS        | GRUB                    | yes         |
 | sonic         | ThinkPad T14 Gen 3 | AMD Ryzen iGPU | zainahmed (1001)   | sonic-dark (custom) | ZFS        | GRUB                    | yes         |
 
@@ -54,7 +54,7 @@ Everything is gated behind ~homelab.*~ options. A machine opts into the desktop 
 
 greetd manages login sessions for all NixOS desktops. By default it runs tuigreet, a TUI greeter that launches ~niri-session~. On encrypted non-ZFS desktops (~homelab.isEncryptedRoot = true~ and ~homelab.isRootZFS = false~), greetd instead starts ~initial_session~ for the primary user immediately after boot-time disk unlock. Supports fingerprint auth when ~homelab.hardware.fingerprint.enable = true~.
 
-Today that means fingerprint auth is available on ~commandmodule~ and ~sonic~. ~arrakis~ is explicitly password-only.
+Today that means fingerprint auth is available on ~commandmodule~ and ~sonic~. ~usul~ is explicitly password-only.
 
 ** PAM Stack
 
@@ -75,13 +75,13 @@ PAM evaluation order for tuigreet with fingerprint enabled:
 
 ~services.gnome.gnome-keyring~ is enabled for all desktops. The PAM module auto-unlocks the ~login~ keyring on password login. Fingerprint login cannot unlock the keyring because no password flows through PAM (see Pain Points).
 
-On encrypted non-ZFS desktops (currently just ~arrakis~), auto-login from the boot password is covered by ~pam_fde_boot_pw.so inject_for=gkr~ in the greetd session stack. ~systemd-cryptsetup~ runs inside the systemd initrd (~boot.initrd.systemd.enable = true~ via the ~isDesktopSystemdBoot~ guard in ~modules/nixos/_boot.nix~) and caches the LUKS passphrase in the kernel keyring under the ~cryptsetup~ description. ~pam_fde_boot_pw~ reads that cached passphrase at session start and injects it so ~pam_gnome_keyring~ can unlock the ~login~ keyring as if the user had typed it. This requires the user's login password to match the LUKS passphrase; if they diverge, the session starts but the keyring stays locked (apps fall back to prompting).
+On encrypted non-ZFS desktops (currently just ~usul~), auto-login from the boot password is covered by ~pam_fde_boot_pw.so inject_for=gkr~ in the greetd session stack. ~systemd-cryptsetup~ runs inside the systemd initrd (~boot.initrd.systemd.enable = true~ via the ~isDesktopSystemdBoot~ guard in ~modules/nixos/_boot.nix~) and caches the LUKS passphrase in the kernel keyring under the ~cryptsetup~ description. ~pam_fde_boot_pw~ reads that cached passphrase at session start and injects it so ~pam_gnome_keyring~ can unlock the ~login~ keyring as if the user had typed it. This requires the user's login password to match the LUKS passphrase; if they diverge, the session starts but the keyring stays locked (apps fall back to prompting).
 
 ** Desktop Applications
 
 Bitwarden Desktop is installed from ~modules/home-manager/programs/_packages.nix~ as part of the shared Linux desktop package set. Element Desktop is managed by Home Manager's native ~programs.element-desktop~ module in ~modules/home-manager/programs/_element-desktop.nix~ and is enabled per machine through ~homelab.programs.element-desktop.enable~. The module is designed to be reusable on both Linux and macOS, but on ~murderbot~ it is currently disabled because nixpkgs ~element-desktop~ fails to build on Darwin (see "Element on Darwin" below); Element is provided there by the Homebrew ~element~ cask as a temporary workaround.
 
-Bitwarden also needs machine-wide integration: fingerprint-capable NixOS desktops install a generated polkit action (~com.bitwarden.Bitwarden.unlock~) from ~modules/nixos/desktop/default.nix~ so Bitwarden's "system authentication" unlock path can delegate to polkit instead of failing because the action is undefined. In the current fleet that action is present on ~commandmodule~ and ~sonic~, but not on ~arrakis~.
+Bitwarden also needs machine-wide integration: fingerprint-capable NixOS desktops install a generated polkit action (~com.bitwarden.Bitwarden.unlock~) from ~modules/nixos/desktop/default.nix~ so Bitwarden's "system authentication" unlock path can delegate to polkit instead of failing because the action is undefined. In the current fleet that action is present on ~commandmodule~ and ~sonic~, but not on ~usul~.
 
 Element Desktop currently has no comparable system-wide integration in this repo, but on Linux its Home Manager module overrides the package to start Electron with ~--password-store=gnome-libsecret~. That forces Electron onto GNOME Keyring's Secret Service backend in the Niri session, where Electron's desktop auto-detection would otherwise fail and offer weaker local encryption. The module also declares a fuller ~settings~ baseline: it points Element at ~homelab.programs.element-desktop.baseUrl~ and ~homelab.programs.element-desktop.serverName~ (defaulting to ~https://chat.mantannest.com~ / ~chat.mantannest.com~), locks login to that homeserver, defaults to the dark theme, and leaves analytics disabled by not configuring ~posthog~. Using the native HM module also leaves room for future declarative extra ~profiles~ without pushing that app-specific config back into the generic package list.
 
@@ -185,7 +185,7 @@ A fontconfig override in ~home.nix~ redirects common monospace fonts (Liberation
 
 * Persistence
 
-All desktops use impermanence with ~/nix/persist~ as the persistence root. ZFS desktops (commandmodule, sonic) roll back root to a blank snapshot on every boot (~zfs rollback -r rpool/root/empty@start~). Non-ZFS desktops (arrakis) use tmpfs root, which is inherently wiped on reboot. Desktop-specific persistent directories:
+All desktops use impermanence with ~/nix/persist~ as the persistence root. ZFS desktops (commandmodule, sonic) roll back root to a blank snapshot on every boot (~zfs rollback -r rpool/root/empty@start~). Non-ZFS desktops (usul) use tmpfs root, which is inherently wiped on reboot. Desktop-specific persistent directories:
 
 | Path                                   | Purpose                                                        |
 |----------------------------------------+----------------------------------------------------------------|
@@ -238,7 +238,7 @@ ananicy-cpp is an auto-nice daemon that adjusts process niceness, I/O priority, 
 
 * Boot
 
-ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix themes the GRUB menu with Base16 colors by default. Non-ZFS desktops (arrakis) use systemd-boot with systemd-based initrd and Plymouth. The boot sequence there is: systemd-boot → Plymouth splash (themed by Stylix) → LUKS passphrase (via Plymouth's password agent) → desktop session. If the machine explicitly disables Stylix, the boot path remains the same but the Base16 theming pieces fall away. If the machine is an unencrypted or ZFS desktop, greetd falls back to the normal greeter path instead. Kernel params ~quiet splash loglevel=3~ suppress console output so the splash is uninterrupted. Plymouth and systemd initrd are auto-enabled for any machine with ~role = "desktop"~ and ~isRootZFS = false~ (the ~isDesktopSystemdBoot~ guard in ~_boot.nix~).
+ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix themes the GRUB menu with Base16 colors by default. Non-ZFS desktops (usul) use systemd-boot with systemd-based initrd and Plymouth. The boot sequence there is: systemd-boot → Plymouth splash (themed by Stylix) → LUKS passphrase (via Plymouth's password agent) → desktop session. If the machine explicitly disables Stylix, the boot path remains the same but the Base16 theming pieces fall away. If the machine is an unencrypted or ZFS desktop, greetd falls back to the normal greeter path instead. Kernel params ~quiet splash loglevel=3~ suppress console output so the splash is uninterrupted. Plymouth and systemd initrd are auto-enabled for any machine with ~role = "desktop"~ and ~isRootZFS = false~ (the ~isDesktopSystemdBoot~ guard in ~_boot.nix~).
 
 * Pain Points
 
@@ -246,7 +246,7 @@ ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix 
 
 When ~pam_fprintd.so~ succeeds (marked ~sufficient~), PAM short-circuits the auth stack. ~pam_gnome_keyring.so~ never receives a password, so the ~login~ keyring stays locked. Apps that use the Secret Service API (Element, Discord) will prompt for credentials each session.
 
-Note that the analogous auto-login pain point on encrypted non-ZFS desktops (~arrakis~) is now resolved by ~pam_fde_boot_pw~ in the greetd session stack — see Login Flow / GNOME Keyring above. The same trick does not help fingerprint logins because ~commandmodule~ and ~sonic~ are ZFS desktops with no LUKS passphrase cached in the kernel keyring; the only password source available to PAM during a fingerprint login is the user's typed password, which is exactly what fingerprint replaces.
+Note that the analogous auto-login pain point on encrypted non-ZFS desktops (~usul~) is now resolved by ~pam_fde_boot_pw~ in the greetd session stack — see Login Flow / GNOME Keyring above. The same trick does not help fingerprint logins because ~commandmodule~ and ~sonic~ are ZFS desktops with no LUKS passphrase cached in the kernel keyring; the only password source available to PAM during a fingerprint login is the user's typed password, which is exactly what fingerprint replaces.
 
 *Workaround:* log in with password instead of fingerprint. The keyring unlocks automatically.
 
@@ -256,4 +256,4 @@ The repo currently installs ~com.bitwarden.Bitwarden.unlock~ only when ~homelab.
 
 ** ZFS requires GRUB
 
-systemd-boot does not support ZFS. commandmodule and sonic are locked to GRUB. arrakis has migrated to ext4+LUKS and uses systemd-boot.
+systemd-boot does not support ZFS. commandmodule and sonic are locked to GRUB. usul has migrated to ext4+LUKS and uses systemd-boot.

@@ -77,7 +77,7 @@ When changing only one machine or service, prefer the narrowest command that exe
 NixOS hosts currently include:
 
 - `accesscontrolsystem`
-- `arrakis`
+- `usul`
 - `caretaker`
 - `commandmodule`
 - `commrelay`
