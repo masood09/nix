@@ -1,4 +1,9 @@
+# Age encryption keys for sops-nix secrets management.
+# Each machine has its own key; masoodahmed is the sole admin key
+# used from all dev machines (murderbot, work-pantheon, etc.).
+# See docs/secrets-rotation.org for rotation and incident-response procedures.
 keys:
+  # --- NixOS machines ---
   - &accesscontrolsystem
     age1rx9mw350ymp2xwua05peyg0f8s354ad8lxl9kkzwkg7pmwnh2q3qvg3z8e
   - &commandmodule
@@ -19,12 +24,15 @@ keys:
     age1nsg2cqxkudumqj362mfeg5zfydgld9e78rwceancqx7lt3gr0dkqjnp9kp
   - &trialunit
     age1pcju0zkh2k3f8m7856k9ftzkjqw538jf255t2azusf9yr6v2nqksfn2pwa
+  # --- Admin key (shared across all dev machines: murderbot, work-pantheon) ---
   - &masoodahmed
-    age1zpv05al3vr4kl6xwkqy234k70qkfwrm9pjv0hd3uyqsqqmeq4stsxhrv39
-  - &murderbot
     age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
 
+# Creation rules: each regex maps a sops file to the set of age keys that can
+# decrypt it. Every file includes masoodahmed (admin). Machine-specific files
+# include only that machine + admin; shared files include all relevant machines.
 creation_rules:
+  # Global shared secrets — all NixOS machines + admin
   - path_regex: ^secrets/secrets\.sops\.yaml$
     key_groups:
       - age:
@@ -39,15 +47,14 @@ creation_rules:
           - *sonic
           - *trialunit
           - *masoodahmed
-          - *murderbot
 
+  # Scoped secrets — headscale DNS/ACL only need meshcontrol + trialunit
   - path_regex: ^secrets/headscale-dns\.sops\.yaml$
     key_groups:
       - age:
         - *meshcontrol
         - *trialunit
         - *masoodahmed
-        - *murderbot
 
   - path_regex: ^secrets/headscale-acl\.sops\.yaml$
     key_groups:
@@ -55,78 +62,69 @@ creation_rules:
         - *meshcontrol
         - *trialunit
         - *masoodahmed
-        - *murderbot
 
+  # Per-machine secrets — each machine + admin only
   - path_regex: ^machines/accesscontrolsystem/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *accesscontrolsystem
         - *masoodahmed
-        - *murderbot
 
   - path_regex: ^machines/commandmodule/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *commandmodule
         - *masoodahmed
-        - *murderbot
 
   - path_regex: ^machines/commrelay/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *commrelay
         - *masoodahmed
-        - *murderbot
 
   - path_regex: ^machines/caretaker/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *caretaker
         - *masoodahmed
-        - *murderbot
 
   - path_regex: ^machines/meshcontrol/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *meshcontrol
         - *masoodahmed
-        - *murderbot
 
   - path_regex: ^machines/watchfulsystem/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *watchfulsystem
         - *masoodahmed
-        - *murderbot
 
   - path_regex: ^machines/heartbeat/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *heartbeat
         - *masoodahmed
-        - *murderbot
 
   - path_regex: ^machines/arrakis/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *arrakis
         - *masoodahmed
-        - *murderbot
 
+  # sonic shares secrets with commandmodule (paired laptops)
   - path_regex: ^machines/sonic/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *commandmodule
         - *sonic
         - *masoodahmed
-        - *murderbot
 
   - path_regex: ^machines/trialunit/secrets\.sops\.yaml$
     key_groups:
       - age:
         - *trialunit
         - *masoodahmed
-        - *murderbot
 
 stores:
   yaml:
