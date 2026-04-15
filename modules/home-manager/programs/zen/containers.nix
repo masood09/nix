@@ -2,7 +2,12 @@
 # Space UUIDs are stable so Zen can persist workspace state across rebuilds.
 # "homelab" (default): Personal, Homelab, Admin, Google.
 # "family" / "work":   Personal, Work, Google.
-{homelabCfg, ...}: {
+# "work-minimal":      Personal, Work (no Google, no pinned tabs).
+{
+  homelabCfg,
+  lib,
+  ...
+}: {
   programs = {
     zen-browser = {
       profiles = {
@@ -15,7 +20,10 @@
                 icon = "fingerprint";
                 id = 2;
               };
-
+            }
+            // lib.optionalAttrs
+            (builtins.elem homelabCfg.programs.zen.containerProfile ["homelab" "family" "work"])
+            {
               Google = {
                 color = "yellow"; # Catppuccin Yellow (#f9e2af)
                 icon = "circle";
@@ -23,7 +31,7 @@
               };
             }
             // (
-              if builtins.elem homelabCfg.programs.zen.containerProfile ["family" "work"]
+              if builtins.elem homelabCfg.programs.zen.containerProfile ["family" "work" "work-minimal"]
               then {
                 Work = {
                   color = "green"; # Catppuccin Green (#a6e3a1)
@@ -55,7 +63,10 @@
                 container = 2; # Personal container
                 position = 1000;
               };
-
+            }
+            // lib.optionalAttrs
+            (builtins.elem homelabCfg.programs.zen.containerProfile ["homelab" "family" "work"])
+            {
               "Google" = {
                 id = "a8f3c2e1-5d90-4b2a-9e7f-1c4d8a6b3f9e";
                 icon = "🔍";
@@ -64,7 +75,7 @@
               };
             }
             // (
-              if builtins.elem homelabCfg.programs.zen.containerProfile ["family" "work"]
+              if builtins.elem homelabCfg.programs.zen.containerProfile ["family" "work" "work-minimal"]
               then {
                 "Work" = {
                   id = "b2f47c1d-8e23-4a91-bc56-7d3e9f0a1c84";

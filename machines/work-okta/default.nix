@@ -1,0 +1,85 @@
+# work-okta — Okta work macOS machine. Minimal Zen profile (work-minimal),
+# no git signing, work-only SSH keys. Corporate Artifactory proxy blocks
+# third-party Homebrew taps (see _packages.nix).
+{
+  imports = [
+    ./hardware-configuration.nix
+
+    ./../../modules/macos/base.nix
+    ./../../modules/home-manager
+
+    ./_dock.nix
+    ./_packages.nix
+  ];
+
+  home-manager = {
+    users = {
+      "masood.ahmed" = {
+        programs = {
+          zen-browser = {
+            policies = {
+              ExtensionSettings = {
+                # Karakeep — not needed on work machine
+                "addon@karakeep.app" = {
+                  installation_mode = "blocked";
+                };
+                # SponsorBlock — not needed on work machine
+                "sponsorBlocker@ajay.app" = {
+                  installation_mode = "blocked";
+                };
+                # Bitwarden — not needed on work machine
+                "{446900e4-71c2-419f-a6a7-df9c091e268b}" = {
+                  installation_mode = "blocked";
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+
+  # Show menu bar — no sketchybar on this machine (blocked by Artifactory)
+  system = {
+    defaults = {
+      NSGlobalDomain = {
+        _HIHideMenuBar = false;
+      };
+    };
+  };
+
+  homelab = {
+    role = "desktop";
+
+    networking = {
+      hostName = "work-okta";
+    };
+
+    # Work-only SSH key — personal keys excluded from this machine
+    primaryUser = {
+      userName = "masood.ahmed";
+      sshPublicKeys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPACCnG604Keu/TxyHknYuzLhua3i6FpXw1Jz6TkEoH6 masood.ahmed@okta.com"
+      ];
+    };
+
+    programs = {
+      emacs = {
+        enable = true;
+      };
+
+      kitty = {
+        enable = true;
+      };
+
+      neovim = {
+        enable = true;
+      };
+
+      zen = {
+        enable = true;
+        containerProfile = "work-minimal";
+      };
+    };
+  };
+}

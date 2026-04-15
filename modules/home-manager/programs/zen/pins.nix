@@ -5,9 +5,10 @@
 #            Homelab  → router, omada, uptime, grafana, uptime.test, grafana.test, oracle cloud, backblaze
 #            Admin    → auth, auth.test
 #            Google   → gmail, youtube
-# "work":    Personal → proton mail, proton calendar, keep, ittools, passwords
-#            Google   → gmail, youtube
-# "family":  Personal → keep, ittools
+# "work":         Personal → proton mail, proton calendar, keep, ittools, passwords
+#                 Google   → gmail, youtube
+# "work-minimal": (none)
+# "family":       Personal → keep, ittools
 {
   homelabCfg,
   lib,

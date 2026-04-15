@@ -39,6 +39,7 @@ in {
         username = lib.mkOption {
           description = "Username to apply the dock settings to";
           type = lib.types.str;
+          default = config.homelab.primaryUser.userName;
         };
       };
     };

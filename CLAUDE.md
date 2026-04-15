@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 3 NixOS desktops, and 2 macOS machines with home-manager, sops-nix secrets, ZFS, and impermanence.
+Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 3 NixOS desktops, and 3 macOS machines with home-manager, sops-nix secrets, ZFS, and impermanence.
 
 ## Commands
 
@@ -115,7 +115,7 @@ homelab = {
 
 ### Darwin / Homebrew Policy
 
-Long-term direction on macOS machines (`murderbot`, `work-pantheon`) is to phase out Homebrew casks and `masApps` in favor of nixpkgs / Home Manager. Homebrew is a fallback for packages that don't yet build cleanly on Darwin via nixpkgs, not a permanent choice.
+Long-term direction on macOS machines (`murderbot`, `work-pantheon`, `work-okta`) is to phase out Homebrew casks and `masApps` in favor of nixpkgs / Home Manager. Homebrew is a fallback for packages that don't yet build cleanly on Darwin via nixpkgs, not a permanent choice. On `work-okta` the corporate Artifactory proxy blocks all third-party taps, so shared taps/brews/casks are force-cleared in `machines/work-okta/_packages.nix`.
 
 - For new Darwin packages, default to nixpkgs/HM. Only fall back to Homebrew when there's a concrete blocker.
 - When falling back to a cask, leave a `TECH DEBT:` comment near the cask entry explaining what's blocking the nixpkgs route, and re-evaluate periodically.
@@ -166,5 +166,5 @@ Combine sources when useful: nixos MCP for the exact option name, then context7 
 
 **NixOS servers**: accesscontrolsystem, commrelay, meshcontrol, watchfulsystem, caretaker, heartbeat, trialunit
 **NixOS desktops**: usul (primary laptop), commandmodule (laptop), sonic (laptop)
-**macOS**: murderbot, work-pantheon
+**macOS**: murderbot, work-okta, work-pantheon
 **Other**: nixiso (minimal NixOS installer ISO)

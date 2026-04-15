@@ -213,6 +213,7 @@
 
     # macOS machines
     darwinConfigurations = {
+      "work-okta" = mkDarwinConfig ./machines/work-okta;
       "work-pantheon" = mkDarwinConfig ./machines/work-pantheon;
       murderbot = mkDarwinConfig ./machines/murderbot;
     };
