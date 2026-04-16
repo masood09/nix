@@ -647,8 +647,8 @@ Defined in =nix/pkgs/= and auto-discovered.
 *** sonic
 
 - *Purpose:* Sonic Laptop (NixOS Desktop)
-- *Storage:* ZFS root (encrypted, impermanence)
-- *GPU:* AMD
+- *Storage:* ext4/LUKS root (LVM, tmpfs impermanence)
+- *GPU:* Intel
 - *Desktop:* Niri compositor + greetd
 - *Primary User:* zainahmed (uid 1001)
 
@@ -669,7 +669,6 @@ Defined in =nix/pkgs/= and auto-discovered.
 | bitwarden-desktop | Password manager                   |
 | element-desktop   | Matrix chat client                 |
 | emacs             | Editor                             |
-| fastfetch         | zpools: rpool                      |
 | fish              | Interactive shell                  |
 | git               | Zain Ahmed / zain@ahmedmasood.com  |
 | kitty             | Terminal emulator                  |
