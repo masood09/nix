@@ -1,4 +1,4 @@
-# Hardware config — ThinkPad T14 Gen 3 AMD laptop (bare-metal AMD x86_64).
+# Hardware config — ThinkPad T490 (bare-metal Intel x86_64).
 {
   config,
   lib,
@@ -13,35 +13,41 @@
   boot = {
     initrd = {
       availableKernelModules = [
-        "nvme"
         "xhci_pci"
+        "ahci"
+        "nvme"
+        "usbhid"
         "usb_storage"
         "sd_mod"
+        "rtsx_pci_sdmmc" # Realtek SD card reader
       ];
     };
 
     kernelModules = [
-      # WiFi (Intel AX WiFi - iwlwifi stack)
+      # WiFi (Intel Wireless - iwlwifi stack)
       "iwlwifi"
       "iwlmvm"
 
-      # Ethernet (Realtek r8169)
-      "r8169"
+      # Ethernet (Intel e1000e)
+      "e1000e"
 
-      # ThinkPad specific
+      # Thinkpad specific
       "thinkpad_acpi"
 
-      # AMD thermal
-      "k10temp"
+      # Power management / thermal
+      "intel_pmc_core"
+      "intel_rapl_msr"
+      "intel_cstate"
+      "intel_pch_thermal"
 
       # KVM
-      "kvm_amd"
+      "kvm_intel"
       "kvm"
     ];
 
     kernelParams = [
-      # Use modern AMD P-State driver with energy performance preference
-      "amd_pstate=active"
+      # Disable Panel Self Refresh — causes micro-stutter on Whiskey Lake iGPU
+      "i915.enable_psr=0"
     ];
 
     extraModulePackages = [];
@@ -56,7 +62,7 @@
     firmware = [pkgs.linux-firmware];
 
     cpu = {
-      amd = {
+      intel = {
         updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
       };
     };

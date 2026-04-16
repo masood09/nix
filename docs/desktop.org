@@ -5,13 +5,13 @@
 
 * Overview
 
-Three NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. commandmodule and sonic use ZFS root with impermanence (ephemeral root via ZFS rollback). usul uses LUKS-encrypted ext4 with tmpfs impermanence and systemd-boot. macOS desktops (murderbot, work-pantheon) use nix-darwin with Stylix for HM-level theming (fonts, opacity, terminal colors) but are otherwise out of scope for this document.
+Three NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. commandmodule uses ZFS root with impermanence (ephemeral root via ZFS rollback). usul and sonic use LUKS-encrypted ext4 with tmpfs impermanence and systemd-boot. macOS desktops (murderbot, work-pantheon) use nix-darwin with Stylix for HM-level theming (fonts, opacity, terminal colors) but are otherwise out of scope for this document.
 
 | Machine       | Hardware           | GPU            | Primary User       | Theme               | Root FS    | Boot                    | Fingerprint |
 |---------------+--------------------+----------------+--------------------+---------------------+------------+-------------------------+-------------|
 | usul          | ThinkPad T14 Gen 3 | AMD Radeon     | masoodahmed (1000) | gruvbox-dark        | ext4/LUKS  | systemd-boot + Plymouth | no          |
 | commandmodule | ThinkPad (Intel)   | Intel UHD 620  | masoodahmed (1000) | gruvbox-dark        | ZFS        | GRUB                    | yes         |
-| sonic         | ThinkPad T14 Gen 3 | AMD Ryzen iGPU | zainahmed (1001)   | sonic-dark (custom) | ZFS        | GRUB                    | yes         |
+| sonic         | ThinkPad (Intel)   | Intel UHD 620  | zainahmed (1001)   | sonic-dark (custom) | ext4/LUKS  | systemd-boot + Plymouth | yes         |
 
 * Module Structure
 
@@ -144,7 +144,7 @@ GPU acceleration is configured per-driver via ~homelab.hardware.graphics.driver~
 
 ~LIBVA_DRIVER_NAME=iHD~. Kernel param ~i915.enable_psr=0~ disables Panel Self Refresh to fix scrolling micro-stutter on Whiskey Lake.
 
-** AMD (sonic)
+** AMD (usul)
 
 | Package        | Purpose                   |
 |----------------+---------------------------|
@@ -185,7 +185,7 @@ A fontconfig override in ~home.nix~ redirects common monospace fonts (Liberation
 
 * Persistence
 
-All desktops use impermanence with ~/nix/persist~ as the persistence root. ZFS desktops (commandmodule, sonic) roll back root to a blank snapshot on every boot (~zfs rollback -r rpool/root/empty@start~). Non-ZFS desktops (usul) use tmpfs root, which is inherently wiped on reboot. Desktop-specific persistent directories:
+All desktops use impermanence with ~/nix/persist~ as the persistence root. ZFS desktops (commandmodule) roll back root to a blank snapshot on every boot (~zfs rollback -r rpool/root/empty@start~). Non-ZFS desktops (usul, sonic) use tmpfs root, which is inherently wiped on reboot. Desktop-specific persistent directories:
 
 | Path                                   | Purpose                                                        |
 |----------------------------------------+----------------------------------------------------------------|
@@ -238,7 +238,7 @@ ananicy-cpp is an auto-nice daemon that adjusts process niceness, I/O priority, 
 
 * Boot
 
-ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix themes the GRUB menu with Base16 colors by default. Non-ZFS desktops (usul) use systemd-boot with systemd-based initrd and Plymouth. The boot sequence there is: systemd-boot → Plymouth splash (themed by Stylix) → LUKS passphrase (via Plymouth's password agent) → desktop session. If the machine explicitly disables Stylix, the boot path remains the same but the Base16 theming pieces fall away. If the machine is an unencrypted or ZFS desktop, greetd falls back to the normal greeter path instead. Console output is suppressed by ~boot.consoleLogLevel = 3~ (warnings+ only) and kernel params ~quiet~, ~rd.udev.log_level=3~, ~systemd.show_status=auto~. Note: the log level must be set via ~consoleLogLevel~, not a ~loglevel=N~ kernel param, because the NixOS kernel module unconditionally appends ~loglevel=<consoleLogLevel>~ after all ~kernelParams~ entries and the kernel honours the last value. Plymouth's NixOS module adds ~splash~ automatically. Plymouth and systemd initrd are auto-enabled for any machine with ~role = "desktop"~ and ~isRootZFS = false~ (the ~isDesktopSystemdBoot~ guard in ~_boot.nix~).
+ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix themes the GRUB menu with Base16 colors by default. Non-ZFS desktops (usul, sonic) use systemd-boot with systemd-based initrd and Plymouth. The boot sequence there is: systemd-boot → Plymouth splash (themed by Stylix) → LUKS passphrase (via Plymouth's password agent) → desktop session. If the machine explicitly disables Stylix, the boot path remains the same but the Base16 theming pieces fall away. If the machine is an unencrypted or ZFS desktop, greetd falls back to the normal greeter path instead. Console output is suppressed by ~boot.consoleLogLevel = 3~ (warnings+ only) and kernel params ~quiet~, ~rd.udev.log_level=3~, ~systemd.show_status=auto~. Note: the log level must be set via ~consoleLogLevel~, not a ~loglevel=N~ kernel param, because the NixOS kernel module unconditionally appends ~loglevel=<consoleLogLevel>~ after all ~kernelParams~ entries and the kernel honours the last value. Plymouth's NixOS module adds ~splash~ automatically. Plymouth and systemd initrd are auto-enabled for any machine with ~role = "desktop"~ and ~isRootZFS = false~ (the ~isDesktopSystemdBoot~ guard in ~_boot.nix~).
 
 * Pain Points
 
@@ -246,7 +246,7 @@ ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix 
 
 When ~pam_fprintd.so~ succeeds (marked ~sufficient~), PAM short-circuits the auth stack. ~pam_gnome_keyring.so~ never receives a password, so the ~login~ keyring stays locked. Apps that use the Secret Service API (Element, Discord) will prompt for credentials each session.
 
-Note that the analogous auto-login pain point on encrypted non-ZFS desktops (~usul~) is now resolved by ~pam_fde_boot_pw~ in the greetd session stack — see Login Flow / GNOME Keyring above. The same trick does not help fingerprint logins because ~commandmodule~ and ~sonic~ are ZFS desktops with no LUKS passphrase cached in the kernel keyring; the only password source available to PAM during a fingerprint login is the user's typed password, which is exactly what fingerprint replaces.
+Note that the analogous auto-login pain point on encrypted non-ZFS desktops (~usul~, ~sonic~) is now resolved by ~pam_fde_boot_pw~ in the greetd session stack — see Login Flow / GNOME Keyring above. The same trick does not help fingerprint logins because the only password source available to PAM during a fingerprint login is the user's typed password, which is exactly what fingerprint replaces. So on ~sonic~ (encrypted non-ZFS desktop with a fingerprint reader), password logins unlock the keyring automatically via ~pam_fde_boot_pw~, but fingerprint logins still leave the keyring locked. ~commandmodule~ has no escape hatch at all because it is a ZFS desktop with no LUKS passphrase cached in the kernel keyring.
 
 *Workaround:* log in with password instead of fingerprint. The keyring unlocks automatically.
 
@@ -256,4 +256,4 @@ The repo currently installs ~com.bitwarden.Bitwarden.unlock~ only when ~homelab.
 
 ** ZFS requires GRUB
 
-systemd-boot does not support ZFS. commandmodule and sonic are locked to GRUB. usul has migrated to ext4+LUKS and uses systemd-boot.
+systemd-boot does not support ZFS. commandmodule is locked to GRUB. usul and sonic use ext4+LUKS and systemd-boot.

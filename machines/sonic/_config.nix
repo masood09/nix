@@ -1,10 +1,20 @@
-# Homelab options — ThinkPad T14 Gen 3 laptop with Niri desktop, bluetooth, fingerprint.
+# Homelab options — ThinkPad T490 laptop with Niri desktop, bluetooth, fingerprint.
 {
   config = {
     homelab = {
       role = "desktop";
       purpose = "Sonic Laptop (NixOS Desktop)";
-      isRootZFS = true;
+
+      # Storage stack: LUKS-encrypted ext4 (LVM) + systemd-boot + Plymouth.
+      # Setting isRootZFS = false (with role = "desktop" and isEncryptedRoot = true)
+      # cascades through shared modules to enable: systemd-boot + systemd initrd
+      # + Plymouth splash (modules/nixos/_boot.nix), tmpfs root with /home
+      # bind-mounted from /nix/persist (modules/nixos/_impermanence.nix), and
+      # greetd auto-login + pam_fde_boot_pw GNOME Keyring unlock for the
+      # primary user (modules/nixos/desktop/_greetd.nix). For the keyring
+      # auto-unlock to work, zainahmed's login password must equal the LUKS
+      # passphrase set during install.
+      isRootZFS = false;
       isEncryptedRoot = true;
       impermanence = true;
 
@@ -37,7 +47,7 @@
         graphics = {
           enable = true;
 
-          driver = "amd";
+          driver = "intel";
         };
       };
 
@@ -53,9 +63,6 @@
       };
 
       programs = {
-        fastfetch = {
-          zpools = ["rpool"];
-        };
         element-desktop = {
           enable = true;
         };

@@ -1,6 +1,6 @@
-# Disko disk layout — single-disk root pool (laptop).
+# Disko disk layout — single-disk LUKS+LVM (swap + ext4 /nix), tmpfs root (laptop).
 {...}: {
   imports = [
-    ../../../modules/nixos/disko/_root-disk-single.nix
+    ../../../modules/nixos/disko/_root-disk-single-ext4.nix
   ];
 }

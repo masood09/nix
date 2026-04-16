@@ -94,7 +94,7 @@ homelab = {
 
 ### Persistence Model
 - ZFS machines: ephemeral root via ZFS rollback to blank snapshot, persistent data in `/nix/persist`
-- Non-ZFS machines (usul, caretaker): tmpfs root wiped on reboot, LUKS-encrypted ext4 at `/nix`, persistent data in `/nix/persist`
+- Non-ZFS machines (usul, caretaker, sonic): tmpfs root wiped on reboot, LUKS-encrypted ext4 at `/nix`, persistent data in `/nix/persist`
 - Services that manage their own ZFS dataset bypass impermanence bind-mounts entirely
 - The three-part guard in `lib/persistence-helpers.nix` handles all scenarios: `impermanence && !isRootZFS && !zfsEnable`
 - Import the helper as: `persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};`
