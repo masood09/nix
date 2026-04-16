@@ -214,8 +214,6 @@
     # macOS machines
     darwinConfigurations = {
       "work-okta" = mkDarwinConfig ./machines/work-okta;
-      "work-pantheon" = mkDarwinConfig ./machines/work-pantheon;
-      murderbot = mkDarwinConfig ./machines/murderbot;
     };
 
     # NixOS servers and desktops
@@ -231,7 +229,6 @@
 
       # Desktops — use mkNixOSDesktopConfig for niri + noctalia modules
       usul = mkNixOSDesktopConfig ./machines/usul;
-      commandmodule = mkNixOSDesktopConfig ./machines/commandmodule;
       sonic = mkNixOSDesktopConfig ./machines/sonic;
 
       # Minimal NixOS installer ISO with SSH key baked in

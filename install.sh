@@ -34,6 +34,6 @@ if [ "$(uname)" == "Darwin" ]; then
   echo -e "\n\033[1;32mAll steps completed successfully. nix-darwin is now ready to be installed.\033[0m\n"
   echo -e "To install nix-darwin configuration, run the following commands:\n"
   echo -e "\033[1m. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh\033[0m\n"
-  echo -e "\033[1msudo nix run nix-darwin -- switch --flake github:masood09/nix#murderbot\033[0m\n"
+  echo -e "\033[1msudo nix run nix-darwin -- switch --flake github:masood09/nix#work-okta\033[0m\n"
   echo -e "Remember to add the new host public key to sops-nix!"
 fi

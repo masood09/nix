@@ -56,8 +56,8 @@ Because this repo is configuration-heavy, a “single test” usually means eval
 
 - Evaluate one NixOS host: `nix eval .#nixosConfigurations.heartbeat.config.system.name`
 - Build one NixOS host: `nix build .#nixosConfigurations.heartbeat.config.system.build.toplevel`
-- Evaluate one Darwin host: `nix eval .#darwinConfigurations.murderbot.system.primaryUser`
-- Build one Darwin host: `nix build .#darwinConfigurations.murderbot.system`
+- Evaluate one Darwin host: `nix eval .#darwinConfigurations.work-okta.system.primaryUser`
+- Build one Darwin host: `nix build .#darwinConfigurations.work-okta.system`
 - Build one custom package: `nix build .#mailarchiver`
 - Check one Nix expression parses: `nix-instantiate --parse modules/services/mailarchiver/default.nix`
 
@@ -79,7 +79,6 @@ NixOS hosts currently include:
 - `accesscontrolsystem`
 - `usul`
 - `caretaker`
-- `commandmodule`
 - `commrelay`
 - `heartbeat`
 - `meshcontrol`
@@ -90,8 +89,7 @@ NixOS hosts currently include:
 
 Darwin hosts currently include:
 
-- `murderbot`
-- `work-pantheon`
+- `work-okta`
 
 ## Formatting Rules
 

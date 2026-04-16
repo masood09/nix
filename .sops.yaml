@@ -1,13 +1,11 @@
 # Age encryption keys for sops-nix secrets management.
 # Each machine has its own key; masoodahmed is the sole admin key
-# used from all dev machines (murderbot, work-pantheon, etc.).
+# used from all dev machines (usul, work-okta).
 # See docs/secrets-rotation.org for rotation and incident-response procedures.
 keys:
   # --- NixOS machines ---
   - &accesscontrolsystem
     age1rx9mw350ymp2xwua05peyg0f8s354ad8lxl9kkzwkg7pmwnh2q3qvg3z8e
-  - &commandmodule
-    age1g54hxk0qqe24nh5n7vjsl6hpas42kdn3u4s7g3djgsenvqhkx48qn2xm7u
   - &commrelay
     age1p3zgy2putgsdfgvz7uf43crn47ta5gxsw2vvc3uvdjufc83g2a6slwaj7y
   - &meshcontrol
@@ -24,7 +22,7 @@ keys:
     age1nsg2cqxkudumqj362mfeg5zfydgld9e78rwceancqx7lt3gr0dkqjnp9kp
   - &trialunit
     age1pcju0zkh2k3f8m7856k9ftzkjqw538jf255t2azusf9yr6v2nqksfn2pwa
-  # --- Admin key (shared across all dev machines: murderbot, work-pantheon) ---
+  # --- Admin key (shared across dev machines: usul, work-okta) ---
   - &masoodahmed
     age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
 
@@ -42,7 +40,6 @@ creation_rules:
           - *watchfulsystem
           - *caretaker
           - *usul
-          - *commandmodule
           - *heartbeat
           - *sonic
           - *trialunit
@@ -68,12 +65,6 @@ creation_rules:
     key_groups:
       - age:
         - *accesscontrolsystem
-        - *masoodahmed
-
-  - path_regex: ^machines/commandmodule/secrets\.sops\.yaml$
-    key_groups:
-      - age:
-        - *commandmodule
         - *masoodahmed
 
   - path_regex: ^machines/commrelay/secrets\.sops\.yaml$
@@ -112,11 +103,9 @@ creation_rules:
         - *usul
         - *masoodahmed
 
-  # sonic shares secrets with commandmodule (paired laptops)
   - path_regex: ^machines/sonic/secrets\.sops\.yaml$
     key_groups:
       - age:
-        - *commandmodule
         - *sonic
         - *masoodahmed
 
