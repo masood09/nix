@@ -22,10 +22,8 @@ machines/                          Per-machine configurations
   watchfulsystem/                    NixOS server (monitoring, uptime)
   caretaker/                         NixOS server (DNS, Tailscale)
   usul/                              NixOS desktop (primary laptop)
-  commandmodule/                     NixOS desktop (laptop)
   sonic/                             NixOS desktop (laptop)
-  murderbot/                         macOS (primary dev)
-  work-pantheon/                     macOS (work)
+  work-okta/                         macOS (work)
   nixiso/                            NixOS installer ISO
 
 modules/                           Reusable configuration modules
@@ -175,8 +173,8 @@ homelab
 | Role    | Machines                                                                                     | Characteristics                                |
 |---------+----------------------------------------------------------------------------------------------+------------------------------------------------|
 | server  | heartbeat, trialunit, accesscontrolsystem, meshcontrol, commrelay, watchfulsystem, caretaker | ZFS root, impermanence, headless, backup       |
-| desktop | usul, commandmodule, sonic                                                                   | Niri compositor, GPU, audio, Bluetooth, Stylix |
-| macOS   | murderbot, work-pantheon                                                                     | nix-darwin, Homebrew, Dock management          |
+| desktop | usul, sonic                                                                                  | Niri compositor, GPU, audio, Bluetooth, Stylix |
+| macOS   | work-okta                                                                                    | nix-darwin, Homebrew, Dock management          |
 
 * Secrets Architecture
 

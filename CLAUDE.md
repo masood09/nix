@@ -115,14 +115,11 @@ homelab = {
 
 ### Darwin / Homebrew Policy
 
-Long-term direction on macOS machines (`murderbot`, `work-pantheon`, `work-okta`) is to phase out Homebrew casks and `masApps` in favor of nixpkgs / Home Manager. Homebrew is a fallback for packages that don't yet build cleanly on Darwin via nixpkgs, not a permanent choice. On `work-okta` the corporate Artifactory proxy blocks all third-party taps, so shared taps/brews/casks are force-cleared in `machines/work-okta/_packages.nix`.
+Long-term direction on `work-okta` (the sole macOS machine) is to phase out Homebrew casks and `masApps` in favor of nixpkgs / Home Manager. Homebrew is a fallback for packages that don't yet build cleanly on Darwin via nixpkgs, not a permanent choice. On `work-okta` the corporate Artifactory proxy blocks all third-party taps, so shared taps/brews/casks are force-cleared in `machines/work-okta/_packages.nix`.
 
 - For new Darwin packages, default to nixpkgs/HM. Only fall back to Homebrew when there's a concrete blocker.
 - When falling back to a cask, leave a `TECH DEBT:` comment near the cask entry explaining what's blocking the nixpkgs route, and re-evaluate periodically.
 - When a Darwin build breaks and the easy fix is "just use the cask," frame it as tech debt rather than the preferred solution.
-
-**Known exceptions** are tracked inline at the cask entry and in `docs/desktop.org`. Current entries:
-- `element` cask in `machines/murderbot/_packages.nix` — nixpkgs `element-desktop` fails to build on Darwin (electron-builder/actool issue). HM `programs.element-desktop` is disabled on murderbot until upstream is fixed. See the "Element on Darwin (tech debt)" section in `docs/desktop.org` for the full diagnosis and the inline `TECH DEBT:` comment in `_packages.nix` for the in-file note.
 
 ### Service Registry
 Before adding services, check `docs/service-registry.org` for:
@@ -165,6 +162,6 @@ Combine sources when useful: nixos MCP for the exact option name, then context7 
 ## Machines
 
 **NixOS servers**: accesscontrolsystem, commrelay, meshcontrol, watchfulsystem, caretaker, heartbeat, trialunit
-**NixOS desktops**: usul (primary laptop), commandmodule (laptop), sonic (laptop)
-**macOS**: murderbot, work-okta, work-pantheon
+**NixOS desktops**: usul (primary laptop), sonic (laptop)
+**macOS**: work-okta
 **Other**: nixiso (minimal NixOS installer ISO)

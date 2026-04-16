@@ -134,8 +134,8 @@ state survives reboots without any Zen-specific persistence rules.
 
 ** Machines
 
-Zen is enabled on all three NixOS desktops: usul, commandmodule, and sonic.
-On macOS it is enabled on murderbot and work-pantheon.
+Zen is enabled on the NixOS desktops (usul, sonic) and on the sole macOS
+machine (work-okta).
 
 * Operational gotchas
 

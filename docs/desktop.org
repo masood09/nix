@@ -5,13 +5,12 @@
 
 * Overview
 
-Three NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. commandmodule uses ZFS root with impermanence (ephemeral root via ZFS rollback). usul and sonic use LUKS-encrypted ext4 with tmpfs impermanence and systemd-boot. macOS desktops (murderbot, work-pantheon) use nix-darwin with Stylix for HM-level theming (fonts, opacity, terminal colors) but are otherwise out of scope for this document.
+Two NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. Both use LUKS-encrypted ext4 with tmpfs impermanence and systemd-boot. The sole macOS machine (work-okta) uses nix-darwin with Stylix for HM-level theming (fonts, opacity, terminal colors) but is otherwise out of scope for this document.
 
 | Machine       | Hardware           | GPU            | Primary User       | Theme               | Root FS    | Boot                    | Fingerprint |
 |---------------+--------------------+----------------+--------------------+---------------------+------------+-------------------------+-------------|
 | usul          | ThinkPad T14 Gen 3 | AMD Radeon     | masoodahmed (1000) | gruvbox-dark        | ext4/LUKS  | systemd-boot + Plymouth | no          |
-| commandmodule | ThinkPad (Intel)   | Intel UHD 620  | masoodahmed (1000) | gruvbox-dark        | ZFS        | GRUB                    | yes         |
-| sonic         | ThinkPad (Intel)   | Intel UHD 620  | zainahmed (1001)   | sonic-dark (custom) | ext4/LUKS  | systemd-boot + Plymouth | yes         |
+| sonic         | ThinkPad T490      | Intel UHD 620  | zainahmed (1001)   | sonic-dark (custom) | ext4/LUKS  | systemd-boot + Plymouth | yes         |
 
 * Module Structure
 
@@ -40,8 +39,6 @@ modules/home-manager/programs/
   _kitty.nix         Terminal emulator
   zen/               Browser (privacy hardening, extensions, containers, pinned tabs)
 
-machines/commandmodule/
-  _niri.nix          Machine-local Niri laptop panel output placement
 machines/sonic/
   _niri.nix          Machine-local Niri laptop panel output placement
 #+end_example
@@ -54,7 +51,7 @@ Everything is gated behind ~homelab.*~ options. A machine opts into the desktop 
 
 greetd manages login sessions for all NixOS desktops. By default it runs tuigreet, a TUI greeter that launches ~niri-session~. On encrypted non-ZFS desktops (~homelab.isEncryptedRoot = true~ and ~homelab.isRootZFS = false~), greetd instead starts ~initial_session~ for the primary user immediately after boot-time disk unlock. Supports fingerprint auth when ~homelab.hardware.fingerprint.enable = true~.
 
-Today that means fingerprint auth is available on ~commandmodule~ and ~sonic~. ~usul~ is explicitly password-only.
+Today that means fingerprint auth is available on ~sonic~. ~usul~ is explicitly password-only.
 
 ** PAM Stack
 
@@ -79,17 +76,11 @@ On encrypted non-ZFS desktops (currently just ~usul~), auto-login from the boot 
 
 ** Desktop Applications
 
-Bitwarden Desktop is installed from ~modules/home-manager/programs/_packages.nix~ as part of the shared Linux desktop package set. Element Desktop is managed by Home Manager's native ~programs.element-desktop~ module in ~modules/home-manager/programs/_element-desktop.nix~ and is enabled per machine through ~homelab.programs.element-desktop.enable~. The module is designed to be reusable on both Linux and macOS, but on ~murderbot~ it is currently disabled because nixpkgs ~element-desktop~ fails to build on Darwin (see "Element on Darwin" below); Element is provided there by the Homebrew ~element~ cask as a temporary workaround.
+Bitwarden Desktop is installed from ~modules/home-manager/programs/_packages.nix~ as part of the shared Linux desktop package set. Element Desktop is managed by Home Manager's native ~programs.element-desktop~ module in ~modules/home-manager/programs/_element-desktop.nix~ and is enabled per machine through ~homelab.programs.element-desktop.enable~.
 
-Bitwarden also needs machine-wide integration: fingerprint-capable NixOS desktops install a generated polkit action (~com.bitwarden.Bitwarden.unlock~) from ~modules/nixos/desktop/default.nix~ so Bitwarden's "system authentication" unlock path can delegate to polkit instead of failing because the action is undefined. In the current fleet that action is present on ~commandmodule~ and ~sonic~, but not on ~usul~.
+Bitwarden also needs machine-wide integration: fingerprint-capable NixOS desktops install a generated polkit action (~com.bitwarden.Bitwarden.unlock~) from ~modules/nixos/desktop/default.nix~ so Bitwarden's "system authentication" unlock path can delegate to polkit instead of failing because the action is undefined. In the current fleet that action is present on ~sonic~, but not on ~usul~.
 
 Element Desktop currently has no comparable system-wide integration in this repo, but on Linux its Home Manager module overrides the package to start Electron with ~--password-store=gnome-libsecret~. That forces Electron onto GNOME Keyring's Secret Service backend in the Niri session, where Electron's desktop auto-detection would otherwise fail and offer weaker local encryption. The module also declares a fuller ~settings~ baseline: it points Element at ~homelab.programs.element-desktop.baseUrl~ and ~homelab.programs.element-desktop.serverName~ (defaulting to ~https://chat.mantannest.com~ / ~chat.mantannest.com~), locks login to that homeserver, defaults to the dark theme, and leaves analytics disabled by not configuring ~posthog~. Using the native HM module also leaves room for future declarative extra ~profiles~ without pushing that app-specific config back into the generic package list.
-
-*** Element on Darwin (tech debt)
-
-On macOS the HM ~programs.element-desktop~ module is intentionally not enabled. nixpkgs ~element-desktop@1.12.10~ fails to build on Darwin: ~electron-builder@26.x~ added an eager actool version check in ~app-builder-lib/src/util/macosIconComposer.ts~ that runs at module load time and calls bare ~actool~ with no absolute path. The Nix builder's PATH is built only from ~nativeBuildInputs~, so ~/usr/bin/actool~ is unreachable from inside the build even with ~sandbox = false~ — the build fails with "Failed to check actool version. Is Xcode 26 or higher installed?" regardless of whether Xcode is installed on the host. Because ~platformPackager.ts~ imports ~macosIconComposer~ unconditionally, the failure happens even though Element never goes near the macOS icon composer.
-
-As a temporary workaround ~murderbot~ installs Element via the Homebrew ~element~ cask (see ~machines/murderbot/_packages.nix~) and disables the HM module entry in ~machines/murderbot/default.nix~. The long-term direction is to drop the cask and re-enable the HM module once nixpkgs picks up an upstream electron-builder fix or patches the bare ~actool~ call to use an absolute path. The HM-managed ~settings~ baseline does not apply on Darwin while the module is disabled; if homeserver pinning becomes important on macOS before the upstream fix lands, the cleanest fix is a downstream overlay on ~pkgs.element-desktop~ rather than re-enabling the broken build.
 
 * Compositor
 
@@ -107,7 +98,7 @@ When ~desktop.shell = "noctalia"~, the shared Niri keymap routes shell-owned har
 
 ~spawn-at-startup~ launches session processes alongside the compositor. Noctalia is first so the shell owns OSD/notifications before apps appear. Desktop apps follow, each gated on its own enable flag: ~bitwarden~ on ~role == "desktop"~, ~element-desktop~ on ~homelab.programs.element-desktop.enable~, and ~emacs --daemon~ on ~homelab.programs.emacs.enable~. The Emacs daemon pairs with a ~Mod+E~ keybinding that opens a graphical client frame via ~emacsclient -c~; the keybinding is also gated on ~homelab.programs.emacs.enable~. This keeps shell startup tied to the compositor session, which matches Noctalia's current Niri guidance and avoids enabling the shell's experimental systemd user service in parallel. A separate ~noctalia-before-sleep-lock~ user service runs ~swayidle -w before-sleep ...~ with Noctalia IPC so lid-close suspend locks while the user session is still alive; earlier root-side sleep hooks and generic ~loginctl lock-session~ wiring were intentionally removed because they ran too late or did not integrate reliably with the active Noctalia session.
 
-The shared Niri config defines the external LG 4K monitor using a stable logical key and matches the actual hardware by monitor name (~LG Electronics LG ULTRAFINE 110NTHM20241~) rather than a transient connector like ~DP-2~. Laptop panel placement remains machine-local in ~machines/{commandmodule,sonic}/_niri.nix~ so the shared desktop module only owns output state that is common across both laptops.
+The shared Niri config defines the external LG 4K monitor using a stable logical key and matches the actual hardware by monitor name (~LG Electronics LG ULTRAFINE 110NTHM20241~) rather than a transient connector like ~DP-2~. Laptop panel placement remains machine-local in ~machines/sonic/_niri.nix~ so the shared desktop module only owns output state that is common across laptops.
 
 The primary directional bindings use edge-aware fallbacks so movement stays continuous across the desktop topology. ~Mod+Left/Right~ and ~Mod+H/L~ focus the adjacent column, then fall through to the monitor on that side when already at the edge. ~Mod+Up/Down~ and ~Mod+K/J~ focus the adjacent window, then fall through to the workspace above or below when already at the first or last window. The matching ~Mod+Shift+...~ bindings move the focused column or window with the same fallback behavior, while the ~Mod+Ctrl+...~ bindings remain explicit monitor navigation.
 
@@ -132,7 +123,7 @@ Niri's defaults (600ms delay, 25Hz) feel sluggish next to macOS, which is why we
 
 GPU acceleration is configured per-driver via ~homelab.hardware.graphics.driver~:
 
-** Intel (commandmodule)
+** Intel (sonic)
 
 | Package               | Purpose                                 |
 |-----------------------+-----------------------------------------|
@@ -185,7 +176,7 @@ A fontconfig override in ~home.nix~ redirects common monospace fonts (Liberation
 
 * Persistence
 
-All desktops use impermanence with ~/nix/persist~ as the persistence root. ZFS desktops (commandmodule) roll back root to a blank snapshot on every boot (~zfs rollback -r rpool/root/empty@start~). Non-ZFS desktops (usul, sonic) use tmpfs root, which is inherently wiped on reboot. Desktop-specific persistent directories:
+All desktops use impermanence with ~/nix/persist~ as the persistence root. Both current desktops (usul, sonic) use tmpfs root with LUKS-encrypted ext4, which is inherently wiped on reboot. (The shared modules still support ZFS-root desktops via ~zfs rollback -r rpool/root/empty@start~, but no current machine uses that path.) Desktop-specific persistent directories:
 
 | Path                                   | Purpose                                                        |
 |----------------------------------------+----------------------------------------------------------------|
@@ -246,7 +237,7 @@ ZFS desktops use GRUB (~gfxmodeEfi = "auto"~ for graphical framebuffer); Stylix 
 
 When ~pam_fprintd.so~ succeeds (marked ~sufficient~), PAM short-circuits the auth stack. ~pam_gnome_keyring.so~ never receives a password, so the ~login~ keyring stays locked. Apps that use the Secret Service API (Element, Discord) will prompt for credentials each session.
 
-Note that the analogous auto-login pain point on encrypted non-ZFS desktops (~usul~, ~sonic~) is now resolved by ~pam_fde_boot_pw~ in the greetd session stack — see Login Flow / GNOME Keyring above. The same trick does not help fingerprint logins because the only password source available to PAM during a fingerprint login is the user's typed password, which is exactly what fingerprint replaces. So on ~sonic~ (encrypted non-ZFS desktop with a fingerprint reader), password logins unlock the keyring automatically via ~pam_fde_boot_pw~, but fingerprint logins still leave the keyring locked. ~commandmodule~ has no escape hatch at all because it is a ZFS desktop with no LUKS passphrase cached in the kernel keyring.
+Note that the analogous auto-login pain point on encrypted non-ZFS desktops (~usul~, ~sonic~) is now resolved by ~pam_fde_boot_pw~ in the greetd session stack — see Login Flow / GNOME Keyring above. The same trick does not help fingerprint logins because the only password source available to PAM during a fingerprint login is the user's typed password, which is exactly what fingerprint replaces. So on ~sonic~ (encrypted non-ZFS desktop with a fingerprint reader), password logins unlock the keyring automatically via ~pam_fde_boot_pw~, but fingerprint logins still leave the keyring locked.
 
 *Workaround:* log in with password instead of fingerprint. The keyring unlocks automatically.
 
@@ -256,4 +247,4 @@ The repo currently installs ~com.bitwarden.Bitwarden.unlock~ only when ~homelab.
 
 ** ZFS requires GRUB
 
-systemd-boot does not support ZFS. commandmodule is locked to GRUB. usul and sonic use ext4+LUKS and systemd-boot.
+systemd-boot does not support ZFS. Both current desktops (usul, sonic) use ext4+LUKS and systemd-boot; the ZFS-root desktop path (GRUB) is still wired in ~modules/nixos/_boot.nix~ but has no live machine today.
