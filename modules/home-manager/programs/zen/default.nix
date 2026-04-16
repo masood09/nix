@@ -1,10 +1,15 @@
 # Zen Browser — privacy-focused Firefox fork with vertical tabs and workspaces.
-# Profile config is split across sub-modules:
+# Profile config is split into a shared baseline (this module + its sub-modules)
+# and machine-specific layouts that live in each machine's `_zen.nix`:
+#
+#   (shared)
 #   settings.nix    — browser preferences
-#   extensions.nix  — extensions and Zen Mods
-#   search.nix      — search engines
-#   containers.nix  — container tabs and spaces
-#   pins.nix        — pinned tabs
+#   extensions.nix  — extensions and Zen Mods (common across all machines)
+#   search.nix      — default + hidden search engines (Brave + built-in hides)
+#
+#   (per-machine, in machines/<host>/_zen.nix)
+#   containers, spaces, pins — each host declares its own set directly
+#   additional search.engines — usul adds the NixOS ecosystem engines
 {
   lib,
   pkgs,
@@ -16,8 +21,6 @@
     ./settings.nix
     ./extensions.nix
     ./search.nix
-    ./containers.nix
-    ./pins.nix
   ];
 
   # Workaround for https://github.com/0xc000022070/zen-browser-flake/issues/63

@@ -61,17 +61,21 @@ launchd context, which is set by ~launchctl setenv~.
 
 * Configuration files
 
-Zen browser configuration is split across ~modules/home-manager/programs/zen/~:
+Zen browser configuration is split into a shared baseline under
+~modules/home-manager/programs/zen/~ and per-machine layout files at
+~machines/<host>/_zen.nix~:
 
-| File           | Responsibility                                        |
-|----------------+-------------------------------------------------------|
-| ~default.nix~    | Module entry point, enterprise policies, Betterfox    |
-|                | profile, ~MOZ_LEGACY_PROFILES~ workaround               |
-| ~settings.nix~   | Browser preferences (compact-mode behaviour, etc.)    |
-| ~extensions.nix~ | Extensions and Zen Mods                               |
-| ~search.nix~     | Search engines                                        |
-| ~containers.nix~ | Container tabs and Zen spaces                         |
-| ~pins.nix~       | Declarative pinned tabs keyed by human-readable names |
+| File                           | Responsibility                                                  |
+|--------------------------------+-----------------------------------------------------------------|
+| ~default.nix~                    | Module entry point, enterprise policies, Betterfox              |
+|                                | profile, ~MOZ_LEGACY_PROFILES~ workaround                         |
+| ~settings.nix~                   | Browser preferences (compact-mode behaviour, etc.)              |
+| ~extensions.nix~                 | Extensions and Zen Mods (common across all machines)            |
+| ~search.nix~                     | Default (Brave) + hidden built-in search engines                |
+| ~machines/<host>/_zen.nix~       | Per-machine containers, spaces, pins, and extra search engines  |
+
+Host layouts are fully machine-local — there is no shared "profile" enum.
+See "Per-machine layouts" below for what each host declares.
 
 Theming is applied separately from the platform Stylix modules:
 
@@ -136,6 +140,43 @@ state survives reboots without any Zen-specific persistence rules.
 
 Zen is enabled on the NixOS desktops (usul, sonic) and on the sole macOS
 machine (work-okta).
+
+** Per-machine layouts
+
+Each Zen-enabled machine declares its own containers, spaces, and pins in
+=machines/<host>/_zen.nix=. The files write directly into
+=home-manager.users.<primaryUser>.programs.zen-browser.profiles.default= and
+merge with the shared baseline. UUIDs are stable and must not be
+regenerated — Zen keys persistent session state (space membership, pin
+ordering) off those IDs, so changing one surfaces as a "new" space or
+duplicate pin on next launch.
+
+*** usul (primary laptop)
+
+- Containers: Personal, Homelab, Admin, Google (ids 2, 3, 4, 5)
+- Pins: 17 total — Personal (Proton Mail/Calendar, Karakeep, IT Tools,
+  Mail Archiver), Homelab (UniFi, Omada, Uptime Prod/Test, Grafana
+  Prod/Test, Oracle Cloud, Backblaze), Admin (Authentik Prod/Test),
+  Google (Gmail, YouTube)
+- Search: adds the NixOS ecosystem engines — NixOS Packages, NixOS
+  Options, Home Manager Options, My NixOS, Noogle — on top of Brave.
+
+*** sonic (family laptop)
+
+- Containers: Personal, Work, Google (ids 2, 3, 5)
+- Pins: 2 total — Karakeep and IT Tools in the Personal space; Work and
+  Google spaces exist but ship no pinned tabs.
+- Search: Brave default only.
+
+*** work-okta (work macOS)
+
+- Containers: Personal, Work (ids 2, 3); no Google container.
+- Pins: none (~pinsForce = true; pins = {};~).
+- ~ExtensionSettings~ policy blocks three addons that are not appropriate
+  on a work machine: Karakeep (~addon@karakeep.app~), SponsorBlock
+  (~sponsorBlocker@ajay.app~), and Bitwarden
+  (~{446900e4-71c2-419f-a6a7-df9c091e268b}~).
+- Search: Brave default only.
 
 * Operational gotchas
 
