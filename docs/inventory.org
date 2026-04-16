@@ -635,7 +635,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | kitty             | Terminal emulator                  |
 | neovim            | Editor                             |
 | stylix            | Custom scheme (sonic-dark.yaml)    |
-| zen               | Web browser (family container)     |
+| zen               | Web browser (layout in =machines/sonic/_zen.nix=) |
 
 ** macOS Machines
 *** work-okta
@@ -651,7 +651,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | emacs   | Editor                             |
 | kitty   | Terminal emulator                  |
 | neovim  | Editor                             |
-| zen     | Web browser (work-minimal profile) |
+| zen     | Web browser (layout in =machines/work-okta/_zen.nix=) |
 
 **** Dock Apps
 
