@@ -66,6 +66,9 @@
         element-desktop = {
           enable = true;
         };
+        opencloud-desktop = {
+          enable = true;
+        };
         emacs = {
           enable = true;
         };
