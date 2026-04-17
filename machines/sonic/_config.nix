@@ -86,9 +86,6 @@
         element-desktop = {
           enable = true;
         };
-        emacs = {
-          enable = true;
-        };
         fish = {
           enable = true;
         };
