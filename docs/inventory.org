@@ -151,6 +151,7 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 | =bitwarden=       | =role == "desktop"=                        | Password manager                   |
 | =element-desktop= | =homelab.programs.element-desktop.enable= | Matrix client                      |
 | =emacs --daemon=  | =homelab.programs.emacs.enable=           | Emacs daemon (connect via Mod+E)   |
+| =opencloud-desktop= | =homelab.programs.opencloud-desktop.enable= | File sync (system tray)          |
 
 **** Output Configuration
 
@@ -593,6 +594,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | bitwarden-desktop      | Password manager                                                         |
 | element-desktop        | Matrix chat client                                                       |
 | emacs                  | Editor with LSP/Go tools                                                 |
+| opencloud-desktop      | OpenCloud file sync client                                               |
 | fastfetch              | System info                                                              |
 | fish                   | Interactive shell                                                        |
 | git                    | Version control                                                          |
@@ -632,6 +634,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 |------------------------+------------------------------------|
 | bitwarden-desktop      | Password manager                   |
 | element-desktop        | Matrix chat client                 |
+| opencloud-desktop      | OpenCloud file sync client         |
 | fish                   | Interactive shell                  |
 | git                    | Zain Ahmed / zain@ahmedmasood.com  |
 | jellyfin-media-player  | Jellyfin desktop client            |

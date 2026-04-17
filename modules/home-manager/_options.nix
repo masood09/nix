@@ -244,6 +244,10 @@ in {
           enable = lib.mkEnableOption "Whether to enable Oracle Cloud CLI.";
         };
 
+        opencloud-desktop = {
+          enable = lib.mkEnableOption "Whether to enable OpenCloud Desktop sync client.";
+        };
+
         opencode = {
           enable = lib.mkEnableOption "Whether to enable opencode.";
         };

@@ -118,7 +118,10 @@ in {
             XDG_SESSION_TYPE = "wayland";
             QT_QPA_PLATFORM = "wayland";
             QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
-            QT_QPA_PLATFORMTHEME = "gtk3";
+            # Qt platform theme is managed by Stylix's qt target (qtct +
+            # Kvantum). Do not set QT_QPA_PLATFORMTHEME here — it would
+            # override qt.platformTheme.name and break Kvantum discovery
+            # for Qt apps like OpenCloud Desktop.
             ELECTRON_OZONE_PLATFORM_HINT = "auto";
             NIXOS_OZONE_WL = "1";
           };
@@ -128,7 +131,8 @@ in {
           # appear. Desktop apps follow, each gated on its own enable flag so
           # server and headless closures stay free of GUI packages.
           # Emacs starts as a daemon; the matching Mod+E keybinding opens a
-          # graphical client frame via emacsclient.
+          # graphical client frame via emacsclient. OpenCloud Desktop runs
+          # headless in the system tray for background file sync.
           spawn-at-startup =
             lib.optionals shellIsNoctalia [
               {
@@ -137,7 +141,8 @@ in {
             ]
             ++ lib.optional (homelabCfg.role == "desktop") {command = ["bitwarden"];}
             ++ lib.optional (homelabCfg.programs.element-desktop.enable or false) {command = ["element-desktop"];}
-            ++ lib.optional (homelabCfg.programs.emacs.enable or false) {command = ["emacs" "--daemon"];};
+            ++ lib.optional (homelabCfg.programs.emacs.enable or false) {command = ["emacs" "--daemon"];}
+            ++ lib.optional (homelabCfg.programs.opencloud-desktop.enable or false) {command = ["opencloud-desktop"];};
 
           gestures.hot-corners.enable = false;
 

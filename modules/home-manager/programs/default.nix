@@ -15,7 +15,6 @@
     ./_bat.nix
     ./_btop.nix
     ./_direnv.nix
-    ./_element-desktop.nix
     ./_eza.nix
     ./_fastfetch.nix
     ./_fd.nix
@@ -42,7 +41,9 @@
     # Desktop (Linux only, gated on niri.enable)
     ./niri
 
-    # Applications
+    # Desktop applications (GUI apps with their own enable flags)
+    ./_element-desktop.nix
+    ./_opencloud-desktop.nix
     ./zen
 
     # Per-role package lists
