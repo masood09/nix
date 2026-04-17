@@ -102,6 +102,9 @@ in {
       // lib.optionalAttrs hasNiriOption {
         # Keep the `programs.niri` subtree absent on platforms where the
         # upstream HM module was never imported (notably nix-darwin).
+        # Use the nixpkgs niri binary instead of the flake's own build so the
+        # compositor tracks the same release cadence as the rest of the system.
+        niri.package = pkgs.niri;
         niri.settings = {
           # Session-level environment for apps spawned by niri.
           # Suppress the "config reload failed" popup — errors are visible in
