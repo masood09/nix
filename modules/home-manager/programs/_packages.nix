@@ -49,6 +49,7 @@ in {
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
         coreutils
         coreutils-prefixed
+        fontconfig # fc-list/fc-cache for Doom Emacs font discovery (doom doctor)
         nixos-rebuild
 
         # Fonts (on NixOS these are installed system-wide via fonts.packages)
