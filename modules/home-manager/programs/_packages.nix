@@ -40,6 +40,10 @@ in {
         # Desktop is managed via Home Manager's native module in
         # `_element-desktop.nix` so it can carry package overrides/settings.
         bitwarden-desktop
+        # Media — Jellyfin client for self-hosted libraries, Stremio for
+        # Real-Debrid streaming (configure Torrentio addon after first launch).
+        jellyfin-media-player
+        stremio
       ])
       # macOS-specific (coreutils for GNU compat, nixos-rebuild for remote deploys)
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
