@@ -1,7 +1,7 @@
 # work-okta — Okta work macOS machine. Minimal Zen profile (work-minimal),
 # no git signing, work-only SSH keys. Corporate Artifactory proxy blocks
 # third-party Homebrew taps (see _packages.nix).
-{
+{lib, ...}: {
   imports = [
     ./hardware-configuration.nix
 
@@ -17,7 +17,7 @@
   system = {
     defaults = {
       NSGlobalDomain = {
-        _HIHideMenuBar = false;
+        _HIHideMenuBar = lib.mkDefault false;
       };
     };
   };
@@ -38,6 +38,10 @@
     };
 
     programs = {
+      direnv = {
+        enable = false;
+      };
+
       emacs = {
         enable = true;
       };
