@@ -611,7 +611,8 @@ Defined in =nix/pkgs/= and auto-discovered.
 - *Storage:* ext4/LUKS root (LVM, tmpfs impermanence)
 - *GPU:* Intel
 - *Desktop:* Niri compositor + greetd
-- *Primary User:* zainahmed (uid 1001)
+- *Primary User:* zainahmed (uid 1001) — desktop, no sudo
+- *Admin User:* masoodahmed (uid 1000) — wheel (passwordless sudo), SSH-only, non-persistent home
 
 **** Hardware Features
 

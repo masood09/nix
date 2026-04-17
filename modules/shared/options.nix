@@ -52,6 +52,12 @@
             Public SSH keys to be added to authorized keys and git allowed signers
           '';
         };
+
+        wheel = lib.mkOption {
+          default = true;
+          type = lib.types.bool;
+          description = "Whether the primary user should be in the wheel (sudo) group.";
+        };
       };
     };
   };
