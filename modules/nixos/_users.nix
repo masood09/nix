@@ -1,6 +1,8 @@
 # User management — immutable users with sops-managed passwords.
 # Defines the primary user account and their SSH authorized keys.
 # Password is read from sops at activation time (mutableUsers = false).
+# Wheel (sudo) membership is gated on homelab.primaryUser.wheel (default: true)
+# so machines can run a non-admin primary user (e.g. sonic's kid account).
 {
   config,
   lib,
@@ -28,6 +30,8 @@ in {
           extraGroups =
             [
               "networkmanager"
+            ]
+            ++ lib.optionals homelabCfg.primaryUser.wheel [
               "wheel"
             ]
             # Desktop users need direct access to audio/input/video devices

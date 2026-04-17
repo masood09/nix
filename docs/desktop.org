@@ -7,10 +7,10 @@
 
 Two NixOS desktops run a Wayland-native stack: Niri compositor, greetd login manager, PipeWire audio, and Stylix theming. Both use LUKS-encrypted ext4 with tmpfs impermanence and systemd-boot. The sole macOS machine (work-okta) uses nix-darwin with Stylix for HM-level theming (fonts, opacity, terminal colors) but is otherwise out of scope for this document.
 
-| Machine       | Hardware           | GPU            | Primary User       | Theme               | Root FS    | Boot                    | Fingerprint |
-|---------------+--------------------+----------------+--------------------+---------------------+------------+-------------------------+-------------|
-| usul          | ThinkPad T14 Gen 3 | AMD Radeon     | masoodahmed (1000) | gruvbox-dark        | ext4/LUKS  | systemd-boot + Plymouth | no          |
-| sonic         | ThinkPad T490      | Intel UHD 620  | zainahmed (1001)   | sonic-dark (custom) | ext4/LUKS  | systemd-boot + Plymouth | yes         |
+| Machine       | Hardware           | GPU            | Primary User       | Admin User         | Theme               | Root FS    | Boot                    | Fingerprint |
+|---------------+--------------------+----------------+--------------------+--------------------+---------------------+------------+-------------------------+-------------|
+| usul          | ThinkPad T14 Gen 3 | AMD Radeon     | masoodahmed (1000) | (same)             | gruvbox-dark        | ext4/LUKS  | systemd-boot + Plymouth | no          |
+| sonic         | ThinkPad T490      | Intel UHD 620  | zainahmed (1001)   | masoodahmed (1000) | sonic-dark (custom) | ext4/LUKS  | systemd-boot + Plymouth | yes         |
 
 * Module Structure
 
