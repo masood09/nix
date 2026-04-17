@@ -11,7 +11,11 @@
 # Work-space UUID intentionally matches sonic so the "Work" concept is
 # consistent across machines; the container and space are still scoped
 # per-profile.
-{config, ...}: let
+{
+  config,
+  lib,
+  ...
+}: let
   user = config.homelab.primaryUser.userName;
   personalSpace = "572910e1-4468-4832-a869-0b3a93e2f165";
   workSpace = "b2f47c1d-8e23-4a91-bc56-7d3e9f0a1c84";
@@ -29,15 +33,15 @@ in {
               ExtensionSettings = {
                 # Karakeep — personal bookmark manager, not needed on work.
                 "addon@karakeep.app" = {
-                  installation_mode = "blocked";
+                  installation_mode = lib.mkDefault "blocked";
                 };
                 # SponsorBlock — YouTube sponsor skipper, not needed on work.
                 "sponsorBlocker@ajay.app" = {
-                  installation_mode = "blocked";
+                  installation_mode = lib.mkDefault "blocked";
                 };
                 # Bitwarden — work machine uses corporate password tooling.
                 "{446900e4-71c2-419f-a6a7-df9c091e268b}" = {
-                  installation_mode = "blocked";
+                  installation_mode = lib.mkDefault "blocked";
                 };
               };
             };
