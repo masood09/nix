@@ -19,7 +19,7 @@ keys:
   - &usul
     age1qpdxlfwgwwnym09qjzr94chzwjnxj5f449nvvz4sgz8r2qrrn3sqtvvvzx
   - &sonic
-    age1nsg2cqxkudumqj362mfeg5zfydgld9e78rwceancqx7lt3gr0dkqjnp9kp
+    age1nz95puflzkel7f0e9exj9d4pl0y2tu9gfust6nwevd6njtkrg5gq8x6c5q
   - &trialunit
     age1pcju0zkh2k3f8m7856k9ftzkjqw538jf255t2azusf9yr6v2nqksfn2pwa
   # --- Admin key (shared across dev machines: usul, work-okta) ---
