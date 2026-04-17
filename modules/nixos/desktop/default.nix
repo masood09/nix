@@ -95,6 +95,13 @@ in {
     ];
 
     services = {
+      # Flatpak for apps that cannot ship via nixpkgs cleanly (e.g. Stremio,
+      # which depends on the insecure Qt5 WebEngine). After first boot:
+      #   flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+      flatpak = {
+        enable = true;
+      };
+
       logind = {
         # Laptop lid handling is owned by logind, not the compositor. Suspend on
         # lid close whether on battery or AC; keep docked systems awake so an
