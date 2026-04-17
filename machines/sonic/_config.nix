@@ -86,9 +86,6 @@
         element-desktop = {
           enable = true;
         };
-        opencloud-desktop = {
-          enable = true;
-        };
         fish = {
           enable = true;
         };

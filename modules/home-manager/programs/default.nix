@@ -41,9 +41,8 @@
     # Desktop (Linux only, gated on niri.enable)
     ./niri
 
-    # Desktop applications (GUI apps with their own enable flags)
+    # Desktop Applications
     ./_element-desktop.nix
-    ./_opencloud-desktop.nix
     ./zen
 
     # Per-role package lists
