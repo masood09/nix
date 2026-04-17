@@ -76,7 +76,7 @@ On encrypted non-ZFS desktops (currently just ~usul~), auto-login from the boot 
 
 ** Desktop Applications
 
-Bitwarden Desktop is installed from ~modules/home-manager/programs/_packages.nix~ as part of the shared Linux desktop package set. Element Desktop is managed by Home Manager's native ~programs.element-desktop~ module in ~modules/home-manager/programs/_element-desktop.nix~ and is enabled per machine through ~homelab.programs.element-desktop.enable~. OpenCloud Desktop is the file sync client for the self-hosted OpenCloud instance; it is installed by ~modules/home-manager/programs/_opencloud-desktop.nix~ and enabled per machine through ~homelab.programs.opencloud-desktop.enable~. It auto-starts with Niri via ~spawn-at-startup~ and runs headless in the system tray.
+Bitwarden Desktop is installed from ~modules/home-manager/programs/_packages.nix~ as part of the shared Linux desktop package set. Element Desktop is managed by Home Manager's native ~programs.element-desktop~ module in ~modules/home-manager/programs/_element-desktop.nix~ and is enabled per machine through ~homelab.programs.element-desktop.enable~.
 
 Bitwarden also needs machine-wide integration: fingerprint-capable NixOS desktops install a generated polkit action (~com.bitwarden.Bitwarden.unlock~) from ~modules/nixos/desktop/default.nix~ so Bitwarden's "system authentication" unlock path can delegate to polkit instead of failing because the action is undefined. In the current fleet that action is present on ~sonic~, but not on ~usul~.
 
