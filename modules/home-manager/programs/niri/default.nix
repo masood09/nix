@@ -301,8 +301,9 @@ in {
             };
           };
 
-          # Window rules restored from the previous manual config. Keep these in
-          # shared config because they apply consistently across both laptops.
+          # Window rules restored from the previous manual config plus gaming
+          # rules for Steam/Proton. Keep these in shared config because they
+          # apply consistently across both laptops.
           window-rules = [
             {
               # Empty default-column-width lets wezterm use its own requested size
@@ -355,6 +356,27 @@ in {
                 }
               ];
               block-out-from = "screen-capture";
+            }
+            {
+              # Steam client windows — float so the store/library UI doesn't
+              # tile, but don't fullscreen (it's a regular desktop app).
+              # Both casings appear depending on Steam/XWayland version.
+              matches = [
+                {app-id = "^steam$";}
+                {app-id = "^Steam$";}
+              ];
+              open-floating = true;
+            }
+            {
+              # Proton/Wine games and Gamescope — open fullscreen so XWayland
+              # games fill the display and cursor coordinates map correctly.
+              # steam_app_ is a prefix (no $ anchor) — Proton games report as
+              # steam_app_<appid> (e.g. steam_app_813780 for AoE2:DE).
+              matches = [
+                {app-id = "^steam_app_";}
+                {app-id = "^gamescope$";}
+              ];
+              open-fullscreen = true;
             }
           ];
 
