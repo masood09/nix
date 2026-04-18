@@ -101,6 +101,9 @@
         neovim = {
           enable = true;
         };
+        prism-launcher = {
+          enable = true;
+        };
 
         zen = {
           enable = true;

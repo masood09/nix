@@ -45,6 +45,9 @@
     ./_element-desktop.nix
     ./zen
 
+    # Gaming
+    ./_prism-launcher.nix
+
     # Per-role package lists
     ./_packages.nix
   ];
