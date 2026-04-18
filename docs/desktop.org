@@ -252,6 +252,15 @@ Both ~gamescope~ (via ~capSysNice~) and ~gamemoded~ (via ~enableRenice~) receive
 
 Steam data lives entirely under ~$HOME~ (~/.local/share/Steam/~, ~/.steam/~). Since ~/home/<user>~ is already persisted on both desktops via impermanence, no additional bind-mount configuration is needed. Games, Proton prefixes, save files, and shader caches all survive reboots.
 
+*** Niri window rules
+
+Niri window rules in ~modules/home-manager/programs/niri/default.nix~ handle Steam and game windows:
+
+- *Steam client* (~steam~, ~Steam~) — ~open-floating = true~. The store/library UI floats as a regular desktop window without tiling.
+- *Proton/Wine games* (~steam_app_*~) and *Gamescope* — ~open-fullscreen = true~. Games open fullscreen via Niri so XWayland cursor coordinates map correctly. Without this, games open as tiled or floating windows with misaligned mouse input.
+
+The ~steam_app_~ match is an anchored prefix (no ~$~) because Proton games report their app-id as ~steam_app_<appid>~ (e.g. ~steam_app_813780~).
+
 *** Usage
 
 - *MangoHud*: launch a game with ~MANGOHUD=1 %command%~ in Steam launch options, or enable globally via ~MANGOHUD=1~ in the environment.
