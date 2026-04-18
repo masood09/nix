@@ -1,4 +1,4 @@
-# Homelab options — ThinkPad T490 laptop with Niri desktop, bluetooth, fingerprint.
+# Homelab options — ThinkPad T490 laptop with Niri desktop, bluetooth, fingerprint, gaming.
 # Dual-user machine: zainahmed (desktop, no sudo) + masoodahmed (sudo/SSH admin, no desktop).
 {lib, ...}: {
   config = {
@@ -41,6 +41,12 @@
 
       desktop = {
         enable = true;
+
+        # Steam, Gamescope, GameMode, Proton-GE, MangoHud. GameMode GPU
+        # tuning is skipped on Intel iGPUs (see _gaming.nix).
+        gaming = {
+          enable = true;
+        };
 
         niri = {
           enable = true;

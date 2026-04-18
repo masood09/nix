@@ -22,6 +22,7 @@ modules/nixos/
 
 modules/nixos/desktop/
   default.nix        Shared services, hardware, kernel (Zen), VM tuning, ananicy-cpp, fontconfig, fonts, Bitwarden polkit action; defines desktop.shell option
+  _gaming.nix        Steam, Gamescope, GameMode, Proton-GE, MangoHud (guarded on desktop.gaming.enable)
   _greetd.nix        Login manager (tuigreet + auto-login for encrypted non-ZFS desktops) with PAM config
   _niri.nix          Niri compositor + backlight control (light) + GTK portal (FileChooser)
   _noctalia.nix      Noctalia desktop shell (system package, guarded on desktop.shell)
@@ -43,7 +44,7 @@ machines/sonic/
   _niri.nix          Machine-local Niri laptop panel output placement
 #+end_example
 
-Everything is gated behind ~homelab.*~ options. A machine opts into the desktop stack by setting ~homelab.desktop.enable = true~ and ~homelab.desktop.niri.enable = true~ in its ~_config.nix~. ~homelab.desktop.shell~ (enum, default ~"noctalia"~) selects a desktop shell; when set, shell-provided desktop pieces such as the bar, notifications, lock screen UI, wallpaper, and other replacement surfaces are skipped. ~swayidle~ still remains in the session for pre-suspend locking, and ~rofi~ remains enabled so the launcher stays available on ~Mod+D~ regardless of shell choice.
+Everything is gated behind ~homelab.*~ options. A machine opts into the desktop stack by setting ~homelab.desktop.enable = true~ and ~homelab.desktop.niri.enable = true~ in its ~_config.nix~. ~homelab.desktop.gaming.enable = true~ adds Steam, Gamescope, GameMode, and the supporting driver/tool stack (see Gaming section below). ~homelab.desktop.shell~ (enum, default ~"noctalia"~) selects a desktop shell; when set, shell-provided desktop pieces such as the bar, notifications, lock screen UI, wallpaper, and other replacement surfaces are skipped. ~swayidle~ still remains in the session for pre-suspend locking, and ~rofi~ remains enabled so the launcher stays available on ~Mod+D~ regardless of shell choice.
 
 * Login Flow
 
@@ -216,6 +217,46 @@ Desktop-specific sysctl overrides inspired by CachyOS defaults. Absolute byte di
 ** Process Scheduling (ananicy-cpp)
 
 ananicy-cpp is an auto-nice daemon that adjusts process niceness, I/O priority, and CPU scheduling class in real time. It uses the CachyOS community ruleset (~ananicy-rules-cachyos~) which covers hundreds of common applications. A custom rule is added for ~zen-beta~ (mapped to ~Doc-View~ type, same as Firefox/Zen) since upstream only covers ~zen~ and ~zen-bin~.
+
+** Gaming
+
+Gated on ~homelab.desktop.gaming.enable~. The module lives in ~modules/nixos/desktop/_gaming.nix~ and is NixOS-level (not Home Manager) because Steam, GameMode, and Gamescope require system-wide capabilities, udev rules, firewall ports, and a 32-bit driver stack.
+
+*** What it enables
+
+| Component                 | NixOS option / package              | Purpose                                                   |
+|---------------------------+-------------------------------------+-----------------------------------------------------------|
+| Steam                     | ~programs.steam~                      | Game store, Proton runtime, Steam Input                   |
+| Proton-GE                 | ~extraCompatPackages = [proton-ge-bin]~ | Community Proton build with extra game fixes, media codecs |
+| Protontricks              | ~programs.steam.protontricks~         | Winetricks wrapper for per-prefix tuning                  |
+| extest                    | ~programs.steam.extest~               | X11 → uinput translation for Steam Input on Wayland       |
+| Gamescope                 | ~programs.gamescope~                  | Per-game compositor for resolution scaling, frame limiting |
+| GameMode                  | ~programs.gamemode~                   | On-demand CPU/IO/GPU optimizations when games launch      |
+| Steam hardware udev rules | ~hardware.steam-hardware~             | Controller support (Steam Controller, etc.)               |
+| 32-bit graphics drivers   | ~hardware.graphics.enable32Bit~       | Mesa, Vulkan loaders, VA-API for Proton/Wine              |
+| MangoHud                  | ~environment.systemPackages~          | Vulkan overlay for FPS/GPU/CPU stats                      |
+| ProtonUp-Qt               | ~environment.systemPackages~          | GUI for managing additional Proton-GE versions            |
+
+Firewall ports are opened for Steam Remote Play and Steam Local Network Game Transfers.
+
+*** GameMode settings
+
+GameMode renices game processes by -10 and sets I/O priority to BEST_EFFORT/0. GPU-specific tuning is conditional on ~homelab.hardware.graphics.driver~:
+
+- *AMD* (~usul~): sets ~power_dpm_force_performance_level = "high"~ via sysfs for the duration of the game session.
+- *Intel* (~sonic~): GPU tuning is skipped. Intel iGPUs (UHD 620) lack the DPM sysfs interface that GameMode targets. CPU and I/O optimizations still apply.
+
+Both ~gamescope~ (via ~capSysNice~) and ~gamemoded~ (via ~enableRenice~) receive ~CAP_SYS_NICE~. These are independent capabilities on separate binaries and do not conflict.
+
+*** Persistence
+
+Steam data lives entirely under ~$HOME~ (~/.local/share/Steam/~, ~/.steam/~). Since ~/home/<user>~ is already persisted on both desktops via impermanence, no additional bind-mount configuration is needed. Games, Proton prefixes, save files, and shader caches all survive reboots.
+
+*** Usage
+
+- *MangoHud*: launch a game with ~MANGOHUD=1 %command%~ in Steam launch options, or enable globally via ~MANGOHUD=1~ in the environment.
+- *GameMode*: launch a game with ~gamemoderun %command%~ in Steam launch options. Steam games using the GameMode API activate it automatically.
+- *Gamescope*: launch a game with ~gamescope -W 1920 -H 1080 -- %command%~ for resolution scaling, or use Steam's per-game Gamescope integration.
 
 ** Font Rendering (fontconfig)
 
