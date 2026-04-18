@@ -1,11 +1,12 @@
-# Desktop modules — shared desktop services, hardware, and compositor(s).
+# Desktop modules — shared desktop services, hardware, compositor(s), and gaming.
 # desktop.enable gates shared services (accounts-daemon, printing, fonts, etc.).
 # desktop.shell selects a desktop shell (default: Noctalia); when set, shell-owned
 # bar/notification/lock/wallpaper programs in the HM niri module are skipped.
 # swayidle remains session-side because lid-close locking still needs a user
 # session hook before suspend. Rofi stays available on Mod+D across shell
 # choices.
-# Hardware features and compositors are individually gated behind their own enable flags.
+# Sub-modules (gaming, niri, noctalia) are individually gated behind their own
+# enable flags so they add nothing to the closure when disabled.
 {
   config,
   lib,
@@ -18,6 +19,7 @@
   isAmd = gfxCfg.driver == "amd";
 in {
   imports = [
+    ./_gaming.nix
     ./_greetd.nix
     ./_niri.nix
     ./_noctalia.nix

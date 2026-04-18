@@ -1,4 +1,4 @@
-# Homelab options — ThinkPad T14 Gen 3 laptop with Niri desktop, bluetooth.
+# Homelab options — ThinkPad T14 Gen 3 laptop with Niri desktop, bluetooth, gaming.
 {
   config = {
     homelab = {
@@ -15,6 +15,12 @@
 
       desktop = {
         enable = true;
+
+        # Steam, Gamescope, GameMode, Proton-GE, MangoHud. GameMode applies
+        # AMD GPU DPM tuning on this machine (see _gaming.nix).
+        gaming = {
+          enable = true;
+        };
 
         niri = {
           enable = true;
