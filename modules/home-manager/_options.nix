@@ -252,6 +252,10 @@ in {
           enable = lib.mkEnableOption "Whether to enable OpenTofu.";
         };
 
+        prism-launcher = {
+          enable = lib.mkEnableOption "Whether to enable Prism Launcher.";
+        };
+
         ripgrep = {
           enable = lib.mkOption {
             default = true;
