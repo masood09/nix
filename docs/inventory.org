@@ -359,6 +359,12 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 |---------+------------+------------------------------------------------------|
 | Podman  | podman/    | Rootless container runtime with auto-pruning         |
 
+** Gaming
+
+| Service   | Module Dir | Purpose                                                |
+|-----------+------------+--------------------------------------------------------|
+| Minecraft | minecraft/ | Vanilla Java Edition server (declarative, ZFS-backed)  |
+
 ** Specialized
 
 | Service                   | Module Dir                    | Purpose                                       |
@@ -457,7 +463,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Service                   | Notes                                             |
 |---------------------------+---------------------------------------------------|
 | ACME                      | ZFS-backed cert storage                           |
-| Backup                    | Orchestrates 12 service units                     |
+| Backup                    | Orchestrates 13 service units                     |
 | Caddy                     | Reverse proxy                                     |
 | Dell iDRAC Fan Controller | IPMI fan speed management                         |
 | Grafana                   | ZFS-backed dashboards                             |
@@ -468,6 +474,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Loki                      | ZFS-backed log aggregation                        |
 | MailArchiver              | ZFS-backed email archival                         |
 | Matrix                    | ZFS, TCP/IP, MAS with trusted proxies             |
+| Minecraft                 | ZFS (dpool), vanilla Java Edition, open firewall  |
 | MongoDB                   | ZFS-backed (Nightscout)                           |
 | Nightscout                | CGM dashboard, open firewall                      |
 | OpenCloud                 | ZFS-backed file sync                              |
@@ -519,7 +526,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | ACME                      | ZFS-backed cert storage                       |
 | Authentik                 | Test SSO instance                             |
 | BabyBuddy                 | ZFS-backed baby tracking                      |
-| Backup                    | Orchestrates 18 service units                 |
+| Backup                    | Orchestrates 19 service units                 |
 | Blocky                    | DNS with local domain resolution              |
 | Caddy                     | Reverse proxy                                 |
 | Dell iDRAC Fan Controller | IPMI fan speed management                     |
@@ -533,6 +540,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Loki                      | ZFS, custom retention (24h/48h/168h)          |
 | MailArchiver              | ZFS email archival                            |
 | Matrix                    | ZFS, Caddy, LiveKit RTC                       |
+| Minecraft                 | ZFS (dpool), vanilla Java Edition, open firewall |
 | MongoDB                   | ZFS (Nightscout)                              |
 | Nightscout                | CGM dashboard                                 |
 | OpenCloud                 | ZFS, multi-dataset                            |
