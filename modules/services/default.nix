@@ -21,6 +21,7 @@
     ./loki
     ./mailarchiver
     ./matrix
+    ./minecraft
     ./mongodb
     ./nightscout
     ./opencloud

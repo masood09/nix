@@ -57,6 +57,7 @@
             "karakeep-workers.service"
             "karakeep-web.service"
             "mailarchiver.service"
+            "minecraft-server.service"
             "matrix-authentication-service.service"
             "matrix-synapse.service"
             "nightscout.service"
@@ -190,6 +191,16 @@
 
           rtc = {
             enable = true;
+          };
+        };
+
+        minecraft = {
+          enable = true;
+          openFirewall = true;
+
+          zfs = {
+            enable = true;
+            dataset = "dpool/tank/services/minecraft";
           };
         };
 

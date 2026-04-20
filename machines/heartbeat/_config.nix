@@ -40,6 +40,7 @@
             "mailarchiver.service"
             "matrix-authentication-service.service"
             "matrix-synapse.service"
+            "minecraft-server.service"
             "nightscout.service"
             "podman-babybuddy.service"
             "podman-compose-opencloud-root.target"
@@ -138,6 +139,15 @@
                 };
               };
             };
+          };
+        };
+
+        minecraft = {
+          enable = true;
+          openFirewall = true;
+
+          zfs = {
+            enable = true;
           };
         };
 
