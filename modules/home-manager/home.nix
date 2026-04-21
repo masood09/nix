@@ -23,6 +23,16 @@ in {
   dconf = lib.mkIf pkgs.stdenv.isLinux {
     enable = lib.mkDefault (homelabCfg.role == "desktop");
   };
+
+  # HM's XDG MIME module independently adds shared-mime-info (~73 MB) to
+  # home.packages. The NixOS-level xdg.mime.enable in _stylix.nix covers the
+  # system MIME database; this covers the per-user one.
+  xdg = {
+    mime = {
+      enable = lib.mkDefault (homelabCfg.role == "desktop" || pkgs.stdenv.isDarwin);
+    };
+  };
+
   imports = [
     ./programs
     # MCP server bridge — translates `mcp-servers.programs.<name>.enable`

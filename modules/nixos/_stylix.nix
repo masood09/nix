@@ -3,10 +3,16 @@
 # once and propagate to Home-Manager automatically via Stylix's autoImport
 # (imports homeModules.stylix for every HM user) and followSystem (copies
 # these values into HM config with mkDefault priority).
+#
+# Desktop vs server split: Stylix's autoEnable defaults every target to true,
+# but servers only benefit from console and grub theming. This module disables
+# GTK, Qt, KDE, and GNOME targets on servers (both NixOS-level and HM-level)
+# and turns off NixOS XDG sound/icon/mime assets. Without these gates the
+# server closure pulls ~1 GB of Qt/GTK/Wayland libraries and theme packages.
+#
 # HM-only target overrides (starship, waybar, zen-browser) and the Papirus
-# icon theme are injected
-# through home-manager.sharedModules since those targets don't exist at the
-# NixOS level.
+# icon theme are injected through home-manager.sharedModules since those
+# targets don't exist at the NixOS level.
 # Darwin counterpart: modules/macos/_stylix.nix.
 {
   config,
@@ -15,6 +21,7 @@
   ...
 }: let
   cfg = config.homelab.stylix;
+  isDesktop = config.homelab.role == "desktop";
 in {
   options = {
     homelab = {
@@ -93,7 +100,7 @@ in {
         };
       };
 
-      cursor = {
+      cursor = lib.mkIf isDesktop {
         package = pkgs.bibata-cursors;
         name = "Bibata-Modern-Classic";
         size = 24;
@@ -103,6 +110,34 @@ in {
         terminal = 0.90;
         popups = 0.90;
       };
+
+      # Servers only benefit from console and grub theming. Disable targets
+      # that pull GTK, Qt, cursor, and icon packages into the closure —
+      # qt5ct/qt6ct/kvantum alone add ~1.4 GB of Qt/Wayland dependencies.
+      targets = lib.mkIf (!isDesktop) {
+        gtk = {
+          enable = false;
+        };
+        qt = {
+          enable = false;
+        };
+      };
+    };
+
+    # Disable NixOS-level XDG desktop assets on servers — sound-theme-freedesktop,
+    # shared-mime-info, and hicolor-icon-theme are useless on headless machines.
+    # Lives here rather than in a dedicated module because the motivation is the
+    # same Stylix-on-servers closure cleanup.
+    xdg = lib.mkIf (!isDesktop) {
+      sounds = {
+        enable = false;
+      };
+      icons = {
+        enable = false;
+      };
+      mime = {
+        enable = false;
+      };
     };
 
     # HM-only target overrides and icon theme — injected via sharedModules
@@ -110,15 +145,6 @@ in {
     home-manager = {
       sharedModules = [
         {
-          # Papirus icon theme — provides application icons for desktop shells
-          # (Noctalia, launchers, etc.) and GTK apps.
-          gtk = {
-            iconTheme = {
-              package = pkgs.papirus-icon-theme;
-              name = "Papirus-Dark";
-            };
-          };
-
           stylix = {
             targets = {
               # Starship uses hardcoded Catppuccin colors
@@ -132,6 +158,31 @@ in {
               zen-browser = {
                 profileNames = ["default"];
               };
+              # Disable desktop toolkit theming on servers to keep closures lean.
+              # These targets inject qt5ct, qt6ct, kvantum, adw-gtk3,
+              # stylix-kde-theme, gnome-shell-extension-user-themes,
+              # bibata-cursors, and papirus-icon-theme into the HM profile.
+              gtk = {
+                enable = isDesktop;
+              };
+              qt = {
+                enable = isDesktop;
+              };
+              kde = {
+                enable = isDesktop;
+              };
+              gnome = {
+                enable = isDesktop;
+              };
+            };
+          };
+
+          # Papirus icon theme — provides application icons for desktop shells
+          # (Noctalia, launchers, etc.) and GTK apps. Desktop only.
+          gtk = lib.mkIf isDesktop {
+            iconTheme = {
+              package = pkgs.papirus-icon-theme;
+              name = "Papirus-Dark";
             };
           };
         }
