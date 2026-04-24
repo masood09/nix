@@ -1,4 +1,4 @@
-# Options — Vanilla Minecraft Java Edition server (port, memory, ZFS).
+# Options — Vanilla Minecraft Java Edition server (port, memory, seed, ZFS).
 # Wraps the upstream NixOS services.minecraft-server module with homelab
 # conventions (pinned UID/GID, ZFS dataset, impermanence, permissions service).
 {lib, ...}: let
@@ -38,6 +38,14 @@ in {
             default = "4G";
             type = lib.types.str;
             description = "Memory allocation for the Minecraft JVM (used for both -Xms and -Xmx).";
+          };
+
+          seed = lib.mkOption {
+            default = "";
+            type = lib.types.str;
+            # Only applied on initial world generation. Once level.dat exists,
+            # Minecraft reads the seed from there and ignores server.properties.
+            description = "World seed written to server.properties. Only takes effect when generating a new world; ignored once level.dat exists. Empty string means random.";
           };
 
           motd = lib.mkOption {

@@ -66,6 +66,10 @@ in {
         serverProperties = {
           server-port = cfg.port;
           inherit (cfg) gamemode difficulty motd;
+          # level-seed is only consulted during initial world generation.
+          # Once level.dat exists the seed is stored there; this property
+          # is effectively a no-op until the world directory is deleted.
+          level-seed = cfg.seed;
           max-players = cfg.maxPlayers;
           white-list = false;
           enable-command-block = false;

@@ -1,5 +1,7 @@
 # Prism Launcher — Minecraft launcher with bundled JDKs.
-# JRE 25 for current snapshots (25.x), JRE 21 for stable releases (1.17–1.20.x).
+# JRE 17: required for 1.18–1.20.4 and Fabric/Forge modpacks that explicitly pin it (e.g. Homestead).
+# JRE 21: required for 1.20.5+ stable releases.
+# JRE 25: for current snapshots (sourced from nixpkgs-unstable; see TECH DEBT below).
 {
   homelabCfg,
   inputs,
@@ -20,6 +22,7 @@ in {
           jdks = [
             pkgsUnstable.temurin-jre-bin-25
             pkgs.temurin-jre-bin-21
+            pkgs.temurin-jre-bin-17
           ];
         })
       ];

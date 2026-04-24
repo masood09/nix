@@ -145,6 +145,7 @@
         minecraft = {
           enable = true;
           openFirewall = true;
+          seed = "41000018";
 
           zfs = {
             enable = true;
