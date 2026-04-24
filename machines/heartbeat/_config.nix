@@ -144,6 +144,7 @@
 
         minecraft = {
           enable = true;
+          onlineMode = false;
           openFirewall = true;
           seed = "41000018";
 

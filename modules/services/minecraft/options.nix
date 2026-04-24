@@ -72,6 +72,12 @@ in {
             description = "Maximum number of concurrent players.";
           };
 
+          onlineMode = lib.mkOption {
+            default = true;
+            type = lib.types.bool;
+            description = "Whether to require Mojang account authentication for connecting clients.";
+          };
+
           openFirewall = lib.mkOption {
             default = false;
             type = lib.types.bool;
