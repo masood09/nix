@@ -66,6 +66,7 @@ in {
         serverProperties = {
           server-port = cfg.port;
           inherit (cfg) gamemode difficulty motd;
+          "online-mode" = cfg.onlineMode;
           # level-seed is only consulted during initial world generation.
           # Once level.dat exists the seed is stored there; this property
           # is effectively a no-op until the world directory is deleted.
