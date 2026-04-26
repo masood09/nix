@@ -1,7 +1,12 @@
-# Options — Vanilla Minecraft Java Edition server (port, memory, seed, ZFS).
+# Options — Minecraft Java Edition server (package, port, memory, seed, ZFS).
 # Wraps the upstream NixOS services.minecraft-server module with homelab
 # conventions (pinned UID/GID, ZFS dataset, impermanence, permissions service).
-{lib, ...}: let
+{
+  inputs,
+  lib,
+  pkgs,
+  ...
+}: let
   zfsOpts = (import ../../../lib/zfs-options.nix {inherit lib;}).mkZfsOptions;
 in {
   options = {
@@ -9,6 +14,12 @@ in {
       services = {
         minecraft = {
           enable = lib.mkEnableOption "Whether to enable the Minecraft server.";
+
+          package = lib.mkOption {
+            type = lib.types.package;
+            default = inputs.nix-minecraft.legacyPackages.${pkgs.system}.fabricServers."fabric-1_21_10";
+            description = "Minecraft server package to run, such as vanilla or Fabric.";
+          };
 
           dataDir = lib.mkOption {
             type = lib.types.path;

@@ -1,4 +1,4 @@
-# Minecraft — Vanilla Java Edition server with ZFS-backed world storage.
+# Minecraft — Java Edition server with ZFS-backed world storage.
 # Delegates to the upstream NixOS services.minecraft-server module for
 # process management and EULA handling. We pin UID/GID for registry
 # consistency and layer on ZFS, impermanence, and permission-fix service.
@@ -59,7 +59,7 @@ in {
         enable = true;
         eula = true;
         declarative = true;
-        inherit (cfg) dataDir;
+        inherit (cfg) dataDir package;
 
         jvmOpts = "-Xms${cfg.memory} -Xmx${cfg.memory}";
 
