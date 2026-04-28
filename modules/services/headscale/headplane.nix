@@ -50,6 +50,7 @@ in {
             inherit (cfg) port;
 
             host = "127.0.0.1";
+            base_url = "https://${headscaleCfg.webDomain}";
             cookie_secret_path = config.sops.secrets."headscale/headplane/server-cookie-secret".path;
           };
 
