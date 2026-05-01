@@ -144,9 +144,15 @@
 
         minecraft = {
           enable = true;
+          difficulty = "peaceful";
+          motd = "Aswesome Minecraft Server";
           onlineMode = false;
           openFirewall = true;
-          seed = "41000018";
+          # Heartbeat runs a low-conflict exploration world with hostile mobs off.
+          spawnMonsters = false;
+          seed = "8491026976556481134";
+          viewDistance = 16;
+          worldName = "myworld";
 
           zfs = {
             enable = true;

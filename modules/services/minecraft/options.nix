@@ -1,4 +1,4 @@
-# Options — Minecraft Java Edition server (package, port, memory, seed, ZFS).
+# Options — Minecraft Java Edition server (package, world settings, ZFS).
 # Wraps the upstream NixOS services.minecraft-server module with homelab
 # conventions (pinned UID/GID, ZFS dataset, impermanence, permissions service).
 {
@@ -59,6 +59,12 @@ in {
             description = "World seed written to server.properties. Only takes effect when generating a new world; ignored once level.dat exists. Empty string means random.";
           };
 
+          worldName = lib.mkOption {
+            default = "world";
+            type = lib.types.str;
+            description = "World directory name written to server.properties as level-name. Changing it points the server at a different world directory; it does not rename existing world data.";
+          };
+
           motd = lib.mkOption {
             default = "ManTanNest Minecraft Server";
             type = lib.types.str;
@@ -87,6 +93,18 @@ in {
             default = true;
             type = lib.types.bool;
             description = "Whether to require Mojang account authentication for connecting clients.";
+          };
+
+          spawnMonsters = lib.mkOption {
+            default = true;
+            type = lib.types.bool;
+            description = "Whether hostile mobs are allowed to spawn. Passive mobs still follow the upstream server rules.";
+          };
+
+          viewDistance = lib.mkOption {
+            default = 10;
+            type = lib.types.ints.positive;
+            description = "Server view distance in chunks.";
           };
 
           openFirewall = lib.mkOption {
