@@ -115,6 +115,12 @@
     sha512 = "15144d6d7b74dfbe2eede6e3b0aa0c841670be1bd6121608bc28f3b1e46846ccd36b506060a081c988da96cf46fce8bf2e55601e3934b9a52d22dc2fa6cbfd32";
   };
 
+  # Fusion 1.2.12 (required by Rechiseled)
+  fusion = pkgs.fetchurl {
+    url = "https://cdn.modrinth.com/data/p19vrgc2/versions/uCMQtEFU/fusion-1.2.12-fabric-mc1.20.1.jar";
+    sha512 = "04b00b1b6b64edcf2e9114d5ae03bf70c98bfb49284e0b6c017229aa2636f3f6d08665307e2aa31e1790c249a539baf1b4a58a5a78e3d185858457fe2d6482e2";
+  };
+
   # Handcrafted 3.0.6 (required)
   handcrafted = pkgs.fetchurl {
     url = "https://cdn.modrinth.com/data/pJmCFF0p/versions/NRw0CDAc/handcrafted-fabric-1.20.1-3.0.6.jar";
