@@ -95,10 +95,40 @@ in {
             description = "Whether to require Mojang account authentication for connecting clients.";
           };
 
+          operators = lib.mkOption {
+            default = {};
+            type = lib.types.attrsOf lib.types.str;
+            description = "Minecraft operators written to ops.json as a mapping from player name to UUID.";
+          };
+
+          operatorPermissionLevel = lib.mkOption {
+            default = 4;
+            type = lib.types.ints.between 1 4;
+            description = "Permission level assigned to declared Minecraft operators.";
+          };
+
+          functionPermissionLevel = lib.mkOption {
+            default = 4;
+            type = lib.types.ints.between 1 4;
+            description = "Permission level used by Minecraft functions.";
+          };
+
+          enableCommandBlocks = lib.mkOption {
+            default = false;
+            type = lib.types.bool;
+            description = "Whether command blocks are enabled on the server.";
+          };
+
           spawnMonsters = lib.mkOption {
             default = true;
             type = lib.types.bool;
             description = "Whether hostile mobs are allowed to spawn. Passive mobs still follow the upstream server rules.";
+          };
+
+          spawnProtection = lib.mkOption {
+            default = 16;
+            type = lib.types.ints.unsigned;
+            description = "Spawn protection radius in blocks. Set to 0 to disable spawn protection.";
           };
 
           viewDistance = lib.mkOption {
@@ -213,10 +243,40 @@ in {
               description = "Whether to require Mojang account authentication for connecting clients.";
             };
 
+            operators = lib.mkOption {
+              default = {};
+              type = lib.types.attrsOf lib.types.str;
+              description = "Minecraft operators written to ops.json as a mapping from player name to UUID.";
+            };
+
+            operatorPermissionLevel = lib.mkOption {
+              default = 4;
+              type = lib.types.ints.between 1 4;
+              description = "Permission level assigned to declared Minecraft operators.";
+            };
+
+            functionPermissionLevel = lib.mkOption {
+              default = 4;
+              type = lib.types.ints.between 1 4;
+              description = "Permission level used by Minecraft functions.";
+            };
+
+            enableCommandBlocks = lib.mkOption {
+              default = false;
+              type = lib.types.bool;
+              description = "Whether command blocks are enabled on the server.";
+            };
+
             spawnMonsters = lib.mkOption {
               default = true;
               type = lib.types.bool;
               description = "Whether hostile mobs are allowed to spawn.";
+            };
+
+            spawnProtection = lib.mkOption {
+              default = 16;
+              type = lib.types.ints.unsigned;
+              description = "Spawn protection radius in blocks. Set to 0 to disable spawn protection.";
             };
 
             viewDistance = lib.mkOption {
