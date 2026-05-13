@@ -161,6 +161,12 @@ in {
               description = "Minecraft server package to run for the second instance.";
             };
 
+            mods = lib.mkOption {
+              default = import ./minecraft2-server-mods.nix {inherit pkgs;};
+              type = lib.types.attrsOf lib.types.package;
+              description = "Mod jar derivations symlinked into the second Minecraft server's mods directory.";
+            };
+
             dataDir = lib.mkOption {
               type = lib.types.path;
               default = "/var/lib/minecraft2";
