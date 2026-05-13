@@ -154,6 +154,26 @@
           viewDistance = 16;
           worldName = "myworld";
 
+          minecraft2 = {
+            enable = true;
+            dataDir = "/var/lib/minecraft2";
+            difficulty = "peaceful";
+            groupId = 3015;
+            motd = "Forever Minecraft Server";
+            onlineMode = false;
+            openFirewall = true;
+            port = 25566;
+            spawnMonsters = false;
+            userId = 3015;
+            viewDistance = 16;
+            worldName = "world";
+
+            zfs = {
+              enable = true;
+              dataset = "dpool/tank/services/minecraft2";
+            };
+          };
+
           zfs = {
             enable = true;
           };
