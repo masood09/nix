@@ -180,6 +180,7 @@
             operatorPermissionLevel = 4;
             openFirewall = true;
             port = 25566;
+            seed = "-3482801611578790576";
             spawnMonsters = false;
             spawnProtection = 0;
             userId = 3015;
