@@ -121,6 +121,125 @@ in {
               redundant_metadata = "most";
             };
           };
+
+          minecraft2 = {
+            enable = lib.mkEnableOption "Whether to enable the second Minecraft server.";
+
+            package = lib.mkOption {
+              type = lib.types.package;
+              default = inputs.nix-minecraft.legacyPackages.${pkgs.system}.fabricServers."fabric-1_20_1";
+              description = "Minecraft server package to run for the second instance.";
+            };
+
+            dataDir = lib.mkOption {
+              type = lib.types.path;
+              default = "/var/lib/minecraft2";
+              description = "Directory for the second Minecraft server's persistent data.";
+            };
+
+            user = lib.mkOption {
+              type = lib.types.str;
+              default = "minecraft2";
+              description = "System user that runs the second Minecraft server.";
+            };
+
+            group = lib.mkOption {
+              type = lib.types.str;
+              default = "minecraft2";
+              description = "System group that owns the second Minecraft server data.";
+            };
+
+            userId = lib.mkOption {
+              type = lib.types.ints.u16;
+              description = "UID for the second Minecraft service user.";
+            };
+
+            groupId = lib.mkOption {
+              type = lib.types.ints.u16;
+              description = "GID for the second Minecraft service group.";
+            };
+
+            port = lib.mkOption {
+              type = lib.types.port;
+              default = 25566;
+              description = "Port for the second Minecraft server.";
+            };
+
+            memory = lib.mkOption {
+              default = "4G";
+              type = lib.types.str;
+              description = "Memory allocation for the second Minecraft JVM (used for both -Xms and -Xmx).";
+            };
+
+            seed = lib.mkOption {
+              default = "";
+              type = lib.types.str;
+              description = "World seed written to server.properties. Only takes effect when generating a new world; ignored once level.dat exists. Empty string means random.";
+            };
+
+            worldName = lib.mkOption {
+              default = "world";
+              type = lib.types.str;
+              description = "World directory name written to server.properties as level-name.";
+            };
+
+            motd = lib.mkOption {
+              default = "Minecraft Server";
+              type = lib.types.str;
+              description = "Message of the day shown in the server list.";
+            };
+
+            gamemode = lib.mkOption {
+              default = "survival";
+              type = lib.types.enum ["survival" "creative" "adventure" "spectator"];
+              description = "Default game mode for new players.";
+            };
+
+            difficulty = lib.mkOption {
+              default = "normal";
+              type = lib.types.enum ["peaceful" "easy" "normal" "hard"];
+              description = "Server difficulty level.";
+            };
+
+            maxPlayers = lib.mkOption {
+              default = 20;
+              type = lib.types.ints.positive;
+              description = "Maximum number of concurrent players.";
+            };
+
+            onlineMode = lib.mkOption {
+              default = true;
+              type = lib.types.bool;
+              description = "Whether to require Mojang account authentication for connecting clients.";
+            };
+
+            spawnMonsters = lib.mkOption {
+              default = true;
+              type = lib.types.bool;
+              description = "Whether hostile mobs are allowed to spawn.";
+            };
+
+            viewDistance = lib.mkOption {
+              default = 10;
+              type = lib.types.ints.positive;
+              description = "Server view distance in chunks.";
+            };
+
+            openFirewall = lib.mkOption {
+              default = false;
+              type = lib.types.bool;
+              description = "Whether to open the second Minecraft server port in the firewall.";
+            };
+
+            zfs = zfsOpts {
+              serviceName = "Minecraft 2";
+              dataset = "dpool/tank/services/minecraft2";
+              properties = {
+                recordsize = "128K";
+                redundant_metadata = "most";
+              };
+            };
+          };
         };
       };
     };
