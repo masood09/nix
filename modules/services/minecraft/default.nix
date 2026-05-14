@@ -1,9 +1,7 @@
-# Minecraft — Java Edition servers with ZFS-backed world storage.
-# The primary instance delegates process management to the upstream NixOS
-# services.minecraft-server module. Extra instances mirror the upstream unit
-# because that module is single-instance.
+# Minecraft — Java Edition stack managed by nix-minecraft.
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -13,351 +11,248 @@
 
   persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
-  cfgToString = value:
-    if builtins.isBool value
-    then lib.boolToString value
-    else toString value;
-  minecraftServerProperties = serverCfg: {
-    server-port = serverCfg.port;
-    inherit (serverCfg) gamemode difficulty motd;
-    "online-mode" = serverCfg.onlineMode;
-    level-name = serverCfg.worldName;
-    level-seed = serverCfg.seed;
-    max-players = serverCfg.maxPlayers;
-    white-list = false;
-    enable-command-block = serverCfg.enableCommandBlocks;
-    function-permission-level = serverCfg.functionPermissionLevel;
-    op-permission-level = serverCfg.operatorPermissionLevel;
-    spawn-monsters = serverCfg.spawnMonsters;
-    spawn-protection = serverCfg.spawnProtection;
-    view-distance = serverCfg.viewDistance;
+
+  minecraftPackages = inputs.nix-minecraft.legacyPackages.${pkgs.stdenv.hostPlatform.system};
+  dataDir = "/srv/minecraft";
+  publicPort = 25565;
+  awesomeServerPort = 25566;
+  foreverServerPort = 25567;
+  serverNames = [
+    "velocity"
+    "awesome"
+    "forever"
+  ];
+  serviceNames = map (name: "minecraft-server-${name}") serverNames;
+  serverDataDirs = map (name: "${dataDir}/${name}") serverNames;
+
+  serverProperties = {
+    awesome = {
+      server-ip = "127.0.0.1";
+      server-port = awesomeServerPort;
+      gamemode = "survival";
+      difficulty = "peaceful";
+      motd = "Awesome Minecraft Server";
+      "online-mode" = false;
+      level-name = "myworld";
+      level-seed = "8491026976556481134";
+      max-players = 20;
+      white-list = false;
+      enable-command-block = true;
+      function-permission-level = 4;
+      op-permission-level = 4;
+      spawn-protection = 0;
+      view-distance = 32;
+    };
+
+    forever = {
+      server-ip = "127.0.0.1";
+      server-port = foreverServerPort;
+      gamemode = "survival";
+      difficulty = "peaceful";
+      motd = "Forever Minecraft Server";
+      "online-mode" = false;
+      level-name = "world";
+      level-seed = "-3482801611578790576";
+      max-players = 20;
+      white-list = false;
+      enable-command-block = true;
+      function-permission-level = 4;
+      op-permission-level = 4;
+      spawn-protection = 0;
+      view-distance = 32;
+    };
   };
-  mkOpsFile = name: serverCfg:
-    pkgs.writeText "${name}-ops.json" (
-      builtins.toJSON (
-        lib.mapAttrsToList (operatorName: uuid: {
-          inherit uuid;
-          name = operatorName;
-          level = serverCfg.operatorPermissionLevel;
-          bypassesPlayerLimit = false;
-        })
-        serverCfg.operators
-      )
-    );
-  mkServerPropertiesFile = name: serverCfg:
-    pkgs.writeText "${name}-server.properties" (
-      ''
-        # server.properties managed by NixOS configuration
-      ''
-      + lib.concatStringsSep "\n" (
-        lib.mapAttrsToList (propertyName: value: "${propertyName}=${cfgToString value}") (minecraftServerProperties serverCfg)
-      )
-    );
-  eulaFile = builtins.toFile "minecraft-eula.txt" ''
-    # eula.txt managed by NixOS Configuration
-    eula=true
-  '';
+
+  operators = {
+    Masood = {
+      uuid = "c7c4eeb6-cd39-32bf-86e4-66764d831b95";
+      level = 4;
+      bypassesPlayerLimit = false;
+    };
+  };
+
+  hostFor = name: "${name}.${cfg.hostDomain}";
+
+  velocityConfig = {
+    config-version = "2.7";
+    bind = "0.0.0.0:${toString publicPort}";
+    motd = "Masood's Minecraft Server";
+    show-max-players = 20;
+    online-mode = false;
+    force-key-authentication = false;
+    player-info-forwarding-mode = "NONE";
+    announce-forge = false;
+    kick-existing-players = false;
+    ping-passthrough = "DISABLED";
+    enable-player-address-logging = true;
+
+    servers = {
+      awesome = "127.0.0.1:${toString awesomeServerPort}";
+      forever = "127.0.0.1:${toString foreverServerPort}";
+      try = ["awesome"];
+    };
+
+    forced-hosts = {
+      ${hostFor "awesome"} = ["awesome"];
+      ${hostFor "forever"} = ["forever"];
+    };
+  };
+
   permSvc = systemdHelpers.mkPermissionService {
     name = "minecraft";
-    inherit (cfg) dataDir;
+    inherit dataDir;
     user = "minecraft";
     group = "minecraft";
-    mainServices = ["minecraft-server"];
+    mode = "0770";
+    mainServices = serviceNames;
     zfs = {
       inherit (cfg.zfs) enable;
       datasetServiceName = "zfs-dataset-minecraft";
     };
   };
-  minecraft2CollisionAssertions = let
-    minecraft2Cfg = cfg.minecraft2;
-  in
-    lib.optionals minecraft2Cfg.enable [
-      {
-        assertion = minecraft2Cfg.port != cfg.port;
-        message = "homelab.services.minecraft.minecraft2.port must not match the primary Minecraft server port.";
-      }
-      {
-        assertion = minecraft2Cfg.dataDir != cfg.dataDir;
-        message = "homelab.services.minecraft.minecraft2.dataDir must not match the primary Minecraft dataDir.";
-      }
-      {
-        assertion = minecraft2Cfg.user != "minecraft";
-        message = "homelab.services.minecraft.minecraft2.user must not be minecraft; the primary server owns that user.";
-      }
-      {
-        assertion = minecraft2Cfg.group != "minecraft";
-        message = "homelab.services.minecraft.minecraft2.group must not be minecraft; the primary server owns that group.";
-      }
-      {
-        assertion = minecraft2Cfg.userId != cfg.userId;
-        message = "homelab.services.minecraft.minecraft2.userId must not match the primary Minecraft UID.";
-      }
-      {
-        assertion = minecraft2Cfg.groupId != cfg.groupId;
-        message = "homelab.services.minecraft.minecraft2.groupId must not match the primary Minecraft GID.";
-      }
-      {
-        assertion = minecraft2Cfg.zfs.dataset != cfg.zfs.dataset;
-        message = "homelab.services.minecraft.minecraft2.zfs.dataset must not match the primary Minecraft dataset.";
-      }
-    ];
-  mkExtraServerConfig = name: serverCfg: let
-    serviceName = name;
-    socketName = "${serviceName}.socket";
-    fifoPath = "/run/${serviceName}.stdin";
-    opsFile = mkOpsFile serviceName serverCfg;
-    serverPropertiesFile = mkServerPropertiesFile serviceName serverCfg;
-    modsDir = pkgs.linkFarmFromDrvs "${serviceName}-mods" (builtins.attrValues serverCfg.mods);
-    stopScript = pkgs.writeShellScript "${serviceName}-stop" ''
-      echo stop > ${fifoPath}
-
-      while kill -0 "$1" 2> /dev/null; do
-        sleep 1s
-      done
-    '';
-    extraPermSvc = systemdHelpers.mkPermissionService {
-      name = serviceName;
-      inherit (serverCfg) dataDir user group;
-      mainServices = [serviceName];
-      zfs = {
-        inherit (serverCfg.zfs) enable;
-        datasetServiceName = "zfs-dataset-${serviceName}";
-      };
-    };
-  in
-    lib.mkIf serverCfg.enable {
-      homelab = {
-        zfs = {
-          datasets = {
-            ${serviceName} = lib.mkIf serverCfg.zfs.enable {
-              inherit (serverCfg.zfs) dataset properties;
-
-              enable = true;
-              mountpoint = serverCfg.dataDir;
-
-              requiredBy = [
-                "${serviceName}.service"
-              ];
-
-              restic = {
-                enable = true;
-              };
-            };
-          };
-        };
-      };
-
-      users = {
-        users = {
-          ${serverCfg.user} = {
-            uid = serverCfg.userId;
-            description = "${serviceName} service user";
-            home = serverCfg.dataDir;
-            createHome = true;
-            isSystemUser = true;
-            inherit (serverCfg) group;
-          };
-        };
-
-        groups = {
-          ${serverCfg.group} = {
-            gid = serverCfg.groupId;
-          };
-        };
-      };
-
-      systemd = lib.mkMerge [
-        extraPermSvc.systemd
-        {
-          sockets = {
-            ${serviceName} = {
-              bindsTo = ["${serviceName}.service"];
-              socketConfig = {
-                ListenFIFO = fifoPath;
-                SocketMode = "0660";
-                SocketUser = serverCfg.user;
-                SocketGroup = serverCfg.group;
-                RemoveOnStop = true;
-                FlushPending = true;
-              };
-            };
-          };
-
-          services = {
-            ${serviceName} = {
-              description = "${serviceName} service";
-              wantedBy = ["multi-user.target"];
-              requires = [socketName];
-              after = [
-                "network.target"
-                socketName
-              ];
-
-              preStart = ''
-                ln -sf ${eulaFile} eula.txt
-                ln -sf ${opsFile} ops.json
-                cp -f ${serverPropertiesFile} server.properties
-                chmod +w server.properties
-                if [ -e mods ] && [ ! -L mods ]; then
-                  if [ -e mods.pre-nix-managed ]; then
-                    echo "Refusing to replace existing mods directory because mods.pre-nix-managed already exists" >&2
-                    exit 1
-                  fi
-                  mv mods mods.pre-nix-managed
-                fi
-                ln -sfn ${modsDir} mods
-                echo "Autogenerated file that signifies that this server configuration is managed declaratively by NixOS" > .declarative
-              '';
-
-              serviceConfig = {
-                ExecStart = "${serverCfg.package}/bin/minecraft-server -Xms${serverCfg.memory} -Xmx${serverCfg.memory}";
-                ExecStop = "${stopScript} $MAINPID";
-                Restart = "always";
-                User = serverCfg.user;
-                WorkingDirectory = serverCfg.dataDir;
-
-                StandardInput = "socket";
-                StandardOutput = "journal";
-                StandardError = "journal";
-
-                CapabilityBoundingSet = [""];
-                DeviceAllow = [""];
-                LockPersonality = true;
-                PrivateDevices = true;
-                PrivateTmp = true;
-                PrivateUsers = true;
-                ProtectClock = true;
-                ProtectControlGroups = true;
-                ProtectHome = true;
-                ProtectHostname = true;
-                ProtectKernelLogs = true;
-                ProtectKernelModules = true;
-                ProtectKernelTunables = true;
-                ProtectProc = "invisible";
-                RestrictAddressFamilies = [
-                  "AF_INET"
-                  "AF_INET6"
-                ];
-                RestrictNamespaces = true;
-                RestrictRealtime = true;
-                RestrictSUIDSGID = true;
-                SystemCallArchitectures = "native";
-                UMask = "0077";
-              };
-            };
-          };
-        }
-      ];
-
-      environment = persistenceHelpers.mkPersistenceDirs {
-        inherit homelabCfg;
-        zfsEnable = serverCfg.zfs.enable;
-        directories = [serverCfg.dataDir];
-      };
-
-      networking = {
-        firewall = lib.mkIf serverCfg.openFirewall {
-          allowedTCPPorts = [
-            serverCfg.port
-          ];
-        };
-      };
-    };
 in {
   imports = [
+    inputs.nix-minecraft.nixosModules.minecraft-servers
     ./options.nix
   ];
 
-  config = lib.mkIf cfg.enable (lib.mkMerge ([
+  config = lib.mkIf cfg.enable {
+    assertions = [
       {
-        homelab = {
-          zfs = {
-            datasets = {
-              minecraft = lib.mkIf cfg.zfs.enable {
-                inherit (cfg.zfs) dataset properties;
+        assertion = config.networking.hostName == "heartbeat";
+        message = "homelab.services.minecraft is heartbeat-only; enable it only on the heartbeat machine.";
+      }
+    ];
 
-                enable = true;
-                mountpoint = cfg.dataDir;
+    homelab = {
+      zfs = {
+        datasets = {
+          minecraft = lib.mkIf cfg.zfs.enable {
+            inherit (cfg.zfs) dataset properties;
 
-                requiredBy = [
-                  "minecraft-server.service"
-                ];
-
-                restic = {
-                  enable = true;
-                };
-              };
-            };
-          };
-        };
-
-        assertions = minecraft2CollisionAssertions;
-
-        # Upstream NixOS module handles systemd unit, user creation, and EULA.
-        # declarative = true means server.properties is overwritten from Nix on
-        # every activation — manual edits on disk will not persist.
-        services = {
-          minecraft-server = {
             enable = true;
-            eula = true;
-            declarative = true;
-            inherit (cfg) dataDir package;
+            mountpoint = dataDir;
 
-            jvmOpts = "-Xms${cfg.memory} -Xmx${cfg.memory}";
+            requiredBy = map (name: "${name}.service") serviceNames;
 
-            serverProperties = minecraftServerProperties cfg;
-          };
-        };
-
-        # Pin UID/GID for service registry consistency; the upstream module
-        # creates the minecraft user/group, we just constrain the numeric IDs.
-        users = {
-          users = {
-            minecraft = {
-              uid = cfg.userId;
-            };
-          };
-
-          groups = {
-            minecraft = {
-              gid = cfg.groupId;
+            restic = {
+              enable = true;
             };
           };
         };
+      };
+    };
 
-        systemd = lib.mkMerge [
-          permSvc.systemd
-          {
-            services = {
-              minecraft-server = {
-                preStart = lib.mkAfter ''
-                  ln -sf ${mkOpsFile "minecraft" cfg} ops.json
-                '';
+    services = {
+      minecraft-servers = {
+        enable = true;
+        eula = true;
+        inherit dataDir;
+        openFirewall = false;
+        managementSystem = {
+          tmux = {
+            enable = false;
+          };
+
+          systemd-socket = {
+            enable = true;
+          };
+        };
+
+        servers = {
+          velocity = {
+            enable = true;
+            package = minecraftPackages.velocityServers.velocity;
+            jvmOpts = "-Xms512M -Xmx512M";
+            stopCommand = "end";
+
+            files = {
+              "velocity.toml" = {
+                value = velocityConfig;
+                format = pkgs.formats.toml {};
               };
             };
-          }
-        ];
+          };
 
-        environment = persistenceHelpers.mkPersistenceDirs {
-          inherit homelabCfg;
-          zfsEnable = cfg.zfs.enable;
-          directories = [cfg.dataDir];
+          awesome = {
+            enable = true;
+            package = minecraftPackages.fabricServers."fabric-1_21_10";
+            jvmOpts = "-Xms4G -Xmx4G";
+            inherit operators;
+            serverProperties = serverProperties.awesome;
+          };
+
+          forever = {
+            enable = true;
+            package = minecraftPackages.fabricServers."fabric-1_20_1";
+            jvmOpts = "-Xms4G -Xmx4G";
+            inherit operators;
+            serverProperties = serverProperties.forever;
+
+            symlinks = {
+              mods = pkgs.linkFarmFromDrvs "forever-mods" (
+                builtins.attrValues (import ./forever-server-mods.nix {inherit pkgs;})
+              );
+            };
+          };
         };
+      };
+    };
 
-        # Minecraft Java Edition uses TCP only; UDP 25565 is LAN broadcast
-        # which is irrelevant for a dedicated headless server.
-        networking = {
-          firewall = lib.mkIf cfg.openFirewall {
-            allowedTCPPorts = [
-              cfg.port
+    users = {
+      users = {
+        minecraft = {
+          uid = 3014;
+        };
+      };
+
+      groups = {
+        minecraft = {
+          gid = 3014;
+        };
+      };
+    };
+
+    systemd = lib.mkMerge [
+      permSvc.systemd
+      {
+        services = {
+          # systemd applies WorkingDirectory before ExecStartPre, so create the
+          # nix-minecraft per-server directories in the ordered permission unit.
+          minecraft-permissions = {
+            serviceConfig = {
+              ExecStart = lib.mkForce ''
+                ${pkgs.coreutils}/bin/install -d -m 0770 -o minecraft -g minecraft ${dataDir} ${lib.concatStringsSep " " serverDataDirs}
+              '';
+            };
+          };
+
+          minecraft-server-velocity = {
+            after = [
+              "minecraft-server-awesome.service"
+              "minecraft-server-forever.service"
+            ];
+            wants = [
+              "minecraft-server-awesome.service"
+              "minecraft-server-forever.service"
             ];
           };
         };
       }
-    ]
-    ++ [
-      (
-        mkExtraServerConfig "minecraft2" cfg.minecraft2
-      )
-    ]));
+    ];
+
+    environment = persistenceHelpers.mkPersistenceDirs {
+      inherit homelabCfg;
+      zfsEnable = cfg.zfs.enable;
+      directories = [dataDir];
+    };
+
+    networking = {
+      firewall = lib.mkIf cfg.openFirewall {
+        allowedTCPPorts = [
+          publicPort
+        ];
+      };
+    };
+  };
 }

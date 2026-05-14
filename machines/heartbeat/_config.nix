@@ -40,7 +40,9 @@
             "mailarchiver.service"
             "matrix-authentication-service.service"
             "matrix-synapse.service"
-            "minecraft-server.service"
+            "minecraft-server-awesome.service"
+            "minecraft-server-forever.service"
+            "minecraft-server-velocity.service"
             "nightscout.service"
             "podman-babybuddy.service"
             "podman-compose-opencloud-root.target"
@@ -144,57 +146,11 @@
 
         minecraft = {
           enable = true;
-          enableCommandBlocks = true;
-          difficulty = "peaceful";
-          functionPermissionLevel = 4;
-          motd = "Aswesome Minecraft Server";
-          onlineMode = false;
-          # Vanilla Minecraft has no operator wildcard; add each offline-mode
-          # player UUID here if they should be able to run commands.
-          operators = {
-            Masood = "c7c4eeb6-cd39-32bf-86e4-66764d831b95";
-          };
-          operatorPermissionLevel = 4;
           openFirewall = true;
-          # Heartbeat runs a low-conflict exploration world with hostile mobs off.
-          spawnMonsters = false;
-          spawnProtection = 0;
-          seed = "8491026976556481134";
-          viewDistance = 16;
-          worldName = "myworld";
-
-          minecraft2 = {
-            enable = true;
-            enableCommandBlocks = true;
-            dataDir = "/var/lib/minecraft2";
-            difficulty = "peaceful";
-            functionPermissionLevel = 4;
-            groupId = 3015;
-            motd = "Forever Minecraft Server";
-            onlineMode = false;
-            # Keep command access explicit because offline-mode UUIDs depend on
-            # the exact username used by each client.
-            operators = {
-              Masood = "c7c4eeb6-cd39-32bf-86e4-66764d831b95";
-            };
-            operatorPermissionLevel = 4;
-            openFirewall = true;
-            port = 25566;
-            seed = "-3482801611578790576";
-            spawnMonsters = false;
-            spawnProtection = 0;
-            userId = 3015;
-            viewDistance = 16;
-            worldName = "world";
-
-            zfs = {
-              enable = true;
-              dataset = "dpool/tank/services/minecraft2";
-            };
-          };
 
           zfs = {
             enable = true;
+            dataset = "fpool/fast/services/minecraft";
           };
         };
 

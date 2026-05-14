@@ -1,5 +1,5 @@
 # Generated from the minecraft.org server-side mod list.
-# Mirrors the nix-minecraft symlinks.mods/linkFarmFromDrvs pattern for minecraft2.
+# Mirrors the nix-minecraft symlinks.mods/linkFarmFromDrvs pattern for Forever.
 {pkgs}: {
   # Amendments 1.20-2.2.5 (required)
   amendments = pkgs.fetchurl {
@@ -77,6 +77,12 @@
   create_structures = pkgs.fetchurl {
     url = "https://cdn.modrinth.com/data/IAnP4np7/versions/nqsTHZwx/create-structures-0.1.1-1.20.1-FABRIC.jar";
     sha512 = "56d693c501b655d52dc21673efe003a99feedfa44cf89afed82fae97c1d6be8fd2c8a9d0c8f126ecbe37116bf2a4631b8bb725bdc870a3382e4791c49cce04b6";
+  };
+
+  # CrossStitch 0.1.6 (required for Fabric modded servers behind Velocity)
+  crossstitch = pkgs.fetchurl {
+    url = "https://cdn.modrinth.com/data/YkOyn1Pn/versions/dJioNlO8/crossstitch-0.1.6.jar";
+    sha512 = "2pyrrsi6nxwssi0igxdb9vsp231fcvk70zlqkb4cm6r4m7gw7jf8v0fwcz11ydw4gsak78mch38qxdngz66sy9da0dzxvirm749chs3";
   };
 
   # Cristel Lib 1.1.5 (required)
