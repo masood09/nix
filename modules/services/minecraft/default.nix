@@ -41,7 +41,7 @@
       function-permission-level = 4;
       op-permission-level = 4;
       spawn-protection = 0;
-      view-distance = 32;
+      view-distance = 12;
     };
 
     forever = {
@@ -52,14 +52,14 @@
       motd = "Forever Minecraft Server";
       "online-mode" = false;
       level-name = "world";
-      level-seed = "-3482801611578790576";
+      level-seed = "-1487282512956129422";
       max-players = 20;
       white-list = false;
       enable-command-block = true;
       function-permission-level = 4;
       op-permission-level = 4;
       spawn-protection = 0;
-      view-distance = 32;
+      view-distance = 12;
     };
   };
 
