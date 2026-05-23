@@ -211,12 +211,6 @@
     sha512 = "6445f4c16cc120fb2fb4feb70de9f9cc0a303570dc5b2b330b8dd767807a90e04afd2c7cb6f512fad26707819dc9476f203ffd971b2af8c04fa53f8d0dce1391";
   };
 
-  # Tectonic 3.0.17 (required)
-  tectonic = pkgs.fetchurl {
-    url = "https://cdn.modrinth.com/data/lWDHr9jE/versions/mz3wlQKd/tectonic-3.0.17-fabric-1.20.1.jar";
-    sha512 = "9a11047ed0e981bb60c230d00ec5d88bf3968119df808e9c55678cab94f8fa5005cdd916799dfd641e0ad60a1b937b4554c71c19d7b3d0f61b94f5135cbf377a";
-  };
-
   # Terralith 2.5.4 (required)
   terralith = pkgs.fetchurl {
     url = "https://cdn.modrinth.com/data/8oi3bsk5/versions/WeYhEb5d/Terralith_1.20.x_v2.5.4.jar";
