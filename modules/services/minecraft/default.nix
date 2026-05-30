@@ -15,44 +15,66 @@
   minecraftPackages = inputs.nix-minecraft.legacyPackages.${pkgs.stdenv.hostPlatform.system};
   dataDir = "/srv/minecraft";
   publicPort = 25565;
-  awesomeServerPort = 25566;
-  foreverServerPort = 25567;
+  # awesomeServerPort = 25566;
+  # foreverServerPort = 25567;
+  ourworldServerPort = 25568;
+
   serverNames = [
     "velocity"
-    "awesome"
-    "forever"
+    "ourworld"
+    # "awesome"
+    # "forever"
   ];
+
   serviceNames = map (name: "minecraft-server-${name}") serverNames;
   serverDataDirs = map (name: "${dataDir}/${name}") serverNames;
 
   serverProperties = {
-    awesome = {
-      server-ip = "127.0.0.1";
-      server-port = awesomeServerPort;
-      gamemode = "survival";
-      difficulty = "peaceful";
-      motd = "Awesome Minecraft Server";
-      "online-mode" = false;
-      level-name = "myworld";
-      level-seed = "8491026976556481134";
-      max-players = 20;
-      white-list = false;
-      enable-command-block = true;
-      function-permission-level = 4;
-      op-permission-level = 4;
-      spawn-protection = 0;
-      view-distance = 12;
-    };
+    # awesome = {
+    #   server-ip = "127.0.0.1";
+    #   server-port = awesomeServerPort;
+    #   gamemode = "survival";
+    #   difficulty = "peaceful";
+    #   motd = "Awesome Minecraft Server";
+    #   "online-mode" = false;
+    #   level-name = "myworld";
+    #   level-seed = "8491026976556481134";
+    #   max-players = 20;
+    #   white-list = false;
+    #   enable-command-block = true;
+    #   function-permission-level = 4;
+    #   op-permission-level = 4;
+    #   spawn-protection = 0;
+    #   view-distance = 12;
+    # };
 
-    forever = {
+    # forever = {
+    #   server-ip = "127.0.0.1";
+    #   server-port = foreverServerPort;
+    #   gamemode = "survival";
+    #   difficulty = "peaceful";
+    #   motd = "Forever Minecraft Server";
+    #   "online-mode" = false;
+    #   level-name = "world";
+    #   level-seed = "-1487282512956129422";
+    #   max-players = 20;
+    #   white-list = false;
+    #   enable-command-block = true;
+    #   function-permission-level = 4;
+    #   op-permission-level = 4;
+    #   spawn-protection = 0;
+    #   view-distance = 12;
+    # };
+
+    ourworld = {
       server-ip = "127.0.0.1";
-      server-port = foreverServerPort;
+      server-port = ourworldServerPort;
       gamemode = "survival";
-      difficulty = "peaceful";
-      motd = "Forever Minecraft Server";
+      difficulty = "easy";
+      motd = "Our World Minecraft Server";
       "online-mode" = false;
       level-name = "world";
-      level-seed = "-1487282512956129422";
+      level-seed = "8457939973362474444";
       max-players = 20;
       white-list = false;
       enable-command-block = true;
@@ -60,14 +82,6 @@
       op-permission-level = 4;
       spawn-protection = 0;
       view-distance = 12;
-    };
-  };
-
-  operators = {
-    Masood = {
-      uuid = "c7c4eeb6-cd39-32bf-86e4-66764d831b95";
-      level = 4;
-      bypassesPlayerLimit = false;
     };
   };
 
@@ -87,14 +101,17 @@
     enable-player-address-logging = true;
 
     servers = {
-      awesome = "127.0.0.1:${toString awesomeServerPort}";
-      forever = "127.0.0.1:${toString foreverServerPort}";
-      try = ["awesome"];
+      # awesome = "127.0.0.1:${toString awesomeServerPort}";
+      # forever = "127.0.0.1:${toString foreverServerPort}";
+      ourworld = "127.0.0.1:${toString ourworldServerPort}";
+      # try = ["awesome"];
+      try = ["ourworld"];
     };
 
     forced-hosts = {
-      ${hostFor "awesome"} = ["awesome"];
-      ${hostFor "forever"} = ["forever"];
+      # ${hostFor "awesome"} = ["awesome"];
+      # ${hostFor "forever"} = ["forever"];
+      ${hostFor "ourworld"} = ["ourworld"];
     };
   };
 
@@ -174,24 +191,35 @@ in {
             };
           };
 
-          awesome = {
-            enable = true;
-            package = minecraftPackages.fabricServers."fabric-1_21_10";
-            jvmOpts = "-Xms4G -Xmx4G";
-            inherit operators;
-            serverProperties = serverProperties.awesome;
-          };
+          #   awesome = {
+          #     enable = true;
+          #     package = minecraftPackages.fabricServers."fabric-1_21_10";
+          #     jvmOpts = "-Xms4G -Xmx4G";
+          #     serverProperties = serverProperties.awesome;
+          #   };
 
-          forever = {
+          #   forever = {
+          #     enable = true;
+          #     package = minecraftPackages.fabricServers."fabric-1_20_1";
+          #     jvmOpts = "-Xms4G -Xmx4G";
+          #     serverProperties = serverProperties.forever;
+
+          #     symlinks = {
+          #       mods = pkgs.linkFarmFromDrvs "forever-mods" (
+          #         builtins.attrValues (import ./forever-server-mods.nix {inherit pkgs;})
+          #       );
+          #     };
+          #   };
+
+          ourworld = {
             enable = true;
-            package = minecraftPackages.fabricServers."fabric-1_20_1";
-            jvmOpts = "-Xms4G -Xmx4G";
-            inherit operators;
-            serverProperties = serverProperties.forever;
+            package = minecraftPackages.fabricServers."fabric-1_21_11";
+            jvmOpts = "-Xms2G -Xmx8G";
+            serverProperties = serverProperties.ourworld;
 
             symlinks = {
-              mods = pkgs.linkFarmFromDrvs "forever-mods" (
-                builtins.attrValues (import ./forever-server-mods.nix {inherit pkgs;})
+              mods = pkgs.linkFarmFromDrvs "ourworld-mods" (
+                builtins.attrValues (import ./ourworld-server-mods.nix {inherit pkgs;})
               );
             };
           };
@@ -229,12 +257,14 @@ in {
 
           minecraft-server-velocity = {
             after = [
-              "minecraft-server-awesome.service"
-              "minecraft-server-forever.service"
+              # "minecraft-server-awesome.service"
+              # "minecraft-server-forever.service"
+              "minecraft-server-ourworld.service"
             ];
             wants = [
-              "minecraft-server-awesome.service"
-              "minecraft-server-forever.service"
+              # "minecraft-server-awesome.service"
+              # "minecraft-server-forever.service"
+              "minecraft-server-ourworld.service"
             ];
           };
         };
