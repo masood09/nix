@@ -193,6 +193,12 @@
     sha512 = "40a137479c0528f0fea159379021520bdd26e3187092ed346fccd12aad4d7d0539ee13a7cd0240b2db435a4548a67b6a20f80e9b61f5ab68fc579759d2b94db7";
   };
 
+  # Voxy Server Side 0.2.2 (required)
+  voxy_server_side = pkgs.fetchurl {
+    url = "https://cdn.modrinth.com/data/84zcagOb/versions/27xuJ82D/voxy-server-side-fabric.jar";
+    sha512 = "6afe7e71fdb2e80eab126a0e998f98ea51f9428b8ba0a1e3ce20caa12157d4c6ccb80f6ed5dbc1e372d43054980e3de116765e57bfc2e660c3e5e398074915a7";
+  };
+
   # Xaero's Minimap fabric-1.21.11-25.3.12 (required)
   xaeros_minimap = pkgs.fetchurl {
     url = "https://cdn.modrinth.com/data/1bokaNcj/versions/q5DQinHS/xaerominimap-fabric-1.21.11-25.3.12.jar";
