@@ -70,7 +70,7 @@
       server-ip = "127.0.0.1";
       server-port = ourworldServerPort;
       gamemode = "survival";
-      difficulty = "easy";
+      difficulty = "normal";
       motd = "Our World Minecraft Server";
       "online-mode" = false;
       level-name = "world";
@@ -82,6 +82,7 @@
       op-permission-level = 4;
       spawn-protection = 0;
       view-distance = 12;
+      pvp = false;
     };
   };
 
