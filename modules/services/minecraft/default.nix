@@ -74,7 +74,7 @@
       motd = "Our World Minecraft Server";
       "online-mode" = false;
       level-name = "world";
-      level-seed = "8457939973362474444";
+      level-seed = "100000459812896461";
       max-players = 20;
       white-list = false;
       enable-command-block = true;
