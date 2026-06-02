@@ -19,6 +19,12 @@
     sha512 = "2a73c5a12898ba2c613afe1a9dec559011946b4b7b1338328d4c279a7cb921be6c8c9789c1b35037a0aa826eb27efa1a45090d28fd27bf7dffd3bacebab4c676";
   };
 
+  # Chef's Delight 1.0.5-fabric-1.21.11 (required)
+  chefs_delight = pkgs.fetchurl {
+    url = "https://cdn.modrinth.com/data/pvcsfne4/versions/EXu0Q4KH/chefs-delight-1.0.5-fabric-1.21.11.jar";
+    sha512 = "cae5e68b53dde6cb9320d4ef33ca764fc69e52b64a3ce63c5f2aa75012430f3866e86401d0b0dea74b702a4ff9999e9bba5bdf28729ed68348afb3c75f6e758b";
+  };
+
   # Chunky 1.4.55 (required)
   chunky = pkgs.fetchurl {
     url = "https://cdn.modrinth.com/data/fALzjamp/versions/1CpEkmcD/Chunky-Fabric-1.4.55.jar";
@@ -29,6 +35,12 @@
   cloth_config = pkgs.fetchurl {
     url = "https://cdn.modrinth.com/data/9s6osm5g/versions/xuX40TN5/cloth-config-21.11.153-fabric.jar";
     sha512 = "8f455489d4b71069e998568cf4e1450116f4360a4eb481cd89117f629c6883164886cf63ca08ac4fc929dd13d1112152755a6216d4a1498ee6406ef102093e51";
+  };
+
+  # Collective 1.21.11-8.22-fabric+forge+neo (required)
+  collective = pkgs.fetchurl {
+    url = "https://cdn.modrinth.com/data/e0M1UDsY/versions/6EPDFSpU/collective-1.21.11-8.22.jar";
+    sha512 = "53ffcc1ae26713254c11a975f4d5182e709b637f4706e563cf1d3e8b90bab510ed6552609a1e757e298f505ae9aabe1cdb952afbdc2879c8039226783733a3b4";
   };
 
   # Concurrent Chunk Management Engine 0.3.7+alpha.0.10+1.21.11 (required)
@@ -53,6 +65,12 @@
   cristel_lib = pkgs.fetchurl {
     url = "https://cdn.modrinth.com/data/cl223EMc/versions/yWdD26Oh/cristellib-fabric-1.21.11-3.1.2.jar";
     sha512 = "39b55242591208c3c1bbd0eb0c4fe719cdf1bd9356146bd1712af9a35f0765415b5aa01165c9133b1eb2d14c4ac181dbe1756669683df0aa911dab2bbd356a2b";
+  };
+
+  # Explorer's Compass 1.21.11-2.5.1-fabric (required)
+  explorers_compass = pkgs.fetchurl {
+    url = "https://cdn.modrinth.com/data/RV1qfVQ8/versions/aS4au8gn/ExplorersCompass-1.21.11-2.5.1-fabric.jar";
+    sha512 = "86771761605af0841f3277a4150847552266be1ffeb95544b4ae7d0137d864ba6cc8e8e74ea23c4b930e5c2bdfa0c73702ea3b1b7f67f3c5391864cf18d1e664";
   };
 
   # Fabric API 0.141.4+1.21.11 (required)
@@ -133,6 +151,12 @@
     sha512 = "ed1b4961f3a039c95712adf828d22c0aa6ad5d55a956282dfdd26a0e7c60b25691985440bc89c0a69f6339446d219d33afff1f8ba001fc1e7fc8c8d2c392e143";
   };
 
+  # Pet Names 1.21.11-3.5-fabric+forge+neo (required)
+  pet_names = pkgs.fetchurl {
+    url = "https://cdn.modrinth.com/data/tOoh2eQm/versions/tEnPNOUu/petnames-1.21.11-3.5.jar";
+    sha512 = "5c47c48808f6646cade32f3b36bc4b966ca0b194c2c1347a9d4d89c8a1ab1093db40a1766ee97f0efb08369eac3790b7a08d342950bf1a0ee001149550029444";
+  };
+
   # Placeholder API 2.8.2+1.21.10 (required)
   placeholder_api = pkgs.fetchurl {
     url = "https://cdn.modrinth.com/data/eXts2L7r/versions/qxjzQ9xY/placeholder-api-2.8.2%2B1.21.10.jar";
@@ -197,6 +221,12 @@
   voxy_server_side = pkgs.fetchurl {
     url = "https://cdn.modrinth.com/data/84zcagOb/versions/27xuJ82D/voxy-server-side-fabric.jar";
     sha512 = "6afe7e71fdb2e80eab126a0e998f98ea51f9428b8ba0a1e3ce20caa12157d4c6ccb80f6ed5dbc1e372d43054980e3de116765e57bfc2e660c3e5e398074915a7";
+  };
+
+  # Villager Names 1.21.11-8.4-fabric+forge+neo (required)
+  villager_names = pkgs.fetchurl {
+    url = "https://cdn.modrinth.com/data/gqRXDo8B/versions/O8m9nvv4/villagernames-1.21.11-8.4.jar";
+    sha512 = "d47c1c2b959444432ed2eaf704560a233e0ec3a88b79c70eb50c4fcfbf6985a3e03e64427e4922dd9a907a34010549c36ce6a59d15b1bd82d40508a0ab7dbb21";
   };
 
   # Xaero's Minimap fabric-1.21.11-25.3.12 (required)
