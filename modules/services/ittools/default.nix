@@ -21,7 +21,7 @@ in {
         containers = {
           ittools = {
             # renovate: datasource=docker depName=ghcr.io/willjayyyy/next-tools
-            image = "ghcr.io/willjayyyy/next-tools:1.9.6";
+            image = "ghcr.io/willjayyyy/next-tools:1.10.3";
             autoStart = true;
 
             ports = [
