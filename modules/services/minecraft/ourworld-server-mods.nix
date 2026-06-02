@@ -121,12 +121,6 @@
     sha512 = "f14a5c3d2fad786347ca25083f902139694f618b7c103947f2fd067a7c5ee88a63e1ef8926f7d693ea79ed7d00f57317bae77ef9c2d630bf5ed01ac97a752b94";
   };
 
-  # Lithostitched 1.7.2-fabric-21.11 (required)
-  lithostitched = pkgs.fetchurl {
-    url = "https://cdn.modrinth.com/data/XaDC71GB/versions/pLbQKCOo/lithostitched-1.7.2-fabric-21.11.jar";
-    sha512 = "77e432cf8932f5a9e6caee5ed4e18d80e0782e5eb9852a0e14c3e2337f5f84ecc579277ac8b7cdbbeaf03ac2fd2b17b68e951a05355c7973df4fd9176774679f";
-  };
-
   # M.R.U 1.0.26+edge+1.21.11-fabric (required)
   mru = pkgs.fetchurl {
     url = "https://cdn.modrinth.com/data/SNVQ2c0g/versions/XXzIJdq5/mru-1.0.26%2Bedge%2B1.21.11-fabric.jar";
@@ -185,18 +179,6 @@
   supermartijn642_core_lib = pkgs.fetchurl {
     url = "https://cdn.modrinth.com/data/rOUBggPv/versions/trynou9q/supermartijn642corelib-1.1.21-fabric-mc1.21.11.jar";
     sha512 = "60f918dae4767d60bbff063cf77e7998ff8018c83bc6408d1a8636c4e89bf3e55c5dfd2dabeed2f30d16b25710fbe4028b61445e96f30291274ec6846c68340e";
-  };
-
-  # Tectonic 3.0.19 (required)
-  tectonic = pkgs.fetchurl {
-    url = "https://cdn.modrinth.com/data/lWDHr9jE/versions/7olSYFxL/tectonic-3.0.19-fabric-1.21.11.jar";
-    sha512 = "ce0643d45aac7b5e3f3a32fc01928371d97612a9dc6e8df721bf215bf90afa021b8e8d7e19c0d00060c3c98591aec90d2ea51f594fdc0012051f20657fae85ef";
-  };
-
-  # Terralith 2.6.1 (required)
-  terralith = pkgs.fetchurl {
-    url = "https://cdn.modrinth.com/data/8oi3bsk5/versions/vVdNToqE/Terralith_1.21.11_v2.6.1_Fabric.jar";
-    sha512 = "c502e8c18cc6b749fd3d5e8fc6e1d3fc91cdb9763c58c1c7e68c2ea69fb61f27259128171d5f50b2aaa0ea6a7753fcc293f14127110f5f4d2e2141758ffd469e";
   };
 
   # Towns and Towers 1.13.9 (required)
