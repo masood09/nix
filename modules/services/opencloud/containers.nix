@@ -157,7 +157,7 @@ in {
 
           "opencloud-collabora" = {
             # renovate: datasource=docker depName=docker.io/collabora/code
-            image = "docker.io/collabora/code:25.04.10.3.1";
+            image = "docker.io/collabora/code:26.04.1.4.1";
 
             environment = {
               DONT_GEN_SSL_CERT = "YES";
