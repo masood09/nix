@@ -1,6 +1,12 @@
 # Generated from the minecraft.org server-side mod list for Forever.
 # Mirrors the nix-minecraft symlinks.mods/linkFarmFromDrvs pattern.
 {pkgs}: {
+  # CrossStitch 0.1.6 (required for Fabric modded servers behind Velocity)
+  crossstitch = pkgs.fetchurl {
+    url = "https://cdn.modrinth.com/data/YkOyn1Pn/versions/dJioNlO8/crossstitch-0.1.6.jar";
+    sha512 = "434396c8a939eefe1b502d796dcc7fb6758c0664159da9f423bcf9103ee30e6ce4e4e1ef54924d65644d4c3f3873331786b87aa7d5fa8b206acdbb3551e7ecaf";
+  };
+
   # Immersive Paintings 0.6.13+1.20.1
   immersive_paintings = pkgs.fetchurl {
     url = "https://cdn.modrinth.com/data/6txNkua3/versions/TOHB3jQz/immersive_paintings-0.6.13%2B1.20.1-fabric.jar";
