@@ -16,14 +16,14 @@
   dataDir = "/srv/minecraft";
   publicPort = 25565;
   # awesomeServerPort = 25566;
-  # foreverServerPort = 25567;
+  foreverServerPort = 25567;
   ourworldServerPort = 25568;
 
   serverNames = [
     "velocity"
     "ourworld"
+    "forever"
     # "awesome"
-    # "forever"
   ];
 
   serviceNames = map (name: "minecraft-server-${name}") serverNames;
@@ -48,23 +48,24 @@
     #   view-distance = 12;
     # };
 
-    # forever = {
-    #   server-ip = "127.0.0.1";
-    #   server-port = foreverServerPort;
-    #   gamemode = "survival";
-    #   difficulty = "peaceful";
-    #   motd = "Forever Minecraft Server";
-    #   "online-mode" = false;
-    #   level-name = "world";
-    #   level-seed = "-1487282512956129422";
-    #   max-players = 20;
-    #   white-list = false;
-    #   enable-command-block = true;
-    #   function-permission-level = 4;
-    #   op-permission-level = 4;
-    #   spawn-protection = 0;
-    #   view-distance = 12;
-    # };
+    forever = {
+      server-ip = "127.0.0.1";
+      server-port = foreverServerPort;
+      gamemode = "survival";
+      difficulty = "normal";
+      motd = "Forever Minecraft Server";
+      "online-mode" = false;
+      level-name = "world";
+      level-seed = "3730519071524984297";
+      max-players = 20;
+      white-list = false;
+      enable-command-block = true;
+      function-permission-level = 4;
+      op-permission-level = 4;
+      spawn-protection = 0;
+      view-distance = 12;
+      pvp = false;
+    };
 
     ourworld = {
       server-ip = "127.0.0.1";
@@ -103,15 +104,14 @@
 
     servers = {
       # awesome = "127.0.0.1:${toString awesomeServerPort}";
-      # forever = "127.0.0.1:${toString foreverServerPort}";
+      forever = "127.0.0.1:${toString foreverServerPort}";
       ourworld = "127.0.0.1:${toString ourworldServerPort}";
-      # try = ["awesome"];
       try = ["ourworld"];
     };
 
     forced-hosts = {
       # ${hostFor "awesome"} = ["awesome"];
-      # ${hostFor "forever"} = ["forever"];
+      ${hostFor "forever"} = ["forever"];
       ${hostFor "ourworld"} = ["ourworld"];
     };
   };
@@ -199,18 +199,18 @@ in {
           #     serverProperties = serverProperties.awesome;
           #   };
 
-          #   forever = {
-          #     enable = true;
-          #     package = minecraftPackages.fabricServers."fabric-1_20_1";
-          #     jvmOpts = "-Xms4G -Xmx4G";
-          #     serverProperties = serverProperties.forever;
+          forever = {
+            enable = true;
+            package = minecraftPackages.fabricServers."fabric-1_20_1";
+            jvmOpts = "-Xms2G -Xmx8G";
+            serverProperties = serverProperties.forever;
 
-          #     symlinks = {
-          #       mods = pkgs.linkFarmFromDrvs "forever-mods" (
-          #         builtins.attrValues (import ./forever-server-mods.nix {inherit pkgs;})
-          #       );
-          #     };
-          #   };
+            symlinks = {
+              mods = pkgs.linkFarmFromDrvs "forever-mods" (
+                builtins.attrValues (import ./forever-server-mods.nix {inherit pkgs;})
+              );
+            };
+          };
 
           ourworld = {
             enable = true;
@@ -259,12 +259,12 @@ in {
           minecraft-server-velocity = {
             after = [
               # "minecraft-server-awesome.service"
-              # "minecraft-server-forever.service"
+              "minecraft-server-forever.service"
               "minecraft-server-ourworld.service"
             ];
             wants = [
               # "minecraft-server-awesome.service"
-              # "minecraft-server-forever.service"
+              "minecraft-server-forever.service"
               "minecraft-server-ourworld.service"
             ];
           };
