@@ -35,7 +35,7 @@ in {
         containers = {
           "opencloud-opencloud" = {
             # renovate: datasource=docker depName=docker.io/opencloudeu/opencloud
-            image = "docker.io/opencloudeu/opencloud:4.0.8";
+            image = "docker.io/opencloudeu/opencloud:7.2.2";
 
             environment = {
               "COLLABORA_DOMAIN" = collaboraWebDomain;
@@ -111,7 +111,7 @@ in {
 
           "opencloud-wopi" = {
             # renovate: datasource=docker depName=docker.io/opencloudeu/opencloud
-            image = "docker.io/opencloudeu/opencloud:4.0.8";
+            image = "docker.io/opencloudeu/opencloud:7.2.2";
 
             environment = {
               "COLLABORATION_APP_ADDR" = "https://${collaboraWebDomain}";
