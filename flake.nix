@@ -47,9 +47,14 @@
     };
 
     # Services
+    # NOTE: do NOT set inputs.nixpkgs.follows here. authentik-nix builds
+    # authentik (incl. the heavy Rust server + aws-lc-fips) against its own
+    # pinned nixpkgs and publishes those artifacts to nix-community.cachix.org.
+    # Overriding nixpkgs re-hashes the build → cache miss → compile from source
+    # (which OOM/deadlocks the small aarch64 SSO box). Upstream explicitly does
+    # not support the follows override.
     authentik-nix = {
       url = "github:nix-community/authentik-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-minecraft = {
       url = "github:Infinidoge/nix-minecraft";
