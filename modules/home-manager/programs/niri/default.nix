@@ -19,7 +19,7 @@
 #
 # Noctalia IPC dispatch: hardware keys (volume, mute, media, brightness) and
 # vendor function keys (Wi-Fi, Bluetooth, lock, power-profile, settings) are
-# routed through `noctalia-shell ipc call …` when desktop.shell == "noctalia"
+# routed through `noctalia msg …` when desktop.shell == "noctalia"
 # so the shell owns its OSD and internal state. Noctalia also uses a small
 # swayidle helper so lid-close suspend locks from the user session before
 # logind freezes user.slice. Non-Noctalia shells fall back to direct CLI tools
@@ -60,10 +60,10 @@
   # Use the Home Manager package path directly so user services don't depend on
   # PATH or /run/current-system. Guarded: the noctalia HM module is only
   # included via mkNixOSDesktopConfig, so the option is absent on servers.
-  hasNoctaliaOption = options.programs ? noctalia-shell;
-  noctaliaShellBin =
+  hasNoctaliaOption = options.programs ? noctalia;
+  noctaliaBin =
     if hasNoctaliaOption
-    then lib.getExe config.programs.noctalia-shell.package
+    then lib.getExe config.programs.noctalia.package
     else null;
 in {
   imports = [
@@ -134,7 +134,7 @@ in {
           spawn-at-startup =
             lib.optionals shellIsNoctalia [
               {
-                command = ["noctalia-shell"];
+                command = ["noctalia"];
               }
             ]
             ++ lib.optional (homelabCfg.role == "desktop") {command = ["bitwarden"];}
@@ -409,7 +409,7 @@ in {
           #
           # Three-way key dispatch:
           #   shell="none"     → swaylock lock, wpctl/playerctl/light direct CLI
-          #   shell="noctalia" → noctalia-shell IPC for lock + hardware controls
+          #   shell="noctalia" → noctalia msg IPC for lock + hardware controls
           #   shell=<other>    → no lock bind; media/brightness still direct CLI
           binds =
             lib.optionalAttrs (!shellEnabled) {
@@ -422,30 +422,30 @@ in {
             // lib.optionalAttrs shellIsNoctalia {
               "Super+Alt+L" = {
                 allow-when-locked = true;
-                action.spawn = ["noctalia-shell" "ipc" "call" "lockScreen" "lock"];
+                action.spawn = ["noctalia" "msg" "session" "lock"];
               };
               "XF86WLAN" = {
                 allow-when-locked = true;
-                action.spawn = ["noctalia-shell" "ipc" "call" "wifi" "toggle"];
+                action.spawn = ["noctalia" "msg" "wifi-toggle"];
               };
               "XF86Bluetooth" = {
                 allow-when-locked = true;
-                action.spawn = ["noctalia-shell" "ipc" "call" "bluetooth" "toggle"];
+                action.spawn = ["noctalia" "msg" "bluetooth-toggle"];
               };
               # Fn+F7 on ThinkPads — repurposed as a secondary lock trigger
               "XF86Display" = {
                 allow-when-locked = true;
-                action.spawn = ["noctalia-shell" "ipc" "call" "lockScreen" "lock"];
+                action.spawn = ["noctalia" "msg" "session" "lock"];
               };
               # Fn+F11 on ThinkPads — cycles through power profiles via Noctalia
               "XF86Keyboard" = {
                 allow-when-locked = true;
-                action.spawn = ["noctalia-shell" "ipc" "call" "powerProfile" "cycle"];
+                action.spawn = ["noctalia" "msg" "power-cycle"];
               };
               # Fn+F9 on ThinkPads — opens/closes the Noctalia settings panel
               "XF86Tools" = {
                 allow-when-locked = true;
-                action.spawn = ["noctalia-shell" "ipc" "call" "settings" "toggle"];
+                action.spawn = ["noctalia" "msg" "settings-toggle"];
               };
             }
             // {
@@ -487,28 +487,28 @@ in {
                 allow-when-locked = true;
                 action.spawn =
                   if shellIsNoctalia
-                  then ["noctalia-shell" "ipc" "call" "volume" "increase"]
+                  then ["noctalia" "msg" "volume-up"]
                   else ["sh" "-c" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+ -l 1.0"];
               };
               "XF86AudioLowerVolume" = {
                 allow-when-locked = true;
                 action.spawn =
                   if shellIsNoctalia
-                  then ["noctalia-shell" "ipc" "call" "volume" "decrease"]
+                  then ["noctalia" "msg" "volume-down"]
                   else ["sh" "-c" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"];
               };
               "XF86AudioMute" = {
                 allow-when-locked = true;
                 action.spawn =
                   if shellIsNoctalia
-                  then ["noctalia-shell" "ipc" "call" "volume" "muteOutput"]
+                  then ["noctalia" "msg" "volume-mute"]
                   else ["sh" "-c" "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"];
               };
               "XF86AudioMicMute" = {
                 allow-when-locked = true;
                 action.spawn =
                   if shellIsNoctalia
-                  then ["noctalia-shell" "ipc" "call" "volume" "muteInput"]
+                  then ["noctalia" "msg" "mic-mute"]
                   else ["sh" "-c" "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"];
               };
 
@@ -516,27 +516,28 @@ in {
                 allow-when-locked = true;
                 action.spawn =
                   if shellIsNoctalia
-                  then ["noctalia-shell" "ipc" "call" "media" "playPause"]
+                  then ["noctalia" "msg" "media" "toggle"]
                   else ["sh" "-c" "playerctl play-pause"];
               };
               "XF86AudioStop" = {
                 allow-when-locked = true;
-                # No documented Noctalia stop action yet; keep the direct MPRIS
-                # fallback until the shell exposes a native equivalent.
-                action.spawn-sh = "playerctl stop";
+                action.spawn =
+                  if shellIsNoctalia
+                  then ["noctalia" "msg" "media" "stop"]
+                  else ["sh" "-c" "playerctl stop"];
               };
               "XF86AudioPrev" = {
                 allow-when-locked = true;
                 action.spawn =
                   if shellIsNoctalia
-                  then ["noctalia-shell" "ipc" "call" "media" "previous"]
+                  then ["noctalia" "msg" "media" "previous"]
                   else ["sh" "-c" "playerctl previous"];
               };
               "XF86AudioNext" = {
                 allow-when-locked = true;
                 action.spawn =
                   if shellIsNoctalia
-                  then ["noctalia-shell" "ipc" "call" "media" "next"]
+                  then ["noctalia" "msg" "media" "next"]
                   else ["sh" "-c" "playerctl next"];
               };
 
@@ -544,14 +545,14 @@ in {
                 allow-when-locked = true;
                 action.spawn =
                   if shellIsNoctalia
-                  then ["noctalia-shell" "ipc" "call" "brightness" "increase"]
+                  then ["noctalia" "msg" "brightness-up"]
                   else ["brightnessctl" "set" "10%+"];
               };
               "XF86MonBrightnessDown" = {
                 allow-when-locked = true;
                 action.spawn =
                   if shellIsNoctalia
-                  then ["noctalia-shell" "ipc" "call" "brightness" "decrease"]
+                  then ["noctalia" "msg" "brightness-down"]
                   else ["brightnessctl" "set" "10%-"];
               };
 
@@ -763,9 +764,40 @@ in {
               };
 
               Service = {
-                ExecStart = "${pkgs.swayidle}/bin/swayidle -w before-sleep '${noctaliaShellBin} ipc call lockScreen lock'";
+                ExecStart = "${pkgs.swayidle}/bin/swayidle -w before-sleep '${noctaliaBin} msg session lock'";
                 Restart = "on-failure";
                 RestartSec = 1;
+              };
+
+              Install = {
+                WantedBy = ["graphical-session.target"];
+              };
+            };
+          }
+          // lib.optionalAttrs (shellIsNoctalia && wallpaper != null) {
+            # The Noctalia wallpaper is runtime state (set via `noctalia msg
+            # wallpaper-set`), not a config.toml key, so enforce it declaratively:
+            # re-apply the Stylix image on each login. Noctalia is spawned by niri
+            # (not a systemd unit), so poll its IPC until it is up. Idempotent.
+            noctalia-wallpaper = {
+              Unit = {
+                Description = "Apply the Noctalia wallpaper (Stylix image)";
+                PartOf = ["graphical-session.target"];
+                After = ["graphical-session.target"];
+              };
+
+              Service = {
+                Type = "oneshot";
+                RemainAfterExit = true;
+                ExecStart = pkgs.writeShellScript "noctalia-set-wallpaper" ''
+                  for _ in $(seq 1 60); do
+                    if ${noctaliaBin} msg wallpaper-set ${wallpaper} 2>/dev/null; then
+                      exit 0
+                    fi
+                    sleep 1
+                  done
+                  exit 0
+                '';
               };
 
               Install = {
