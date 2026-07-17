@@ -424,6 +424,11 @@ in {
                 allow-when-locked = true;
                 action.spawn = ["noctalia" "msg" "session" "lock"];
               };
+              # Toggle the Noctalia clipboard-history panel. Not allowed when
+              # locked — it would expose clipboard contents.
+              "Super+Alt+C" = {
+                action.spawn = ["noctalia" "msg" "panel-toggle" "clipboard"];
+              };
               "XF86WLAN" = {
                 allow-when-locked = true;
                 action.spawn = ["noctalia" "msg" "wifi-toggle"];
