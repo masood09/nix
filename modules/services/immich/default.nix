@@ -70,7 +70,8 @@ in {
 
         database = {
           enable = postgresqlEnabled;
-          enableVectors = false;
+          # nixos-26.05 removed database.enableVectors — pgvecto.rs is gone and
+          # VectorChord is now always enabled by the immich module.
         };
       };
 

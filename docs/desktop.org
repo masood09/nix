@@ -60,7 +60,7 @@ The greetd PAM service is configured in ~_greetd.nix~:
 
 - ~enableGnomeKeyring = true~ — passes the login password to gnome-keyring-daemon for auto-unlock
 - ~fprintAuth~ — conditional on hardware fingerprint support
-- ~pam_fde_boot_pw.so inject_for=gkr~ (session, optional) — added only on encrypted non-ZFS desktops (~autoLoginFromBootPassword = true~). Ordered to run just before ~pam_gnome_keyring~'s session rule. Sourced from ~nixpkgs-unstable~ because the package has not landed in ~nixos-25.11~ yet.
+- ~pam_fde_boot_pw.so inject_for=gkr~ (session, optional) — added only on encrypted non-ZFS desktops (~autoLoginFromBootPassword = true~). Ordered to run just before ~pam_gnome_keyring~'s session rule.
 
 PAM evaluation order for tuigreet with fingerprint enabled:
 

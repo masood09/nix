@@ -70,7 +70,7 @@ in {
   };
 
   config = lib.mkIf homelabCfg.desktop.enable {
-    # bitwarden-desktop in nixos-25.11 still pins electron_39, which upstream
+    # bitwarden-desktop in nixos-26.05 still pins electron_39, which upstream
     # marked EOL/insecure. Permit it here on desktop closures until nixpkgs
     # bumps the package to electron_41+.
     nixpkgs = {

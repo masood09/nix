@@ -23,15 +23,24 @@ in {
 
   config = lib.mkIf homelabCfg.desktop.niri.enable {
     programs = {
-      # Backlight control — sets udev rules granting video group write access
-      # to /sys/class/backlight/*. Required for brightness keys (light -A/-U).
-      light = {
-        enable = true;
-      };
       # Package provided by niri-flake's NixOS module (inputs.niri.nixosModules.niri
       # included via mkNixOSDesktopConfig); no explicit `package` needed here.
       niri = {
         enable = true;
+      };
+    };
+
+    # Backlight control — brightnessctl ships udev rules that grant the video
+    # group write access to /sys/class/backlight/*, which is what the niri
+    # brightness keys (brightnessctl set N%±) need. Replaces programs.light,
+    # whose `light` package was removed from nixpkgs in 26.05. Desktop users
+    # are already in the video group (see modules/nixos/_users.nix).
+    environment = {
+      systemPackages = [pkgs.brightnessctl];
+    };
+    services = {
+      udev = {
+        packages = [pkgs.brightnessctl];
       };
     };
 
