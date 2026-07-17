@@ -39,7 +39,7 @@ in {
         # Formatters & linters
         html-tidy # :lang web
         jsbeautifier # :lang web (JS/CSS/HTML formatting)
-        nixfmt-rfc-style # :lang nix (nix-format-buffer)
+        nixfmt # :lang nix (nix-format-buffer); nixfmt-rfc-style is now an alias for this
         shellcheck # :lang sh
         stylelint # :lang web
 
