@@ -75,7 +75,7 @@
           "https://niri.cachix.org" # sodiboo/niri-flake
           "https://claude-code.cachix.org" # sadjow/claude-code-nix (hourly updates)
           "https://codex-cli.cachix.org" # sadjow/codex-cli-nix (hourly updates)
-          "https://noctalia.cachix.org" # noctalia-dev/noctalia-shell
+          "https://noctalia.cachix.org" # noctalia-dev/noctalia
         ];
 
         trusted-public-keys = [

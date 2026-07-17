@@ -1,13 +1,30 @@
-# Noctalia desktop shell (home-manager side) — enables the HM module,
-# declares settings, and manages the plugin registry. The noctalia HM
-# module is included via mkNixOSDesktopConfig (not in the shared home.nix);
-# this file activates and configures it when desktop.shell == "noctalia".
-# Settings are captured from the GUI via IPC diff and declared here so
-# Nix remains the source of truth.
-# Plugins: the model-usage bar widget (AI model provider stats) is
-# conditionally enabled when a supported provider is selected and its backing
-# local data source is available.
+# Noctalia desktop shell (home-manager side, v5) — enables the HM module and
+# declares its settings. The noctalia HM module is included via
+# mkNixOSDesktopConfig (not in the shared home.nix); this file activates and
+# configures it when desktop.shell == "noctalia".
+#
+# v5 is a ground-up rewrite of v4: the namespace is `programs.noctalia` (was
+# `noctalia-shell`), config is `~/.config/noctalia/config.toml` (was
+# settings.json), and the schema is entirely different (TOML, snake_case widget
+# IDs, per-widget `[widget.<name>]` tables).
+#
+# Source of truth: this file is the ONLY source of truth for settings. Noctalia
+# also keeps a writable `~/.local/state/noctalia/settings.toml` that the Settings
+# UI writes to and which deep-merges *over* this config at runtime — so any tweak
+# made in the GUI shadows what is declared here. To stay reproducible, make
+# changes here (capture the desired values with `noctalia config export merged`),
+# not in the UI, and clear the state overrides after deploying:
+#   rm ~/.local/state/noctalia/settings.toml && noctalia msg config-reload
+# Keys below were validated against the installed version's schema
+# (`noctalia config export full`); config is also validated at build time
+# (validateConfig). Unknown keys only warn; only a wrong value type fails.
+#
+# Theming: Stylix 26.05 has no v5 target, so we bridge the Stylix base16 palette
+# into a Noctalia v5 *custom palette* (mirroring Stylix's own v4 noctalia-shell
+# mapping) and select it via `theme.source = "custom"`, keeping the shell's
+# colors identical to the desktop-wide Stylix palette.
 {
+  config,
   homelabCfg,
   lib,
   options,
@@ -17,305 +34,187 @@
   # Guard against machines where the noctalia HM module is not imported
   # (servers, macOS). The flake wrapper is only included via
   # mkNixOSDesktopConfig, so the option namespace is absent elsewhere.
-  hasNoctaliaOption = options.programs ? noctalia-shell;
+  hasNoctaliaOption = options.programs ? noctalia;
   shellIsNoctalia = hasNoctaliaOption && ((homelabCfg.desktop.shell or "none") == "noctalia") && pkgs.stdenv.isLinux;
-  aiToolsCfg = homelabCfg.programs.ai_tools;
-  aiToolsEnabled = aiToolsCfg.enable or false;
-  hasAiTool = tool: aiToolsEnabled && lib.elem tool (aiToolsCfg.tools or []);
-  # The widget is driven by provider selection, not installed CLIs. That lets a
-  # machine expose usage for a provider even if the corresponding executable is
-  # delivered some other way later, and keeps tool installation separate from UI
-  # state.
-  hasAiModel = model: aiToolsEnabled && lib.elem model (aiToolsCfg.models or []);
-  # Only render the bar widget on machines that actually expose Bluetooth in
-  # the machine-level hardware profile; desktops without an adapter should not
-  # show a dead control.
+  # Only render the Bluetooth bar widget on machines that actually expose
+  # Bluetooth in the machine-level hardware profile; desktops without an
+  # adapter should not show a dead control.
   bluetoothEnabled = homelabCfg.hardware.bluetooth.enable or false;
-  claudeModelEnabled = hasAiModel "claude-code";
-  # Noctalia's Codex provider reads local Codex CLI state from `~/.codex`, so
-  # only enable it when the machine selects the provider and actually installs
-  # the Codex tool. That keeps the widget from probing missing local files and
-  # spamming warnings on hosts that use opencode without Codex CLI. Keep
-  # `openai` as the higher-level machine-facing alias while still mapping onto
-  # the plugin's `codex` provider toggle.
-  codexModelEnabled = (hasAiModel "codex" || hasAiModel "openai") && hasAiTool "codex";
-  openrouterModelEnabled = hasAiModel "openrouter";
-  zenModelEnabled = hasAiModel "zen";
-  copilotModelEnabled = hasAiModel "copilot";
-  modelUsageEnabled =
-    claudeModelEnabled
-    || codexModelEnabled
-    || openrouterModelEnabled
-    || zenModelEnabled
-    || copilotModelEnabled;
+
+  stylixEnabled = config.stylix.enable or false;
+  # Stylix base16 -> Noctalia palette roles. Mapping mirrors Stylix's v4
+  # noctalia-shell target (modules/noctalia-shell/hm.nix upstream), so v5 lands
+  # the exact colors the desktop had under v4. Lazily evaluated; only forced on
+  # Stylix-enabled desktops (guarded by stylixEnabled below).
+  stylixPalette = with config.lib.stylix.colors.withHashtag; {
+    mPrimary = base0D;
+    mOnPrimary = base00;
+    mSecondary = base0E;
+    mOnSecondary = base00;
+    mTertiary = base0C;
+    mOnTertiary = base00;
+    mError = base08;
+    mOnError = base00;
+    mSurface = base00;
+    mOnSurface = base05;
+    mHover = base0C;
+    mOnHover = base00;
+    mSurfaceVariant = base01;
+    mOnSurfaceVariant = base04;
+    mOutline = base03;
+    mShadow = base00;
+  };
 in {
   config = lib.mkIf shellIsNoctalia (lib.optionalAttrs hasNoctaliaOption {
     programs = {
-      noctalia-shell = {
+      noctalia = {
         enable = true;
-        settings = {
-          # Pin the current upstream settings schema version so Noctalia reads
-          # the Home Manager-generated JSON as already migrated state. Without
-          # this, cold starts treat the file as legacy v0 settings and can
-          # silently remap bar options such as `barType` back to upstream
-          # defaults during migration.
-          settingsVersion = 59;
 
-          appLauncher = {
-            enableClipboardHistory = true;
-            terminalCommand = "kitty -e";
+        # Custom palette bridged from Stylix. Writes ~/.config/noctalia/palettes/
+        # stylix.json, selected by settings.theme below.
+        customPalettes = lib.optionalAttrs stylixEnabled {
+          stylix = {
+            dark = stylixPalette;
           };
+        };
 
-          bar = {
-            barType = "floating";
-            # mkForce: the HM module defaults to 1.0; semi-transparent bar
-            # gives floating capsules a subtle backdrop
-            backgroundOpacity = lib.mkForce 0.50;
-            useSeparateOpacity = true;
-            density = "spacious";
-            marginVertical = 12;
-            marginHorizontal = 12;
-            widgets = {
-              left = [
-                {
-                  id = "Workspace";
-                  labelMode = "none";
-                }
-                {
-                  id = "ActiveWindow";
-                  colorizeIcons = true;
-                  # Vanish when no window is focused; scroll only on hover to
-                  # avoid accidental workspace switches
-                  hideMode = "hidden";
-                  maxWidth = 500;
-                  scrollingMode = "hover";
-                  showIcon = true;
-                  showText = true;
-                  textColor = "none";
-                  useFixedWidth = false;
-                }
-                {
-                  id = "MediaMini";
-                  # Compact now-playing capsule: album art + progress ring,
-                  # artist before title, no audio visualiser
-                  hideMode = "hidden";
-                  hideWhenIdle = false;
-                  maxWidth = 500;
-                  panelShowAlbumArt = true;
-                  scrollingMode = "hover";
-                  showAlbumArt = true;
-                  showArtistFirst = true;
-                  showProgressRing = true;
-                  showVisualizer = false;
-                  textColor = "none";
-                  useFixedWidth = false;
-                  visualizerType = "linear";
-                }
-              ];
-              # Mirror the current GUI-customized layout: keep the middle empty,
-              # anchor the tray on the right, and only render the Bluetooth
-              # control when the machine enables Bluetooth hardware.
-              center = [];
-              right =
-                [
-                  {
-                    id = "Tray";
-                    # Flat tray: no drawer chevron, no icon recolouring.
-                    blacklist = [];
-                    chevronColor = "none";
-                    colorizeIcons = false;
-                    drawerEnabled = false;
-                    hidePassive = false;
-                    pinned = [];
-                  }
-                ]
-                ++ lib.optional modelUsageEnabled {
-                  id = "plugin:model-usage";
-                }
-                ++ lib.optional bluetoothEnabled {
-                  id = "Bluetooth";
-                  displayMode = "onhover";
-                  iconColor = "none";
-                  textColor = "none";
-                }
-                ++ [
-                  {
-                    id = "Battery";
-                    # Icon-only in the bar; auto-hide on desktops without a battery;
-                    # expose performance-mode and power-profile toggles in the popup
-                    displayMode = "icon-always";
-                    hideIfIdle = false;
-                    hideIfNotDetected = true;
-                    showNoctaliaPerformance = true;
-                    showPowerProfiles = true;
-                  }
-                  {
-                    id = "Volume";
-                    # Keep the volume readout always visible; middle-click opens
-                    # pwvucontrol (PipeWire) with pavucontrol fallback.
-                    displayMode = "alwaysShow";
-                    middleClickCommand = "pwvucontrol || pavucontrol";
-                  }
-                  {
-                    id = "Brightness";
-                    applyToAllMonitors = false;
-                    displayMode = "alwaysShow";
-                    iconColor = "none";
-                    textColor = "none";
-                  }
-                  {
-                    id = "Clock";
-                    # Widget-level format (time-first); general.clockFormat is
-                    # used for lock screen and other shell surfaces
-                    formatHorizontal = "HH:mm ddd, MMM dd";
-                    tooltipFormat = "HH:mm ddd, MMM dd";
-                  }
-                  {
-                    id = "NotificationHistory";
-                  }
-                  {
-                    id = "ControlCenter";
-                    colorizeDistroLogo = false;
-                    colorizeSystemIcon = "none";
-                    enableColorization = true;
-                    icon = "noctalia";
-                    useDistroLogo = true;
-                  }
-                ];
+        settings = {
+          # Follow the Stylix palette via a custom palette; fall back to a
+          # built-in scheme on any (hypothetical) non-Stylix desktop.
+          theme =
+            if stylixEnabled
+            then {
+              mode = "dark";
+              source = "custom";
+              custom_palette = "stylix";
+            }
+            else {
+              mode = "dark";
+              source = "builtin";
+              builtin = "Gruvbox";
+            };
+
+          shell = {
+            clipboard_enabled = true;
+            animation = {
+              enabled = true;
+            };
+            panel = {
+              control_center_placement = "floating";
+              control_center_position = "center";
             };
           };
 
-          # Settings panel opens as a centered overlay instead of attached to the bar
-          ui = {
-            settingsPanelMode = "centered";
+          # Control Center dashboard (the panel, not the bar button).
+          control_center = {
+            hidden_tabs = ["calendar"];
+            sidebar = "full";
+            sidebar_section = "full";
           };
 
+          bar = {
+            main = {
+              position = "top";
+              background_opacity = 0.5;
+              radius = 12;
+              margin_ends = 10;
+              padding = 18;
+              widget_spacing = 10;
+              scale = 1.2;
+              reserve_space = true;
+              shadow = true;
+
+              start = ["workspaces" "active_window" "media"];
+              center = [];
+              # Bluetooth only on machines with an adapter; clipboard next to tray.
+              end =
+                ["tray" "clipboard"]
+                ++ lib.optional bluetoothEnabled "bluetooth"
+                ++ ["battery" "volume" "brightness" "clock" "notifications" "control-center"];
+            };
+          };
+
+          # Per-widget tweaks. Numeric fields are floats (schema types them as
+          # doubles; a bare int would fail validation).
+          widget = {
+            workspaces = {
+              display = "none";
+            };
+            active_window = {
+              max_length = 500.0;
+              title_scroll = "on_hover";
+            };
+            media = {
+              max_length = 500.0;
+              title_scroll = "on_hover";
+              hide_when_no_media = true;
+            };
+            tray = {
+              drawer = false;
+            };
+            battery = {
+              display_mode = "glyph";
+            };
+            volume = {
+              show_label = true;
+            };
+            brightness = {
+              show_label = true;
+            };
+            clock = {
+              format = "{:%a, %b %d %Y %H:%M}";
+              tooltip_format = "{:%H:%M %a, %b %d}";
+            };
+            notifications = {
+              hide_when_no_unread = false;
+            };
+            # Restore the NixOS logo on the Control Center bar button (v4 used the
+            # distro logo). Points at noctalia's own bundled distro asset;
+            # colorized (tinted to the theme accent) to match the current setup.
+            "control-center" = {
+              custom_image = "${config.programs.noctalia.package}/share/noctalia/assets/images/distros/nixos.svg";
+              custom_image_colorize = true;
+            };
+          };
+
+          # On-screen display (volume/brightness) centred at the bottom.
+          osd = {
+            position = "bottom_center";
+          };
+
+          # No dock.
           dock = {
             enabled = false;
           };
 
-          general = {
-            animationDisabled = true;
-            clockFormat = "ddd, MMM dd HH:mm  ";
-            lockScreenAnimations = true;
-            passwordChars = true;
-          };
-
+          # Idle policy: screen off at 10 min, lock 1 min later, suspend at 30 min,
+          # with a surface-colour fade before an idle action fires.
           idle = {
-            enabled = true;
-            # Screen off after 10 min, lock 1 min later, suspend at 30 min
-            screenOffTimeout = 600;
-            lockTimeout = 660;
-            suspendTimeout = 1800;
-            fadeDuration = 5;
-          };
-
-          noctaliaPerformance = {
-            disableWallpaper = false;
-          };
-
-          # On-screen display (volume/brightness) centred at the bottom
-          osd = {
-            location = "bottom_center";
-          };
-
-          # Power menu: 5s countdown (halved from default 10s), UEFI reboot
-          # hidden since it's rarely needed on these machines
-          sessionMenu = {
-            countdownDuration = 5000;
-            powerOptions = [
-              {
+            pre_action_fade_seconds = 5.0;
+            behavior = {
+              "screen-off" = {
+                timeout = 600;
+                action = "screen_off";
+                enabled = true;
+              };
+              lock = {
+                timeout = 660;
                 action = "lock";
                 enabled = true;
-                keybind = "1";
-              }
-              {
+              };
+              "lock-and-suspend" = {
+                timeout = 1800;
                 action = "suspend";
                 enabled = true;
-                keybind = "2";
-              }
-              {
-                action = "hibernate";
-                enabled = true;
-                keybind = "3";
-              }
-              {
-                action = "reboot";
-                enabled = true;
-                keybind = "4";
-              }
-              {
-                action = "logout";
-                enabled = true;
-                keybind = "5";
-              }
-              {
-                action = "shutdown";
-                enabled = true;
-                keybind = "6";
-              }
-              {
-                action = "rebootToUefi";
-                enabled = false;
-                keybind = "7";
-              }
-            ];
-          };
-        };
-
-        pluginSettings = {
-          model-usage = lib.mkIf modelUsageEnabled {
-            providers = {
-              claude = {
-                enabled = claudeModelEnabled;
-                statsPath = "~/.claude/stats-cache.json";
-                credentialsPath = "~/.claude/.credentials.json";
-              };
-              codex = {
-                enabled = codexModelEnabled;
-              };
-              copilot = {
-                enabled = copilotModelEnabled;
-              };
-              openrouter = {
-                enabled = openrouterModelEnabled;
-                apiKey = "";
-              };
-              zen = {
-                enabled = zenModelEnabled;
-                apiKey = "";
-              };
-            };
-            barDisplayMode = "active";
-            barCycleIntervalSec = 5;
-            barMetric = "usage";
-            refreshIntervalSec = 30;
-          };
-        };
-      };
-    };
-
-    # Plugin registry (plugins.json) — separate from settings.json.
-    # Noctalia auto-installs enabled plugins from declared sources on startup.
-    xdg = {
-      configFile = {
-        "noctalia/plugins.json" = {
-          text = builtins.toJSON {
-            version = 2;
-            sources = [
-              {
-                enabled = true;
-                name = "Noctalia Plugins";
-                url = "https://github.com/noctalia-dev/noctalia-plugins";
-              }
-            ];
-            states = lib.optionalAttrs modelUsageEnabled {
-              model-usage = {
-                enabled = true;
-                sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
               };
             };
           };
+
+          # NB: the active wallpaper is runtime state set via `noctalia msg
+          # wallpaper-set`, not a config.toml key — so it is enforced
+          # declaratively by the `noctalia-wallpaper` user service in
+          # ./default.nix (which re-applies the Stylix image on each login),
+          # not here.
         };
       };
     };

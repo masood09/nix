@@ -22,7 +22,7 @@ System programs enabled conditionally via =homelab.programs.*=:
 
 ** Home-Manager Programs (all machines via home-manager)
 
-Each program module guards itself with its own =homelab.programs.<name>.enable= flag. Machines opt in via =_config.nix=. AI-related CLIs now also share an aggregate selector at =homelab.programs.ai_tools=, which fans out to the underlying per-tool flags and declares the provider list used by Noctalia's model-usage widget.
+Each program module guards itself with its own =homelab.programs.<name>.enable= flag. Machines opt in via =_config.nix=. AI-related CLIs now also share an aggregate selector at =homelab.programs.ai_tools=, which fans out to the underlying per-tool flags and declares a provider list (=models=). The provider list previously drove Noctalia's =model-usage= bar widget; that widget is not currently wired under Noctalia v5 (the plugin registry was removed), so the =models= list has no consumer for now — pending the v5 declarative-plugin story.
 
 *** Shell & Terminal
 
@@ -65,7 +65,7 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 | _gpg.nix         | gpg, gpg-agent (SSH agent mode)                                    | GPG encryption + smartcard/YubiKey |
 | _neovim.nix      | neovim                                                             | Editor (vi/vim aliases)            |
 
-The =homelab.programs.ai_tools= selector uses enum-backed =tools= and =models= lists. =tools= controls CLI installation (currently =claude-code=, =codex=, =opencode=) while =models= controls provider visibility in Noctalia's =model-usage= plugin (currently =claude-code=, =codex=, =openai=, =copilot=, =openrouter=, =zen=).
+The =homelab.programs.ai_tools= selector uses enum-backed =tools= and =models= lists. =tools= controls CLI installation (currently =claude-code=, =codex=, =opencode=) while =models= (currently =claude-code=, =codex=, =openai=, =copilot=, =openrouter=, =zen=) previously controlled provider visibility in Noctalia's =model-usage= plugin. That widget is not currently wired under Noctalia v5, so =models= has no active consumer for now.
 
 The shared MCP registry in =_mcp.nix= is gated on the same =ai_tools= selector: when no AI CLI is enabled, =programs.mcp= stays disabled and neither =mcp-nixos= nor =context7-mcp= enters the closure. Declarative server entries (via =mcp-servers-nix='s HM bridge) and the manual =nixos= entry both write into =programs.mcp.servers=, which =_claude-code.nix=, =_codex-cli.nix=, and =_opencode.nix= consume.
 
@@ -96,9 +96,9 @@ The shared MCP registry in =_mcp.nix= is gated on the same =ai_tools= selector: 
 
 *** Noctalia Desktop Shell (=desktop/_noctalia.nix=, default for desktops)
 
-| Package        | Purpose                                                       |
-|----------------+---------------------------------------------------------------|
-| noctalia-shell | Desktop shell (bar, notifications, launcher, lock, wallpaper) |
+| Package  | Purpose                                                       |
+|----------+---------------------------------------------------------------|
+| noctalia | Desktop shell v5 (bar, notifications, launcher, lock, wallpaper) |
 
 *** Niri Desktop (=niri/default.nix=, Linux desktops with Niri)
 
@@ -153,7 +153,7 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 
 | Process         | Condition                               | Purpose                            |
 |-----------------+-----------------------------------------+------------------------------------|
-| =noctalia-shell=  | =shell = "noctalia"=                      | Desktop shell (bar, notifications) |
+| =noctalia=        | =shell = "noctalia"=                      | Desktop shell (bar, notifications) |
 | =bitwarden=       | =role == "desktop"=                        | Password manager                   |
 | =element-desktop= | =homelab.programs.element-desktop.enable= | Matrix client                      |
 | =emacs --daemon=  | =homelab.programs.emacs.enable=           | Emacs daemon (connect via Mod+E)   |
