@@ -96,6 +96,8 @@ in {
 
           shell = {
             clipboard_enabled = true;
+            polkit_agent = true;
+            password_style = "random";
             animation = {
               enabled = true;
             };
@@ -115,12 +117,15 @@ in {
           bar = {
             main = {
               position = "top";
-              background_opacity = 0.5;
+              background_opacity = 0.6;
               radius = 12;
+              thickness = 40;
               margin_ends = 10;
+              margin_edge = 10;
+              concave_edge_corners = false;
               padding = 18;
-              widget_spacing = 10;
-              scale = 1.2;
+              widget_spacing = 15;
+              scale = 1.0;
               reserve_space = true;
               shadow = true;
 
@@ -180,6 +185,20 @@ in {
           # On-screen display (volume/brightness) centred at the bottom.
           osd = {
             position = "bottom_center";
+            background_opacity = 0.6;
+            offset_y = 40;
+          };
+
+          # Resolve location from IP (feeds weather / night light / auto theme).
+          location = {
+            auto_locate = true;
+          };
+
+          # Disable system-resource sampling (no sysmon widgets in use).
+          system = {
+            monitor = {
+              enabled = false;
+            };
           };
 
           # No dock.
