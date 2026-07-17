@@ -25,6 +25,15 @@ in {
   };
 
   config = lib.mkIf enableZFS {
+    boot = {
+      zfs = {
+        # Adopt the 26.11 default early: don't force-import a pool that wasn't
+        # cleanly exported. Safer against data loss (e.g. a disk imported by
+        # another system) and silences the pre-26.11 deprecation warning.
+        forceImportRoot = false;
+      };
+    };
+
     services = lib.mkIf (homelabCfg.isRootZFS || anyManagedDatasets) {
       zfs = {
         autoScrub = {
