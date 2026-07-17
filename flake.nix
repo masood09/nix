@@ -3,7 +3,7 @@
   description = "Masood's NixOS Configuration";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     # Unstable channel — used by inputs that require latest nixpkgs (e.g. noctalia)
     nixpkgs-unstable = {
       url = "github:nixos/nixpkgs/nixos-unstable";
@@ -25,7 +25,7 @@
 
     # User environment
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     niri = {
@@ -33,13 +33,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     stylix = {
-      url = "github:nix-community/stylix/release-25.11";
+      url = "github:nix-community/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # macOS
     nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
+      url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew = {
@@ -138,6 +138,11 @@
       inputs.home-manager.nixosModules.home-manager
       inputs.authentik-nix.nixosModules.default
       inputs.impermanence.nixosModules.impermanence
+      # nixos-26.05 ships a native services.headplane module that collides with
+      # the pinned v0.6.2 flake module below (our Headscale integration targets
+      # the v0.6.2 option shape — see the Headplane pin note above). Disable the
+      # upstream module so only the flake module declares services.headplane.
+      {disabledModules = ["services/networking/headplane.nix"];}
       inputs.headplane.nixosModules.headplane
       inputs.stylix.nixosModules.stylix
 

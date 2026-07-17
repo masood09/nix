@@ -124,25 +124,44 @@ in {
       };
 
       initrd = {
-        # systemd-based initrd for LUKS unlock via systemd-cryptsetup —
-        # required for Plymouth's password agent integration
-        systemd = lib.mkIf isDesktopSystemdBoot {
-          enable = true;
+        systemd = {
+          # systemd stage-1 initrd is the default as of nixos-26.05. Non-ZFS
+          # desktops additionally rely on it for LUKS unlock via
+          # systemd-cryptsetup (Plymouth's password agent integration).
+          enable = lib.mkIf isDesktopSystemdBoot true;
+
+          # Roll back root dataset to a blank snapshot on every boot
+          # (impermanence). Under systemd stage-1 initrd the scripted
+          # postResumeCommands hook is unsupported, so this runs as an initrd
+          # oneshot ordered after the pool import and before the root dataset
+          # is mounted at /sysroot.
+          services = {
+            rollback =
+              lib.mkIf (
+                homelabCfg.isRootZFS
+                && homelabCfg.impermanence
+              ) {
+                description = "Roll back root ZFS dataset to a blank snapshot";
+                wantedBy = ["initrd.target"];
+                after = ["zfs-import-rpool.service"];
+                before = ["sysroot.mount"];
+                path = [config.boot.zfs.package];
+                unitConfig = {
+                  DefaultDependencies = "no";
+                };
+                serviceConfig = {
+                  Type = "oneshot";
+                };
+                script = ''
+                  zfs rollback -r rpool/root/empty@start
+                '';
+              };
+          };
         };
 
         network = {
           flushBeforeStage2 = true;
         };
-
-        # Roll back root dataset to blank snapshot on every boot (impermanence)
-        postResumeCommands =
-          lib.mkIf (
-            homelabCfg.isRootZFS
-            && homelabCfg.impermanence
-          )
-          (lib.mkAfter ''
-            zfs rollback -r rpool/root/empty@start
-          '');
       };
 
       supportedFilesystems = lib.mkIf homelabCfg.isRootZFS ["zfs"];

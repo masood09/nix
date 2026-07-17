@@ -51,6 +51,12 @@
           restartUnits = ["grafana.service"];
         };
 
+        "grafana/secret-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "grafana";
+          restartUnits = ["grafana.service"];
+        };
+
         "headscale/dns-extra-records.json" = {
           owner = "headscale";
           sopsFile = ./../../secrets/headscale-dns.sops.yaml;

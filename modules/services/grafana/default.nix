@@ -119,6 +119,17 @@ in {
         };
 
         settings = {
+          # nixos-26.05 removed Grafana's built-in default secret_key (used to
+          # sign auth cookies / encrypt DB-stored secrets) and now asserts it be
+          # set explicitly. Sourced from sops per machine via the $__file
+          # provider; declare the `grafana/secret-key` secret in each Grafana
+          # machine's _secrets.nix.
+          security = {
+            secret_key = "$__file{${
+              config.sops.secrets."grafana/secret-key".path
+            }}";
+          };
+
           auth = {
             signout_redirect_url = "https://${grafanaCfg.oauth.providerHost}/application/o/grafana/end-session/";
             oauth_auto_login = true;

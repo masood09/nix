@@ -20,7 +20,12 @@
           };
         }
         // lib.optionalAttrs (config.programs.mcp.servers != {}) {
-          mcp_servers = lib.mkDefault config.programs.mcp.servers;
+          # nixpkgs 26.05's TOML format type rejects null-valued attributes,
+          # and the shared MCP server submodule carries null defaults (e.g.
+          # `url`/`enabled` for stdio servers). Strip nulls before serializing.
+          mcp_servers = lib.mkDefault (
+            lib.filterAttrsRecursive (_: v: v != null) config.programs.mcp.servers
+          );
         };
     };
 

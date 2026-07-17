@@ -60,12 +60,11 @@
     hostName = "nixiso";
 
     # Use NetworkManager for WiFi — nmcli is easier than wpa_cli on a live ISO.
-    # Disables standalone wpa_supplicant to avoid socket/conflict issues.
+    # On nixos-26.05 the NetworkManager module itself sets
+    # networking.wireless.enable = true (wpa_supplicant fully controlled over
+    # DBus), so we no longer set it here — an explicit value now conflicts.
     networkmanager = {
       enable = true;
-    };
-    wireless = {
-      enable = false;
     };
   };
 

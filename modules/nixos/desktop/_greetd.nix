@@ -18,13 +18,8 @@
 #      to consume. Requires the user's login password to equal the LUKS
 #      passphrase; if they diverge the session still starts but the keyring
 #      stays locked.
-#
-# TECH DEBT: pam_fde_boot_pw is pulled from nixpkgs-unstable because the
-# package has not landed in nixos-25.11. Drop the inputs.nixpkgs-unstable
-# reference once pkgs.pam_fde_boot_pw is available on the pinned channel.
 {
   config,
-  inputs,
   lib,
   pkgs,
   ...
@@ -37,7 +32,7 @@
     && homelabCfg.isEncryptedRoot
     && !homelabCfg.isRootZFS;
 
-  inherit (inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}) pam_fde_boot_pw;
+  inherit (pkgs) pam_fde_boot_pw;
 in {
   config = lib.mkIf homelabCfg.desktop.enable (lib.mkMerge [
     {
@@ -84,7 +79,7 @@ in {
     # Auto-login PAM augmentation — only built into the closure on machines
     # where initial_session actually runs (see file header). Kept in its own
     # mkMerge entry so ZFS desktops never reference pam_fde_boot_pw and never
-    # pull the unstable package into their store.
+    # pull the package into their store.
     (lib.mkIf autoLoginFromBootPassword {
       security = {
         pam = {

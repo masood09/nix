@@ -50,8 +50,10 @@ in {
     systemd.services."lk-jwt-service" = {
       environment = {
         LIVEKIT_FULL_ACCESS_HOMESERVERS = cfg.rootDomain;
-        LIVEKIT_JWT_BIND = "127.0.0.1:${toString cfg.rtc."lk-jwt-service".port}";
-        LIVEKIT_JWT_PORT = lib.mkForce "";
+        # The nixos-26.05 lk-jwt-service module binds LIVEKIT_JWT_BIND to
+        # `:<port>` (all interfaces) and dropped the old LIVEKIT_JWT_PORT var.
+        # Force localhost-only since the service sits behind the Caddy proxy.
+        LIVEKIT_JWT_BIND = lib.mkForce "127.0.0.1:${toString cfg.rtc."lk-jwt-service".port}";
       };
     };
   };

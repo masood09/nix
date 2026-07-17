@@ -29,6 +29,17 @@ in {
   ];
 
   config = lib.mkIf cfg.enable {
+    # TECH DEBT: karakeep in nixos-26.05 builds with pnpm 9.15.9, which nixpkgs
+    # marks insecure (CVE-2026-48995 and friends). Permit it on karakeep hosts
+    # until nixpkgs bumps the karakeep pnpm pin to a patched release.
+    nixpkgs = {
+      config = {
+        permittedInsecurePackages = [
+          "pnpm-9.15.9"
+        ];
+      };
+    };
+
     # ZFS dataset for dataDir
     homelab = {
       zfs = {

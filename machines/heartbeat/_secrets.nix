@@ -36,6 +36,12 @@
           restartUnits = ["grafana.service"];
         };
 
+        "grafana/secret-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "grafana";
+          restartUnits = ["grafana.service"];
+        };
+
         "jobscraper/.env" = {
           sopsFile = ./secrets.sops.yaml;
           restartUnits = ["podman-jobscraper.service"];

@@ -26,10 +26,12 @@ in {
 
   # HM's XDG MIME module independently adds shared-mime-info (~73 MB) to
   # home.packages. The NixOS-level xdg.mime.enable in _stylix.nix covers the
-  # system MIME database; this covers the per-user one.
+  # system MIME database; this covers the per-user one. Linux-only: as of
+  # home-manager 26.05 the xdg.mime module hard-errors on Darwin (macOS uses
+  # Launch Services, not the freedesktop MIME database).
   xdg = {
     mime = {
-      enable = lib.mkDefault (homelabCfg.role == "desktop" || pkgs.stdenv.isDarwin);
+      enable = lib.mkDefault (pkgs.stdenv.isLinux && homelabCfg.role == "desktop");
     };
   };
 

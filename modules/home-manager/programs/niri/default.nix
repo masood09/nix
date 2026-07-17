@@ -545,14 +545,14 @@ in {
                 action.spawn =
                   if shellIsNoctalia
                   then ["noctalia-shell" "ipc" "call" "brightness" "increase"]
-                  else ["light" "-A" "10"];
+                  else ["brightnessctl" "set" "10%+"];
               };
               "XF86MonBrightnessDown" = {
                 allow-when-locked = true;
                 action.spawn =
                   if shellIsNoctalia
                   then ["noctalia-shell" "ipc" "call" "brightness" "decrease"]
-                  else ["light" "-U" "10"];
+                  else ["brightnessctl" "set" "10%-"];
               };
 
               "Mod+O" = {

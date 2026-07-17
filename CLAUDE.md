@@ -149,11 +149,11 @@ Combine sources when useful: nixos MCP for the exact option name, then context7 
 
 ## Key Dependencies
 
-- nixpkgs: `nixos-25.11`
+- nixpkgs: `nixos-26.05`
 - nixpkgs-unstable: `nixos-unstable` (used by noctalia and to source the latest `opencode` package)
-- home-manager: `release-25.11`
-- nix-darwin: `nix-darwin-25.11`
-- stylix: `release-25.11`
+- home-manager: `release-26.05`
+- nix-darwin: `nix-darwin-26.05`
+- stylix: `release-26.05`
 - niri: `sodiboo/niri-flake` (declarative Niri compositor config + Stylix integration; included in `mkNixOSDesktopConfig`, not `mkNixOSConfig`, to avoid pulling niri into server closures)
 - noctalia: `noctalia-dev/noctalia-shell` (desktop shell; HM module included in `mkNixOSDesktopConfig` via `home-manager.sharedModules`, not in shared `home.nix`, because the flake wrapper unconditionally sets a default package via `mkDefault`)
 - mcp-servers-nix: `natsukium/mcp-servers-nix` (declarative MCP server registry; HM bridge module reads `mcp-servers.programs.<name>.enable` and writes the resulting entries into `programs.mcp.servers`, which `_claude-code.nix`/`_codex-cli.nix`/`_opencode.nix` consume; imported in shared `home.nix` but the registry itself is gated on `homelab.programs.ai_tools` inside `modules/home-manager/programs/_mcp.nix` so server closures stay free of MCP packages)
