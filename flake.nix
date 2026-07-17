@@ -100,14 +100,12 @@
       url = "github:yokoffing/Betterfox";
       flake = false;
     };
-    # Noctalia desktop shell (requires unstable nixpkgs for latest Quickshell)
+    # Noctalia desktop shell (v5). The `cachix` branch plus NO nixpkgs
+    # `follows` lets us pull prebuilt binaries from noctalia.cachix.org
+    # instead of compiling locally; the trade-off is a separate nixpkgs
+    # pinned in flake.lock. (v4 lives on the `legacy-v4` branch.)
     noctalia = {
-      url = "github:noctalia-dev/noctalia-shell";
-      inputs = {
-        nixpkgs = {
-          follows = "nixpkgs-unstable";
-        };
-      };
+      url = "github:noctalia-dev/noctalia/cachix";
     };
   };
 
@@ -160,8 +158,8 @@
     # niri-flake NixOS module unconditionally injects its HM module (with
     # a default niri package) into home-manager.sharedModules, and the
     # noctalia and zen-browser flake wrappers unconditionally pull
-    # heavyweight packages (quickshell, qt-wayland) into every closure
-    # even when the program is never enabled.
+    # heavyweight desktop-shell/browser packages into every closure even
+    # when the program is never enabled.
     desktopNixOSModules = [
       inputs.niri.nixosModules.niri
       {
