@@ -110,6 +110,9 @@ in {
     userDirs = {
       enable = pkgs.stdenv.isLinux && homelabCfg.role == "desktop";
       createDirectories = true;
+      # Adopt the nixos-26.05 default (flips to false once home.stateVersion
+      # >= 26.05); don't export XDG_*_DIR session variables.
+      setSessionVariables = false;
     };
   };
 
