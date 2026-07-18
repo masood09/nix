@@ -79,7 +79,11 @@ On encrypted non-ZFS desktops (currently just ~usul~), auto-login from the boot 
 
 Bitwarden Desktop is installed from ~modules/home-manager/programs/_packages.nix~ as part of the shared Linux desktop package set. Element Desktop is managed by Home Manager's native ~programs.element-desktop~ module in ~modules/home-manager/programs/_element-desktop.nix~ and is enabled per machine through ~homelab.programs.element-desktop.enable~.
 
-Bitwarden also needs machine-wide integration: fingerprint-capable NixOS desktops install a generated polkit action (~com.bitwarden.Bitwarden.unlock~) from ~modules/nixos/desktop/default.nix~ so Bitwarden's "system authentication" unlock path can delegate to polkit instead of failing because the action is undefined. In the current fleet that action is present on ~sonic~, but not on ~usul~.
+Bitwarden also needs machine-wide integration: NixOS desktops that set ~homelab.programs.bitwarden.systemAuthUnlock.enable = true~ install a generated polkit action (~com.bitwarden.Bitwarden.unlock~) from ~modules/nixos/desktop/default.nix~ so Bitwarden's "system authentication" unlock path can delegate to polkit instead of failing because the action is undefined. The companion ~passwordless~ option sets the action's ~allow_active~ to ~yes~ (silent auto-unlock at launch) instead of ~auth_self~ (polkit prompt); ~allow_any~/~allow_inactive~ stay at ~auth_self~ so remote/inactive sessions always authenticate. Silent unlock relies on the login keyring already being open at boot (~pam_fde_boot_pw~), and the tradeoff is that any process in the logged-in session can then trigger an unlock without authenticating — acceptable only on autologin desktops whose session is already trusted. In the current fleet both ~usul~ and ~sonic~ set ~enable = true~ and ~passwordless = true~. Enabling the option is orthogonal to ~hardware.fingerprint.enable~; on ~sonic~ ~passwordless~ deliberately bypasses the fingerprint prompt too.
+
+Note the app-side prerequisite that Nix cannot manage: in Bitwarden's own settings you must enable "Unlock with system authentication" once per machine, since that state lives in the app's data directory rather than in this repo.
+
+*Status (2026-07): the polkit half of this is correct and deployed, but end-to-end silent auto-unlock does not actually work yet on our stack — see "Bitwarden system-auth auto-unlock does not work end-to-end" under Pain Points. The ~systemAuthUnlock~ option is kept in place, dormant, for when the upstream blockers clear.*
 
 Element Desktop currently has no comparable system-wide integration in this repo, but on Linux its Home Manager module overrides the package to start Electron with ~--password-store=gnome-libsecret~. That forces Electron onto GNOME Keyring's Secret Service backend in the Niri session, where Electron's desktop auto-detection would otherwise fail and offer weaker local encryption. The module also declares a fuller ~settings~ baseline: it points Element at ~homelab.programs.element-desktop.baseUrl~ and ~homelab.programs.element-desktop.serverName~ (defaulting to ~https://chat.mantannest.com~ / ~chat.mantannest.com~), locks login to that homeserver, defaults to the dark theme, and leaves analytics disabled by not configuring ~posthog~. Using the native HM module also leaves room for future declarative extra ~profiles~ without pushing that app-specific config back into the generic package list.
 
@@ -291,9 +295,26 @@ Note that the analogous auto-login pain point on encrypted non-ZFS desktops (~us
 
 *Workaround:* log in with password instead of fingerprint. The keyring unlocks automatically.
 
-** Bitwarden system-auth unlock is only wired on fingerprint desktops
+** Bitwarden system-auth unlock is no longer tied to fingerprint
 
-The repo currently installs ~com.bitwarden.Bitwarden.unlock~ only when ~homelab.hardware.fingerprint.enable = true~. That matches the immediate requirement: make Bitwarden biometric unlock work on laptops with fingerprint readers. If a future non-fingerprint Linux desktop wants Bitwarden's polkit-backed system-auth flow via password only, this guard should be widened and the behavior re-evaluated.
+Previously ~com.bitwarden.Bitwarden.unlock~ was installed only when ~homelab.hardware.fingerprint.enable = true~, which coupled Bitwarden's system-auth path to fingerprint hardware and left non-fingerprint desktops (~usul~) without it. This is now controlled by the dedicated ~homelab.programs.bitwarden.systemAuthUnlock~ option (see Bitwarden Desktop above), independent of fingerprint support. The ~passwordless~ sub-option additionally makes the unlock silent — see the security tradeoff noted there.
+
+** Bitwarden system-auth auto-unlock does not work end-to-end
+
+Goal: have Bitwarden Desktop auto-unlock silently after boot on the autologin desktops (~usul~, ~sonic~), so the vault is ready without typing the master password. The ~systemAuthUnlock~ option (~enable~ + ~passwordless~) was built for this and is deployed, but as of 2026-07 the vault still prompts for the master password after every restart. The reason is upstream, not our config.
+
+What we verified is *correct* on ~usul~ (all confirmed live):
+- Polkit action ~com.bitwarden.Bitwarden.unlock~ installed with ~allow_active = yes~ (silent grant).
+- A polkit authentication agent is running in the Niri session (~polkit-kde-authentication-agent-1~).
+- The login keyring is unlocked at boot (~pam_fde_boot_pw~); ~desktop_core~ logs ~OS keyring is_locked=false~.
+- Bitwarden's biometric key is present in the keyring (secret service item ~service=Bitwarden_biometric~, ~account=<userId>_user_biometric~) and ~data.json~ has ~biometricUnlockEnabled=true~ with a stored ~clientKeyHalf~.
+
+Despite all that, the lock screen's "Unlock with system authentication" button is *disabled*. Two independent upstream walls:
+
+1. *Feature flag.* Desktop ~2026.5.0~ carries a ~LinuxBiometricsV2~ flag (~pm-26340-linux-biometrics-v2~), default ~false~, only turned on if the server advertises it in ~/api/config~ ~featureStates~. Our server is Vaultwarden ~1.36.0~ (the current latest), whose ~SUPPORTED_FEATURE_FLAGS~ whitelist includes ~pm-25373-windows-biometrics-v2~ but *not* the Linux one — so we cannot even set it via ~EXPERIMENTAL_CLIENT_FEATURE_FLAGS~ without Vaultwarden refusing to start.
+2. *Client status logic.* Forcing the flag ~true~ locally (patching the client's cached ~serverConfig.featureStates~ in ~data.json~) did *not* enable the button, so on this desktop build the flag is necessary-but-not-sufficient — the renderer's biometric-status check refuses Linux system-auth for another reason we did not pin down.
+
+Because both walls are upstream (Bitwarden desktop + Vaultwarden), the option is left in place dormant rather than reverted: the NixOS/polkit groundwork is already correct, so if a future Vaultwarden whitelists the flag *and* a future desktop build enables the button, silent auto-unlock should start working with no further Nix changes. Re-test by launching Bitwarden and checking whether that button is enabled.
 
 ** ZFS requires GRUB
 

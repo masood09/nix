@@ -89,6 +89,17 @@
       };
 
       programs = {
+        # Bitwarden system-auth unlock: install the polkit action and grant it
+        # silently for the active session so the vault auto-unlocks at launch.
+        # Safe here because sonic autologins from the boot password (password
+        # login path) and the login keyring is already unlocked by
+        # pam_fde_boot_pw. Note: passwordless bypasses the fingerprint prompt too.
+        bitwarden = {
+          systemAuthUnlock = {
+            enable = true;
+            passwordless = true;
+          };
+        };
         element-desktop = {
           enable = true;
         };
