@@ -37,8 +37,9 @@
         };
 
         # Leave fingerprint support off on usul. Shared desktop modules gate
-        # fprintd, PAM fingerprint auth, and Bitwarden's polkit action on this
-        # flag, so disabling it keeps the machine on the password-only path.
+        # fprintd and PAM fingerprint auth on this flag, so disabling it keeps
+        # the machine on the password-only path. Bitwarden system-auth unlock is
+        # no longer tied to this flag — see programs.bitwarden below.
         fingerprint = {
           enable = false;
         };
@@ -68,6 +69,16 @@
             "codex"
             "opencode"
           ];
+        };
+        # Bitwarden system-auth unlock: install the polkit action and grant it
+        # silently for the active session so the vault auto-unlocks at launch.
+        # Safe here because usul autologins from the boot password and the login
+        # keyring is already unlocked by pam_fde_boot_pw.
+        bitwarden = {
+          systemAuthUnlock = {
+            enable = true;
+            passwordless = true;
+          };
         };
         element-desktop = {
           enable = true;

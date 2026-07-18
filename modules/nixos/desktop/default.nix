@@ -17,6 +17,14 @@
   gfxCfg = homelabCfg.hardware.graphics;
   isIntel = gfxCfg.driver == "intel";
   isAmd = gfxCfg.driver == "amd";
+  bwUnlockCfg = homelabCfg.programs.bitwarden.systemAuthUnlock;
+  # "yes" auto-grants the active session (silent unlock); "auth_self" prompts.
+  # allow_any/allow_inactive stay at auth_self so remote/inactive sessions
+  # always authenticate regardless of the passwordless choice.
+  bwActiveAuth =
+    if bwUnlockCfg.passwordless
+    then "yes"
+    else "auth_self";
 in {
   imports = [
     ./_gaming.nix
@@ -37,6 +45,34 @@ in {
             "noctalia"
           ];
           description = "Desktop shell providing bar, notifications, lock screen, wallpaper, and idle handling. When set, individual replacements (waybar, swaync, swaylock, swaybg, udiskie) are not installed. swayidle remains available for session-side before-sleep locking. Rofi remains available as the launcher on Mod+D.";
+        };
+      };
+
+      programs = {
+        bitwarden = {
+          systemAuthUnlock = {
+            enable = lib.mkEnableOption ''
+              the com.bitwarden.Bitwarden.unlock polkit action so Bitwarden
+              Desktop's "system authentication" unlock path can delegate to
+              polkit. Required for both fingerprint-prompted and passwordless
+              unlock; enable on any desktop that uses Bitwarden system-auth'';
+
+            passwordless = lib.mkOption {
+              default = false;
+              type = lib.types.bool;
+              description = ''
+                Resolve the unlock action for the active session with
+                allow_active = "yes" instead of "auth_self", so Bitwarden
+                unlocks silently at launch with no polkit prompt. Relies on the
+                login keyring already being unlocked at boot (pam_fde_boot_pw).
+
+                Security tradeoff: any process in the logged-in session can then
+                trigger a Bitwarden unlock without authenticating. Only meaningful
+                where the session is already trusted (autologin desktops). Has no
+                effect unless systemAuthUnlock.enable is also true.
+              '';
+            };
+          };
         };
       };
 
@@ -83,9 +119,10 @@ in {
 
     # System-wide desktop glue that is not owned by a single service module.
     # Today this is only the Bitwarden polkit action used for "system auth"
-    # unlocks. Keep it gated to fingerprint-capable desktops because that is
-    # the only path in this repo that currently relies on the action.
-    environment.systemPackages = lib.optionals homelabCfg.hardware.fingerprint.enable [
+    # unlocks. Gated on homelab.programs.bitwarden.systemAuthUnlock.enable; the
+    # active-session auth mode is auth_self (prompt) or "yes" (silent) depending
+    # on .passwordless — see the let-bound bwActiveAuth above.
+    environment.systemPackages = lib.optionals bwUnlockCfg.enable [
       # Install the policy file via the Nix store so polkit sees the
       # com.bitwarden.Bitwarden.unlock action during desktop sessions.
       (pkgs.writeTextDir "share/polkit-1/actions/com.bitwarden.Bitwarden.policy" ''
@@ -100,7 +137,7 @@ in {
             <defaults>
               <allow_any>auth_self</allow_any>
               <allow_inactive>auth_self</allow_inactive>
-              <allow_active>auth_self</allow_active>
+              <allow_active>${bwActiveAuth}</allow_active>
             </defaults>
           </action>
         </policyconfig>
