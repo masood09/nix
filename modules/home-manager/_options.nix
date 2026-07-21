@@ -83,6 +83,20 @@ in {
 
         codex-cli = {
           enable = lib.mkEnableOption "Whether to enable Codex CLI.";
+
+          trustedProjects = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [];
+            example = ["/home/masoodahmed/code/work"];
+            description = ''
+              Absolute paths Codex should treat as trusted workspaces.
+
+              Codex normally records the answer to its "trust this folder?"
+              prompt by writing back into `~/.codex/config.toml`, which Home
+              Manager owns as a read-only store symlink. Listing a path here
+              declares the trust up front so the prompt never has to write.
+            '';
+          };
         };
 
         direnv = {
@@ -177,6 +191,10 @@ in {
               Whether to enable fzf.
             '';
           };
+        };
+
+        gh = {
+          enable = lib.mkEnableOption "Whether to enable the GitHub CLI (gh).";
         };
 
         git = {
