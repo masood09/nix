@@ -179,6 +179,10 @@ in {
           };
         };
 
+        gh = {
+          enable = lib.mkEnableOption "Whether to enable the GitHub CLI (gh).";
+        };
+
         git = {
           enable = lib.mkEnableOption "Whether to enable git.";
 

@@ -28,6 +28,7 @@
     ./_claude-code.nix
     ./_codex-cli.nix
     ./_emacs.nix
+    ./_gh.nix
     ./_git.nix
     ./_gpg.nix
     ./_neovim.nix
