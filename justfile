@@ -26,6 +26,10 @@ preflight:
     @{{ nix }} fmt -- --check .
     @just lint
 
+# Full validation — every host eval, sops, lock drift (slower than preflight)
+test:
+    ./test-flake.sh
+
 up:
     {{ nix }} flake update
 
