@@ -28,9 +28,13 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # epireyn's fork of niri-flake keeps the module current and ships a cachix
+    # cache (niri-epireyn.cachix.org) that covers nixos-26.05. No nixpkgs
+    # `follows` — niri builds against the fork's own nixpkgs so it resolves from
+    # that cache instead of compiling from source (sodiboo's cache only covers
+    # unstable/25.05, so following our 26.05 nixpkgs missed the cache entirely).
     niri = {
-      url = "github:sodiboo/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:epireyn/niri-flake";
     };
     stylix = {
       url = "github:nix-community/stylix/release-26.05";
