@@ -6,7 +6,13 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  # This flake's checkout is trusted everywhere Codex runs; anything else is
+  # opt-in per machine via `homelab.programs.codex-cli.trustedProjects`.
+  trustedProjects =
+    ["${config.home.homeDirectory}/code/nix"]
+    ++ homelabCfg.programs.codex-cli.trustedProjects;
+in {
   config = lib.mkIf homelabCfg.programs.codex-cli.enable {
     programs = {
       codex = {
@@ -23,6 +29,12 @@
             tui = {
               theme = "gruvbox-dark";
             };
+
+            # Pre-answer the "trust this folder?" prompt. Codex cannot persist
+            # the answer itself because HM makes config.toml read-only.
+            projects = lib.genAttrs trustedProjects (_: {
+              trust_level = "trusted";
+            });
           }
           // lib.optionalAttrs (config.programs.mcp.servers != {}) {
             # nixpkgs 26.05's TOML format type rejects null-valued attributes,
