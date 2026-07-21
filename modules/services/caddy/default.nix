@@ -36,11 +36,13 @@ in {
           };
         };
 
-        certs.${config.networking.domain} = {
-          extraDomainNames = [
-            "${config.networking.domain}"
-            "*.${config.networking.domain}"
-          ];
+        certs = {
+          ${config.networking.domain} = {
+            extraDomainNames = [
+              "${config.networking.domain}"
+              "*.${config.networking.domain}"
+            ];
+          };
         };
       };
     };

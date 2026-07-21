@@ -34,28 +34,35 @@
   mcpNixosExe = lib.getExe pkgs.mcp-nixos;
 in {
   config = lib.mkIf anyAiToolEnabled {
-    # The outer `lib.mkIf` is the real gate; this assignment exists so a
-    # machine can opt out with `programs.mcp.enable = lib.mkForce false;`
-    # without having to disable AI tooling entirely. `mkDefault` keeps that
-    # escape hatch open.
-    programs.mcp.enable = lib.mkDefault true;
+    programs = {
+      mcp = {
+        # The outer `lib.mkIf` is the real gate; this assignment exists so a
+        # machine can opt out with `programs.mcp.enable = lib.mkForce false;`
+        # without having to disable AI tooling entirely. `mkDefault` keeps that
+        # escape hatch open.
+        enable = lib.mkDefault true;
 
-    # Declarative MCP servers contributed via natsukium/mcp-servers-nix.
-    # Each entry is evaluated by the bridge module and lands in
-    # `programs.mcp.servers.<name>` below.
-    mcp-servers.programs = {
-      context7 = {
-        enable = true;
+        # Manual server entries. Currently just the local `nixos` MCP — the
+        # stdio transport is set explicitly so Claude Code can reuse the entry
+        # without reshaping it. Coexists with bridge-emitted entries via
+        # attrset merge.
+        servers = {
+          nixos = {
+            type = "stdio";
+            command = mcpNixosExe;
+          };
+        };
       };
     };
 
-    # Manual server entries. Currently just the local `nixos` MCP — the stdio
-    # transport is set explicitly so Claude Code can reuse the entry without
-    # reshaping it. Coexists with bridge-emitted entries via attrset merge.
-    programs.mcp.servers = {
-      nixos = {
-        type = "stdio";
-        command = mcpNixosExe;
+    # Declarative MCP servers contributed via natsukium/mcp-servers-nix.
+    # Each entry is evaluated by the bridge module and lands in
+    # `programs.mcp.servers.<name>` above.
+    mcp-servers = {
+      programs = {
+        context7 = {
+          enable = true;
+        };
       };
     };
   };

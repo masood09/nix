@@ -131,7 +131,8 @@ services.greetd = {
 ```
 
 - Keep attribute trees visually shallow and grouped by subsystem.
-- Match whatever the surrounding file already does. Some files legitimately diverge (`modules/nixos/disko/`, `machines/*/disko/`, and single-subtree HM program modules such as `_claude-code.nix` use a dotted path for their one top-level assignment). Do not "fix" those while editing something else.
+- The rule is absolute outside `disko/`. It applies to option trees, to third-party settings DSLs (niri `action.*`, `animations.*.kind`), and to paths with interpolated keys (`certs.${domain}`, `users.${userName}`) alike.
+- The only exemption is disko disk layout (`modules/nixos/disko/`, `machines/*/disko/`), where `disk.root` / `zpool.rpool` match upstream disko idiom.
 - Use one attribute per line for lists unless the list is tiny and already formatted that way.
 - Favor `inherit (...) foo bar;` when it reduces repetition and keeps ownership clear.
 

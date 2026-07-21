@@ -90,6 +90,8 @@ homelab = {
   - Good: `services = { greetd = { enable = true; }; };`
   - Bad: `services.greetd = { enable = true; };`
   - This applies to all top-level options: `services`, `programs`, `security`, `environment`, etc.
+  - It also applies to third-party settings DSLs and to paths with interpolated keys. Write `action = { close-window = {}; };` not `action.close-window = {};`, and `certs = { ${domain} = {...}; };` not `certs.${domain} = {...};`.
+  - **Sole exemption**: disko disk layout (`modules/nixos/disko/`, `machines/*/disko/`) keeps `disk.root` / `zpool.rpool` to match upstream disko idiom. Everywhere else the rule holds with no exceptions.
 - **Cross-platform HM modules**: If a shared Home Manager module writes to an option namespace provided only on one platform (or only on desktops), guard the `config` block with `lib.optionalAttrs (options.<path> ? <name>)`. Do **not** use `lib.mkIf` for this — `mkIf` still registers a conditional definition with the module system, which triggers "option does not exist" when the namespace is entirely absent. `optionalAttrs` evaluates at the Nix language level and returns `{}`, so no definition is registered at all. Do not try to make `imports` depend on `pkgs`/`config` to avoid missing-option errors; that causes module recursion. See `modules/home-manager/programs/zen/` for the canonical example.
 - **Linux-only HM behavior**: Even when an option namespace exists on both platforms, gate writes that are only meaningful on Linux (e.g. `dconf`, `xdg.configFile."fontconfig/..."`, `bubblewrap` package, dbus-dependent activation) behind `lib.mkIf pkgs.stdenv.isLinux`. macOS uses Core Text / Keychain / `sandbox-exec` instead, so the same options either no-op silently or accumulate dead config in `~/.config/`.
 
