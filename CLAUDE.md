@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 3 NixOS desktops, and 3 macOS machines with home-manager, sops-nix secrets, ZFS, and impermanence.
+Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 2 NixOS desktops, and 1 macOS machine with home-manager, sops-nix secrets, ZFS, and impermanence.
 
 ## Commands
 
@@ -26,19 +26,19 @@ just sops-update                     # Update sops key files (interactive)
 
 ## Deployment
 
-After making config changes, stop at preflight (`just preflight`, or `nix fmt --check` + `statix check`). Do not run `just deploy`, `darwin-rebuild switch`, or `nixos-rebuild switch` — the user runs activation themselves so they can watch the output and decide when to apply. Only run a deploy command if the user explicitly asks.
+After making config changes, stop at preflight (`just preflight`, or `nix fmt -- --check .` + `statix check .`). Do not run `just deploy`, `darwin-rebuild switch`, or `nixos-rebuild switch` — the user runs activation themselves so they can watch the output and decide when to apply. Only run a deploy command if the user explicitly asks.
 
 ## Architecture
 
 ### Flake Structure
 - `flake.nix` - Entry point defining all NixOS and Darwin configurations (`mkNixOSConfig` for servers, `mkNixOSDesktopConfig` for desktops, `mkDarwinConfig` for macOS)
-- `machines/` - Per-machine configs (each has `default.nix`, `_config.nix`, `hardware-configuration.nix`)
+- `machines/` - Per-machine configs (each has `default.nix`, `hardware-configuration.nix`, and — on every machine except `work-okta` and `nixiso` — `_config.nix`, `_networking.nix`, `_secrets.nix`, `secrets.sops.yaml`, `install.org`, and often a `disko/` directory)
 - `modules/` - Reusable modules split by concern:
   - `modules/home-manager/` - User environment (programs as `_<name>.nix` files in `programs/`)
   - `modules/nixos/` - NixOS system config (boot, networking, users, impermanence, zfs)
   - `modules/macos/` - nix-darwin system config
   - `modules/shared/` - Cross-platform option schemas imported by both NixOS and Darwin (role, purpose, primaryUser, networking)
-  - `modules/services/` - 27 declarative services (each in own directory)
+  - `modules/services/` - 28 declarative services (each in own directory)
 - `lib/` - Shared helper libraries:
   - `persistence-helpers.nix` - Impermanence bind-mount guard (three-part condition: `impermanence && !isRootZFS && !zfsEnable`)
   - `systemd-helpers.nix` - Permission-fixing oneshot service generator (`mkPermissionService`)
@@ -154,11 +154,16 @@ Combine sources when useful: nixos MCP for the exact option name, then context7 
 - home-manager: `release-26.05`
 - nix-darwin: `nix-darwin-26.05`
 - stylix: `release-26.05`
-- niri: `sodiboo/niri-flake` (declarative Niri compositor config + Stylix integration; included in `mkNixOSDesktopConfig`, not `mkNixOSConfig`, to avoid pulling niri into server closures)
-- noctalia: `noctalia-dev/noctalia-shell` (desktop shell; HM module included in `mkNixOSDesktopConfig` via `home-manager.sharedModules`, not in shared `home.nix`, because the flake wrapper unconditionally sets a default package via `mkDefault`)
+- niri: `epireyn/niri-flake` (fork of `sodiboo/niri-flake`; declarative Niri compositor config + Stylix integration. Included in `mkNixOSDesktopConfig`, not `mkNixOSConfig`, to avoid pulling niri into server closures. No nixpkgs `follows` — it must build against the fork's own nixpkgs to hit `niri-epireyn.cachix.org`, which covers 26.05)
+- noctalia: `noctalia-dev/noctalia`, `cachix` branch (desktop shell, v5. HM module included in `mkNixOSDesktopConfig` via `home-manager.sharedModules`, not in shared `home.nix`, because the flake wrapper unconditionally pulls the shell package into every closure. No nixpkgs `follows` so builds resolve from `noctalia.cachix.org`; v4 lives on the `legacy-v4` branch)
 - mcp-servers-nix: `natsukium/mcp-servers-nix` (declarative MCP server registry; HM bridge module reads `mcp-servers.programs.<name>.enable` and writes the resulting entries into `programs.mcp.servers`, which `_claude-code.nix`/`_codex-cli.nix`/`_opencode.nix` consume; imported in shared `home.nix` but the registry itself is gated on `homelab.programs.ai_tools` inside `modules/home-manager/programs/_mcp.nix` so server closures stay free of MCP packages)
 - zen-browser: `0xc000022070/zen-browser-flake` (Zen Browser HM module; included in `desktopNixOSModules` via `home-manager.sharedModules` for NixOS desktops and in `mkDarwinConfig` for macOS, not in shared `home.nix`, because the flake wrapper unconditionally pulls heavyweight browser/Qt packages into every closure even when the program is never enabled)
-- Other inputs: disko, impermanence, sops-nix, nix-homebrew, authentik-nix, headplane, claude-code, codex-cli-nix, betterfox
+- claude-code (`sadjow/claude-code-nix`) and codex-cli-nix (`sadjow/codex-cli-nix`): both auto-update hourly and ship their own binary caches. No nixpkgs `follows`, and they are consumed via `inputs.<name>.packages.<system>.default` — **not** their overlays, which would rebuild against our nixpkgs and miss the cache on every `just up`
+- headplane: pinned to `v0.6.2`; nixos-26.05's native `services.headplane` module is `disabledModules`-ed in `flake.nix` so only the flake module declares the option
+- authentik-nix: deliberately no nixpkgs `follows` (upstream doesn't support it; overriding causes a cache miss that OOMs the aarch64 SSO box)
+- Other inputs: disko, impermanence, sops-nix, nix-homebrew, nix-minecraft, betterfox
+
+**Binary-cache rule of thumb**: an input that publishes its own cachix cache must *not* get `inputs.nixpkgs.follows`, and must be consumed via its own `packages` attr rather than an overlay. Substituters and public keys live in `modules/nixos/default.nix`.
 
 ## Machines
 
