@@ -72,15 +72,19 @@
     };
 
     # Applications
-    # Claude Code CLI (hourly auto-updates, binary cache)
+    # Claude Code CLI (hourly auto-updates, binary cache). No nixpkgs
+    # `follows` — the package must build against the flake's own nixpkgs to
+    # match the prebuilt artifacts on claude-code.cachix.org. Following our
+    # nixpkgs re-hashes the derivation → cache miss → recompile on every
+    # `just up`. Consumed via `inputs.claude-code.packages.<system>.default`
+    # (NOT the overlay, which would rebuild against our nixpkgs regardless).
     claude-code = {
       url = "github:sadjow/claude-code-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Codex CLI (hourly auto-updates, binary cache)
+    # Codex CLI (hourly auto-updates, binary cache). Same cache rationale as
+    # claude-code above — no `follows`, consumed via the input's package attr.
     codex-cli-nix = {
       url = "github:sadjow/codex-cli-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     # Declarative MCP server registry. Provides per-server modules
     # (context7, filesystem, playwright, …) and a Home Manager bridge module
@@ -131,8 +135,10 @@
 
     # Applied to all NixOS, Darwin, and package builds
     sharedOverlays = [
-      inputs.claude-code.overlays.default
-      inputs.codex-cli-nix.overlays.default
+      # claude-code / codex-cli overlays intentionally omitted: their overlays
+      # rebuild against our nixpkgs (cache miss). We consume the inputs'
+      # prebuilt packages directly in _claude-code.nix / _codex-cli.nix so the
+      # builds match their cachix caches.
       inputs.headplane.overlays.default
       (import ./nix/overlays/default.nix)
       (import ./nix/overlays/darwin-setproctitle.nix)

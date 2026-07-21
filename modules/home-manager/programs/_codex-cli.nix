@@ -2,6 +2,7 @@
 {
   config,
   homelabCfg,
+  inputs,
   lib,
   pkgs,
   ...
@@ -9,7 +10,10 @@
   config = lib.mkIf homelabCfg.programs.codex-cli.enable {
     programs.codex = {
       enable = true;
-      package = pkgs.codex;
+      # Input's prebuilt package (built against codex-cli-nix's own nixpkgs)
+      # so it resolves from codex-cli.cachix.org instead of recompiling. The
+      # overlay path (pkgs.codex) would rebuild against our nixpkgs.
+      package = inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
       # Keep Codex on the upstream HM module while layering in local defaults
       # and the shared MCP server registry managed by `_mcp.nix`.
