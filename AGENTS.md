@@ -36,16 +36,22 @@ Primary commands live in `justfile`.
 - Lint repo: `just lint`
 - Direct linter invocation: `statix check .`
 - Run standard local validation: `just preflight`
+- Run full validation (all hosts): `just test`
 - Update flake inputs: `just up`
 - Build installer ISO: `just build-iso`
-- Deploy current machine: `just deploy`
-- Deploy a remote NixOS host: `just machine=heartbeat deploy`
+- Garbage collect: `just gc` (or `just gc age=30d`)
+- Verify/repair the nix store: `just repair`
+- Rotate sops keys: `just sops-rotate` (requires a clean git tree); update key files: `just sops-update`
+
+### Deployment Is Not An Agent Action
+
+`just deploy`, `just machine=<name> deploy`, `darwin-rebuild switch`, and `nixos-rebuild switch` are **user-run commands**. Stop at `just preflight` and hand back. The user runs activation themselves so they can watch the output and choose when to apply. Only run a deploy command if the user explicitly asks for it in that turn.
 
 ## Test Strategy
 
 There is no conventional unit-test suite in this repo. Validation is mostly Nix evaluation, targeted builds, and deployment-safe checks.
 
-- Full fast validation script: `./test-flake.sh`
+- Full fast validation: `just test` (wraps `./test-flake.sh`)
 - Flake metadata: `nix flake metadata`
 - Show flake outputs: `nix flake show`
 - Parse one file for syntax: `nix-instantiate --parse path/to/file.nix`
@@ -69,27 +75,33 @@ When changing only one machine or service, prefer the narrowest command that exe
 - Shared module change: `just preflight` plus at least one affected host eval/build
 - Machine-only change: evaluate or build only that machine
 - Service module change: evaluate/build a machine that enables that service
-- Flake wiring change: run `./test-flake.sh`
+- Flake wiring change: run `just test`
 - Installer change: `just build-iso`
 
 ## Important Machines
 
-NixOS hosts currently include:
+NixOS servers (built with `mkNixOSConfig`):
 
-- `accesscontrolsystem`
-- `usul`
-- `caretaker`
-- `commrelay`
-- `heartbeat`
-- `meshcontrol`
-- `nixiso`
-- `sonic`
-- `trialunit`
-- `watchfulsystem`
+- `accesscontrolsystem` — Authentik SSO
+- `caretaker` — DNS, Tailscale (non-ZFS: LUKS + ext4)
+- `commrelay` — Matrix, monitoring
+- `heartbeat` — NAS, primary services
+- `meshcontrol` — Headscale VPN control
+- `trialunit` — secondary services
+- `watchfulsystem` — monitoring, uptime
 
-Darwin hosts currently include:
+NixOS desktops (built with `mkNixOSDesktopConfig`, which adds niri/noctalia/zen-browser):
 
-- `work-okta`
+- `usul` — primary laptop (non-ZFS)
+- `sonic` — family laptop, dual-user (non-ZFS)
+
+Darwin hosts (`mkDarwinConfig`):
+
+- `work-okta` — the sole macOS machine; has no `_config.nix` (options live in `default.nix`)
+
+Other:
+
+- `nixiso` — minimal installer ISO, built directly by `nixpkgs.lib.nixosSystem` in `flake.nix`
 
 ## Formatting Rules
 
@@ -120,6 +132,8 @@ services.greetd = {
 ```
 
 - Keep attribute trees visually shallow and grouped by subsystem.
+- The rule is absolute outside `disko/`. It applies to option trees, to third-party settings DSLs (niri `action.*`, `animations.*.kind`), and to paths with interpolated keys (`certs.${domain}`, `users.${userName}`) alike.
+- The only exemption is disko disk layout (`modules/nixos/disko/`, `machines/*/disko/`), where `disk.root` / `zpool.rpool` match upstream disko idiom.
 - Use one attribute per line for lists unless the list is tiny and already formatted that way.
 - Favor `inherit (...) foo bar;` when it reduces repetition and keeps ownership clear.
 
@@ -177,6 +191,16 @@ services.greetd = {
 - Keep the existing style of concise, high-signal comments.
 - Add comments when the constraint is non-obvious, cross-platform, or operationally important.
 - Prefer explaining why a rule exists, not narrating obvious syntax.
+
+## Policies Defined In CLAUDE.md
+
+`CLAUDE.md` is the authoritative source for several repo policies that are easy to violate accidentally. Read it before touching these areas:
+
+- **Binary caches / flake inputs** — inputs with their own cachix cache must not use `inputs.nixpkgs.follows`, and must be consumed via their `packages` attr, not their overlay.
+- **Darwin / Homebrew** — nixpkgs and Home Manager are the default on `work-okta`; a Homebrew cask is a fallback that needs a `TECH DEBT:` comment naming the blocker.
+- **Stylix** — one system-level source of truth (`modules/nixos/_stylix.nix`, `modules/macos/_stylix.nix`) propagating to HM. Servers gate GTK/Qt/KDE/GNOME targets off; removing those gates adds ~1 GB to every server closure.
+- **Linux-only HM behavior** — gate `dconf`, fontconfig files, and dbus-dependent activation behind `lib.mkIf pkgs.stdenv.isLinux`.
+- **Research routing** — use the `nixos` MCP server for option schemas and package availability rather than guessing from training data.
 
 ## Rule Files Checked
 

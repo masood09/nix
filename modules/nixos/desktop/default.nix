@@ -122,27 +122,29 @@ in {
     # unlocks. Gated on homelab.programs.bitwarden.systemAuthUnlock.enable; the
     # active-session auth mode is auth_self (prompt) or "yes" (silent) depending
     # on .passwordless — see the let-bound bwActiveAuth above.
-    environment.systemPackages = lib.optionals bwUnlockCfg.enable [
-      # Install the policy file via the Nix store so polkit sees the
-      # com.bitwarden.Bitwarden.unlock action during desktop sessions.
-      (pkgs.writeTextDir "share/polkit-1/actions/com.bitwarden.Bitwarden.policy" ''
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE policyconfig PUBLIC
-         "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
-         "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
-        <policyconfig>
-          <action id="com.bitwarden.Bitwarden.unlock">
-            <description>Unlock Bitwarden</description>
-            <message>Authenticate to unlock Bitwarden</message>
-            <defaults>
-              <allow_any>auth_self</allow_any>
-              <allow_inactive>auth_self</allow_inactive>
-              <allow_active>${bwActiveAuth}</allow_active>
-            </defaults>
-          </action>
-        </policyconfig>
-      '')
-    ];
+    environment = {
+      systemPackages = lib.optionals bwUnlockCfg.enable [
+        # Install the policy file via the Nix store so polkit sees the
+        # com.bitwarden.Bitwarden.unlock action during desktop sessions.
+        (pkgs.writeTextDir "share/polkit-1/actions/com.bitwarden.Bitwarden.policy" ''
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE policyconfig PUBLIC
+           "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+           "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
+          <policyconfig>
+            <action id="com.bitwarden.Bitwarden.unlock">
+              <description>Unlock Bitwarden</description>
+              <message>Authenticate to unlock Bitwarden</message>
+              <defaults>
+                <allow_any>auth_self</allow_any>
+                <allow_inactive>auth_self</allow_inactive>
+                <allow_active>${bwActiveAuth}</allow_active>
+              </defaults>
+            </action>
+          </policyconfig>
+        '')
+      ];
+    };
 
     services = {
       # Flatpak for apps that cannot ship via nixpkgs cleanly (e.g. Stremio,

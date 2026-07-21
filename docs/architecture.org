@@ -5,7 +5,7 @@
 
 * Overview
 
-Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 3 NixOS desktops, and 2 macOS machines with home-manager, sops-nix secrets, ZFS, and impermanence.
+Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 2 NixOS desktops, and 1 macOS machine with home-manager, sops-nix secrets, ZFS, and impermanence.
 
 * Repository Layout
 
@@ -14,6 +14,14 @@ flake.nix                          Entry point — inputs, mkNixOSConfig, mkNixO
 flake.lock                         Pinned dependency versions
 
 machines/                          Per-machine configurations
+  <name>/default.nix                 Machine entry point
+  <name>/_config.nix                 homelab.* options (absent on work-okta and nixiso)
+  <name>/_networking.nix             Per-machine network config
+  <name>/_secrets.nix                sops secret declarations
+  <name>/secrets.sops.yaml           Encrypted per-host secrets
+  <name>/disko/                      Declarative disk layout (where applicable)
+  <name>/install.org                 Per-machine install/recovery runbook
+
   heartbeat/                         NixOS server (NAS, primary services)
   trialunit/                         NixOS server (secondary services)
   accesscontrolsystem/               NixOS server (Authentik SSO)
@@ -34,7 +42,7 @@ modules/                           Reusable configuration modules
   macos/                             nix-darwin system (dock, packages, networking)
   home-manager/                      User environment (shell, programs, theming)
   home-manager/programs/             Per-program configs (_emacs.nix, _git.nix, etc.)
-  services/                          27 declarative service modules
+  services/                          28 declarative service modules
 
 lib/                               Shared helpers
   persistence-helpers.nix            mkPersistenceDirs — impermanence bind-mount guard
@@ -153,17 +161,21 @@ homelab
   +-- networking       { hostName, domain }
   +-- impermanence     bool — ephemeral root enabled
   +-- isRootZFS        bool — root is on ZFS
-  +-- stylix          { enable, scheme, polarity, wallpaper } (NixOS-level theming)
+  +-- stylix          { enable, scheme, polarity, wallpaper }
+  |                    Single source of truth — set at the system level and
+  |                    propagated to Home Manager via Stylix autoImport +
+  |                    followSystem. There is no homelab.programs.stylix.
+  +-- desktop         { enable, niri.enable, shell, gaming.enable, ... }
   +-- programs
-  |     +-- stylix    { enable, scheme, polarity, wallpaper } (HM-level theming)
   |     +-- emacs.enable
+  |     +-- ai_tools   { enable, tools, models }
   |     +-- ...
   +-- services
   |     +-- backup     { enable, serviceUnits, extraPaths, backupRoot }
   |     +-- restic     { enable, pruneOpts }
   |     +-- caddy      { enable }
   |     +-- immich     { enable, zfs.enable, dataDir, ... }
-  |     +-- ...        (27 services total)
+  |     +-- ...        (28 services total)
   +-- zfs
         +-- datasets   Attrset of declarative ZFS datasets
 #+end_example
@@ -206,7 +218,7 @@ Services: rpool/root/var/lib/<service> (dedicated datasets per service)
 Backup:   rpool/root/var/backup/postgresql (pg_dump target)
 #+end_example
 
-Non-ZFS machines (usul, caretaker) use LUKS-encrypted ext4 with tmpfs root:
+Non-ZFS machines (usul, sonic, caretaker) use LUKS-encrypted ext4 with tmpfs root:
 
 #+begin_example
 Boot:     /boot (EFI, vfat)

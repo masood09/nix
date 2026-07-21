@@ -34,7 +34,11 @@ modules/home-manager/
   home.nix           Base HM config: home path, session vars, XDG user directories, fontconfig Nerd Font override
 
 modules/home-manager/programs/
-  niri/default.nix   Niri HM config (programs.niri.settings, rofi, swaync, swaylock, playerctld, udiskie, user services; inert on Darwin)
+  niri/default.nix   Niri HM module: guards, session/input/output settings, rofi, swaync, swaylock, playerctld, udiskie, user services; inert on Darwin
+  niri/_binds.nix        Keybindings (settings.binds) — plain function, imported not `imports`
+  niri/_layout.nix       Layout and decoration defaults (settings.layout) — ditto
+  niri/_animations.nix   Animation tuning (settings.animations) — ditto
+  niri/_window-rules.nix Window rules incl. Steam/Proton (settings.window-rules) — ditto
   niri/_noctalia.nix Noctalia HM module enablement and settings (guarded on desktop.shell == "noctalia")
   niri/_waybar.nix   Waybar status bar (workspaces, window title, tray, audio, network, battery, clock, notifications)
   _kitty.nix         Terminal emulator
@@ -89,7 +93,7 @@ Element Desktop currently has no comparable system-wide integration in this repo
 
 * Compositor
 
-Niri is a scrollable-tiling Wayland compositor. System-level enablement (~programs.niri.enable~, ~programs.light.enable~ for backlight control, GTK portal backend, and FileChooser routing) is in ~_niri.nix~. The package/session integration comes from ~sodiboo/niri-flake~'s NixOS module, included via ~mkNixOSDesktopConfig~ rather than in the shared ~mkNixOSConfig~ builder. This is intentional: the niri-flake NixOS module unconditionally injects its HM module into ~home-manager.sharedModules~ whenever home-manager is present, which would force the niri package into every server closure even with ~programs.niri.enable = false~. User configuration is managed declaratively through home-manager via ~programs.niri.settings~, and Stylix themes Niri through the same flake integration.
+Niri is a scrollable-tiling Wayland compositor. System-level enablement (~programs.niri.enable~, ~programs.light.enable~ for backlight control, GTK portal backend, and FileChooser routing) is in ~_niri.nix~. The package/session integration comes from ~epireyn/niri-flake~'s NixOS module (a fork of ~sodiboo/niri-flake~ that stays current and publishes ~niri-epireyn.cachix.org~, which covers nixos-26.05 — the input therefore carries no nixpkgs ~follows~), included via ~mkNixOSDesktopConfig~ rather than in the shared ~mkNixOSConfig~ builder. This is intentional: the niri-flake NixOS module unconditionally injects its HM module into ~home-manager.sharedModules~ whenever home-manager is present, which would force the niri package into every server closure even with ~programs.niri.enable = false~. User configuration is managed declaratively through home-manager via ~programs.niri.settings~, and Stylix themes Niri through the same flake integration.
 
 ~_niri.nix~ also adds ~xdg-desktop-portal-gtk~ to ~xdg.portal.extraPortals~ and explicitly routes ~org.freedesktop.impl.portal.FileChooser~ to the ~gtk~ backend via ~xdg.portal.config.niri~. niri-flake's portal config (~niri-portals.conf~) sets ~default=gnome;gtk;~, so the GNOME backend gets first pick for all interfaces. The GNOME backend does implement FileChooser, but its dialog requires a full GNOME session to render — on a bare niri compositor it accepts the D-Bus request then silently fails without falling back to GTK. The explicit routing override ensures "Save As" dialogs (e.g. browser downloads configured with ~browser.download.useDownloadDir = false~) always appear. macOS is unaffected because its native file picker does not go through xdg-desktop-portal.
 
