@@ -36,6 +36,7 @@ Primary commands live in `justfile`.
 - Lint repo: `just lint`
 - Direct linter invocation: `statix check .`
 - Run standard local validation: `just preflight`
+- Run full validation (all hosts): `just test`
 - Update flake inputs: `just up`
 - Build installer ISO: `just build-iso`
 - Garbage collect: `just gc` (or `just gc age=30d`)
@@ -50,7 +51,7 @@ Primary commands live in `justfile`.
 
 There is no conventional unit-test suite in this repo. Validation is mostly Nix evaluation, targeted builds, and deployment-safe checks.
 
-- Full fast validation script: `./test-flake.sh`
+- Full fast validation: `just test` (wraps `./test-flake.sh`)
 - Flake metadata: `nix flake metadata`
 - Show flake outputs: `nix flake show`
 - Parse one file for syntax: `nix-instantiate --parse path/to/file.nix`
@@ -74,7 +75,7 @@ When changing only one machine or service, prefer the narrowest command that exe
 - Shared module change: `just preflight` plus at least one affected host eval/build
 - Machine-only change: evaluate or build only that machine
 - Service module change: evaluate/build a machine that enables that service
-- Flake wiring change: run `./test-flake.sh`
+- Flake wiring change: run `just test`
 - Installer change: `just build-iso`
 
 ## Important Machines

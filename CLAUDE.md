@@ -12,6 +12,7 @@ Multi-machine homelab infrastructure using Nix Flakes. Manages 7 NixOS servers, 
 just deploy                          # Deploy to current machine (runs preflight first)
 just machine=heartbeat deploy        # Build and deploy on remote machine via SSH
 just preflight                       # Check formatting + lint (no auto-fix)
+just test                            # Full validation: every host eval, sops, lock drift
 just up                              # Update flake.lock
 just lint                            # Check with statix
 just fmt                             # Format with alejandra
