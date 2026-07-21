@@ -34,7 +34,11 @@ modules/home-manager/
   home.nix           Base HM config: home path, session vars, XDG user directories, fontconfig Nerd Font override
 
 modules/home-manager/programs/
-  niri/default.nix   Niri HM config (programs.niri.settings, rofi, swaync, swaylock, playerctld, udiskie, user services; inert on Darwin)
+  niri/default.nix   Niri HM module: guards, session/input/output settings, rofi, swaync, swaylock, playerctld, udiskie, user services; inert on Darwin
+  niri/_binds.nix        Keybindings (settings.binds) — plain function, imported not `imports`
+  niri/_layout.nix       Layout and decoration defaults (settings.layout) — ditto
+  niri/_animations.nix   Animation tuning (settings.animations) — ditto
+  niri/_window-rules.nix Window rules incl. Steam/Proton (settings.window-rules) — ditto
   niri/_noctalia.nix Noctalia HM module enablement and settings (guarded on desktop.shell == "noctalia")
   niri/_waybar.nix   Waybar status bar (workspaces, window title, tray, audio, network, battery, clock, notifications)
   _kitty.nix         Terminal emulator
