@@ -16,7 +16,7 @@ echo ""
 echo "1️⃣  Checking Nix syntax..."
 if ! nix-instantiate --parse flake.nix > /dev/null 2>&1; then
     echo "❌ Syntax check failed"
-    ((ERRORS++))
+    ERRORS=$((ERRORS + 1))
 else
     echo "✅ Syntax check passed"
 fi
@@ -26,7 +26,7 @@ echo ""
 echo "2️⃣  Validating flake metadata..."
 if ! nix --extra-experimental-features nix-command --extra-experimental-features flakes flake metadata --no-write-lock-file > /dev/null 2>&1; then
     echo "❌ Flake metadata validation failed"
-    ((ERRORS++))
+    ERRORS=$((ERRORS + 1))
 else
     echo "✅ Flake metadata valid"
 fi
@@ -36,7 +36,7 @@ echo ""
 echo "3️⃣  Verifying flake outputs..."
 if ! nix --extra-experimental-features nix-command --extra-experimental-features flakes flake show --no-write-lock-file > /dev/null 2>&1; then
     echo "❌ Flake show failed"
-    ((ERRORS++))
+    ERRORS=$((ERRORS + 1))
 else
     echo "✅ Flake outputs accessible"
 fi
@@ -50,27 +50,29 @@ for host in $HOSTS; do
         echo "✅ ${host} configuration evaluates"
     else
         echo "❌ ${host} configuration evaluation failed"
-        ((ERRORS++))
+        ERRORS=$((ERRORS + 1))
     fi
 done
 echo ""
 
 # 5. SOPS secrets validation (check that *.sops.yaml files are SOPS-encrypted)
+# Failures here are fatal: a *.sops.yaml missing its `sops:` block or `ENC[`
+# values means plaintext credentials are about to be committed. An unreadable
+# file is fatal too — the check could not be performed, which is not a pass.
 echo "5️⃣  Validating SOPS secrets..."
 SOPS_ERRORS=0
 while IFS= read -r -d '' sops_file; do
-  # Skip unreadable files
   if [ ! -r "$sops_file" ]; then
-    echo "⚠️  Cannot read SOPS file: $sops_file"
-    ((SOPS_ERRORS++))
+    echo "❌ Cannot read SOPS file: $sops_file"
+    SOPS_ERRORS=$((SOPS_ERRORS + 1))
     continue
   fi
   # A properly-encrypted SOPS YAML should contain:
   # - a top-level `sops:` metadata block, and
   # - at least one `ENC[` encrypted value somewhere
   if ! grep -qE '^sops:' "$sops_file" || ! grep -q 'ENC\[' "$sops_file"; then
-    echo "⚠️  Possible unencrypted or malformed SOPS file: $sops_file"
-    ((SOPS_ERRORS++))
+    echo "❌ Unencrypted or malformed SOPS file: $sops_file"
+    SOPS_ERRORS=$((SOPS_ERRORS + 1))
   fi
 done < <(
   find . \
@@ -83,7 +85,8 @@ done < <(
 if [ "$SOPS_ERRORS" -eq 0 ]; then
   echo "✅ SOPS secrets look encrypted"
 else
-  echo "⚠️  Found $SOPS_ERRORS potentially unencrypted/malformed SOPS file(s)"
+  echo "❌ Found $SOPS_ERRORS unencrypted/malformed SOPS file(s)"
+  ERRORS=$((ERRORS + SOPS_ERRORS))
 fi
 echo ""
 
@@ -93,7 +96,7 @@ if git diff --name-only --exit-code flake.lock > /dev/null; then
 else
   echo "❌ flake.lock changed during validation"
   git diff -- flake.lock
-  ((ERRORS++))
+  ERRORS=$((ERRORS + 1))
 fi
 echo ""
 
