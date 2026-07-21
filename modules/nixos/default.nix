@@ -6,7 +6,9 @@
   config,
   lib,
   ...
-}: {
+}: let
+  isDesktop = config.homelab.role == "desktop";
+in {
   imports = [
     ../shared/options.nix
 
@@ -39,16 +41,20 @@
   options = {
     homelab = {
       hardware = {
-        isVM = lib.mkEnableOption "virtual machine mode (disables fwupd and other bare-metal services)";
+        isVM = lib.mkEnableOption "virtual machine mode (disables bare-metal-only services)";
       };
     };
   };
 
   config = {
-    # Firmware updates — fwupd pulls from LVFS; run `fwupdmgr update` to apply
-    # Disabled on VMs where there is no physical firmware to update.
+    # Firmware updates — fwupd pulls from LVFS; run `fwupdmgr update` to apply.
+    # Desktops only. The daemon never flashes anything on its own, so on a
+    # headless server it bought nothing while dragging pango/cairo/X11 into the
+    # runtime closure (~100 MiB) via its wrapGApps typelib/XDG wrapper args.
+    # Servers get firmware updates on demand instead — see docs/firmware.org.
+    # Also off on VMs, where there is no physical firmware to update.
     services = {
-      fwupd = lib.mkIf (!config.homelab.hardware.isVM) {
+      fwupd = lib.mkIf (isDesktop && !config.homelab.hardware.isVM) {
         enable = true;
       };
     };

@@ -1,0 +1,126 @@
+#+TITLE: Firmware Updates
+#+STARTUP: overview
+
+* Policy
+
+=fwupd= is enabled on **desktops only** (=usul=, =sonic=). It is off on every
+NixOS server. The gate lives in =modules/nixos/default.nix=:
+
+#+begin_src nix
+services = {
+  fwupd = lib.mkIf (isDesktop && !config.homelab.hardware.isVM) {
+    enable = true;
+  };
+};
+#+end_src
+
+** Why servers are excluded
+
+The daemon never flashes anything on its own — it only makes firmware
+*available*, and something still has to run =fwupdmgr update=. On a headless box
+that meant carrying the cost with none of the benefit:
+
+- ~100 MiB of runtime closure per bare-metal server.
+- It was the second-largest source of desktop libraries on servers, pulling
+  =pango=, =cairo=, =gdk-pixbuf=, =shared-mime-info= and =libxmlb= into
+  =system-path=. These are *not* linked by fwupd's ELF binaries — they enter
+  through the =wrapGAppsNoGuiHook= wrapper (=GI_TYPELIB_PATH=, =XDG_DATA_DIRS=,
+  =GIO_EXTRA_MODULES=), so the whole chain was wrapper metadata nothing on a
+  server ever loads.
+
+Only two servers were ever affected: =heartbeat= and =caretaker=. The other five
+(=commrelay=, =watchfulsystem=, =trialunit=, =meshcontrol=,
+=accesscontrolsystem=) set =homelab.hardware.isVM = true= and never had it.
+
+Trimming the wrapper via =overrideAttrs= was evaluated and rejected: it recovers
+only ~13 MiB of the ~100 MiB (the rest arrives via =gobject-introspection= →
+=cairo=), and requires re-implementing upstream's =postFixup= locally, which
+rots silently on the next nixpkgs bump.
+
+* Updating server firmware
+
+Firmware updates on servers are a deliberate, scheduled maintenance action, not
+a background service. UEFI capsule updates require a reboot to apply regardless,
+so this is planned downtime either way.
+
+** 1. Enable fwupd on the target machine
+
+Add to =machines/<name>/default.nix=:
+
+#+begin_src nix
+services = {
+  fwupd = {
+    enable = true;
+  };
+};
+#+end_src
+
+The module-level gate uses =lib.mkIf=, so =fwupd.enable= is left at its default
+on servers rather than forced to =false=. A plain =enable = true= is enough —
+no =lib.mkForce= needed.
+
+** 2. Deploy
+
+#+begin_src sh
+just preflight
+just machine=heartbeat deploy
+#+end_src
+
+** 3. Refresh metadata and inspect
+
+#+begin_src sh
+ssh heartbeat
+sudo fwupdmgr refresh --force   # pull latest metadata from LVFS
+fwupdmgr get-devices            # what is updatable, and current versions
+fwupdmgr get-updates            # what LVFS has newer than installed
+#+end_src
+
+** 4. Apply
+
+#+begin_src sh
+sudo fwupdmgr update
+#+end_src
+
+Read the prompts. UEFI/BIOS updates stage a capsule and apply on next boot;
+drive and controller firmware may flash immediately. Reboot when told to.
+
+** 5. Verify, then revert the config
+
+#+begin_src sh
+fwupdmgr get-history            # what was applied and whether it succeeded
+fwupdmgr get-results <DEVICE-ID>
+#+end_src
+
+Remove the =services.fwupd= block from =machines/<name>/default.nix= and deploy
+again so the server returns to its trimmed closure.
+
+* Checking without a rebuild
+
+To inventory firmware versions without touching the config, =fwupdtool= runs
+standalone — it does everything in-process and needs no daemon:
+
+#+begin_src sh
+ssh heartbeat
+nix shell nixpkgs#fwupd -c sudo fwupdtool get-devices
+#+end_src
+
+Caveat: the NixOS module is what installs =/etc/fwupd/remotes.d/*.conf=. Without
+it there are no configured remotes, so =refresh= and =get-updates= have no LVFS
+metadata to compare against — =get-devices= (local hardware enumeration) is the
+part that works unconditionally. For anything that needs to compare against
+LVFS, use the enable-and-deploy procedure above.
+
+* Desktops
+
+No procedure needed — the daemon is running. Check the notifier or run:
+
+#+begin_src sh
+fwupdmgr refresh
+fwupdmgr get-updates
+sudo fwupdmgr update
+#+end_src
+
+* Related Documentation
+
+- [[file:architecture.org][architecture.org]] — System architecture overview
+- [[file:inventory.org][inventory.org]] — Packages, services, and fonts per machine

@@ -52,6 +52,7 @@ After making config changes, stop at preflight (`just preflight`, or `nix fmt --
   - `service-registry.org` - Authoritative source for UIDs, GIDs, and port assignments
   - `architecture.org` - System architecture overview
   - `backup.org` - Backup strategy and procedures
+  - `firmware.org` - Firmware update policy (fwupd is desktop-only) and the server procedure
   - `secrets-rotation.org` - Secrets rotation runbook
   - `inventory.org` - Packages, services, and fonts per machine
   - `desktop.org` - Desktop architecture (login, graphics, theming)
