@@ -247,6 +247,7 @@ Builder for consistent =homelab.services.<name>.zfs.*= option declarations. Prov
 
 - [[file:backup.org][backup.org]] — Nightly backup pipeline and operations
 - [[file:desktop.org][desktop.org]] — Desktop architecture (login, graphics, theming)
+- [[file:firmware.org][firmware.org]] — Firmware update policy and server procedure
 - [[file:inventory.org][inventory.org]] — Packages, services, and fonts per machine
 - [[file:secrets-rotation.org][secrets-rotation.org]] — Key rotation and incident response
 - [[file:service-registry.org][service-registry.org]] — UIDs, GIDs, and port allocations

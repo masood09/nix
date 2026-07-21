@@ -349,9 +349,9 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 
 ** Firmware
 
-| Service | Module Dir  | Purpose                                     |
-|---------+-------------+---------------------------------------------|
-| fwupd   | (always on) | Firmware updates via LVFS (disabled on VMs) |
+| Service | Module Dir     | Purpose                                                       |
+|---------+----------------+---------------------------------------------------------------|
+| fwupd   | (desktop only) | Firmware updates via LVFS. Servers: see [[file:firmware.org][firmware.org]] |
 
 ** Containers
 
