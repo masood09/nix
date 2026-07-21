@@ -12,6 +12,14 @@ in {
     systemPackages = with pkgs; [
       efibootmgr
       git
+      # Not the kitty package: this is kitty's separate `terminfo` output — a
+      # 20 KB path holding one file (share/terminfo/x/xterm-kitty) with zero
+      # runtime references, substituted on its own from cache.nixos.org
+      # (aarch64 included). It pulls no desktop closure onto headless servers.
+      # Kept because ncurses ships `kitty`/`kitty-direct` but NOT `xterm-kitty`,
+      # and its `kitty` entry is not an equivalent alias — kmous, blink, bw, km,
+      # sgr and several kf* keys differ, so re-aliasing it would misdescribe the
+      # terminal for anyone SSHing in from kitty.
       kitty.terminfo
     ];
   };

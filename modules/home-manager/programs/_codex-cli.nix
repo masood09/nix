@@ -8,29 +8,31 @@
   ...
 }: {
   config = lib.mkIf homelabCfg.programs.codex-cli.enable {
-    programs.codex = {
-      enable = true;
-      # Input's prebuilt package (built against codex-cli-nix's own nixpkgs)
-      # so it resolves from codex-cli.cachix.org instead of recompiling. The
-      # overlay path (pkgs.codex) would rebuild against our nixpkgs.
-      package = inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    programs = {
+      codex = {
+        enable = true;
+        # Input's prebuilt package (built against codex-cli-nix's own nixpkgs)
+        # so it resolves from codex-cli.cachix.org instead of recompiling. The
+        # overlay path (pkgs.codex) would rebuild against our nixpkgs.
+        package = inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
-      # Keep Codex on the upstream HM module while layering in local defaults
-      # and the shared MCP server registry managed by `_mcp.nix`.
-      settings =
-        {
-          tui = {
-            theme = "gruvbox-dark";
+        # Keep Codex on the upstream HM module while layering in local defaults
+        # and the shared MCP server registry managed by `_mcp.nix`.
+        settings =
+          {
+            tui = {
+              theme = "gruvbox-dark";
+            };
+          }
+          // lib.optionalAttrs (config.programs.mcp.servers != {}) {
+            # nixpkgs 26.05's TOML format type rejects null-valued attributes,
+            # and the shared MCP server submodule carries null defaults (e.g.
+            # `url`/`enabled` for stdio servers). Strip nulls before serializing.
+            mcp_servers = lib.mkDefault (
+              lib.filterAttrsRecursive (_: v: v != null) config.programs.mcp.servers
+            );
           };
-        }
-        // lib.optionalAttrs (config.programs.mcp.servers != {}) {
-          # nixpkgs 26.05's TOML format type rejects null-valued attributes,
-          # and the shared MCP server submodule carries null defaults (e.g.
-          # `url`/`enabled` for stdio servers). Strip nulls before serializing.
-          mcp_servers = lib.mkDefault (
-            lib.filterAttrsRecursive (_: v: v != null) config.programs.mcp.servers
-          );
-        };
+      };
     };
 
     home = {

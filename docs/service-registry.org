@@ -18,9 +18,10 @@ This file should be consulted *before* adding any new service, container, or sys
 * Users & Groups Registry
 
 ** Human Users
-| Name        |  UID |
-|-------------+------|
-| masoodahmed | 1000 |
+| Name        |  UID | Notes                                         |
+|-------------+------+-----------------------------------------------|
+| masoodahmed | 1000 | Admin on every machine                        |
+| zainahmed   | 1001 | Desktop-only user on =sonic= (no sudo, no SSH) |
 
 ** Service Users
 | Service                       |  UID |  GID | Description                                     |
@@ -47,10 +48,12 @@ Next available UID/GID: *3015*
 * Port Registry
 
 ** Infrastructure
-| Service      |  Port | Notes                            |
-|--------------+-------+----------------------------------|
-| Blocky (DNS) |    53 | TCP + UDP                        |
-| SSH          | 22222 | Non-standard port, key-only auth |
+| Service       |  Port | Notes                                |
+|---------------+-------+--------------------------------------|
+| Blocky (DNS)  |    53 | TCP + UDP                            |
+| Caddy (HTTP)  |    80 | Redirects to HTTPS                   |
+| Caddy (HTTPS) |   443 | Reverse proxy for all service vhosts |
+| SSH           | 22222 | Non-standard port, key-only auth     |
 
 ** Application Services
 | Service                              |  Port | Notes                             |
@@ -86,9 +89,6 @@ Next available UID/GID: *3015*
 | lk-jwt-service (Matrix RTC)          |  8912 |                                   |
 | MailArchiver                         |  8913 |                                   |
 | Nightscout                           |  8914 |                                   |
-| Minecraft Velocity                   | 25565 | Public proxy on heartbeat         |
-| Minecraft Awesome backend            | 25566 | Localhost only, Fabric 1.21.10    |
-| Minecraft Forever backend            | 25567 | Localhost only, Fabric 1.20.1     |
 | Authentik                            |  9000 |                                   |
 | Prometheus                           |  9090 | Upstream default                  |
 | Headscale (Metrics)                  |  9091 |                                   |
@@ -99,6 +99,9 @@ Next available UID/GID: *3015*
 | Authentik (Metrics)                  |  9300 |                                   |
 | Authentik (Built-in HTTPS)           |  9443 |                                   |
 | Grafana Alloy (HTTP)                 | 12345 | Upstream default                  |
+| Minecraft Velocity                   | 25565 | Public proxy on heartbeat         |
+| Minecraft Awesome backend            | 25566 | Localhost only, Fabric 1.21.10    |
+| Minecraft Forever backend            | 25567 | Localhost only, Fabric 1.20.1     |
 | MongoDB                              | 27017 | Localhost only (Nightscout)       |
 | LiveKit RTC (UDP range)              | 50100 | 50100–50200                       |
 
