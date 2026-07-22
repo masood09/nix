@@ -1,5 +1,12 @@
 prometheus.exporter.unix "local_system" {
-	enable_collectors = ["systemd", "ethtool", "softirqs", "tcpstat"]
+	enable_collectors = ["systemd", "ethtool", "softirqs", "tcpstat", "textfile"]
+
+	// Directory is created by modules/services/alloy/default.nix and written by
+	// the backup pipeline (modules/services/backup/default.nix). Keep the path
+	// in sync with homelab.services.alloy.textfileDir.
+	textfile {
+		directory = "/var/lib/alloy-textfile"
+	}
 }
 
 prometheus.scrape "scrape_unix_metrics" {

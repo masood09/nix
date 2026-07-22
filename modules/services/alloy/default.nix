@@ -63,6 +63,15 @@ in {
     };
 
     systemd = {
+      # Textfile collector drop-box. Batch jobs write *.prom files here and the
+      # unix exporter picks them up on its next scrape. Root-owned and
+      # world-readable: writers are root-run oneshots, alloy only reads.
+      tmpfiles = {
+        rules = [
+          "d ${toString alloyCfg.textfileDir} 0755 root root -"
+        ];
+      };
+
       services = {
         alloy = {
           environment = {

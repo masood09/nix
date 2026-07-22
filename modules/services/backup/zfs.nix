@@ -38,28 +38,51 @@
       datasetNames)}
   '';
 
+  snapNameFor = name: "${resticDatasetEntries.${name}.dataset}@restic_nightly";
+
+  poolOf = dataset: builtins.head (lib.splitString "/" dataset);
+
+  # `zfs snapshot` is atomic across every name in a single invocation, but only
+  # within one pool — it refuses names spanning pools. So group by pool and
+  # issue one call each.
+  namesByPool =
+    lib.groupBy (name: poolOf resticDatasetEntries.${name}.dataset) datasetNames;
+
   prepareScript = pkgs.writeShellScript "restic-zfs-prepare" ''
     set -euo pipefail
     mkdir -p "${backupRoot}"
 
-    ${lib.concatStringsSep "\n" (map (name: let
-        ds = resticDatasetEntries.${name};
-
-        inherit (ds) dataset;
-
-        mnt = mountPathFor name;
-        snap = "${dataset}@restic_nightly";
-      in ''
-        echo "=== Staging ${name} (${dataset}) ==="
-
-        mkdir -p "${mnt}"
-        umount "${mnt}" 2>/dev/null || true
-        zfs destroy "${snap}" 2>/dev/null || true
-
-        zfs snapshot "${snap}"
-        mount -t zfs -o ro "${snap}" "${mnt}"
+    # Phase 1 — clear anything a previous run left behind.
+    ${lib.concatMapStringsSep "\n" (name: ''
+        umount "${mountPathFor name}" 2>/dev/null || true
+        zfs destroy "${snapNameFor name}" 2>/dev/null || true
       '')
-      datasetNames)}
+      datasetNames}
+
+    # Phase 2 — snapshot, one call per pool, back to back with no other work
+    # in between. Previously this was a per-dataset loop with a mount after
+    # each snapshot, so the 14 datasets on heartbeat were captured across
+    # roughly a second of wall clock and were not consistent with each other.
+    # That matters for services split over several datasets: opencloud spans
+    # five, and matrix-synapse's database and media store are two more.
+    #
+    # Cross-pool atomicity is not reachable with ZFS alone, and both of those
+    # services do straddle fpool and dpool here. Issuing the calls
+    # consecutively narrows that residual window to the gap between two
+    # syscalls, which is the best available without quiescing the services.
+    ${lib.concatMapStringsSep "\n" (pool: ''
+        echo "=== Snapshotting ${toString (builtins.length namesByPool.${pool})} dataset(s) on ${pool} ==="
+        zfs snapshot ${lib.concatMapStringsSep " \\\n          " snapNameFor namesByPool.${pool}}
+      '')
+      (lib.attrNames namesByPool)}
+
+    # Phase 3 — mount the snapshots read-only for restic.
+    ${lib.concatMapStringsSep "\n" (name: ''
+        echo "=== Staging ${name} (${resticDatasetEntries.${name}.dataset}) ==="
+        mkdir -p "${mountPathFor name}"
+        mount -t zfs -o ro "${snapNameFor name}" "${mountPathFor name}"
+      '')
+      datasetNames}
   '';
 in {
   config = lib.mkIf (resticEnabled && datasetNames != []) {

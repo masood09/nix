@@ -47,14 +47,14 @@ sudo systemctl stop mailarchiver.service
 
 * 4. (Recommended) Take Pre-Restore ZFS Snapshots
 
-#+begin_src bash
-sudo zfs snapshot -r fpool/fast/services/mailarchiver@pre-restore
-#+end_src
-
-PostgreSQL snapshot (optional but recommended):
+Dataset names are derived from their mountpoints, so this is correct on
+whichever host runs the service (the pools differ per host):
 
 #+begin_src bash
-sudo zfs snapshot -r dpool/tank/services/postgresql@pre-restore
+for mp in /var/lib/mailarchiver /var/lib/postgresql/17; do
+  ds=$(zfs list -H -o name,mountpoint | awk -v m="$mp" '{p=$2;sub(/\/+$/,"",p);if(p==m)print $1}')
+  [ -n "$ds" ] && sudo zfs snapshot -r "${ds}@pre-restore" && echo "snapshotted ${ds}@pre-restore"
+done
 #+end_src
 
 * 5. Clear Existing Live Data
@@ -140,7 +140,10 @@ sudo zfs destroy -r dpool/tank/restore-staging
 *2. Remove pre-restore snapshots:*
 
 #+begin_src bash
-sudo zfs destroy -r fpool/fast/services/mailarchiver@pre-restore
+for mp in /var/lib/mailarchiver /var/lib/postgresql/17; do
+  ds=$(zfs list -H -o name,mountpoint | awk -v m="$mp" '{p=$2;sub(/\/+$/,"",p);if(p==m)print $1}')
+  [ -n "$ds" ] && sudo zfs destroy -r "${ds}@pre-restore"
+done
 #+end_src
 
 Verify:
