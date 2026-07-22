@@ -37,6 +37,29 @@ in {
             };
           };
 
+          collationCheck = {
+            enable = lib.mkOption {
+              type = lib.types.bool;
+              default = true;
+              description = ''
+                Periodically compare each database's recorded collation version
+                against the one the OS now provides, and log at error priority
+                when they drift.
+
+                A glibc upgrade can change collation ordering, which silently
+                invalidates text indexes until they are rebuilt. Only services
+                that surface PostgreSQL notices in their own logs (authentik)
+                complain about this on their own; everything else stays quiet.
+              '';
+            };
+
+            startAt = lib.mkOption {
+              type = lib.types.str;
+              default = "weekly";
+              description = "systemd calendar expression for the collation drift check.";
+            };
+          };
+
           zfs = zfsOpts {
             serviceName = "PostgreSQL";
             dataset = "fpool/fast/services/postgresql_17";

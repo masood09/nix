@@ -13,6 +13,7 @@
 in {
   imports = [
     ./alloy.nix
+    ./collation-check.nix
     ./options.nix
   ];
 
