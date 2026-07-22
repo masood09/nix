@@ -28,12 +28,14 @@
           };
         };
 
+        # Disabled: there is nothing here to back up. Both ZFS datasets (acme,
+        # tailscale) opt out of restic, so `hasResticPaths` is false and no
+        # restic job is ever generated; PostgreSQL is not enabled either. The
+        # nightly run stopped nothing, dumped nothing, and still logged
+        # "Backup pipeline complete", which read as coverage in log reviews.
+        # ACME certs regenerate on demand and the tailscale node can re-auth.
         backup = {
-          enable = true;
-
-          serviceUnits = [
-            "uptime-kuma.service"
-          ];
+          enable = false;
         };
 
         caddy = {

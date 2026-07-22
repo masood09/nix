@@ -16,10 +16,12 @@
       };
 
       services = {
+        # Disabled: nothing to back up. This host has no ZFS datasets and no
+        # PostgreSQL, so the pipeline generated no restic job and the nightly
+        # run was a no-op that still logged "Backup pipeline complete".
+        # Blocky's config is fully declarative, so there is no state to keep.
         backup = {
-          enable = true;
-          # No services need stopping — blocky handles DNS restarts gracefully
-          serviceUnits = [];
+          enable = false;
         };
 
         blocky = {
