@@ -13,6 +13,43 @@ in {
   ];
 
   config = lib.mkIf alloyCfg.enable {
+    # -------------------------
+    # Loki drop rules (fleet-wide journal noise)
+    # -------------------------
+    #
+    # dbus logs "Ignoring duplicate name ... in service file ..." at priority
+    # err, so the journald priority mapping labels it level="error" and it
+    # lands in the same stream as real failures. It is benign: NixOS puts the
+    # system path on the session bus search path explicitly *and* via
+    # standard_session_servicedirs, so dbus scans the same directory twice and
+    # reports the second copy of each systemd unit file it finds. Nothing is
+    # broken and nothing is lost — dbus keeps the first definition.
+    #
+    # Emitted once per bus startup, i.e. on every login/SSH session, on every
+    # host in the fleet.
+    homelab = {
+      services = {
+        alloy = {
+          loki = {
+            systemd = {
+              dropRules = lib.mkBefore (
+                map (unit: {
+                  name = "dbus: drop duplicate service-file names (${unit})";
+                  inherit unit;
+                  expression = "^Ignoring duplicate name '[^']*' in service file .*";
+                }) [
+                  "user@${toString config.homelab.primaryUser.userId}.service"
+                  # Desktops run dbus-broker rather than dbus-daemon; the unit
+                  # does not exist on servers, where the rule is simply inert.
+                  "dbus-broker.service"
+                ]
+              );
+            };
+          };
+        };
+      };
+    };
+
     services = {
       alloy = {
         inherit (alloyCfg) enable;
