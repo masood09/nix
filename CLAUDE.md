@@ -52,6 +52,7 @@ After making config changes, stop at preflight (`just preflight`, or `nix fmt --
   - `service-registry.org` - Authoritative source for UIDs, GIDs, and port assignments
   - `architecture.org` - System architecture overview
   - `backup.org` - Backup strategy and procedures
+  - `firmware.org` - Firmware update policy (fwupd is desktop-only) and the server procedure
   - `secrets-rotation.org` - Secrets rotation runbook
   - `inventory.org` - Packages, services, and fonts per machine
   - `desktop.org` - Desktop architecture (login, graphics, theming)
@@ -79,7 +80,7 @@ homelab = {
 - All settings (`homelab.stylix.*`) propagate to Home-Manager via Stylix's `autoImport` + `followSystem`
 - HM-only target overrides (starship, waybar, zen-browser) are injected via `home-manager.sharedModules` in the system module
 - Stylix is enabled by default on all machines; set `homelab.stylix.enable = false` only for an explicit opt-out
-- **Server closure hygiene**: Servers disable GTK, Qt, KDE, and GNOME Stylix targets (NixOS + HM), cursor theming, NixOS XDG sound/icon/mime assets, and HM `xdg.mime`. Without these gates the server closure pulls ~1 GB of Qt/GTK/Wayland/theme packages. The gates live in `_stylix.nix` (NixOS + HM targets, XDG) and `home.nix` (HM `xdg.mime`)
+- **Server closure hygiene**: Servers disable GTK, Qt, KDE, GNOME, and `font-packages` Stylix targets (NixOS + HM), cursor theming, NixOS XDG sound/icon/mime assets, and HM `xdg.mime`. Without these gates the server closure pulls ~1 GB of Qt/GTK/Wayland/theme packages plus 247 MiB of fonts. The gates live in `_stylix.nix` (NixOS + HM targets, XDG) and `home.nix` (HM `xdg.mime`). Dropping `font-packages` is safe because the grub target bakes its `.pf2` at build time (350 KiB, no runtime refs) and the fontconfig target only writes font *names*
 - Darwin Stylix does not support `stylix.cursor` (no cursor module in `darwinModules`)
 
 ### File Naming Convention
