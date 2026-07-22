@@ -43,7 +43,7 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 | _btop.nix      | btop       | System resource monitor               |
 | _direnv.nix    | direnv     | Per-directory env with nix-direnv     |
 | _eza.nix       | eza        | Modern ls with git status             |
-| _fastfetch.nix | fastfetch  | System info display                   |
+| _fastfetch.nix | fastfetch  | System info display (slim build on servers) |
 | _fd.nix        | fd         | Fast find alternative                 |
 | _fzf.nix       | fzf        | Fuzzy finder                          |
 | _ripgrep.nix   | ripgrep    | Fast recursive grep                   |
