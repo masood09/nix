@@ -43,14 +43,37 @@
 
         backup = {
           enable = true;
-          extraPaths = ["/var/lib/private/authentik/media"];
+          # The whole StateDirectory, not .../media — see the same change on
+          # accesscontrolsystem. media/ only exists once something has been
+          # uploaded, and restic silently skips missing paths, so this entry had
+          # been backing up nothing. Neither host has a media/ directory today.
+          extraPaths = ["/var/lib/private/authentik"];
 
+          # authentik, authentik-worker, headscale and headplane are
+          # deliberately absent — they were removed for the same reasons they
+          # were removed on accesscontrolsystem and meshcontrol, and because
+          # together they reproduced the 02:00 headscale outage on a single
+          # host.
+          #
+          # headscale sets only_start_if_oidc_is_available and exits fatally
+          # when its issuer is unreachable at startup. This stop-list restarted
+          # authentik and headscale together, and headscale came back before
+          # authentik was serving OIDC, so on 2026-07-22 it crash-looped three
+          # times against "503 Service Unavailable: authentik starting" before
+          # recovering at 02:01:14. Not restarting headscale removes the
+          # coupling; the cross-host version of this same failure is described
+          # in machines/meshcontrol/_config.nix.
+          #
+          # Neither needs quiescing anyway. headscale and headplane each keep
+          # all state in a single ZFS dataset (headscale is SQLite with
+          # write_ahead_log = true, and db/-wal/-shm all live under
+          # /var/lib/headscale, which is the dataset mountpoint), so one atomic
+          # snapshot is crash-consistent. authentik has no dataset at all: its
+          # state is the PostgreSQL dump, which pg_dump makes MVCC-consistent
+          # without help, plus an extraPath that restic reads live after
+          # services are already back up.
           serviceUnits = [
-            "authentik.service"
-            "authentik-worker.service"
             "garage.service"
-            "headplane.service"
-            "headscale.service"
             "immich-machine-learning.service"
             "immich-server.service"
             "karakeep-browser.service"

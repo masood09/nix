@@ -5,58 +5,68 @@
 
 * Overview
 
-Nightly backup pipeline that runs on every NixOS server at 2:00 AM via a systemd timer. The pipeline orchestrates service shutdown, PostgreSQL dumps, ZFS snapshots, restic backup to S3, integrity verification, and service restart.
+Nightly backup pipeline that runs on every NixOS server at 2:00 AM via a systemd timer. The pipeline orchestrates PostgreSQL dumps, ZFS snapshots, restic backup to S3, and reports on itself via Prometheus.
 
 #+begin_example
   02:00 AM
      |
      v
-  Stop services (serviceUnits)
+  PostgreSQL dumps (pg_dump per database)   <-- services LIVE
      |
      v
-  PostgreSQL dumps (pg_dump per database)
+  Stop services (serviceUnits)   ~~~~~~~~~~~~~~ stop window opens
      |
      v
-  ZFS snapshot + mount (read-only, per dataset)
+  ZFS snapshot + mount (one call per pool, atomic)
      |
      v
-  Restart services  <-- services back online before upload
+  Restart services               ~~~~~~~~~~~~~~ stop window closes (~seconds)
      |
      v
   Restic backup to S3 (from mounted snapshots + extraPaths)
      |
      v
-  Restic check (metadata + 5% random data sample)
+  Cleanup ZFS snapshots + mounts
      |
      v
-  Cleanup ZFS snapshots + mounts
+  Write backup.prom for the textfile collector
      |
      v
   Done
 #+end_example
 
-Key design decision: services are restarted *before* the restic upload begins. The upload reads from immutable ZFS snapshot mounts, so services can safely resume while the (potentially slow) upload runs.
+Two design decisions carry most of the weight here.
+
+*The stop window covers only the snapshot.* PostgreSQL dumps run first, with services live: =pg_dump= is MVCC-consistent by construction, so quiescing around it buys nothing, and it is by far the slowest step — on heartbeat the dumps take over ten minutes, of which =mailarchiver= alone is 8m14s for a 2.9G gzip. Previously the dumps ran inside the outage, so heartbeat was down 10m07s nightly. Now only the snapshot is, which is about a second.
+
+*Services resume before the upload.* Restic reads immutable snapshot mounts, so the (slow) upload runs with everything back online.
+
+Note the consequence for PostgreSQL: the dumps are captured by a snapshot taken ~10 minutes after they were written, so they do not line up with the blob datasets of the services whose rows they contain. That is deliberate, and safe, because the live data directory is *also* backed up — see [[*PostgreSQL: two artifacts]].
 
 * Machines
 
-| Machine             | Backup | Service Units Stopped               | ZFS Datasets | Extra Paths | PG Backup |
-|---------------------+--------+-------------------------------------+--------------+-------------+-----------|
-| heartbeat           | Yes    | immich, karakeep, mailarchiver,     | postgresql   | -           | Yes       |
-|                     |        | matrix-synapse, matrix-auth,        |              |             |           |
-|                     |        | nightscout, podman-babybuddy,       |              |             |           |
-|                     |        | podman-opencloud, vaultwarden       |              |             |           |
-| trialunit           | Yes    | authentik, garage, headplane,       | postgresql   | authentik   | Yes       |
-|                     |        | headscale, immich, karakeep,        |              | media       |           |
-|                     |        | mailarchiver, matrix-synapse,       |              |             |           |
-|                     |        | matrix-auth, nightscout,            |              |             |           |
-|                     |        | podman-babybuddy, podman-opencloud, |              |             |           |
-|                     |        | uptime-kuma, vaultwarden            |              |             |           |
-| accesscontrolsystem | Yes    | authentik, authentik-worker         | postgresql   | authentik   | Yes       |
-|                     |        |                                     |              | media       |           |
-| meshcontrol         | Yes    | headplane, headscale                | -            | -           | No        |
-| commrelay           | Yes    | uptime-kuma                         | -            | -           | No        |
-| watchfulsystem      | Yes    | uptime-kuma                         | -            | -           | No        |
-| caretaker           | Yes    | (none)                              | -            | -           | No        |
+This table is hand-maintained and has drifted before. Treat the flake as authoritative:
+
+#+begin_src bash
+nix eval --json '.#nixosConfigurations.<host>.config.homelab.services.backup'
+nix eval --json '.#nixosConfigurations.<host>.config.services.restic.backups.backup.paths'
+#+end_src
+
+| Machine             | Backup | Datasets | Units Stopped | Extra Paths | PG Backup |
+|---------------------+--------+----------+---------------+-------------+-----------|
+| heartbeat           | Yes    |       15 | 15            | -           | Yes       |
+| trialunit           | Yes    |       19 | 18            | authentik   | Yes       |
+| accesscontrolsystem | Yes    |        2 | (none)        | authentik   | Yes       |
+| meshcontrol         | Yes    |        1 | (none)        | -           | No        |
+| watchfulsystem      | Yes    |        1 | (none)        | -           | No        |
+| commrelay           | No     |        0 | -             | -           | No        |
+| caretaker           | No     |        0 | -             | -           | No        |
+
+Three hosts stop nothing at all. =accesscontrolsystem= gained nothing from the stop: its only snapshotted data was the =pg_dump= output (MVCC-consistent already) and its =extraPaths= are read live after services restart, so the window never covered them. =meshcontrol= and =watchfulsystem= keep all state for headscale, headplane and uptime-kuma in a single ZFS dataset each, so one atomic snapshot is crash-consistent — the same guarantee those processes must already survive on power loss. headscale in particular is SQLite with =write_ahead_log = true=, and the db, =-wal= and =-shm= files all live inside =/var/lib/headscale=, which is the dataset mountpoint.
+
+That last change also removed a cross-host outage. headscale sets =only_start_if_oidc_is_available= and exits fatally when its OIDC issuer is unreachable at startup; because every host fired its backup at 02:00:00, meshcontrol restarted headscale in the same minute accesscontrolsystem stopped authentik. On 2026-07-22 that crash-looped headscale eight times and dropped all 13 tailnet nodes for ~50s.
+
+=commrelay= and =caretaker= have the pipeline disabled outright: neither has any dataset opting into restic, so both spent months backing up nothing while logging success.
 
 * Architecture
 
@@ -80,6 +90,8 @@ modules/services/backup/
 | =backup-restic-zfs-dataset-cleanup= | oneshot | Unmount + destroy snapshots                |
 | =restic-backups-backup.service=     | oneshot | Restic upload (NixOS-generated)            |
 | =postgresqlBackup-<db>.service=     | oneshot | Per-database pg_dump (NixOS-generated)     |
+| =backup-restic-check.service=       | oneshot | Repository integrity check                 |
+| =backup-restic-check.timer=         | timer   | Fires =Sun *-*-* 04:00:00= weekly            |
 
 The main =backup-system.service= invokes the other units via =systemctl start= rather than systemd dependencies. This gives the orchestrator script full control over ordering and error handling.
 
@@ -96,10 +108,13 @@ The main =backup-system.service= invokes the other units via =systemctl start= r
 
 *** =homelab.services.restic=
 
-| Option    | Type        | Default                               | Description                 |
-|-----------+-------------+---------------------------------------+-----------------------------|
-| =enable=    | bool        | =false= (auto-enabled by backup module) | Enable restic configuration |
-| =pruneOpts= | list of str | =--keep-daily 3=, =--keep-weekly 4=       | Retention policy            |
+| Option                 | Type        | Default                               | Description                            |
+|------------------------+-------------+---------------------------------------+----------------------------------------|
+| =enable=                 | bool        | =false= (auto-enabled by backup module) | Enable restic configuration            |
+| =pruneOpts=              | list of str | =--keep-daily 3=, =--keep-weekly 4=       | Retention policy                       |
+| =check.enable=           | bool        | =true=                                  | Run the integrity check on a timer     |
+| =check.readDataSubset=   | str         | =10%=                                   | Fraction of pack data to download      |
+| =check.onCalendar=       | str         | =Sun *-*-* 04:00:00=                    | When to check                          |
 
 ** ZFS Dataset Integration
 
@@ -133,19 +148,40 @@ Individual database backup failures are logged but do not abort the pipeline.
 
 ** ZFS Snapshots
 
-The prepare script runs *while services are stopped*, ensuring a crash-consistent snapshot. For each dataset:
+The prepare script runs in three phases, not a per-dataset loop. =zfs snapshot= is atomic across every name given in a single invocation, so all snapshots are taken together:
 
 #+begin_src bash
-# Clean up any stale state from a previous failed run
+# Phase 1 -- clear stale state from a previous failed run
 umount /mnt/nightly_backup/<name> 2>/dev/null || true
 zfs destroy <dataset>@restic_nightly 2>/dev/null || true
 
-# Create fresh snapshot and mount read-only
-zfs snapshot <dataset>@restic_nightly
+# Phase 2 -- snapshot, one call per pool, issued back to back
+zfs snapshot <ds1>@restic_nightly <ds2>@restic_nightly <ds3>@restic_nightly
+
+# Phase 3 -- mount read-only for restic
 mount -t zfs -o ro <dataset>@restic_nightly /mnt/nightly_backup/<name>
 #+end_src
 
+This matters for services that own more than one dataset. =opencloud= spans five, and =matrix-synapse= splits its database and media store across two. Under the old loop those were captured up to a second apart, so metadata could reference storage that was not in its own snapshot — the loop only worked because services were stopped for the whole window, which they no longer are.
+
+Atomicity is *per pool*: zfs rejects an invocation naming datasets in different pools. On heartbeat both multi-dataset services straddle =fpool= and =dpool=, so a residual window remains between the two calls — now the gap between two syscalls rather than a second of mounting. trialunit is single-pool, so all 19 of its datasets are captured in one atomic call.
+
 The cleanup script reverses this: unmount, rmdir, destroy snapshot. It uses =set +euo pipefail= so cleanup proceeds even if individual steps fail.
+
+** PostgreSQL: two artifacts
+
+Both the live data directory and the =pg_dump= output are backed up, and they do different jobs:
+
+| Artifact                     | Consistent with blobs? | Portable across PG majors? |
+|------------------------------+------------------------+----------------------------|
+| datadir (=postgresql= dataset) | Yes                    | No                         |
+| dumps (=postgresql-backup=)    | No                     | Yes                        |
+
+The *physical* copy is snapshotted in the same atomic per-pool call as every other service dataset, so it lines up exactly with the blobs those services reference. Restoring it is equivalent to recovering from a power cut, which is what =pg_basebackup= and PITR already rely on: =pg_wal= lives inside =$PGDATA=, and =$PGDATA= is the dataset mountpoint, so the WAL is inside the same snapshot. This is the primary restore path.
+
+The *logical* dumps run before the stop window with services live, so they are minutes older than the snapshot that captures them and do not agree with the blob datasets. That is fine — they exist for the one case a physical restore cannot serve, which is restoring onto a different PostgreSQL major version.
+
+Cost of carrying both, measured on heartbeat: 4.39G of datadir against a 639GiB repository, so +0.7%. The dump directory is already larger at 5.94G because =postgresqlBackup= keeps a =.prev= copy of every database.
 
 ** Restic Backup
 
@@ -157,8 +193,56 @@ The NixOS =services.restic.backups.backup= configuration:
 - *Auto-initialize*: Creates the repo on first run
 - *Timer disabled*: =timerConfig = null= (our orchestrator triggers it)
 - *Retention*: 3 daily + 4 weekly snapshots (configurable via =pruneOpts=)
-- *Post-backup verification*: =restic check --read-data-subset=5%= validates
-  metadata integrity and samples 5% of stored data
+
+Note that =extraPaths= are read *live*, not from a snapshot — the pipeline restarts services before the upload runs. Keep them small and write-once. Restic also *silently skips paths that do not exist* rather than failing, which is how the authentik =extraPath= backed up nothing for five months; see [[*Monitoring]].
+
+*** The path set matters more than it looks
+
+Restic keys on the set of paths in a snapshot, and that has two separate consequences. Both bite when you add a dataset or edit =extraPaths=.
+
+**Retention** is grouped by host *and path set*. A changed path set starts a new group, and the old group's final snapshots are pinned forever, because no new snapshots arrive to age them out under =keep-daily= / =keep-weekly=. Drop them by hand with =restic-backup forget <id>= if they accumulate.
+
+**Parent selection** works the same way, and this one is expensive. =restic backup= picks its parent by matching host *and* paths; with no match it logs =no parent snapshot found, will read all files= and re-hashes everything rather than doing an incremental.
+
+Measured on heartbeat when the PostgreSQL datadir was added to the path set:
+
+| | |
+|-------------------+------------|
+| Data re-read      | 589.7 GB   |
+| Repository before | 639.125 GiB |
+| Repository after  | 642.477 GiB |
+| Actual growth     | 3.35 GiB   |
+| Wall clock        | 49 minutes (against ~1 minute steady state) |
+
+It re-*reads*, it does not re-*upload* — content-defined chunking finds nearly every blob already present, so the growth was just the new datadir after dedup and compression. The cost is local I/O and CPU (1h32m of hashing), not egress.
+
+So this is a one-time penalty, paid once per host, the first time a path set changes. The next run finds the new snapshot as its parent and goes incremental again. It is harmless — services are up throughout, since the upload runs after they restart, and =TimeoutStartSec= is 6h — but schedule it when you can leave the host alone for an hour rather than immediately before you need it.
+
+** Integrity Check
+
+=backup-restic-check.service= runs =restic check --read-data-subset= on its own weekly timer, decoupled from the nightly pipeline. It used to run inline at the end of every backup, which downloaded pack data from S3 on every host every night (3m31s on heartbeat) while still holding the snapshot mounts open — and a nightly 5% sample re-checks the same small slice far more often than a weekly larger one, while covering less of the repository over a month.
+
+As a real unit, a failed check now marks the unit failed instead of being swallowed by =|| echo "(non-fatal)"=.
+
+* Monitoring
+
+The pipeline writes =backup.prom= into the textfile collector directory (=homelab.services.alloy.textfileDir=, default =/var/lib/alloy-textfile=) on every run, success or failure:
+
+| Metric                                          | Meaning                                        |
+|-------------------------------------------------+------------------------------------------------|
+| =homelab_backup_success=                          | 1/0 for the most recent run                    |
+| =homelab_backup_last_run_timestamp_seconds=       | When it last finished                          |
+| =homelab_backup_last_success_timestamp_seconds=   | When it last actually worked                   |
+| =homelab_backup_duration_seconds=                 | Wall clock                                     |
+| =homelab_backup_paths_configured=                 | Paths restic was told to read                  |
+| =homelab_backup_paths_present=                    | Paths that existed on disk at upload time      |
+
+Alert on two things:
+
+1. =homelab_backup_paths_present < homelab_backup_paths_configured= — something is being skipped silently.
+2. =homelab_backup_last_success_timestamp_seconds= going stale.
+
+Staleness matters more than failure. Every silent failure this pipeline has had was a *success* that backed up nothing: commrelay and caretaker running an empty pipeline for months, and the authentik =extraPath= pointing at a directory restic then skipped. A failure alert would have caught none of them. A failed run deliberately preserves the previous =last_success= value rather than overwriting it.
 
 * Secrets
 
@@ -172,16 +256,16 @@ Each machine that runs backups has three restic secrets in its =secrets.sops.yam
 
 These are decrypted at runtime by sops-nix and passed to the restic service via =environmentFile=, =repositoryFile=, and =passwordFile=.
 
-Machines with restic secrets: heartbeat, trialunit, accesscontrolsystem, meshcontrol, commrelay, watchfulsystem.
+Machines with restic secrets: heartbeat, trialunit, accesscontrolsystem, meshcontrol, watchfulsystem. commrelay's declarations were dropped when its pipeline was disabled; the values remain in its =secrets.sops.yaml=.
 
 * Safety Guarantees
 
 1. *Services always restart*: EXIT trap fires on any failure; guard prevents double-start on success path
-2. *Crash-consistent snapshots*: Services are stopped before ZFS snapshot creation; snapshots are atomic at the ZFS level
+2. *Crash-consistent snapshots*: where services are stopped, they are stopped across the snapshot; where they are not, all of a service's state is in one dataset and the snapshot is atomic, which is the same guarantee the process must survive on power loss
 3. *Services resume before upload*: The (slow) restic upload reads from immutable snapshot mounts, so services are back online during the upload window
 4. *Stale state cleanup*: Prepare script cleans up leftover mounts/snapshots from previous failed runs before creating new ones
-5. *Graceful degradation*: PostgreSQL backup failures, missing units, and restic check errors are logged but do not abort the pipeline
-6. *Integrity verification*: Post-backup =restic check= validates repository metadata and samples 5% of data blocks
+5. *Graceful degradation*: PostgreSQL backup failures and missing units are logged but do not abort the pipeline
+6. *Always reports*: the EXIT trap writes metrics even on failure, so a run that dies partway is recorded as failed rather than leaving yesterday's success in place looking healthy
 
 * Operations
 
@@ -196,15 +280,32 @@ sudo systemctl start backup-system.service
 #+begin_src bash
 # Timer status
 systemctl status backup-system.timer
+systemctl status backup-restic-check.timer
 
 # Last run logs
 journalctl -u backup-system.service --since today
+
+# What the pipeline reported about itself
+cat /var/lib/alloy-textfile/backup.prom
 
 # Restic snapshots
 sudo /run/current-system/sw/bin/restic-backup snapshots
 
 # Restic repository stats
 sudo /run/current-system/sw/bin/restic-backup stats
+#+end_src
+
+Fleet-wide, the same questions are answerable from Prometheus — see [[*Monitoring]] — or from logs via logcli:
+
+#+begin_src bash
+logcli query '{unit="backup-system.service"} |~ "path is missing"' --since=24h
+#+end_src
+
+** Run the Integrity Check On Demand
+
+#+begin_src bash
+sudo systemctl start backup-restic-check.service
+journalctl -u backup-restic-check.service -f
 #+end_src
 
 ** Manual Restic Operations
@@ -230,14 +331,22 @@ sudo restic-backup stats
 
 ** Adding a New Machine
 
+Before anything else: if the host has no dataset opting into restic and no PostgreSQL, it has nothing to back up. Leave =backup.enable = false= rather than running a pipeline that reports success for doing nothing.
+
 1. Enable the backup module in =machines/<name>/_config.nix=:
    #+begin_src nix
    homelab = {
      services = {
        backup = {
          enable = true;
-         serviceUnits = ["my-service.service"];  # units to stop during snapshot
-         # extraPaths = ["/var/lib/something"];   # optional non-ZFS paths
+         # Default to []. A service only needs stopping if a snapshot of its
+         # dataset would not be recoverable — i.e. it holds state in memory
+         # that is never fsynced. Anything crash-safe (PostgreSQL, SQLite,
+         # most modern daemons) does not belong here, and anything whose
+         # state spans several datasets in different pools cannot be made
+         # consistent by stopping it anyway.
+         serviceUnits = [];
+         # extraPaths = ["/var/lib/something"];  # read live, not snapshotted
        };
      };
    };
