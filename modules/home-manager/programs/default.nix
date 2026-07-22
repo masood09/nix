@@ -19,6 +19,7 @@
     ./_fastfetch.nix
     ./_fd.nix
     ./_fzf.nix
+    ./_logcli.nix
     ./_ripgrep.nix
     ./_zoxide.nix
 
