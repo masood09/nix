@@ -43,7 +43,11 @@
 
         backup = {
           enable = true;
-          extraPaths = ["/var/lib/private/authentik/media"];
+          # The whole StateDirectory, not .../media — see the same change on
+          # accesscontrolsystem. media/ only exists once something has been
+          # uploaded, and restic silently skips missing paths, so this entry had
+          # been backing up nothing. Neither host has a media/ directory today.
+          extraPaths = ["/var/lib/private/authentik"];
 
           serviceUnits = [
             "authentik.service"
