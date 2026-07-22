@@ -6,9 +6,10 @@
 #
 # Desktop vs server split: Stylix's autoEnable defaults every target to true,
 # but servers only benefit from console and grub theming. This module disables
-# GTK, Qt, KDE, and GNOME targets on servers (both NixOS-level and HM-level)
-# and turns off NixOS XDG sound/icon/mime assets. Without these gates the
-# server closure pulls ~1 GB of Qt/GTK/Wayland libraries and theme packages.
+# GTK, Qt, KDE, GNOME, and font-packages targets on servers (both NixOS-level
+# and HM-level) and turns off NixOS XDG sound/icon/mime assets. Without these
+# gates the server closure pulls ~1 GB of Qt/GTK/Wayland libraries and theme
+# packages, plus 247 MiB of TTF/OTF fonts nothing headless ever renders.
 #
 # HM-only target overrides (starship, waybar, zen-browser) and the Papirus
 # icon theme are injected through home-manager.sharedModules since those
@@ -121,6 +122,15 @@ in {
         qt = {
           enable = false;
         };
+        # Installs the TTF/OTF packages into fonts.packages — 247 MiB of
+        # JetBrainsMono Nerd Font, Inter, and Noto emoji that nothing on a
+        # headless box renders. Safe to drop: the grub target converts the
+        # font to a .pf2 at build time (build-time reference only), and the
+        # console target themes colors, not glyphs. The fontconfig target
+        # only writes font *names* into defaultFonts, so it stays enabled.
+        font-packages = {
+          enable = false;
+        };
       };
     };
 
@@ -172,6 +182,11 @@ in {
                 enable = isDesktop;
               };
               gnome = {
+                enable = isDesktop;
+              };
+              # Mirror of the NixOS-level gate above — Stylix installs the
+              # font packages into home.packages as well as fonts.packages.
+              font-packages = {
                 enable = isDesktop;
               };
             };
