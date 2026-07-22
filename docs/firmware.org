@@ -104,11 +104,17 @@ ssh heartbeat
 nix shell nixpkgs#fwupd -c sudo fwupdtool get-devices
 #+end_src
 
-Caveat: the NixOS module is what installs =/etc/fwupd/remotes.d/*.conf=. Without
-it there are no configured remotes, so =refresh= and =get-updates= have no LVFS
-metadata to compare against — =get-devices= (local hardware enumeration) is the
-part that works unconditionally. For anything that needs to compare against
-LVFS, use the enable-and-deploy procedure above.
+Two caveats:
+
+- The NixOS module is what installs =/etc/fwupd/remotes.d/*.conf=. Without it
+  there are no configured remotes, so =refresh= and =get-updates= have no LVFS
+  metadata to compare against — =get-devices= (local hardware enumeration) is
+  the part that works unconditionally. For anything that needs to compare
+  against LVFS, use the enable-and-deploy procedure above.
+- =nixpkgs#= resolves through the flake registry, which this repo points at a
+  GitHub revision rather than a store path (see [[file:architecture.org][architecture.org]]). The first
+  =nix shell= on a given machine therefore needs outbound network; afterwards it
+  is cached. The revision matches the running system exactly.
 
 * Desktops
 

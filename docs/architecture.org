@@ -80,6 +80,23 @@ docs/                              Documentation
            nixos  services hm  nixos  services hm  macos  hm  homebrew
 #+end_example
 
+** Flake Registry
+
+=modules/nixos/default.nix= overrides =nix.registry.nixpkgs.to= to a GitHub
+revision taken from =inputs.nixpkgs.rev=, rather than letting
+=nixpkgs.flake.setFlakeRegistry= pin it to a store path. The default behaviour
+puts the whole 196 MiB nixpkgs tree in every machine's closure purely so
+=/etc/nix/registry.json= can reference it.
+
+With the override, =nix shell nixpkgs#foo=, =nix-shell -p foo= and =<nixpkgs>=
+still resolve to the exact revision the system was built from — but fetch it
+from GitHub on first use and cache it, instead of reading it from the local
+store. Ad-hoc =nix shell= therefore needs outbound network the first time it is
+used on a machine.
+
+The revision is inherited from the flake input, never hardcoded, so =just up=
+keeps the registry and the system in lockstep.
+
 * Module Dependency Graph
 
 #+begin_example
