@@ -144,9 +144,12 @@ in {
             ];
           };
 
-          ingester = {
-            autoforget_unhealthy = true;
-          };
+          # Deliberately no `ingester.autoforget_unhealthy`. It only makes
+          # sense in a multi-ingester ring; at replication_factor = 1 there is
+          # never another ingester to forget, so it just logs
+          # "autoforget have seen 0 unhealthy ingesters out of 1, network may
+          # be partioned" every 15s — ~240 warns/hour of pure self-noise, kept
+          # for the full 720h warn retention.
         };
       };
 
