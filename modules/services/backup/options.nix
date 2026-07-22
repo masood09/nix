@@ -29,6 +29,34 @@
         restic = {
           enable = lib.mkEnableOption "Whether to enable restic backups.";
 
+          check = {
+            enable = lib.mkOption {
+              type = lib.types.bool;
+              default = true;
+              description = "Whether to verify restic repository integrity on a timer.";
+            };
+
+            readDataSubset = lib.mkOption {
+              type = lib.types.str;
+              default = "10%";
+              example = "1/7";
+              description = ''
+                Fraction of repository data to download and verify, passed to
+                `restic check --read-data-subset`. Metadata is always checked in
+                full; this controls how much pack data is fetched from S3.
+              '';
+            };
+
+            onCalendar = lib.mkOption {
+              type = lib.types.str;
+              default = "Sun *-*-* 04:00:00";
+              description = ''
+                When to run the integrity check. Defaults to weekly, between the
+                nightly backup (02:00) and the weekly GC (Sun 06:00).
+              '';
+            };
+          };
+
           pruneOpts = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             default = [
