@@ -4,6 +4,7 @@
 # NixOS-only options (hardware.isVM) are defined here.
 {
   config,
+  inputs,
   lib,
   ...
 }: let
@@ -70,6 +71,26 @@ in {
     # Core nix daemon settings. Automatic garbage collection lives in the
     # sibling `_gc.nix` module to keep the schedule isolated from cache config.
     nix = {
+      # Resolve the `nixpkgs` flake ref to a GitHub revision rather than a
+      # store path. Upstream's `nixpkgs.flake.setFlakeRegistry` pins it to
+      # `cfg.source`, which drags the entire 196 MiB nixpkgs tree into every
+      # closure just so `/etc/nix/registry.json` can name it. Overriding `to`
+      # (upstream defines it with mkDefault) keeps `nix shell nixpkgs#foo`,
+      # `nix-shell -p foo` and `<nixpkgs>` resolving to the exact revision the
+      # system was built from, fetched on demand and cached, at zero closure
+      # cost. `rev` comes from the flake input, so `just up` keeps the registry
+      # and the system in lockstep automatically — never hardcode it.
+      registry = {
+        nixpkgs = {
+          to = {
+            type = "github";
+            owner = "NixOS";
+            repo = "nixpkgs";
+            inherit (inputs.nixpkgs) rev;
+          };
+        };
+      };
+
       settings = {
         experimental-features = "nix-command flakes";
         auto-optimise-store = true;
