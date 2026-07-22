@@ -6,9 +6,31 @@
 {
   homelabCfg,
   lib,
+  pkgs,
   ...
 }: let
   cfg = homelabCfg.programs.fastfetch;
+  isServer = (homelabCfg.role or "") == "server";
+
+  # nixpkgs' default fastfetch enables every backend, dragging the whole
+  # desktop graphics stack (wayland, X11, vulkan, opengl, opencl, imagemagick +
+  # chafa, libpulseaudio, ddcutil, xfconf, dconf) into the closure — ~150 MiB
+  # of libraries for modules a headless server never renders. On servers we
+  # only show text modules (os/host/cpu/mem/disk/zpool), so strip the GUI
+  # backends. Desktops keep the full-featured build.
+  serverPackage = pkgs.fastfetch.override {
+    x11Support = false;
+    waylandSupport = false;
+    vulkanSupport = false;
+    openglSupport = false;
+    openclSupport = false;
+    imageSupport = false;
+    audioSupport = false;
+    brightnessSupport = false;
+    xfceSupport = false;
+    gnomeSupport = false;
+    dbusSupport = false;
+  };
   zshEnabled = homelabCfg.programs.zsh.enable or false;
   fishEnabled = homelabCfg.programs.fish.enable or false;
 
@@ -68,6 +90,8 @@ in {
   programs = {
     fastfetch = {
       inherit (cfg) enable;
+
+      package = lib.mkIf isServer serverPackage;
 
       settings = lib.mkIf cfg.enable {
         # Module order: title → custom (role, reboot) → defaults → ZFS → colors

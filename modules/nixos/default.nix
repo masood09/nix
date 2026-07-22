@@ -4,9 +4,12 @@
 # NixOS-only options (hardware.isVM) are defined here.
 {
   config,
+  inputs,
   lib,
   ...
-}: {
+}: let
+  isDesktop = config.homelab.role == "desktop";
+in {
   imports = [
     ../shared/options.nix
 
@@ -39,16 +42,20 @@
   options = {
     homelab = {
       hardware = {
-        isVM = lib.mkEnableOption "virtual machine mode (disables fwupd and other bare-metal services)";
+        isVM = lib.mkEnableOption "virtual machine mode (disables bare-metal-only services)";
       };
     };
   };
 
   config = {
-    # Firmware updates — fwupd pulls from LVFS; run `fwupdmgr update` to apply
-    # Disabled on VMs where there is no physical firmware to update.
+    # Firmware updates — fwupd pulls from LVFS; run `fwupdmgr update` to apply.
+    # Desktops only. The daemon never flashes anything on its own, so on a
+    # headless server it bought nothing while dragging pango/cairo/X11 into the
+    # runtime closure (~100 MiB) via its wrapGApps typelib/XDG wrapper args.
+    # Servers get firmware updates on demand instead — see docs/firmware.org.
+    # Also off on VMs, where there is no physical firmware to update.
     services = {
-      fwupd = lib.mkIf (!config.homelab.hardware.isVM) {
+      fwupd = lib.mkIf (isDesktop && !config.homelab.hardware.isVM) {
         enable = true;
       };
     };
@@ -64,6 +71,26 @@
     # Core nix daemon settings. Automatic garbage collection lives in the
     # sibling `_gc.nix` module to keep the schedule isolated from cache config.
     nix = {
+      # Resolve the `nixpkgs` flake ref to a GitHub revision rather than a
+      # store path. Upstream's `nixpkgs.flake.setFlakeRegistry` pins it to
+      # `cfg.source`, which drags the entire 196 MiB nixpkgs tree into every
+      # closure just so `/etc/nix/registry.json` can name it. Overriding `to`
+      # (upstream defines it with mkDefault) keeps `nix shell nixpkgs#foo`,
+      # `nix-shell -p foo` and `<nixpkgs>` resolving to the exact revision the
+      # system was built from, fetched on demand and cached, at zero closure
+      # cost. `rev` comes from the flake input, so `just up` keeps the registry
+      # and the system in lockstep automatically — never hardcode it.
+      registry = {
+        nixpkgs = {
+          to = {
+            type = "github";
+            owner = "NixOS";
+            repo = "nixpkgs";
+            inherit (inputs.nixpkgs) rev;
+          };
+        };
+      };
+
       settings = {
         experimental-features = "nix-command flakes";
         auto-optimise-store = true;
