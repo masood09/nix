@@ -196,7 +196,27 @@ The NixOS =services.restic.backups.backup= configuration:
 
 Note that =extraPaths= are read *live*, not from a snapshot — the pipeline restarts services before the upload runs. Keep them small and write-once. Restic also *silently skips paths that do not exist* rather than failing, which is how the authentik =extraPath= backed up nothing for five months; see [[*Monitoring]].
 
-Retention is grouped by host *and path set*. Changing =extraPaths= or adding a dataset starts a new group, and the old group's final snapshots are pinned forever because no new snapshots arrive to age them out. Drop them by hand with =restic-backup forget <id>= if they accumulate.
+*** The path set matters more than it looks
+
+Restic keys on the set of paths in a snapshot, and that has two separate consequences. Both bite when you add a dataset or edit =extraPaths=.
+
+**Retention** is grouped by host *and path set*. A changed path set starts a new group, and the old group's final snapshots are pinned forever, because no new snapshots arrive to age them out under =keep-daily= / =keep-weekly=. Drop them by hand with =restic-backup forget <id>= if they accumulate.
+
+**Parent selection** works the same way, and this one is expensive. =restic backup= picks its parent by matching host *and* paths; with no match it logs =no parent snapshot found, will read all files= and re-hashes everything rather than doing an incremental.
+
+Measured on heartbeat when the PostgreSQL datadir was added to the path set:
+
+| | |
+|-------------------+------------|
+| Data re-read      | 589.7 GB   |
+| Repository before | 639.125 GiB |
+| Repository after  | 642.477 GiB |
+| Actual growth     | 3.35 GiB   |
+| Wall clock        | 49 minutes (against ~1 minute steady state) |
+
+It re-*reads*, it does not re-*upload* — content-defined chunking finds nearly every blob already present, so the growth was just the new datadir after dedup and compression. The cost is local I/O and CPU (1h32m of hashing), not egress.
+
+So this is a one-time penalty, paid once per host, the first time a path set changes. The next run finds the new snapshot as its parent and goes incremental again. It is harmless — services are up throughout, since the upload runs after they restart, and =TimeoutStartSec= is 6h — but schedule it when you can leave the host alone for an hour rather than immediately before you need it.
 
 ** Integrity Check
 
