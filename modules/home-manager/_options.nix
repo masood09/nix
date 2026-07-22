@@ -254,6 +254,31 @@ in {
           enable = lib.mkEnableOption "Whether to enable kitty terminal.";
         };
 
+        logcli = {
+          enable = lib.mkEnableOption "Whether to enable logcli (Loki CLI).";
+
+          remoteHost = lib.mkOption {
+            type = lib.types.str;
+            default = "heartbeat";
+            description = ''
+              SSH host running Loki. logcli reaches it through an SSH local
+              port forward because Loki binds to loopback only.
+            '';
+          };
+
+          remotePort = lib.mkOption {
+            type = lib.types.port;
+            default = 3100;
+            description = "Port Loki listens on at the remote end of the tunnel.";
+          };
+
+          localPort = lib.mkOption {
+            type = lib.types.port;
+            default = 3100;
+            description = "Local port the SSH forward binds to.";
+          };
+        };
+
         neovim = {
           enable = lib.mkEnableOption "Whether to enable neovim.";
         };
