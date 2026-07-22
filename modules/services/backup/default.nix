@@ -130,16 +130,106 @@
   resticDatasetEntries = lib.filterAttrs (_: ds: ds.restic.enable) zfsDatasets;
   datasetNames = lib.attrNames resticDatasetEntries;
 
+  backupRoot = toString cfg.backupRoot;
+
+  # Every path restic is configured to read, in the same order restic.nix
+  # assembles them: staged snapshot mounts first, then extraPaths.
+  resticPaths = (map (name: "${backupRoot}/${name}") datasetNames) ++ cfg.extraPaths;
+
+  textfileDir = toString homelabCfg.services.alloy.textfileDir;
+
+  # Report on the run so a backup that silently stops working is visible
+  # without reading journals. Two failure modes have already slipped through
+  # here: commrelay and caretaker ran a pipeline that backed up nothing for
+  # months, and the authentik extraPath pointed at a directory that does not
+  # exist, which restic skips silently. Both logged "Backup pipeline complete".
+  #
+  # homelab_backup_paths_present is the metric that catches those: it counts
+  # paths that actually exist on disk at upload time, not paths that were
+  # configured. Alert on it dropping below homelab_backup_paths_configured, and
+  # on last_success going stale.
+  # Note: built with printf rather than a heredoc. A heredoc body has to sit at
+  # a fixed column to keep its terminator valid, which does not survive `nix
+  # fmt` reindenting the surrounding Nix string — and the failure is silent
+  # until the exposition file is malformed.
+  writeMetricsScript = pkgs.writeShellScript "backup-write-metrics" ''
+    # Deliberately no `set -e`: reporting must never be the reason a backup
+    # is recorded as failed.
+    set -uo pipefail
+
+    _success="$1"
+    _start_ts="$2"
+    _now="$(date +%s)"
+
+    if [ ! -d "${textfileDir}" ]; then
+      echo "   - ${textfileDir} absent (alloy disabled?) -> skip metrics"
+      exit 0
+    fi
+
+    _paths_present=0
+    for _p in ${lib.escapeShellArgs resticPaths}; do
+      if [ -e "$_p" ]; then
+        _paths_present=$((_paths_present + 1))
+      else
+        echo "   ! configured backup path is missing: $_p"
+      fi
+    done
+
+    # A failed run must not clobber the last known-good timestamp — that is
+    # the value staleness alerts are built on.
+    _success_ts=0
+    if [ -f "${textfileDir}/backup.prom" ]; then
+      _success_ts="$(awk '/^homelab_backup_last_success_timestamp_seconds /{print $2}' \
+        "${textfileDir}/backup.prom" 2>/dev/null | tail -1)"
+      [ -n "$_success_ts" ] || _success_ts=0
+    fi
+    [ "$_success" = "1" ] && _success_ts="$_now"
+
+    _tmp="$(mktemp "${textfileDir}/.backup.prom.XXXXXX")" || exit 0
+
+    printf '%s\n' \
+      '# HELP homelab_backup_success Whether the last backup pipeline run succeeded.' \
+      '# TYPE homelab_backup_success gauge' \
+      "homelab_backup_success $_success" \
+      '# HELP homelab_backup_last_run_timestamp_seconds Unix time the last backup pipeline run finished.' \
+      '# TYPE homelab_backup_last_run_timestamp_seconds gauge' \
+      "homelab_backup_last_run_timestamp_seconds $_now" \
+      '# HELP homelab_backup_last_success_timestamp_seconds Unix time the last successful backup pipeline run finished.' \
+      '# TYPE homelab_backup_last_success_timestamp_seconds gauge' \
+      "homelab_backup_last_success_timestamp_seconds $_success_ts" \
+      '# HELP homelab_backup_duration_seconds Wall-clock duration of the last backup pipeline run.' \
+      '# TYPE homelab_backup_duration_seconds gauge' \
+      "homelab_backup_duration_seconds $((_now - _start_ts))" \
+      '# HELP homelab_backup_paths_configured Number of paths restic is configured to back up.' \
+      '# TYPE homelab_backup_paths_configured gauge' \
+      'homelab_backup_paths_configured ${toString (builtins.length resticPaths)}' \
+      '# HELP homelab_backup_paths_present Number of configured paths that existed on disk at upload time.' \
+      '# TYPE homelab_backup_paths_present gauge' \
+      "homelab_backup_paths_present $_paths_present" \
+      > "$_tmp"
+
+    chmod 0644 "$_tmp"
+    # Rename is atomic, so the collector never reads a half-written file.
+    mv -f "$_tmp" "${textfileDir}/backup.prom"
+  '';
+
   runBackupMainStart = pkgs.writeShellScriptBin "run-backup-main-start" ''
     set -euo pipefail
     echo "Running backup pipeline..."
 
-    # Safety net: always restart services on exit (failure or success).
-    # Guard prevents duplicate restarts when the explicit start already ran.
-    # Armed before anything else runs, so a failure at any point still leaves
-    # services up. Starting a unit that was never stopped is a no-op.
+    _start_ts="$(date +%s)"
+
+    # Safety net: always restart services on exit (failure or success), and
+    # always report, so a run that dies partway is recorded as a failure rather
+    # than leaving yesterday's success metric in place looking healthy.
+    # Armed before anything else runs. Starting a unit that was never stopped
+    # is a no-op, and the guards prevent duplicate work on the happy path.
     _services_started=0
-    trap 'if [ "$_services_started" -eq 0 ]; then ${servicesStartScript} || true; fi' EXIT
+    _completed=0
+    trap '
+      if [ "$_services_started" -eq 0 ]; then ${servicesStartScript} || true; fi
+      if [ "$_completed" -eq 0 ]; then ${writeMetricsScript} 0 "$_start_ts" || true; fi
+    ' EXIT
 
     # Baked in at Nix eval time; true when any ZFS dataset has restic enabled.
     _has_zfs_datasets="${
@@ -203,6 +293,9 @@
       fi
     fi
 
+    _completed=1
+    ${writeMetricsScript} 1 "$_start_ts" || true
+
     echo "Backup pipeline complete."
   '';
 in {
@@ -229,7 +322,7 @@ in {
           after = ["network-online.target"];
           wants = ["network-online.target"];
           restartIfChanged = false;
-          path = [pkgs.systemd];
+          path = [pkgs.systemd pkgs.coreutils pkgs.gawk];
 
           serviceConfig = {
             Type = "oneshot";

@@ -34,6 +34,19 @@ in {
             '';
           };
 
+          textfileDir = lib.mkOption {
+            default = "/var/lib/alloy-textfile";
+            type = lib.types.path;
+            description = ''
+              Directory the unix exporter's textfile collector reads `*.prom`
+              files from. Anything dropped here is scraped and shipped to
+              Prometheus, which is how batch jobs report on themselves.
+
+              Must be kept in sync with the literal path in
+              `prometheus-node-exporter.alloy`, which is a static file.
+            '';
+          };
+
           userId = lib.mkOption {
             default = 3000;
             type = lib.types.ints.u16;
