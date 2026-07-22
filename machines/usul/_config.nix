@@ -98,6 +98,10 @@
         kitty = {
           enable = true;
         };
+        # Queries the fleet's Loki on heartbeat over an SSH port forward.
+        logcli = {
+          enable = true;
+        };
         neovim = {
           enable = true;
         };
