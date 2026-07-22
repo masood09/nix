@@ -136,13 +136,10 @@
 
     # Safety net: always restart services on exit (failure or success).
     # Guard prevents duplicate restarts when the explicit start already ran.
+    # Armed before anything else runs, so a failure at any point still leaves
+    # services up. Starting a unit that was never stopped is a no-op.
     _services_started=0
     trap 'if [ "$_services_started" -eq 0 ]; then ${servicesStartScript} || true; fi' EXIT
-
-    # Stop services under the trap so they are guaranteed to restart on any failure.
-    ${servicesStopScript}
-
-    ${runPgBackups}/bin/run-postgresql-backups
 
     # Baked in at Nix eval time; true when any ZFS dataset has restic enabled.
     _has_zfs_datasets="${
@@ -150,6 +147,19 @@
       then "1"
       else "0"
     }"
+
+    # PostgreSQL dumps run *before* the stop window, with services live.
+    # pg_dump is MVCC-consistent by construction, so quiescing around it buys
+    # nothing — and it is by far the slowest step: on heartbeat the dumps take
+    # a little over ten minutes (mailarchiver alone is 8m14s for a 2.9G gzip),
+    # which used to be ten minutes with every service on the host stopped.
+    ${runPgBackups}/bin/run-postgresql-backups
+
+    # The stop window. This is the only part that genuinely needs services
+    # quiesced, and it is one `zfs snapshot` call per pool — about a second on
+    # heartbeat's fourteen datasets. Everything downstream reads the resulting
+    # read-only snapshot mounts, so services do not have to wait for it.
+    ${servicesStopScript}
 
     if [ "$_has_zfs_datasets" = "1" ]; then
       echo "Preparing ZFS snapshot mounts for restic backups"
