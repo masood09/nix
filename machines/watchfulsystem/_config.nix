@@ -31,9 +31,12 @@
         backup = {
           enable = true;
 
-          serviceUnits = [
-            "uptime-kuma.service"
-          ];
+          # No services are stopped. uptime-kuma keeps its SQLite database in
+          # its dataDir, which is the uptime-kuma dataset — so one atomic
+          # snapshot captures the db and its journal together, and SQLite
+          # recovers on open exactly as it would after a power cut. Stopping it
+          # only created a monitoring blind spot during the backup window.
+          serviceUnits = [];
         };
 
         caddy = {
