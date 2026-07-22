@@ -79,6 +79,18 @@
           pruneOpts = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             default = [
+              # Group only by host, not the default host+paths. restic applies
+              # keep-daily/keep-weekly independently per group, so with the
+              # default grouping a snapshot's *path set* defines its retention
+              # bucket — and any time a dataset is added or an extraPath
+              # changes, the old path set stops receiving snapshots and its
+              # survivors are pinned forever (keep-daily/weekly count snapshots
+              # in the group, not elapsed days, so nothing ages them out).
+              #
+              # Each host backs up to its own repository with a single host
+              # label, so grouping by host alone means retention spans path-set
+              # changes: old path sets age out by time like everything else.
+              "--group-by host"
               "--keep-daily 3"
               "--keep-weekly 4"
             ];
