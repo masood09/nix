@@ -16,16 +16,6 @@
           restartUnits = ["lk-jwt-service.service"];
         };
 
-        "restic/.env" = {
-          sopsFile = ./secrets.sops.yaml;
-        };
-        "restic/repo" = {
-          sopsFile = ./secrets.sops.yaml;
-        };
-        "restic/password" = {
-          sopsFile = ./secrets.sops.yaml;
-        };
-
         "tailscale/preauth-key" = {
           sopsFile = ./secrets.sops.yaml;
         };
