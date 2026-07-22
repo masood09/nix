@@ -20,7 +20,13 @@ The workflow:
 - Database: =authentik=
 - Database owner: =authentik=
 - Database engine: PostgreSQL
-- Media path: =/var/lib/private/authentik/media=
+- State directory: =/var/lib/private/authentik= (the whole StateDirectory is
+  backed up; =media/= only exists once a flow background or application icon
+  has been uploaded, so it may be absent)
+
+Note: authentik has *no dedicated ZFS dataset* — its StateDirectory lives on
+the host root filesystem. The database (in PostgreSQL) is the critical state;
+the StateDirectory is backed up as an =extraPath= read live during the backup.
 
 * 1. Verify Available Snapshots
 
@@ -40,15 +46,16 @@ sudo restic-backup restore latest \
   --target /tmp
 
 sudo restic-backup restore latest \
-  --include /var/lib/private/authentik/media \
+  --include /var/lib/private/authentik \
   --target /tmp
 #+end_src
 
-This will create the following directory structure:
+This will create the following directory structure (the =media/= subdirectory
+is only present if branding assets were ever uploaded):
 
 #+begin_example
 /tmp/mnt/nightly_backup/postgresql-backup/
-/tmp/var/lib/private/authentik/media/
+/tmp/var/lib/private/authentik/
 #+end_example
 
 * 3. Stop Authentik Services
@@ -63,11 +70,15 @@ sudo systemctl stop authentik-migrate.service
 
 * 4. (Recommended) Take Pre-Restore ZFS Snapshot
 
-Take a ZFS snapshot for quick rollback if something goes wrong:
+Snapshot the PostgreSQL data directory for rollback. The dataset name is
+derived from its mountpoint, so this is correct on whichever host runs
+authentik. authentik's own StateDirectory has no dedicated dataset, so it
+cannot be snapshotted here — copy =/var/lib/private/authentik= aside manually
+first if you want a rollback point for it.
 
 #+begin_src bash
-sudo zfs snapshot -r rpool/encrypted/services/authentik@pre-restore
-sudo zfs snapshot -r dpool/tank/services/postgresql@pre-restore
+ds=$(zfs list -H -o name,mountpoint | awk '{p=$2;sub(/\/+$/,"",p);if(p=="/var/lib/postgresql/17")print $1}')
+sudo zfs snapshot -r "${ds}@pre-restore" && echo "snapshotted ${ds}@pre-restore"
 #+end_src
 
 * 5. Drop and Restore the Database
@@ -186,31 +197,26 @@ END $$;
 SQL
 #+end_src
 
-* 9. Clear the Existing Media Directory
+* 9. Restore Media Files (only if present)
 
-Remove all existing contents while preserving the directory itself:
-
-#+begin_src bash
-sudo find /var/lib/private/authentik/media -mindepth 1 -delete
-#+end_src
-
-* 10. Restore Media Files
-
-Copy the restored media into the live directory:
+Uploaded branding assets live in =media/=. This subdirectory only exists if
+something was ever uploaded, so restore it only when the backup actually
+contains it — otherwise skip this section entirely.
 
 #+begin_src bash
-sudo rsync -a --delete \
-  /tmp/var/lib/private/authentik/media/ \
-  /var/lib/private/authentik/media/
+if [ -d /tmp/var/lib/private/authentik/media ]; then
+  sudo mkdir -p /var/lib/private/authentik/media
+  sudo find /var/lib/private/authentik/media -mindepth 1 -delete
+  sudo rsync -a --delete \
+    /tmp/var/lib/private/authentik/media/ \
+    /var/lib/private/authentik/media/
+  sudo chown -R nobody:nogroup /var/lib/private/authentik/media
+else
+  echo "No media/ in backup — nothing to restore (this is normal)"
+fi
 #+end_src
 
-Fix ownership so the service can read and write all files:
-
-#+begin_src bash
-sudo chown -R nobody:nogroup /var/lib/private/authentik/media
-#+end_src
-
-* 11. Start Authentik Services
+* 10. Start Authentik Services
 
 Restart the Authentik services:
 
@@ -225,7 +231,7 @@ sudo systemctl status authentik.service
 sudo systemctl status authentik-worker.service
 #+end_src
 
-* 12. Clean Up Temporary Files
+* 11. Clean Up Temporary Files
 
 Remove the temporary restore files:
 
@@ -235,11 +241,11 @@ sudo rm -rf /tmp/var/lib/private/authentik
 sudo rm -rf /tmp/mnt/nightly_backup/postgresql-backup
 #+end_src
 
-Once the service is verified healthy, remove the pre-restore snapshots:
+Once the service is verified healthy, remove the pre-restore snapshot:
 
 #+begin_src bash
-sudo zfs destroy -r rpool/encrypted/services/authentik@pre-restore
-sudo zfs destroy -r dpool/tank/services/postgresql@pre-restore
+ds=$(zfs list -H -o name,mountpoint | awk '{p=$2;sub(/\/+$/,"",p);if(p=="/var/lib/postgresql/17")print $1}')
+sudo zfs destroy -r "${ds}@pre-restore"
 #+end_src
 
 * Notes & Best Practices
