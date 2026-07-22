@@ -152,6 +152,25 @@
   # a fixed column to keep its terminator valid, which does not survive `nix
   # fmt` reindenting the surrounding Nix string — and the failure is silent
   # until the exposition file is malformed.
+  # Counts configured paths that actually exist. Must be called while the
+  # snapshot mounts are still up — i.e. after restic, before cleanup — because
+  # cleanup unmounts and rmdirs every staged path. Running it afterwards
+  # reports 0 present on a perfectly healthy backup.
+  countPathsScript = pkgs.writeShellScript "backup-count-paths" ''
+    set -uo pipefail
+
+    _present=0
+    for _p in ${lib.escapeShellArgs resticPaths}; do
+      if [ -e "$_p" ]; then
+        _present=$((_present + 1))
+      else
+        echo "   ! configured backup path is missing: $_p" >&2
+      fi
+    done
+
+    printf '%s\n' "$_present"
+  '';
+
   writeMetricsScript = pkgs.writeShellScript "backup-write-metrics" ''
     # Deliberately no `set -e`: reporting must never be the reason a backup
     # is recorded as failed.
@@ -159,21 +178,13 @@
 
     _success="$1"
     _start_ts="$2"
+    _paths_present="$3"
     _now="$(date +%s)"
 
     if [ ! -d "${textfileDir}" ]; then
       echo "   - ${textfileDir} absent (alloy disabled?) -> skip metrics"
       exit 0
     fi
-
-    _paths_present=0
-    for _p in ${lib.escapeShellArgs resticPaths}; do
-      if [ -e "$_p" ]; then
-        _paths_present=$((_paths_present + 1))
-      else
-        echo "   ! configured backup path is missing: $_p"
-      fi
-    done
 
     # A failed run must not clobber the last known-good timestamp — that is
     # the value staleness alerts are built on.
@@ -226,9 +237,12 @@
     # is a no-op, and the guards prevent duplicate work on the happy path.
     _services_started=0
     _completed=0
+    # Stays 0 until the paths are counted while the mounts are up. A run that
+    # dies before then reports 0 present, which is accurate: nothing was staged.
+    _paths_present=0
     trap '
       if [ "$_services_started" -eq 0 ]; then ${servicesStartScript} || true; fi
-      if [ "$_completed" -eq 0 ]; then ${writeMetricsScript} 0 "$_start_ts" || true; fi
+      if [ "$_completed" -eq 0 ]; then ${writeMetricsScript} 0 "$_start_ts" "$_paths_present" || true; fi
     ' EXIT
 
     # Baked in at Nix eval time; true when any ZFS dataset has restic enabled.
@@ -279,6 +293,10 @@
       systemctl start "$resticUnit"
     fi
 
+    # Count staged paths *before* cleanup tears the mounts down.
+    _paths_present="$(${countPathsScript})"
+    echo "   - ${toString (builtins.length resticPaths)} path(s) configured, $_paths_present present"
+
     if [ "$_has_zfs_datasets" = "1" ]; then
       echo "Cleanup ZFS snapshot mounts for restic backups"
 
@@ -294,7 +312,7 @@
     fi
 
     _completed=1
-    ${writeMetricsScript} 1 "$_start_ts" || true
+    ${writeMetricsScript} 1 "$_start_ts" "$_paths_present" || true
 
     echo "Backup pipeline complete."
   '';
