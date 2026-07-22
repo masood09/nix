@@ -55,6 +55,25 @@
                 nightly backup (02:00) and the weekly GC (Sun 06:00).
               '';
             };
+
+            retryLock = lib.mkOption {
+              type = lib.types.str;
+              default = "1h";
+              example = "0";
+              description = ''
+                How long to wait for the repository lock before giving up,
+                passed to `restic check --retry-lock`.
+
+                restic defaults to no retries at all, so the check fails
+                outright if the nightly backup's `forget --prune` is still
+                holding the lock. The two are two hours apart on paper, but a
+                long backup closes that gap — heartbeat's takes over ten
+                minutes before pruning even starts. Waiting is strictly better
+                than failing here: nothing else is queued behind the check.
+
+                Set to "0" to restore restic's fail-fast behaviour.
+              '';
+            };
           };
 
           pruneOpts = lib.mkOption {
