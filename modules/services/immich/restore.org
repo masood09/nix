@@ -19,7 +19,7 @@ The workflow:
 - Database: =immich=
 - Database owner: =immich=
 - Database engine: PostgreSQL
-- Media path: =/mnt/tank/services/immich/=
+- Media path: =/var/lib/immich/=
 
 * 1. Verify Available Snapshots
 
@@ -63,9 +63,14 @@ sudo systemctl stop immich-machine-learning.service
 
 Take a ZFS snapshot for quick rollback if something goes wrong:
 
+Dataset names are derived from their mountpoints, so this is correct on
+whichever host runs the service (the pools differ per host):
+
 #+begin_src bash
-sudo zfs snapshot -r dpool/tank/services/immich@pre-restore
-sudo zfs snapshot -r dpool/tank/services/postgresql@pre-restore
+for mp in /var/lib/immich /var/lib/postgresql/17; do
+  ds=$(zfs list -H -o name,mountpoint | awk -v m="$mp" '{p=$2;sub(/\/+$/,"",p);if(p==m)print $1}')
+  [ -n "$ds" ] && sudo zfs snapshot -r "${ds}@pre-restore" && echo "snapshotted ${ds}@pre-restore"
+done
 #+end_src
 
 * 5. Drop and Restore the Database
@@ -92,7 +97,7 @@ sudo -u immich bash -lc \
 Remove all existing contents while preserving the directory itself:
 
 #+begin_src bash
-sudo find /mnt/tank/services/immich/ -mindepth 1 -delete
+sudo find /var/lib/immich/ -mindepth 1 -delete
 #+end_src
 
 * 7. Restore Media Files
@@ -102,13 +107,13 @@ Copy the restored media into the live directory:
 #+begin_src bash
 sudo rsync -a --delete \
   /tmp/mnt/nightly_backup/immich/ \
-  /mnt/tank/services/immich/
+  /var/lib/immich/
 #+end_src
 
 Fix ownership so the service can read and write all files:
 
 #+begin_src bash
-sudo chown -R immich:immich /mnt/tank/services/immich
+sudo chown -R immich:immich /var/lib/immich
 #+end_src
 
 * 8. Start Immich Services
@@ -140,8 +145,10 @@ sudo rm -rf /tmp/mnt/nightly_backup/postgresql-backup
 Once the service is verified healthy, remove the pre-restore snapshots:
 
 #+begin_src bash
-sudo zfs destroy -r dpool/tank/services/immich@pre-restore
-sudo zfs destroy -r dpool/tank/services/postgresql@pre-restore
+for mp in /var/lib/immich /var/lib/postgresql/17; do
+  ds=$(zfs list -H -o name,mountpoint | awk -v m="$mp" '{p=$2;sub(/\/+$/,"",p);if(p==m)print $1}')
+  [ -n "$ds" ] && sudo zfs destroy -r "${ds}@pre-restore"
+done
 #+end_src
 
 * Notes & Best Practices

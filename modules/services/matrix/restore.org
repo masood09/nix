@@ -54,10 +54,14 @@ sudo systemctl stop matrix-synapse.service
 
 * 4. (Recommended) Take Pre-Restore ZFS Snapshots
 
+Dataset names are derived from their mountpoints, so this is correct on
+whichever host runs the service (the pools differ per host):
+
 #+begin_src bash
-sudo zfs snapshot -r fpool/fast/services/matrix-synapse@pre-restore
-sudo zfs snapshot -r dpool/tank/services/matrix-synapse-media@pre-restore
-sudo zfs snapshot -r dpool/tank/services/postgresql@pre-restore
+for mp in /var/lib/matrix-synapse /var/lib/matrix-synapse-media /var/lib/postgresql/17; do
+  ds=$(zfs list -H -o name,mountpoint | awk -v m="$mp" '{p=$2;sub(/\/+$/,"",p);if(p==m)print $1}')
+  [ -n "$ds" ] && sudo zfs snapshot -r "${ds}@pre-restore" && echo "snapshotted ${ds}@pre-restore"
+done
 #+end_src
 
 * 5. Clear Existing Data
@@ -173,9 +177,10 @@ sudo zfs destroy -r dpool/tank/restore-staging
 *2. Remove pre-restore snapshots:*
 
 #+begin_src bash
-sudo zfs destroy -r fpool/fast/services/matrix-synapse@pre-restore
-sudo zfs destroy -r dpool/tank/services/matrix-synapse-media@pre-restore
-sudo zfs destroy -r dpool/tank/services/postgresql@pre-restore
+for mp in /var/lib/matrix-synapse /var/lib/matrix-synapse-media /var/lib/postgresql/17; do
+  ds=$(zfs list -H -o name,mountpoint | awk -v m="$mp" '{p=$2;sub(/\/+$/,"",p);if(p==m)print $1}')
+  [ -n "$ds" ] && sudo zfs destroy -r "${ds}@pre-restore"
+done
 #+end_src
 
 Verify:
@@ -192,9 +197,10 @@ snapshots:
 #+begin_src bash
 sudo systemctl stop matrix-authentication-service.service
 sudo systemctl stop matrix-synapse.service
-sudo zfs rollback -r fpool/fast/services/matrix-synapse@pre-restore
-sudo zfs rollback -r dpool/tank/services/matrix-synapse-media@pre-restore
-sudo zfs rollback -r dpool/tank/services/postgresql@pre-restore
+for mp in /var/lib/matrix-synapse /var/lib/matrix-synapse-media /var/lib/postgresql/17; do
+  ds=$(zfs list -H -o name,mountpoint | awk -v m="$mp" '{p=$2;sub(/\/+$/,"",p);if(p==m)print $1}')
+  [ -n "$ds" ] && sudo zfs rollback -r "${ds}@pre-restore"
+done
 sudo systemctl start matrix-synapse.service
 sudo systemctl start matrix-authentication-service.service
 #+end_src

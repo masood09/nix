@@ -55,8 +55,12 @@ sudo systemctl stop uptime-kuma.service
 
 Take a ZFS snapshot for quick rollback if something goes wrong:
 
+The dataset name is derived from its mountpoint, so this is correct on
+whichever host runs the service:
+
 #+begin_src bash
-sudo zfs snapshot -r rpool/encrypted/services/uptime-kuma@pre-restore
+ds=$(zfs list -H -o name,mountpoint | awk '{p=$2;sub(/\/+$/,"",p);if(p=="/var/lib/uptime-kuma")print $1}')
+sudo zfs snapshot -r "${ds}@pre-restore" && echo "snapshotted ${ds}@pre-restore"
 #+end_src
 
 * 5. Clear the Existing Data Directory
@@ -108,7 +112,8 @@ sudo rm -rf /tmp/mnt/nightly_backup/uptime-kuma
 Once the service is verified healthy, remove the pre-restore snapshot:
 
 #+begin_src bash
-sudo zfs destroy -r rpool/encrypted/services/uptime-kuma@pre-restore
+ds=$(zfs list -H -o name,mountpoint | awk '{p=$2;sub(/\/+$/,"",p);if(p=="/var/lib/uptime-kuma")print $1}')
+sudo zfs destroy -r "${ds}@pre-restore"
 #+end_src
 
 * Notes & Best Practices

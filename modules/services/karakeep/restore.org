@@ -42,18 +42,25 @@ This will create the following directory structure:
 
 * 3. Stop Karakeep Service
 
-Stop the Karakeep service before restoring data:
+Stop the Karakeep services before restoring data. There is no single
+=karakeep.service=; the runtime units are =karakeep-web=, =karakeep-workers=,
+and =karakeep-browser= (=karakeep-init= and =karakeep-permissions= are oneshots
+that re-run automatically on start):
 
 #+begin_src bash
-sudo systemctl stop karakeep.service
+sudo systemctl stop karakeep-web.service karakeep-workers.service karakeep-browser.service
 #+end_src
 
 * 4. (Recommended) Take Pre-Restore ZFS Snapshot
 
 Take a ZFS snapshot for quick rollback if something goes wrong:
 
+The dataset name is derived from its mountpoint, so this is correct on
+whichever host runs the service:
+
 #+begin_src bash
-sudo zfs snapshot -r rpool/encrypted/services/karakeep@pre-restore
+ds=$(zfs list -H -o name,mountpoint | awk '{p=$2;sub(/\/+$/,"",p);if(p=="/var/lib/karakeep")print $1}')
+sudo zfs snapshot -r "${ds}@pre-restore" && echo "snapshotted ${ds}@pre-restore"
 #+end_src
 
 * 5. Clear the Existing Data Directory
@@ -82,16 +89,16 @@ sudo chown -R karakeep:karakeep /var/lib/karakeep
 
 * 7. Start Karakeep Service
 
-Restart the Karakeep service:
+Restart the Karakeep services:
 
 #+begin_src bash
-sudo systemctl start karakeep.service
+sudo systemctl start karakeep-web.service karakeep-workers.service karakeep-browser.service
 #+end_src
 
 Verify service status:
 
 #+begin_src bash
-sudo systemctl status karakeep.service
+sudo systemctl status karakeep-web.service karakeep-workers.service karakeep-browser.service
 #+end_src
 
 * 8. Clean Up Temporary Files
@@ -105,7 +112,8 @@ sudo rm -rf /tmp/mnt/nightly_backup/karakeep
 Once the service is verified healthy, remove the pre-restore snapshot:
 
 #+begin_src bash
-sudo zfs destroy -r rpool/encrypted/services/karakeep@pre-restore
+ds=$(zfs list -H -o name,mountpoint | awk '{p=$2;sub(/\/+$/,"",p);if(p=="/var/lib/karakeep")print $1}')
+sudo zfs destroy -r "${ds}@pre-restore"
 #+end_src
 
 * Notes & Best Practices

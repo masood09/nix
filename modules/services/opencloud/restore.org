@@ -57,12 +57,18 @@ sudo podman ps | grep opencloud || echo "OpenCloud stopped"
 
 These snapshots allow quick rollback if something goes wrong:
 
+Dataset names are derived from their mountpoints, so this is correct
+regardless of which pool each lives on (on heartbeat these span both fpool
+and dpool):
+
 #+begin_src bash
-sudo zfs snapshot -r dpool/tank/services/opencloud-etc@pre-restore
-sudo zfs snapshot -r dpool/tank/services/opencloud-idm@pre-restore
-sudo zfs snapshot -r dpool/tank/services/opencloud-storage-meta@pre-restore
-sudo zfs snapshot -r dpool/tank/services/opencloud-storage-ocm@pre-restore
-sudo zfs snapshot -r dpool/tank/services/opencloud-storage-user@pre-restore
+for mp in /var/lib/opencloud/etc /var/lib/opencloud/idm \
+          /var/lib/opencloud/storage/metadata \
+          /var/lib/opencloud/storage/ocm \
+          /var/lib/opencloud/storage/users; do
+  ds=$(zfs list -H -o name,mountpoint | awk -v m="$mp" '{p=$2;sub(/\/+$/,"",p);if(p==m)print $1}')
+  [ -n "$ds" ] && sudo zfs snapshot -r "${ds}@pre-restore" && echo "snapshotted ${ds}@pre-restore"
+done
 #+end_src
 
 * 5. Clear Existing Live Data
@@ -172,11 +178,13 @@ sudo zfs destroy -r dpool/tank/restore-staging
 *2. Remove the pre-restore snapshots:*
 
 #+begin_src bash
-sudo zfs destroy -r dpool/tank/services/opencloud-etc@pre-restore
-sudo zfs destroy -r dpool/tank/services/opencloud-idm@pre-restore
-sudo zfs destroy -r dpool/tank/services/opencloud-storage-meta@pre-restore
-sudo zfs destroy -r dpool/tank/services/opencloud-storage-ocm@pre-restore
-sudo zfs destroy -r dpool/tank/services/opencloud-storage-user@pre-restore
+for mp in /var/lib/opencloud/etc /var/lib/opencloud/idm \
+          /var/lib/opencloud/storage/metadata \
+          /var/lib/opencloud/storage/ocm \
+          /var/lib/opencloud/storage/users; do
+  ds=$(zfs list -H -o name,mountpoint | awk -v m="$mp" '{p=$2;sub(/\/+$/,"",p);if(p==m)print $1}')
+  [ -n "$ds" ] && sudo zfs destroy -r "${ds}@pre-restore"
+done
 #+end_src
 
 Verify:
