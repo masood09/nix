@@ -13,6 +13,7 @@ in {
     ./synapse.nix
     ./rtc.nix
     ./caddy.nix
+    ./alloy.nix
   ];
 
   config = {
