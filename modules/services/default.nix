@@ -8,6 +8,7 @@
     ./authentik
     ./babybuddy
     ./backup
+    ./blackbox-exporter
     ./blocky
     ./caddy
     ./dell-idrac-fan-controller

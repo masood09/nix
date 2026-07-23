@@ -43,6 +43,37 @@
           enable = true;
         };
 
+        # External black-box probing from the watcher host — reachability, HTTP
+        # status, latency, and TLS cert expiry for the public vhosts, plus DNS
+        # resolver health. Mirrors the endpoints tracked in uptime-kuma, but
+        # feeds the central Prometheus so it can join dashboards and alerting.
+        blackbox-exporter = {
+          enable = true;
+
+          httpTargets = [
+            "https://auth.mantannest.com/-/health/live/"
+            "https://grafana.mantannest.com/api/health"
+            "https://headscale.mantannest.com/health"
+            "https://headscale.mantannest.com/admin/healthz"
+            "https://photos.mantannest.com/api/server/ping"
+            "https://ittools.mantannest.com"
+            "https://jobscraper.mantannest.com/health"
+            "https://keep.mantannest.com/api/health"
+            "https://loki.mantannest.com/ready"
+            "https://chat.mantannest.com/-/health"
+            "https://mas.chat.mantannest.com/-/health"
+            "https://cloud.mantannest.com/-/health"
+            "https://collabora.cloud.mantannest.com/hosting/discovery"
+            "https://prometheus.mantannest.com/-/healthy"
+            "https://passwords.mantannest.com"
+          ];
+
+          dnsTargets = [
+            "100.64.0.17:53"
+            "100.64.0.22:53"
+          ];
+        };
+
         tailscale = {
           enable = true;
 
