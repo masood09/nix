@@ -118,6 +118,9 @@ in {
         "alloy/prometheus-node-exporter.alloy" = {
           source = ./prometheus-node-exporter.alloy;
         };
+        "alloy/alloy-self.alloy" = {
+          source = ./alloy-self.alloy;
+        };
       };
     };
   };

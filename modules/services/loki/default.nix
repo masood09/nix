@@ -29,6 +29,7 @@
   };
 in {
   imports = [
+    ./alloy.nix
     ./options.nix
   ];
 

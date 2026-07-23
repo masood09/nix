@@ -1,0 +1,17 @@
+// Alloy self-metrics — scrape the agent's own /metrics endpoint so every host
+// emits a heartbeat series (alloy_build_info, component health, WAL/remote-write
+// queue depth). Because the fleet uses remote_write (push), Prometheus has no
+// per-host scrape target and therefore no `up` series; this self-scrape is the
+// only per-host liveness signal, and the foundation for a future staleness /
+// dead-agent alert. Port 12345 is Alloy's upstream-default HTTP listen address
+// (see docs/service-registry.org).
+prometheus.scrape "alloy_self" {
+	targets = [
+		{
+			__address__ = "127.0.0.1:12345",
+			instance    = sys.env("ALLOY_HOSTNAME"),
+		},
+	]
+
+	forward_to = [prometheus.remote_write.metrics_service.receiver]
+}
