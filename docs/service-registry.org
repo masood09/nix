@@ -60,6 +60,8 @@ Next available UID/GID: *3015*
 | Service                              |  Port | Notes                             |
 |--------------------------------------+-------+-----------------------------------|
 | Immich (Server)                      |  2283 |                                   |
+| Immich (API Metrics)                 |  8081 | Localhost; IMMICH_API_METRICS_PORT |
+| Immich (Microservices Metrics)       |  8082 | Localhost; OTEL job metrics       |
 | Grafana                              |  3000 | Upstream default                  |
 | Uptime-Kuma                          |  3001 | Upstream default                  |
 | Immich (Machine Learning)            |  3003 |                                   |
@@ -74,6 +76,7 @@ Next available UID/GID: *3015*
 | LiveKit (Matrix RTC)                 |  7880 |                                   |
 | LiveKit RTC (TCP)                    |  7881 |                                   |
 | Matrix Synapse                       |  8008 | HTTP listener                     |
+| Matrix Synapse (Metrics)             |  9092 | Localhost; /_synapse/metrics      |
 | Headscale                            |  8080 |                                   |
 | Vaultwarden                          |  8222 |                                   |
 | IT-Tools                             |  8901 | Podman container                  |
