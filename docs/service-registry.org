@@ -53,6 +53,7 @@ Next available UID/GID: *3015*
 | Blocky (DNS)  |    53 | TCP + UDP                            |
 | Caddy (HTTP)  |    80 | Redirects to HTTPS                   |
 | Caddy (HTTPS) |   443 | Reverse proxy for all service vhosts |
+| Caddy (Admin) |  2019 | Localhost only; /metrics scrape target |
 | SSH           | 22222 | Non-standard port, key-only auth     |
 
 ** Application Services
