@@ -102,6 +102,7 @@ Next available UID/GID: *3015*
 | prometheus-smartctl-exporter         |  9633 | Upstream default; physical hosts  |
 | prometheus-postgres-exporter         |  9187 | Upstream default                  |
 | prometheus-mongodb-exporter          |  9216 | Upstream default                  |
+| prometheus-blackbox-exporter         |  9115 | Upstream default; watcher host    |
 | Karakeep (Chrome, remote debugging)  |  9222 | Upstream default                  |
 | Authentik (Metrics)                  |  9300 |                                   |
 | Authentik (Built-in HTTPS)           |  9443 |                                   |
