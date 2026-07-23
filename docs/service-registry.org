@@ -95,6 +95,8 @@ Next available UID/GID: *3015*
 | Headscale (Metrics)                  |  9091 |                                   |
 | prometheus-node-exporter             |  9100 | Upstream default (via Alloy)      |
 | prometheus-zfs-exporter              |  9134 | Upstream default                  |
+| prometheus-ipmi-exporter             |  9290 | Upstream default; BMC hosts only  |
+| prometheus-smartctl-exporter         |  9633 | Upstream default; physical hosts  |
 | prometheus-postgres-exporter         |  9187 | Upstream default                  |
 | Karakeep (Chrome, remote debugging)  |  9222 | Upstream default                  |
 | Authentik (Metrics)                  |  9300 |                                   |
