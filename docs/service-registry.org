@@ -53,12 +53,15 @@ Next available UID/GID: *3015*
 | Blocky (DNS)  |    53 | TCP + UDP                            |
 | Caddy (HTTP)  |    80 | Redirects to HTTPS                   |
 | Caddy (HTTPS) |   443 | Reverse proxy for all service vhosts |
+| Caddy (Admin) |  2019 | Localhost only; /metrics scrape target |
 | SSH           | 22222 | Non-standard port, key-only auth     |
 
 ** Application Services
 | Service                              |  Port | Notes                             |
 |--------------------------------------+-------+-----------------------------------|
 | Immich (Server)                      |  2283 |                                   |
+| Immich (API Metrics)                 |  8081 | Localhost; IMMICH_API_METRICS_PORT |
+| Immich (Microservices Metrics)       |  8082 | Localhost; OTEL job metrics       |
 | Grafana                              |  3000 | Upstream default                  |
 | Uptime-Kuma                          |  3001 | Upstream default                  |
 | Immich (Machine Learning)            |  3003 |                                   |
@@ -73,6 +76,7 @@ Next available UID/GID: *3015*
 | LiveKit (Matrix RTC)                 |  7880 |                                   |
 | LiveKit RTC (TCP)                    |  7881 |                                   |
 | Matrix Synapse                       |  8008 | HTTP listener                     |
+| Matrix Synapse (Metrics)             |  9092 | Localhost; /_synapse/metrics      |
 | Headscale                            |  8080 |                                   |
 | Vaultwarden                          |  8222 |                                   |
 | IT-Tools                             |  8901 | Podman container                  |
@@ -94,7 +98,11 @@ Next available UID/GID: *3015*
 | Headscale (Metrics)                  |  9091 |                                   |
 | prometheus-node-exporter             |  9100 | Upstream default (via Alloy)      |
 | prometheus-zfs-exporter              |  9134 | Upstream default                  |
+| prometheus-ipmi-exporter             |  9290 | Upstream default; BMC hosts only  |
+| prometheus-smartctl-exporter         |  9633 | Upstream default; physical hosts  |
 | prometheus-postgres-exporter         |  9187 | Upstream default                  |
+| prometheus-mongodb-exporter          |  9216 | Upstream default                  |
+| prometheus-blackbox-exporter         |  9115 | Upstream default; watcher host    |
 | Karakeep (Chrome, remote debugging)  |  9222 | Upstream default                  |
 | Authentik (Metrics)                  |  9300 |                                   |
 | Authentik (Built-in HTTPS)           |  9443 |                                   |

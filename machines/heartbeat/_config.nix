@@ -59,6 +59,16 @@
           enable = true;
         };
 
+        # Hardware health for this bare-metal Supermicro box: per-disk SMART
+        # (8× 14TB HDD + SSDs + NVMe) and local BMC sensors (temps, fans, PSU).
+        smartctl-exporter = {
+          enable = true;
+        };
+
+        ipmi-exporter = {
+          enable = true;
+        };
+
         grafana = {
           enable = true;
 

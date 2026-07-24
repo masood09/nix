@@ -28,6 +28,12 @@
           enable = true;
         };
 
+        # Bare-metal host with a single NVMe: per-disk SMART health. No BMC, so
+        # no IPMI exporter here.
+        smartctl-exporter = {
+          enable = true;
+        };
+
         tailscale = {
           enable = true;
         };

@@ -65,6 +65,10 @@ in {
           server_name = cfg.rootDomain;
           public_baseurl = "https://${cfg.rootDomain}";
 
+          # Enable the Prometheus metrics endpoint; served on the dedicated
+          # localhost metrics listener below at /_synapse/metrics.
+          enable_metrics = true;
+
           listeners = [
             {
               port = cfg.synapse.listenPort;
@@ -79,6 +83,20 @@ in {
                     "federation"
                   ];
                   compress = true;
+                }
+              ];
+            }
+            # Metrics on a separate localhost-only listener — kept off the
+            # client/federation listener, which Caddy proxies publicly.
+            {
+              port = cfg.synapse.metricsPort;
+              bind_addresses = ["127.0.0.1"];
+              type = "http";
+              tls = false;
+              resources = [
+                {
+                  names = ["metrics"];
+                  compress = false;
                 }
               ];
             }

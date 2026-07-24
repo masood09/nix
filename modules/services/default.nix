@@ -8,6 +8,7 @@
     ./authentik
     ./babybuddy
     ./backup
+    ./blackbox-exporter
     ./blocky
     ./caddy
     ./dell-idrac-fan-controller
@@ -15,6 +16,7 @@
     ./grafana
     ./headscale
     ./immich
+    ./ipmi-exporter
     ./ittools
     ./jobscraper
     ./karakeep
@@ -28,6 +30,7 @@
     ./podman
     ./postgresql
     ./prometheus
+    ./smartctl-exporter
     ./ssh
     ./tailscale
     ./uptime-kuma

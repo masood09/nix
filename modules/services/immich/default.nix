@@ -29,6 +29,7 @@
   };
 in {
   imports = [
+    ./alloy.nix
     ./options.nix
   ];
 
@@ -119,7 +120,25 @@ in {
       };
     };
 
-    inherit (permSvc) systemd;
+    systemd = lib.mkMerge [
+      permSvc.systemd
+      {
+        services = {
+          # Enable Immich's OpenTelemetry Prometheus metrics. Ports are set
+          # explicitly (upstream defaults) so the scrape and registry stay in
+          # sync — API on 8081, microservices (jobs) on 8082, both served by the
+          # immich-server process. Localhost/loopback scrape only; not firewalled
+          # open. See modules/services/immich/alloy.nix.
+          immich-server = {
+            environment = {
+              IMMICH_TELEMETRY_INCLUDE = "all";
+              IMMICH_API_METRICS_PORT = "8081";
+              IMMICH_MICROSERVICES_METRICS_PORT = "8082";
+            };
+          };
+        };
+      }
+    ];
 
     environment = persistenceHelpers.mkPersistenceDirs {
       inherit homelabCfg;

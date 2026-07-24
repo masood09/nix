@@ -16,6 +16,7 @@
   persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
 in {
   imports = [
+    ./alloy.nix
     ./options.nix
   ];
 
