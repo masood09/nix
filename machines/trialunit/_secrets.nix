@@ -57,6 +57,14 @@
           restartUnits = ["grafana.service"];
         };
 
+        # Local break-glass admin password (Authentik-down fallback). Add the
+        # value with `sops machines/trialunit/secrets.sops.yaml`.
+        "grafana/admin-password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "grafana";
+          restartUnits = ["grafana.service"];
+        };
+
         "headscale/dns-extra-records.json" = {
           owner = "headscale";
           sopsFile = ./../../secrets/headscale-dns.sops.yaml;
