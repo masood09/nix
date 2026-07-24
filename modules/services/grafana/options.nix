@@ -12,6 +12,10 @@ in {
         grafana = {
           enable = lib.mkEnableOption "Whether to enable Grafana.";
 
+          discord = {
+            enable = lib.mkEnableOption "Discord alerting — provision Grafana contact points and severity-based notification routing to Discord webhooks. Requires a grafana/discord-webhooks.env secret exposing DISCORD_CRITICAL_WEBHOOK, DISCORD_WARNING_WEBHOOK, and DISCORD_EVENTS_WEBHOOK.";
+          };
+
           webDomain = lib.mkOption {
             type = lib.types.str;
             default = "grafana.${config.networking.domain}";
