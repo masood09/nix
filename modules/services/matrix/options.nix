@@ -65,6 +65,12 @@ in {
               description = "Port for the Synapse HTTP listener.";
             };
 
+            metricsPort = lib.mkOption {
+              default = 9092;
+              type = lib.types.port;
+              description = "Localhost-only port for the Synapse Prometheus metrics listener (/_synapse/metrics).";
+            };
+
             zfs = {
               enable = lib.mkEnableOption "Whether to store Matrix Synapse data on a ZFS dataset.";
 

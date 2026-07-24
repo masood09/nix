@@ -12,6 +12,7 @@
   persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
 in {
   imports = [
+    ./alloy.nix
     ./options.nix
   ];
 
@@ -19,6 +20,30 @@ in {
     services = {
       caddy = {
         enable = true;
+
+        # Global options:
+        #  - `metrics` exposes Prometheus metrics on the admin API endpoint
+        #    (127.0.0.1:2019/metrics); `per_host` adds a host label so request
+        #    rate / status classes / latency break down per virtualHost. Scraped
+        #    by ./alloy.nix.
+        #  - The `access_journal` named logger tees every site's access log to
+        #    stderr as JSON, so it lands in the caddy.service journal and is
+        #    shipped to Loki by the existing loki.source.journal. NixOS already
+        #    writes per-host access logs to files under services.caddy.logDir
+        #    (/var/log/caddy); this is additive — the `include` sink captures the
+        #    same http.log.access.* entries without touching the 18 per-vhost
+        #    definitions or their file loggers.
+        globalConfig = ''
+          metrics {
+            per_host
+          }
+
+          log access_journal {
+            output stderr
+            format json
+            include http.log.access
+          }
+        '';
       };
     };
 
