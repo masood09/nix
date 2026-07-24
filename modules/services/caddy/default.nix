@@ -90,6 +90,27 @@ in {
           };
         };
       };
+
+      # Drop health-check probes from the access logs before they reach Loki.
+      # Blackbox and Uptime-Kuma hit every public vhost on a short interval
+      # (~1.8k req/h combined, ~11% of Caddy's access-log volume) — pure noise.
+      # Matched by their distinctive User-Agents, so real requests to the same
+      # health paths are kept.
+      services = {
+        alloy = {
+          loki = {
+            systemd = {
+              dropRules = lib.mkAfter [
+                {
+                  name = "caddy: drop blackbox / uptime-kuma health-check probes";
+                  unit = "caddy.service";
+                  expression = "(Blackbox-Exporter|Uptime-Kuma)/";
+                }
+              ];
+            };
+          };
+        };
+      };
     };
 
     # Make systemd enforce the mount is present
