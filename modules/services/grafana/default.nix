@@ -102,6 +102,7 @@ in {
                     builtins.toJSON
                     (pkgs.writeText (builtins.baseNameOf x))
                   ];
+                customDashboards = import ./dashboards.nix {inherit lib pkgs;};
               in [
                 {
                   name = "Node Exporter Full";
@@ -117,6 +118,20 @@ in {
                   url = "https://grafana.com/api/dashboards/9628/revisions/8/download";
                   options = {
                     path = makeReadOnly ./dashboards/postgresql.json;
+                  };
+                }
+                {
+                  name = "Fleet Overview";
+                  type = "file";
+                  options = {
+                    path = customDashboards.fleet;
+                  };
+                }
+                {
+                  name = "Storage & Hardware";
+                  type = "file";
+                  options = {
+                    path = customDashboards.storage;
                   };
                 }
               ];
