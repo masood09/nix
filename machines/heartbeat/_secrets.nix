@@ -42,6 +42,14 @@
           restartUnits = ["grafana.service"];
         };
 
+        # Local break-glass admin password (Authentik-down fallback). Add the
+        # value with `sops machines/heartbeat/secrets.sops.yaml`.
+        "grafana/admin-password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "grafana";
+          restartUnits = ["grafana.service"];
+        };
+
         "jobscraper/.env" = {
           sopsFile = ./secrets.sops.yaml;
           restartUnits = ["podman-jobscraper.service"];
