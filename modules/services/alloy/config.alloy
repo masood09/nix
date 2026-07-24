@@ -1,4 +1,13 @@
 loki.write "logs_service" {
+	// Durable on-disk buffer: log entries are persisted before the remote-write
+	// client sends them, so a Loki outage (e.g. the backend-migration window, or
+	// any brief blip) is bridged and backfilled rather than dropped. This mirrors
+	// the always-on WAL of prometheus.remote_write, closing the logs-only gap.
+	wal {
+		enabled         = true
+		max_segment_age = "1h"
+	}
+
 	endpoint {
 		url = sys.env("LOKI_URL")
 
