@@ -13,6 +13,15 @@
         wireless_enable = true;
       };
 
+      services = {
+        # This laptop is off-tailnet on the home LAN, so once the monitoring
+        # backend moves to watchfulsystem (OCI, tailnet-only ingest) it can't
+        # reach it. Stop shipping telemetry rather than buffering to nowhere.
+        alloy = {
+          enable = false;
+        };
+      };
+
       desktop = {
         enable = true;
 

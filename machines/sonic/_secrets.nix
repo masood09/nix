@@ -3,10 +3,6 @@
   config = {
     sops = {
       secrets = {
-        "alloy/.env" = {
-          restartUnits = ["alloy.service"];
-        };
-
         # Primary desktop user (zainahmed) — also the LUKS passphrase for
         # pam_fde_boot_pw keyring auto-unlock. Must match the LUKS passphrase.
         "user/password" = {

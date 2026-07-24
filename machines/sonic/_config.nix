@@ -37,6 +37,12 @@
         ssh = {
           allowUsers = ["masoodahmed"];
         };
+
+        # Off-tailnet on the home LAN — can't reach the tailnet-only monitoring
+        # backend on watchfulsystem, so stop shipping telemetry.
+        alloy = {
+          enable = false;
+        };
       };
 
       desktop = {
