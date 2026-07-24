@@ -66,6 +66,10 @@ in {
 
           datasources = {
             settings = {
+              # The Prometheus datasource carries a stable uid ("prometheus")
+              # so alert rules can reference it. On a fresh Grafana this applies
+              # directly; a pre-existing datasource was reconciled once out of
+              # band.
               datasources =
                 lib.optionals lokiCfg.enable [
                   {
@@ -79,6 +83,7 @@ in {
                   {
                     name = "Prometheus";
                     type = "prometheus";
+                    uid = "prometheus";
                     access = "proxy";
                     url = "http://127.0.0.1:${toString config.services.prometheus.port}";
                   }
@@ -174,6 +179,10 @@ in {
                   }
                 ];
               };
+            };
+
+            rules = {
+              settings = import ./alerting-rules.nix {inherit lib;};
             };
           };
         };
