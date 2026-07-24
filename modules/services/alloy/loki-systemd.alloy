@@ -161,5 +161,23 @@ loki.process "systemd" {
 		}
 	}
 
+	// -------------------------
+	// Redact sensitive query-string values before shipping to Loki.
+	// Caddy access logs record the full request URI, which for Vaultwarden's
+	// /notifications/hub carries the WebSocket JWT as ?access_token=..., and for
+	// OAuth callbacks carries ?code=.... Strip the values so bearer tokens and
+	// single-use auth codes never land in the log store. The capture group is
+	// the value only, so the parameter name is preserved (e.g. access_token=REDACTED).
+	// -------------------------
+	stage.replace {
+		expression = "access_token=([^&\"]+)"
+		replace    = "REDACTED"
+	}
+
+	stage.replace {
+		expression = "[?&]code=([^&\"]+)"
+		replace    = "REDACTED"
+	}
+
 	forward_to = [loki.write.logs_service.receiver]
 }
