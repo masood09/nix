@@ -329,6 +329,10 @@ in {
           };
         };
 
+        vesktop = {
+          enable = lib.mkEnableOption "Whether to enable the Vesktop (Discord) desktop client.";
+        };
+
         zen = {
           enable = lib.mkEnableOption "Whether to enable Zen browser.";
         };

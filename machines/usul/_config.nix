@@ -92,6 +92,9 @@
         element-desktop = {
           enable = true;
         };
+        vesktop = {
+          enable = true;
+        };
         emacs = {
           enable = true;
         };
