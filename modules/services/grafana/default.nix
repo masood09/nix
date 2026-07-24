@@ -129,11 +129,28 @@ in {
             secret_key = "$__file{${
               config.sops.secrets."grafana/secret-key".path
             }}";
+
+            # Local break-glass admin so Grafana stays reachable when Authentik
+            # is down (the very thing you may be using Grafana to debug).
+            # Password from sops — declare grafana/admin-password in each Grafana
+            # host's _secrets.nix. NOTE: Grafana only applies admin_password when
+            # it first creates the admin user; on an already-initialised install
+            # seed it once with `grafana-cli admin reset-admin-password`.
+            admin_user = "admin";
+            admin_password = "$__file{${
+              config.sops.secrets."grafana/admin-password".path
+            }}";
           };
 
           auth = {
             signout_redirect_url = "https://${grafanaCfg.oauth.providerHost}/application/o/grafana/end-session/";
-            oauth_auto_login = true;
+
+            # Do not auto-redirect to Authentik: render the login page with the
+            # local username/password form AND the "Sign in with authentik"
+            # button, so the local admin is always a usable fallback. Keep the
+            # login form explicitly enabled against future regressions.
+            oauth_auto_login = false;
+            disable_login_form = false;
           };
 
           "auth.generic_oauth" = {
