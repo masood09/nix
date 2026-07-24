@@ -72,6 +72,10 @@
         grafana = {
           enable = true;
 
+          discord = {
+            enable = true;
+          };
+
           zfs = {
             enable = true;
           };
