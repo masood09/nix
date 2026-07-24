@@ -44,6 +44,7 @@
     ./niri
 
     # Desktop Applications
+    ./_discord.nix
     ./_element-desktop.nix
     ./zen
 

@@ -89,6 +89,9 @@
             passwordless = true;
           };
         };
+        discord = {
+          enable = true;
+        };
         element-desktop = {
           enable = true;
         };

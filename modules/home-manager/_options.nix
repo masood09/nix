@@ -109,6 +109,10 @@ in {
           };
         };
 
+        discord = {
+          enable = lib.mkEnableOption "Whether to enable the Discord desktop client.";
+        };
+
         element-desktop = {
           enable = lib.mkEnableOption "Whether to enable Element Desktop.";
 
