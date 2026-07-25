@@ -50,6 +50,15 @@
           restartUnits = ["grafana.service"];
         };
 
+        # Discord alerting webhook URLs (env file: DISCORD_CRITICAL_WEBHOOK,
+        # DISCORD_WARNING_WEBHOOK, DISCORD_EVENTS_WEBHOOK). Mounted as Grafana's
+        # EnvironmentFile; referenced by the provisioned contact points via $__env.
+        "grafana/discord-webhooks.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "grafana";
+          restartUnits = ["grafana.service"];
+        };
+
         "jobscraper/.env" = {
           sopsFile = ./secrets.sops.yaml;
           restartUnits = ["podman-jobscraper.service"];
