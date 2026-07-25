@@ -114,7 +114,7 @@ in {
           source = ./config.alloy;
         };
         "alloy/loki-systemd.alloy" = {
-          source = ./loki-systemd.alloy;
+          text = import ./loki-systemd.nix {inherit config lib;};
         };
         "alloy/prometheus-node-exporter.alloy" = {
           source = ./prometheus-node-exporter.alloy;
