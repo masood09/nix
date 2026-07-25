@@ -10,6 +10,7 @@ in {
   imports = [
     ./loki-systemd-drop.nix
     ./options.nix
+    ./reboot-required.nix
   ];
 
   config = lib.mkIf alloyCfg.enable {
