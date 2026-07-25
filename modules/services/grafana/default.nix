@@ -66,6 +66,10 @@ in {
 
           datasources = {
             settings = {
+              # The Prometheus datasource carries a stable uid ("prometheus")
+              # so alert rules can reference it. On a fresh Grafana this applies
+              # directly; a pre-existing datasource was reconciled once out of
+              # band.
               datasources =
                 lib.optionals lokiCfg.enable [
                   {
@@ -79,6 +83,7 @@ in {
                   {
                     name = "Prometheus";
                     type = "prometheus";
+                    uid = "prometheus";
                     access = "proxy";
                     url = "http://127.0.0.1:${toString config.services.prometheus.port}";
                   }
@@ -97,6 +102,7 @@ in {
                     builtins.toJSON
                     (pkgs.writeText (builtins.baseNameOf x))
                   ];
+                customDashboards = import ./dashboards.nix {inherit lib pkgs;};
               in [
                 {
                   name = "Node Exporter Full";
@@ -114,7 +120,84 @@ in {
                     path = makeReadOnly ./dashboards/postgresql.json;
                   };
                 }
+                {
+                  name = "Fleet Overview";
+                  type = "file";
+                  options = {
+                    path = customDashboards.fleet;
+                  };
+                }
+                {
+                  name = "Storage & Hardware";
+                  type = "file";
+                  options = {
+                    path = customDashboards.storage;
+                  };
+                }
               ];
+            };
+          };
+
+          # Discord alerting: three severity-scoped contact points, routed by
+          # the `severity` label. Webhook URLs come from the grafana/
+          # discord-webhooks.env secret (EnvironmentFile below) via $__env, so
+          # they never land in the Nix store.
+          alerting = lib.mkIf grafanaCfg.discord.enable {
+            contactPoints = {
+              settings = {
+                apiVersion = 1;
+                contactPoints = let
+                  mkDiscord = name: envVar: {
+                    orgId = 1;
+                    inherit name;
+                    receivers = [
+                      {
+                        uid = lib.replaceStrings ["-"] ["_"] name;
+                        type = "discord";
+                        settings = {
+                          url = "$__env{${envVar}}";
+                          use_discord_username = true;
+                        };
+                      }
+                    ];
+                  };
+                in [
+                  (mkDiscord "discord-critical" "DISCORD_CRITICAL_WEBHOOK")
+                  (mkDiscord "discord-warning" "DISCORD_WARNING_WEBHOOK")
+                  (mkDiscord "discord-events" "DISCORD_EVENTS_WEBHOOK")
+                ];
+              };
+            };
+
+            policies = {
+              settings = {
+                apiVersion = 1;
+                policies = [
+                  {
+                    orgId = 1;
+                    receiver = "discord-warning";
+                    group_by = ["grafana_folder" "alertname"];
+                    routes = [
+                      {
+                        receiver = "discord-critical";
+                        object_matchers = [["severity" "=" "critical"]];
+                      }
+                      {
+                        receiver = "discord-warning";
+                        object_matchers = [["severity" "=" "warning"]];
+                      }
+                      {
+                        receiver = "discord-events";
+                        object_matchers = [["severity" "=" "info"]];
+                      }
+                    ];
+                  }
+                ];
+              };
+            };
+
+            rules = {
+              settings = import ./alerting-rules.nix {inherit lib;};
             };
           };
         };
@@ -194,7 +277,19 @@ in {
       };
     };
 
-    inherit (permSvc) systemd;
+    systemd = lib.mkMerge [
+      permSvc.systemd
+      (lib.mkIf grafanaCfg.discord.enable {
+        services = {
+          grafana = {
+            serviceConfig = {
+              # Discord webhook URLs for the provisioned contact points ($__env).
+              EnvironmentFile = [config.sops.secrets."grafana/discord-webhooks.env".path];
+            };
+          };
+        };
+      })
+    ];
 
     environment = persistenceHelpers.mkPersistenceDirs {
       inherit homelabCfg;
