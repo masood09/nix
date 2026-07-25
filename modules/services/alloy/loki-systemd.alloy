@@ -189,6 +189,107 @@ loki.process "systemd" {
 	}
 
 	// -------------------------
+	// PostgreSQL: parse "[pid] LEVEL:" prefix and override `level`.
+	// Discovered via FATAL connection-loss lines reading as info — journald
+	// priority mapping doesn't inspect content, so genuine DB-level errors
+	// were indistinguishable from routine checkpoint LOG lines.
+	// Example: [1641972] FATAL:  connection to client lost
+	// -------------------------
+	stage.match {
+		selector = "{unit=\"postgresql.service\"}"
+
+		stage.regex {
+			expression = "^\\[\\d+\\] (?P<pg_level>[A-Z]+):"
+		}
+
+		stage.template {
+			source   = "pg_level"
+			template = "{{- $l := .Value -}}{{- if eq $l \"LOG\" -}}info{{- else if eq $l \"WARNING\" -}}warn{{- else if eq $l \"ERROR\" -}}error{{- else if eq $l \"FATAL\" -}}fatal{{- else if eq $l \"PANIC\" -}}fatal{{- else if eq $l \"NOTICE\" -}}info{{- else -}}{{ lower $l }}{{- end -}}"
+		}
+
+		stage.labels {
+			values = {
+				level = "pg_level",
+			}
+		}
+	}
+
+	// -------------------------
+	// Minecraft (Fabric): parse "[HH:MM:SS] [Thread/LEVEL]:" prefix and
+	// override `level`. Same class of fix as Velocity, but the log4j thread
+	// tag sits before the level instead of a bare bracket.
+	// Example: [02:11:05] [Server thread/WARN]: Can't keep up! ...
+	// -------------------------
+	stage.match {
+		selector = "{unit=~\"minecraft-server-(forever|ourworld).service\"}"
+
+		stage.regex {
+			expression = "^\\[\\d{2}:\\d{2}:\\d{2}\\] \\[[^/\\]]+/(?P<mc_level>[A-Z]+)\\]:"
+		}
+
+		stage.template {
+			source   = "mc_level"
+			template = "{{- $l := .Value -}}{{- if eq $l \"WARN\" -}}warn{{- else if eq $l \"ERROR\" -}}error{{- else if eq $l \"FATAL\" -}}fatal{{- else if eq $l \"DEBUG\" -}}debug{{- else if eq $l \"TRACE\" -}}trace{{- else if eq $l \"INFO\" -}}info{{- else -}}{{ lower $l }}{{- end -}}"
+		}
+
+		stage.labels {
+			values = {
+				level = "mc_level",
+			}
+		}
+	}
+
+	// -------------------------
+	// Uptime Kuma: parse ANSI-colored "LEVEL:" token and override `level`.
+	// Monitor-down/warn events (the tool's own alerting signal) were
+	// reading as info.
+	// Example: [MONITOR] WARN: Monitor #1 'Authentik': Failing: ...
+	// -------------------------
+	stage.match {
+		selector = "{unit=\"uptime-kuma.service\"}"
+
+		stage.regex {
+			expression = "\\x1b\\[\\d+m(?P<kuma_level>[A-Z]+):\\x1b\\[0m"
+		}
+
+		stage.template {
+			source   = "kuma_level"
+			template = "{{- $l := .Value -}}{{- if eq $l \"WARN\" -}}warn{{- else if eq $l \"ERROR\" -}}error{{- else if eq $l \"INFO\" -}}info{{- else -}}{{ lower $l }}{{- end -}}"
+		}
+
+		stage.labels {
+			values = {
+				level = "kuma_level",
+			}
+		}
+	}
+
+	// -------------------------
+	// Immich: parse ANSI-colored NestJS level token and override `level`.
+	// Plugin-load ERROR lines were reading as info; NestJS's own "LOG"
+	// level maps to info.
+	// Example: [Nest] 1618771 ... [31m  ERROR[39m [Microservices:PluginService] ...
+	// -------------------------
+	stage.match {
+		selector = "{unit=\"immich-server.service\"}"
+
+		stage.regex {
+			expression = "\\x1b\\[3\\dm\\s*(?P<immich_level>LOG|WARN|ERROR|DEBUG|VERBOSE|FATAL)\\x1b\\[39m"
+		}
+
+		stage.template {
+			source   = "immich_level"
+			template = "{{- $l := .Value -}}{{- if eq $l \"LOG\" -}}info{{- else if eq $l \"WARN\" -}}warn{{- else if eq $l \"ERROR\" -}}error{{- else if eq $l \"FATAL\" -}}fatal{{- else if eq $l \"VERBOSE\" -}}trace{{- else -}}{{ lower $l }}{{- end -}}"
+		}
+
+		stage.labels {
+			values = {
+				level = "immich_level",
+			}
+		}
+	}
+
+	// -------------------------
 	// Fallback: only if level still missing/empty
 	// -------------------------
 	stage.match {
