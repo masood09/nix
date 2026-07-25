@@ -148,6 +148,47 @@ loki.process "systemd" {
 	}
 
 	// -------------------------
+	// Velocity: parse "[HH:MM:SS LEVEL]:" prefix and override `level`.
+	// Example: [06:44:23 WARN]: Player info forwarding is disabled!
+	// -------------------------
+	stage.match {
+		selector = "{unit=\"minecraft-server-velocity.service\"}"
+
+		stage.regex {
+			expression = "^\\[\\d{2}:\\d{2}:\\d{2} (?P<velocity_level>[A-Z]+)\\]:"
+		}
+
+		stage.template {
+			source   = "velocity_level"
+			template = "{{- $l := .Value -}}{{- if eq $l \"WARN\" -}}warn{{- else if eq $l \"ERROR\" -}}error{{- else if eq $l \"FATAL\" -}}fatal{{- else if eq $l \"DEBUG\" -}}debug{{- else if eq $l \"TRACE\" -}}trace{{- else if eq $l \"INFO\" -}}info{{- else -}}{{ lower $l }}{{- end -}}"
+		}
+
+		stage.labels {
+			values = {
+				level = "velocity_level",
+			}
+		}
+	}
+
+	// Velocity: bare JVM stack traces have no "[HH:MM:SS LEVEL]:" prefix, so
+	// the stage above leaves them on journald's stdout-default "info" — e.g.
+	// the Java-25 class-file-version crash loop
+	// (java.lang.UnsupportedClassVersionError / "Error: LinkageError...").
+	// journald priority is transport-level only (stdout is always "info"
+	// regardless of content), so a real crash silently reads as routine
+	// unless caught here.
+	// -------------------------
+	stage.match {
+		selector = "{unit=\"minecraft-server-velocity.service\"} |~ \"^(Error:|[A-Za-z][A-Za-z.$]*(Exception|Error)\\\\b|\\\\s+at\\\\s|Caused by:)\""
+
+		stage.static_labels {
+			values = {
+				level = "error",
+			}
+		}
+	}
+
+	// -------------------------
 	// Fallback: only if level still missing/empty
 	// -------------------------
 	stage.match {
