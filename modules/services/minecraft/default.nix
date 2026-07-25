@@ -180,7 +180,13 @@ in {
         servers = {
           velocity = {
             enable = true;
-            package = minecraftPackages.velocityServers.velocity;
+            # Velocity's launcher bakes in its JRE (jre_headless) at build time;
+            # recent builds are compiled for Java 25 (class-file 69.0) and crash
+            # on the default Java 21. Override just this package's JRE — the
+            # Fabric servers below stay on the default Java 21.
+            package = minecraftPackages.velocityServers.velocity.override {
+              jre_headless = pkgs.jdk25_headless;
+            };
             jvmOpts = "-Xms512M -Xmx512M";
             stopCommand = "end";
 
