@@ -15,6 +15,8 @@
 
   grafanaDataDir = lib.removeSuffix "/" (toString grafanaCfg.dataDir);
 
+  customDashboards = import ./dashboards {inherit lib pkgs;};
+
   persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
@@ -102,7 +104,6 @@ in {
                     builtins.toJSON
                     (pkgs.writeText (builtins.baseNameOf x))
                   ];
-                customDashboards = import ./dashboards {inherit lib pkgs;};
               in [
                 {
                   name = "Node Exporter Full";
@@ -203,6 +204,13 @@ in {
         };
 
         settings = {
+          dashboards = {
+            # Land on Fleet Overview instead of Grafana's default landing
+            # page — the whole point of the status board is to be the first
+            # thing you see.
+            default_home_dashboard_path = toString customDashboards.fleet;
+          };
+
           # nixos-26.05 removed Grafana's built-in default secret_key (used to
           # sign auth cookies / encrypt DB-stored secrets) and now asserts it be
           # set explicitly. Sourced from sops per machine via the $__file
