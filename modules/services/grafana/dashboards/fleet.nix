@@ -347,13 +347,13 @@
     }
   ];
 
-  # Colour by level band: OK green, NOTICE blue, WARN yellow, CRITICAL red, DOWN dark-red.
+  # Colour by level band: OK = no colour, NOTICE blue, WARN yellow, CRITICAL red, DOWN dark-red.
   hostHealthThresholds = {
     mode = "absolute";
     steps = [
       {
         value = null;
-        color = "green";
+        color = "transparent";
       }
       {
         value = 10;
@@ -482,7 +482,7 @@ in
             }
             {
               value = 99.9;
-              color = "green";
+              color = "transparent";
             }
           ];
         };
@@ -623,7 +623,7 @@ in
           steps = [
             {
               value = null;
-              color = "green";
+              color = "transparent";
             }
             {
               value = 26;
@@ -656,7 +656,7 @@ in
             }
             {
               value = 30;
-              color = "green";
+              color = "transparent";
             }
           ];
         };
