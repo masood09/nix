@@ -658,17 +658,22 @@ in
           }
         ];
       })
-      (mkMetricTable {
+      (mkStatBoard {
         x = 0;
         y = 62;
         w = 24;
+        h = 16;
         title = "TLS certificate expiry";
-        description = "Days remaining before each monitored certificate expires, soonest first. Red under 14 days, orange under 30, no fill beyond — matched to typical ACME renewal lead time, so orange is an early warning, not yet an emergency.";
-        expr = "sort((probe_ssl_earliest_cert_expiry - time()) / 86400)";
-        labelName = "URL";
-        valueName = "Days to expire";
-        valueUnit = "d";
-        cellColor = true;
+        # unit = "suffix: days" (a literal string appended after the number)
+        # rather than Grafana's "d" time unit, which auto-scales to weeks for
+        # larger values — the point is a plain day count, not adaptive
+        # duration formatting.
+        description = "Days remaining before each monitored certificate expires. CRITICAL under 7 days (renewal has clearly failed), WARN under 14 (should have auto-renewed already), NOTICE under 30 (approaching the typical ACME renewal window), no fill beyond.";
+        # Strip scheme + path from the probe URL, leaving just the domain —
+        # the path doesn't matter for a cert (it's issued per-domain).
+        expr = "label_replace(sort((probe_ssl_earliest_cert_expiry - time()) / 86400), \"domain\", \"$1\", \"instance\", \"https?://([^/]+).*\")";
+        legend = "{{domain}}";
+        unit = "suffix: days";
         thresholds = {
           mode = "absolute";
           steps = [
@@ -677,8 +682,12 @@ in
               color = "red";
             }
             {
-              value = 14;
+              value = 7;
               color = "orange";
+            }
+            {
+              value = 14;
+              color = "light-orange";
             }
             {
               value = 30;
