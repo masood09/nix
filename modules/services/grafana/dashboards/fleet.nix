@@ -455,10 +455,10 @@ in
       (mkStatBoard {
         x = 0;
         y = 4;
-        w = 8;
-        h = 18;
+        w = 24;
+        h = 8;
         title = "Host health";
-        description = "Worst-case signal per host across disk, RAM, thermal, power, fans, system, and pending-reboot checks (see hhConditions in fleet.nix). OK (green) = nothing wrong. NOTICE/WARN/CRITICAL (blue/yellow/red) name the worst active issue and its category — e.g. \"Disk WARN\". DOWN (dark red) means the host has stopped reporting entirely. This collapses everything to one number per host; expand a specific category on the disk/memory panels below, or check Storage & Hardware for raw SMART/IPMI detail.";
+        description = "Worst-case signal per host across disk, RAM, thermal, power, fans, system, and pending-reboot checks (see hhConditions in fleet.nix). No fill = nothing wrong. NOTICE/WARN/CRITICAL (light-orange/orange/red) name the worst active issue and its category — e.g. \"Disk WARN\". DOWN (purple) means the host has stopped reporting entirely — a different kind of signal than a detected problem. This collapses everything to one number per host; expand a specific category on the disk/memory panels below, or check Storage & Hardware for raw SMART/IPMI detail.";
         expr = hostHealthExpr;
         legend = "{{instance}}";
         unit = "none";
@@ -466,9 +466,9 @@ in
         mappings = hostHealthMappings;
       })
       (mkStatBoard {
-        x = 8;
-        y = 4;
-        w = 16;
+        x = 0;
+        y = 12;
+        w = 24;
         h = 18;
         title = "Service uptime ($service_window availability)";
         # Availability over the $service_window dropdown, one colour-filled row
@@ -500,7 +500,7 @@ in
       # --- resource trends ------------------------------------------------
       (mkTimeseries {
         x = 0;
-        y = 22;
+        y = 38;
         title = "CPU busy % (per host)";
         description = "Average CPU utilization per host (100% minus idle time, averaged across all cores) over the $trend_window dropdown below.";
         expr = "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)";
@@ -511,7 +511,7 @@ in
       })
       (mkTimeseries {
         x = 0;
-        y = 30;
+        y = 46;
         w = 8;
         title = "Memory used % (per host)";
         description = "Memory used per the kernel's own reclaim-aware estimate (1 - MemAvailable/MemTotal) — a conservative, capacity-planning-oriented number. It treats ZFS ARC as unavailable, so ARC-heavy hosts (see ZFS ARC usage % below) read much higher here than in the \"htop view\" panel alongside it. Use this one to judge real OOM risk / headroom; use the htop view for an intuitive at-a-glance read.";
@@ -523,7 +523,7 @@ in
       })
       (mkTimeseries {
         x = 16;
-        y = 22;
+        y = 38;
         title = "System load % (per host)";
         # Same normalization Node Exporter Full uses for its "Sys Load" gauge:
         # load1 as a % of core count (100% = load matches core count), rather
@@ -536,7 +536,7 @@ in
       })
       (mkTimeseries {
         x = 8;
-        y = 22;
+        y = 38;
         title = "Memory used % — htop view (per host)";
         # MemAvailable-based "used %" above treats ZFS ARC as fully used,
         # since ARC isn't the reclaimable page cache MemAvailable accounts
@@ -552,7 +552,7 @@ in
       })
       (mkTimeseries {
         x = 8;
-        y = 30;
+        y = 46;
         w = 8;
         title = "ZFS ARC usage % (per host)";
         # How much of total RAM the ARC currently holds — the gap between
@@ -566,7 +566,7 @@ in
       })
       (mkTimeseries {
         x = 16;
-        y = 30;
+        y = 46;
         w = 8;
         title = "Swap used % (per host)";
         description = "Percentage of configured swap space currently in use per host. Occasional low usage is normal; sustained non-zero swap under regular (non-spiky) load usually indicates real memory pressure.";
@@ -580,7 +580,7 @@ in
       # --- disk ------------------------------------------------------------
       (mkTimeseries {
         x = 0;
-        y = 38;
+        y = 54;
         w = 8;
         title = "Disk used % (per host, per pool)";
         description = "ZFS pool capacity (allocated/size) per pool, e.g. heartbeat's rpool/fpool/dpool shown as separate lines rather than blended into one number — every impermanence-backed service dataset shares its pool's free space, so a per-mountpoint view would balloon into 100+ near-duplicate rows. Non-ZFS hosts (caretaker; sonic/usul if they start reporting) fall back to root-filesystem usage, labeled \"root (/nix)\".";
@@ -593,7 +593,7 @@ in
       })
       (mkTimeseries {
         x = 8;
-        y = 38;
+        y = 54;
         w = 8;
         title = "Disk I/O throughput by type (per host)";
         description = "Combined read+write throughput per host, split by device class (nvme/hdd/ssd/virtual-other for cloud/KVM block volumes) since baselines differ wildly by type — an HDD near its ceiling looks nothing like an idle NVMe. A 5-minute rolling average, so short bursts are smoothed rather than shown as sharp peaks. Best used to spot which host and device is actively busy right now (a backup, scrub, big transfer), not to judge against theoretical hardware maximums — quiet numbers are normal and expected, since ZFS ARC absorbs most reads before they reach disk.";
@@ -605,7 +605,7 @@ in
       })
       (mkTimeseries {
         x = 16;
-        y = 38;
+        y = 54;
         w = 8;
         title = "Disk I/O wait % (per host)";
         description = "CPU time spent blocked waiting on any disk I/O, per host. Host-level only — iowait has no per-disk breakdown, unlike the throughput panel next to it. Rising alongside high throughput suggests the disk is actually a bottleneck right now; low iowait during high throughput means the disk is keeping up fine.";
@@ -618,8 +618,8 @@ in
       # --- backups & certs ------------------------------------------------
       (mkMetricTable {
         x = 0;
-        y = 46;
-        w = 12;
+        y = 30;
+        w = 24;
         title = "Backups — hours since last success";
         description = "Hours since each host's last successful backup completed, worst (longest) first. Red above 26 hours — enough slack over a 24h daily cadence to allow for normal run-time variance before flagging a genuinely missed backup.";
         expr = "sort_desc((time() - homelab_backup_last_success_timestamp_seconds) / 3600)";
@@ -642,11 +642,11 @@ in
         };
       })
       (mkMetricTable {
-        x = 12;
-        y = 46;
-        w = 12;
+        x = 0;
+        y = 62;
+        w = 24;
         title = "TLS certificate expiry";
-        description = "Days remaining before each monitored certificate expires, soonest first. Red under 14 days, yellow under 30, green beyond — matched to typical ACME renewal lead time, so yellow is an early warning, not yet an emergency.";
+        description = "Days remaining before each monitored certificate expires, soonest first. Red under 14 days, orange under 30, no fill beyond — matched to typical ACME renewal lead time, so orange is an early warning, not yet an emergency.";
         expr = "sort((probe_ssl_earliest_cert_expiry - time()) / 86400)";
         labelName = "URL";
         valueName = "Days to expire";
