@@ -358,7 +358,7 @@ in {
     steps = [
       {
         value = null;
-        color = "green";
+        color = "transparent"; # 0 = healthy: no fill, just red draws the eye
       }
       {
         value = 1;
@@ -380,7 +380,7 @@ in {
       }
       {
         value = full;
-        color = "green";
+        color = "transparent"; # full count = healthy: no fill, just red draws the eye
       }
     ];
   };
