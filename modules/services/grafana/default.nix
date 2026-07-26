@@ -108,7 +108,7 @@ in {
                 {
                   name = "Node Exporter Full";
                   type = "file";
-                  url = "https://grafana.com/api/dashboards/1860/revisions/42/download";
+                  url = "https://grafana.com/api/dashboards/1860/revisions/45/download";
                   options = {
                     path = makeReadOnly ./dashboards/node-exporter-full.json;
                   };
@@ -133,6 +133,13 @@ in {
                   type = "file";
                   options = {
                     path = customDashboards.storage;
+                  };
+                }
+                {
+                  name = "Host Info";
+                  type = "file";
+                  options = {
+                    path = customDashboards.hostInfo;
                   };
                 }
               ];
