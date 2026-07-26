@@ -490,7 +490,10 @@ in {
       mode = "none";
     },
     legendWidth ? null,
+    legendCalcs ? [],
+    legendDisplayMode ? "list",
     tooltipSort ? "none",
+    lineWidth ? 1,
     overrides ? [],
   }: let
     refIds = lib.stringToCharacters "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -538,8 +541,7 @@ in {
                 viz = false;
               };
               insertNulls = false;
-              inherit lineInterpolation;
-              lineWidth = 1;
+              inherit lineInterpolation lineWidth;
               pointSize = 5;
               scaleDistribution = {type = "linear";};
               showPoints = "never";
@@ -561,8 +563,8 @@ in {
       options = {
         legend =
           {
-            calcs = [];
-            displayMode = "list";
+            calcs = legendCalcs;
+            displayMode = legendDisplayMode;
             placement = "bottom";
             showLegend = true;
           }
