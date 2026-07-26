@@ -389,13 +389,13 @@ in
     refresh = "30s";
     hideTimePicker = true;
     # Dropdown driving the trend panels' window (they use timeFrom = $trend_window),
-    # so CPU/mem/disk can be viewed at 6h…30d without a global time picker.
+    # so CPU/mem/disk can be viewed at 5m…30d without a global time picker.
     variables = [
       (mkCustomVar {
         name = "trend_window";
         label = "Trend window";
-        values = ["1h" "6h" "12h" "24h" "2d" "7d" "30d"];
-        default = "6h";
+        values = ["5m" "15m" "30m" "1h" "6h" "12h" "24h" "2d" "7d" "30d"];
+        default = "15m";
       })
       (mkCustomVar {
         name = "service_window";
