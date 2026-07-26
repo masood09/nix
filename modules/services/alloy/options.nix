@@ -47,6 +47,19 @@ in {
             '';
           };
 
+          flakeCommitTimestamp = lib.mkOption {
+            default = null;
+            type = lib.types.nullOr lib.types.int;
+            description = ''
+              Unix timestamp of the flake's last commit (`self.lastModified`),
+              set from `flake.nix` at eval time — NixOS has no built-in
+              equivalent to `system.configurationRevision` for this. Read by
+              the auto-upgrade-status textfile collector to report how stale
+              the deployed configuration is without a live git call from
+              every host.
+            '';
+          };
+
           userId = lib.mkOption {
             default = 3000;
             type = lib.types.ints.u16;

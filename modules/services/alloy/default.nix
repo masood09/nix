@@ -8,6 +8,7 @@
   alloyCfg = config.homelab.services.alloy;
 in {
   imports = [
+    ./auto-upgrade-status.nix
     ./loki-systemd-drop.nix
     ./options.nix
     ./reboot-required.nix

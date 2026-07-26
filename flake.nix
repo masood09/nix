@@ -162,6 +162,17 @@
       (import ./nix/services/default.nix)
 
       {nixpkgs.overlays = sharedOverlays;}
+
+      # Git revision of the flake this configuration was built from — a
+      # real NixOS option, but nothing sets it by default. `self.rev` throws
+      # on a dirty tree, hence the `or` fallback (per the option's own
+      # manpage example). Paired with the commit timestamp below (no
+      # built-in NixOS equivalent) so the fleet dashboard can show how
+      # stale a deployed config is without a live git call from every host.
+      {
+        system.configurationRevision = self.shortRev or self.dirtyShortRev or "unknown";
+        homelab.services.alloy.flakeCommitTimestamp = self.lastModified;
+      }
     ];
 
     # Desktop-only modules. Kept out of sharedNixOSModules because the
