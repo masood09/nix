@@ -42,6 +42,8 @@ in {
     colorMode ? "value",
     mappings ? [],
     description ? null, # shown as a hoverable info icon next to the title
+    decimals ? null,
+    step ? null, # pin the query step (seconds), which feeds $__rate_interval
     thresholds ? {
       mode = "absolute";
       steps = [
@@ -57,15 +59,17 @@ in {
       inherit title;
       gridPos = {inherit x y w h;};
       datasource = ds;
-      targets = [(stgt expr)];
+      targets = [(stgt expr // lib.optionalAttrs (step != null) {inherit step;})];
     }
     // lib.optionalAttrs (description != null) {inherit description;}
     // {
       fieldConfig = {
-        defaults = {
-          inherit unit thresholds mappings;
-          color = {mode = "thresholds";};
-        };
+        defaults =
+          {
+            inherit unit thresholds mappings;
+            color = {mode = "thresholds";};
+          }
+          // lib.optionalAttrs (decimals != null) {inherit decimals;};
         overrides = [];
       };
       options = {
@@ -327,6 +331,159 @@ in {
     multi = false;
     hide = 0;
     skipUrlSync = false;
+  };
+
+  # Single-value radial gauge (0..max, colour-filled arc by threshold).
+  mkGauge = {
+    x,
+    y,
+    w ? 3,
+    h ? 4,
+    title,
+    description ? null,
+    expr,
+    unit ? "percent",
+    min ? 0,
+    max ? 100,
+    decimals ? null,
+    step ? null, # pin the query step (seconds), which feeds $__rate_interval
+    thresholds,
+  }:
+    {
+      type = "gauge";
+      inherit title;
+      gridPos = {inherit x y w h;};
+      datasource = ds;
+      targets = [(stgt expr // lib.optionalAttrs (step != null) {inherit step;})];
+    }
+    // lib.optionalAttrs (description != null) {inherit description;}
+    // {
+      fieldConfig = {
+        defaults =
+          {
+            inherit unit min max thresholds;
+            color = {mode = "thresholds";};
+            mappings = [
+              {
+                type = "special";
+                options = {
+                  match = "null";
+                  result = {text = "N/A";};
+                };
+              }
+            ];
+          }
+          // lib.optionalAttrs (decimals != null) {inherit decimals;};
+        overrides = [];
+      };
+      options = {
+        minVizHeight = 75;
+        minVizWidth = 75;
+        orientation = "auto";
+        sizing = "auto";
+        showThresholdLabels = false;
+        showThresholdMarkers = true;
+        reduceOptions = {
+          calcs = ["lastNotNull"];
+          fields = "";
+          values = false;
+        };
+      };
+    };
+
+  # Multi-series horizontal bar gauge — several distinct queries (not a
+  # multi-series legend fold like mkStatBoard), each its own coloured bar.
+  mkBarGauge = {
+    x,
+    y,
+    w,
+    h,
+    title,
+    description ? null,
+    targets, # list of { expr, legend }
+    unit ? "percentunit",
+    min ? 0,
+    max ? 1,
+    thresholdsMode ? "absolute",
+    step ? null, # pin the query step (seconds), which feeds $__rate_interval
+    decimals ? null,
+    thresholds,
+  }: let
+    refIds = lib.stringToCharacters "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    mkTarget = i: t:
+      {
+        refId = builtins.elemAt refIds i;
+        inherit (t) expr;
+        legendFormat = t.legend;
+        datasource = ds;
+        editorMode = "code";
+        instant = true;
+        range = false;
+        format = "time_series";
+      }
+      // lib.optionalAttrs (step != null) {inherit step;};
+  in
+    {
+      type = "bargauge";
+      inherit title;
+      gridPos = {inherit x y w h;};
+      datasource = ds;
+      targets = lib.imap0 mkTarget targets;
+    }
+    // lib.optionalAttrs (description != null) {inherit description;}
+    // {
+      fieldConfig = {
+        defaults =
+          {
+            inherit unit min max;
+            color = {mode = "thresholds";};
+            thresholds = {
+              mode = thresholdsMode;
+              steps = thresholds;
+            };
+            mappings = [];
+          }
+          // lib.optionalAttrs (decimals != null) {inherit decimals;};
+        overrides = [];
+      };
+      options = {
+        displayMode = "basic";
+        orientation = "horizontal";
+        showUnfilled = true;
+        valueMode = "color";
+        legend = {
+          calcs = [];
+          displayMode = "list";
+          placement = "bottom";
+          showLegend = false;
+        };
+        reduceOptions = {
+          calcs = ["lastNotNull"];
+          fields = "";
+          values = false;
+        };
+      };
+    };
+
+  # A Prometheus label_values() query-driven template variable — e.g. a
+  # $node dropdown sourced live from a metric's label, rather than a fixed
+  # list like mkCustomVar.
+  mkQueryVar = {
+    name,
+    label,
+    query, # e.g. "label_values(node_uname_info, instance)"
+  }: {
+    inherit name label query;
+    type = "query";
+    datasource = ds;
+    definition = query;
+    refresh = 1;
+    regex = "";
+    sort = 1;
+    includeAll = false;
+    multi = false;
+    current = {};
+    options = [];
   };
 
   mkDashboard = {

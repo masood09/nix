@@ -10,7 +10,9 @@
   helpers = import ./helpers.nix {inherit lib;};
   fleetOverview = import ./fleet.nix {inherit lib helpers;};
   storageHardware = import ./storage.nix {inherit lib helpers;};
+  hostInfo = import ./host-info.nix {inherit lib helpers;};
 in {
   fleet = pkgs.writeText "homelab-fleet.json" (builtins.toJSON fleetOverview);
   storage = pkgs.writeText "homelab-storage-hw.json" (builtins.toJSON storageHardware);
+  hostInfo = pkgs.writeText "homelab-host-info.json" (builtins.toJSON hostInfo);
 }
