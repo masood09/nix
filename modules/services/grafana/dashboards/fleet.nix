@@ -501,8 +501,9 @@ in
         timeFrom = "$trend_window";
       })
       (mkTimeseries {
-        x = 8;
-        y = 22;
+        x = 0;
+        y = 30;
+        w = 8;
         title = "Memory used % (per host)";
         description = "Memory used per the kernel's own reclaim-aware estimate (1 - MemAvailable/MemTotal) — a conservative, capacity-planning-oriented number. It treats ZFS ARC as unavailable, so ARC-heavy hosts (see ZFS ARC usage % below) read much higher here than in the \"htop view\" panel alongside it. Use this one to judge real OOM risk / headroom; use the htop view for an intuitive at-a-glance read.";
         expr = "100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)";
@@ -525,9 +526,8 @@ in
         timeFrom = "$trend_window";
       })
       (mkTimeseries {
-        x = 0;
-        y = 30;
-        w = 8;
+        x = 8;
+        y = 22;
         title = "Memory used % — htop view (per host)";
         # MemAvailable-based "used %" above treats ZFS ARC as fully used,
         # since ARC isn't the reclaimable page cache MemAvailable accounts
