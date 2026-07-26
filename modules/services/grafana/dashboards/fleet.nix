@@ -475,7 +475,7 @@ in
         # per service. Names come from the serviceNames map, folded into a
         # `service` label (see serviceUptimeExpr above). The window lives in the
         # PromQL range selector, which Grafana interpolates per selection.
-        description = "Average blackbox-probe availability of each monitored service over the $service_window dropdown at the top of the dashboard — not the (hidden) global time picker. Green ≥ 99.9%, yellow ≥ 95%, red below. Change the dropdown to see a shorter or longer availability window.";
+        description = "Average blackbox-probe availability of each monitored service over the $service_window dropdown at the top of the dashboard — not the (hidden) global time picker. No fill ≥ 99.9% (under ~10 min downtime/week); NOTICE ≥ 99.5% (up to ~50 min/week); WARN ≥ 95% (up to ~8.4 hours/week); CRITICAL below that. Change the dropdown to see a shorter or longer availability window.";
         expr = serviceUptimeExpr;
         legend = "{{service}}";
         thresholds = {
@@ -488,6 +488,10 @@ in
             {
               value = 95;
               color = "orange";
+            }
+            {
+              value = 99.5;
+              color = "light-orange";
             }
             {
               value = 99.9;
