@@ -465,6 +465,116 @@ in {
       };
     };
 
+  # Multi-series timeseries with stacking and per-series field overrides
+  # (fixed colors, transforms, etc.) — richer than mkTimeseries, which only
+  # supports one target and no overrides. `overrides` is a raw passthrough
+  # of Grafana override objects ({matcher; properties;}) rather than a
+  # built abstraction, since the shapes upstream uses vary too much
+  # (fixed-color, custom.fillOpacity, custom.stacking, custom.transform)
+  # to usefully generalize.
+  mkStackedTimeseries = {
+    x,
+    y,
+    w ? 12,
+    h ? 7,
+    title,
+    description ? null,
+    targets, # list of { expr, legend, step ? null }
+    unit ? "short",
+    min ? null,
+    max ? null,
+    fillOpacity ? 40,
+    lineInterpolation ? "linear",
+    stacking ? {
+      group = "A";
+      mode = "none";
+    },
+    legendWidth ? null,
+    tooltipSort ? "none",
+    overrides ? [],
+  }: let
+    refIds = lib.stringToCharacters "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    mkTarget = i: t:
+      {
+        refId = builtins.elemAt refIds i;
+        inherit (t) expr;
+        legendFormat = t.legend;
+        datasource = ds;
+        editorMode = "code";
+        instant = false;
+        range = true;
+        format = "time_series";
+      }
+      // lib.optionalAttrs (t ? step) {inherit (t) step;};
+  in
+    {
+      type = "timeseries";
+      inherit title;
+      gridPos = {inherit x y w h;};
+      datasource = ds;
+      targets = lib.imap0 mkTarget targets;
+    }
+    // lib.optionalAttrs (description != null) {inherit description;}
+    // {
+      fieldConfig = {
+        defaults =
+          {
+            inherit unit;
+            color = {mode = "palette-classic";};
+            custom = {
+              axisBorderShow = false;
+              axisCenteredZero = false;
+              axisColorMode = "text";
+              axisLabel = "";
+              axisPlacement = "auto";
+              barAlignment = 0;
+              barWidthFactor = 0.6;
+              drawStyle = "line";
+              inherit fillOpacity;
+              gradientMode = "none";
+              hideFrom = {
+                legend = false;
+                tooltip = false;
+                viz = false;
+              };
+              insertNulls = false;
+              inherit lineInterpolation;
+              lineWidth = 1;
+              pointSize = 5;
+              scaleDistribution = {type = "linear";};
+              showPoints = "never";
+              spanNulls = false;
+              inherit stacking;
+              thresholdsStyle = {mode = "off";};
+            };
+            links = [];
+            mappings = [];
+            thresholds = {
+              mode = "absolute";
+              steps = [{color = "green";}];
+            };
+          }
+          // lib.optionalAttrs (min != null) {inherit min;}
+          // lib.optionalAttrs (max != null) {inherit max;};
+        inherit overrides;
+      };
+      options = {
+        legend =
+          {
+            calcs = [];
+            displayMode = "list";
+            placement = "bottom";
+            showLegend = true;
+          }
+          // lib.optionalAttrs (legendWidth != null) {width = legendWidth;};
+        tooltip = {
+          hideZeros = false;
+          mode = "multi";
+          sort = tooltipSort;
+        };
+      };
+    };
+
   # A Prometheus label_values() query-driven template variable — e.g. a
   # $node dropdown sourced live from a metric's label, rather than a fixed
   # list like mkCustomVar.
