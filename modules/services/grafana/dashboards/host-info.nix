@@ -24,7 +24,7 @@
   lib,
   helpers,
 }: let
-  inherit (helpers) mkStat mkGauge mkBarGauge mkDashboard mkQueryVar;
+  inherit (helpers) mkStat mkGauge mkBarGauge mkStackedTimeseries mkDashboard mkQueryVar;
 
   nodeFilter = "instance=\"$node\"";
 in
@@ -271,9 +271,303 @@ in
           expr = "node_time_seconds{${nodeFilter}} - node_boot_time_seconds{${nodeFilter}}";
           unit = "s";
         })
+        (mkStackedTimeseries {
+          x = 0;
+          y = 6;
+          title = "CPU Basic";
+          description = "CPU time spent busy vs idle, split by activity type";
+          unit = "percentunit";
+          min = 0;
+          fillOpacity = 40;
+          lineInterpolation = "smooth";
+          stacking = {
+            group = "A";
+            mode = "percent";
+          };
+          legendWidth = 250;
+          tooltipSort = "desc";
+          overrides = [
+            {
+              matcher = {
+                id = "byName";
+                options = "Busy Iowait";
+              };
+              properties = [
+                {
+                  id = "color";
+                  value = {
+                    fixedColor = "#890F02";
+                    mode = "fixed";
+                  };
+                }
+              ];
+            }
+            {
+              matcher = {
+                id = "byName";
+                options = "Idle";
+              };
+              properties = [
+                {
+                  id = "color";
+                  value = {
+                    fixedColor = "#052B51";
+                    mode = "fixed";
+                  };
+                }
+              ];
+            }
+            {
+              matcher = {
+                id = "byName";
+                options = "Busy System";
+              };
+              properties = [
+                {
+                  id = "color";
+                  value = {
+                    fixedColor = "#EAB839";
+                    mode = "fixed";
+                  };
+                }
+              ];
+            }
+            {
+              matcher = {
+                id = "byName";
+                options = "Busy User";
+              };
+              properties = [
+                {
+                  id = "color";
+                  value = {
+                    fixedColor = "#0A437C";
+                    mode = "fixed";
+                  };
+                }
+              ];
+            }
+            {
+              matcher = {
+                id = "byName";
+                options = "Busy Other";
+              };
+              properties = [
+                {
+                  id = "color";
+                  value = {
+                    fixedColor = "#6D1F62";
+                    mode = "fixed";
+                  };
+                }
+              ];
+            }
+          ];
+          targets = [
+            {
+              expr = "avg(rate(node_cpu_seconds_total{${nodeFilter}, mode=\"system\"}[$__rate_interval]))";
+              legend = "Busy System";
+              step = 240;
+            }
+            {
+              expr = "avg(rate(node_cpu_seconds_total{${nodeFilter}, mode=\"user\"}[$__rate_interval]))";
+              legend = "Busy User";
+              step = 240;
+            }
+            {
+              expr = "avg(rate(node_cpu_seconds_total{${nodeFilter}, mode=\"iowait\"}[$__rate_interval]))";
+              legend = "Busy Iowait";
+              step = 240;
+            }
+            {
+              expr = "avg(sum without(mode) (rate(node_cpu_seconds_total{${nodeFilter}, mode=~\".*irq\"}[$__rate_interval])))";
+              legend = "Busy IRQs";
+              step = 240;
+            }
+            {
+              expr = "avg(sum without (mode) (rate(node_cpu_seconds_total{${nodeFilter},  mode!='idle',mode!='user',mode!='system',mode!='iowait',mode!='irq',mode!='softirq'}[$__rate_interval])))";
+              legend = "Busy Other";
+              step = 240;
+            }
+            {
+              expr = "avg(rate(node_cpu_seconds_total{${nodeFilter}, mode=\"idle\"}[$__rate_interval]))";
+              legend = "Idle";
+              step = 240;
+            }
+          ];
+        })
+        (mkStackedTimeseries {
+          x = 12;
+          y = 6;
+          title = "Memory Basic";
+          unit = "bytes";
+          min = 0;
+          fillOpacity = 40;
+          lineInterpolation = "linear";
+          stacking = {
+            group = "A";
+            mode = "normal";
+          };
+          legendWidth = 350;
+          overrides = [
+            {
+              matcher = {
+                id = "byName";
+                options = "Swap used";
+              };
+              properties = [
+                {
+                  id = "color";
+                  value = {
+                    fixedColor = "#BF1B00";
+                    mode = "fixed";
+                  };
+                }
+              ];
+            }
+            {
+              matcher = {
+                id = "byName";
+                options = "Total";
+              };
+              properties = [
+                {
+                  id = "color";
+                  value = {
+                    fixedColor = "#E0F9D7";
+                    mode = "fixed";
+                  };
+                }
+                {
+                  id = "custom.fillOpacity";
+                  value = 0;
+                }
+                {
+                  id = "custom.stacking";
+                  value = {
+                    group = false;
+                    mode = "normal";
+                  };
+                }
+              ];
+            }
+            {
+              matcher = {
+                id = "byName";
+                options = "Cache + Buffer";
+              };
+              properties = [
+                {
+                  id = "color";
+                  value = {
+                    fixedColor = "#052B51";
+                    mode = "fixed";
+                  };
+                }
+              ];
+            }
+            {
+              matcher = {
+                id = "byName";
+                options = "Free";
+              };
+              properties = [
+                {
+                  id = "color";
+                  value = {
+                    fixedColor = "#7EB26D";
+                    mode = "fixed";
+                  };
+                }
+              ];
+            }
+          ];
+          targets = [
+            {
+              expr = "node_memory_MemTotal_bytes{${nodeFilter}}";
+              legend = "Total";
+              step = 240;
+            }
+            {
+              expr = "node_memory_MemTotal_bytes{${nodeFilter}} - node_memory_MemFree_bytes{${nodeFilter}} - (node_memory_Cached_bytes{${nodeFilter}} + node_memory_Buffers_bytes{${nodeFilter}} + node_memory_SReclaimable_bytes{${nodeFilter}})";
+              legend = "Used";
+              step = 240;
+            }
+            {
+              expr = "node_memory_Cached_bytes{${nodeFilter}} + node_memory_Buffers_bytes{${nodeFilter}} + node_memory_SReclaimable_bytes{${nodeFilter}}";
+              legend = "Cache + Buffer";
+              step = 240;
+            }
+            {
+              expr = "node_memory_MemFree_bytes{${nodeFilter}}";
+              legend = "Free";
+              step = 240;
+            }
+            {
+              expr = "(node_memory_SwapTotal_bytes{${nodeFilter}} - node_memory_SwapFree_bytes{${nodeFilter}})";
+              legend = "Swap used";
+              step = 240;
+            }
+          ];
+        })
+        (mkStackedTimeseries {
+          x = 0;
+          y = 13;
+          title = "Network Traffic Basic";
+          unit = "bps";
+          stacking = {
+            group = "A";
+            mode = "none";
+          };
+          overrides = [
+            {
+              matcher = {
+                id = "byRegexp";
+                options = "/.*Tx.*/";
+              };
+              properties = [
+                {
+                  id = "custom.transform";
+                  value = "negative-Y";
+                }
+              ];
+            }
+          ];
+          targets = [
+            {
+              expr = "rate(node_network_receive_bytes_total{${nodeFilter}}[$__rate_interval])*8";
+              legend = "Rx {{device}}";
+              step = 240;
+            }
+            {
+              expr = "rate(node_network_transmit_bytes_total{${nodeFilter}}[$__rate_interval])*8";
+              legend = "Tx {{device}}";
+              step = 240;
+            }
+          ];
+        })
+        (mkStackedTimeseries {
+          x = 12;
+          y = 13;
+          title = "Disk Space Used Basic";
+          unit = "percent";
+          min = 0;
+          max = 100;
+          stacking = {
+            group = "A";
+            mode = "none";
+          };
+          targets = [
+            {
+              expr = "((node_filesystem_size_bytes{${nodeFilter}, device!~'rootfs'} - node_filesystem_avail_bytes{${nodeFilter}, device!~'rootfs'}) / node_filesystem_size_bytes{${nodeFilter}, device!~'rootfs'}) * 100";
+              legend = "{{mountpoint}}";
+              step = 240;
+            }
+          ];
+        })
       ]
-      # Row header — Grafana requires it as its own top-level panel; id gets
-      # reassigned by mkDashboard along with everything else.
+      # Row headers — Grafana requires them as their own top-level panels;
+      # id gets reassigned by mkDashboard along with everything else.
       ++ [
         {
           type = "row";
@@ -282,6 +576,18 @@ in
           gridPos = {
             x = 0;
             y = 0;
+            w = 24;
+            h = 1;
+          };
+          panels = [];
+        }
+        {
+          type = "row";
+          title = "Basic CPU / Mem / Net / Disk";
+          collapsed = false;
+          gridPos = {
+            x = 0;
+            y = 5;
             w = 24;
             h = 1;
           };
