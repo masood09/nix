@@ -124,7 +124,7 @@ in {
         overrides = [];
       };
       options = {
-        colorMode = "background";
+        colorMode = "background_solid";
         graphMode = "none";
         textMode = "value_and_name";
         justifyMode = "auto";

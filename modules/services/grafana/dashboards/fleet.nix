@@ -347,7 +347,13 @@
     }
   ];
 
-  # Colour by level band: OK = no colour, NOTICE blue, WARN yellow, CRITICAL red, DOWN dark-red.
+  # Colour by level band: OK = no colour, NOTICE light-orange, WARN orange, CRITICAL red,
+  # DOWN semi-dark-purple (distinct hue — "no data", not a more severe red).
+  # NOTICE/WARN stay within one hue family rather than switching to yellow:
+  # yellow is the highest-luminance hue humans perceive, so a plain "yellow"
+  # swatch reads as louder than "orange" regardless of which is meant to be
+  # more severe — varying intensity within one hue is the reliable escalation
+  # cue, switching hues isn't.
   hostHealthThresholds = {
     mode = "absolute";
     steps = [
@@ -357,11 +363,11 @@
       }
       {
         value = 10;
-        color = "blue";
+        color = "light-orange";
       }
       {
         value = 20;
-        color = "yellow";
+        color = "orange";
       }
       {
         value = 30;
@@ -369,7 +375,10 @@
       }
       {
         value = 40;
-        color = "dark-red";
+        # Distinct from the red-family severities: DOWN means "no data at
+        # all" (host stopped reporting), not "we detected a problem" — a
+        # different kind of signal, not a more severe one.
+        color = "semi-dark-purple";
       }
     ];
   };
@@ -405,7 +414,7 @@ in
         description = "Count of hosts currently sending metrics, out of the expected fleet total. Green means every expected host is reporting; red means at least one has gone silent.";
         expr = "count(group by (instance) (alloy_build_info))";
         unit = upTotalSuffix expectedHosts;
-        colorMode = "background";
+        colorMode = "background_solid";
         thresholds = upTotalThresholds expectedHosts;
       })
       (mkStat {
@@ -416,7 +425,7 @@ in
         description = "Count of monitored services currently passing their health probe, out of the total tracked (see serviceNames in fleet.nix). Green means all are up; red means at least one is down.";
         expr = "sum(probe_success)";
         unit = upTotalSuffix totalServices;
-        colorMode = "background";
+        colorMode = "background_solid";
         thresholds = upTotalThresholds totalServices;
       })
       (mkStat {
@@ -426,7 +435,7 @@ in
         title = "Alert status";
         description = "Number of currently-firing Grafana alert rules. Shows \"All clear\" in green when nothing is alerting; shows the firing count in red otherwise.";
         expr = "sum(grafana_alerting_alerts{state=\"alerting\"}) or vector(0)";
-        colorMode = "background";
+        colorMode = "background_solid";
         thresholds = greenAtOne;
         # 0 -> "All clear" (green); any firing count shows the number (red).
         mappings = [
@@ -478,7 +487,7 @@ in
             }
             {
               value = 95;
-              color = "yellow";
+              color = "orange";
             }
             {
               value = 99.9;
@@ -652,7 +661,7 @@ in
             }
             {
               value = 14;
-              color = "yellow";
+              color = "orange";
             }
             {
               value = 30;

@@ -18,7 +18,7 @@ in
         title = "ZFS pools not ONLINE";
         description = "Count of ZFS pools fleet-wide not in a healthy ONLINE state (zfs_pool_health > 0 — DEGRADED, FAULTED, etc.). Should always read 0.";
         expr = "count(zfs_pool_health > 0) or vector(0)";
-        colorMode = "background";
+        colorMode = "background_solid";
         thresholds = greenAtOne;
       })
       (mkStat {
@@ -28,7 +28,7 @@ in
         title = "Disks SMART-failing";
         description = "Count of disks fleet-wide whose SMART self-assessment reports failing. Should always read 0 — a disk that shows up here should be replaced soon, not just watched.";
         expr = "count(smartctl_device_smart_status < 1) or vector(0)";
-        colorMode = "background";
+        colorMode = "background_solid";
         thresholds = greenAtOne;
       })
       (mkStat {
