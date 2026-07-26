@@ -102,7 +102,7 @@ in {
                     builtins.toJSON
                     (pkgs.writeText (builtins.baseNameOf x))
                   ];
-                customDashboards = import ./dashboards.nix {inherit lib pkgs;};
+                customDashboards = import ./dashboards {inherit lib pkgs;};
               in [
                 {
                   name = "Node Exporter Full";
