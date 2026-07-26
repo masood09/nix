@@ -402,6 +402,7 @@ in
         y = 0;
         w = 8;
         title = "Hosts reporting";
+        description = "Count of hosts currently sending metrics, out of the expected fleet total. Green means every expected host is reporting; red means at least one has gone silent.";
         expr = "count(group by (instance) (alloy_build_info))";
         unit = upTotalSuffix expectedHosts;
         colorMode = "background";
@@ -412,6 +413,7 @@ in
         y = 0;
         w = 8;
         title = "Services up";
+        description = "Count of monitored services currently passing their health probe, out of the total tracked (see serviceNames in fleet.nix). Green means all are up; red means at least one is down.";
         expr = "sum(probe_success)";
         unit = upTotalSuffix totalServices;
         colorMode = "background";
@@ -422,6 +424,7 @@ in
         y = 0;
         w = 8;
         title = "Alert status";
+        description = "Number of currently-firing Grafana alert rules. Shows \"All clear\" in green when nothing is alerting; shows the firing count in red otherwise.";
         expr = "sum(grafana_alerting_alerts{state=\"alerting\"}) or vector(0)";
         colorMode = "background";
         thresholds = greenAtOne;
@@ -446,6 +449,7 @@ in
         w = 8;
         h = 18;
         title = "Host health";
+        description = "Worst-case signal per host across disk, RAM, thermal, power, fans, system, and pending-reboot checks (see hhConditions in fleet.nix). OK (green) = nothing wrong. NOTICE/WARN/CRITICAL (blue/yellow/red) name the worst active issue and its category — e.g. \"Disk WARN\". DOWN (dark red) means the host has stopped reporting entirely. This collapses everything to one number per host; expand a specific category on the disk/memory panels below, or check Storage & Hardware for raw SMART/IPMI detail.";
         expr = hostHealthExpr;
         legend = "{{instance}}";
         unit = "none";
@@ -462,6 +466,7 @@ in
         # per service. Names come from the serviceNames map, folded into a
         # `service` label (see serviceUptimeExpr above). The window lives in the
         # PromQL range selector, which Grafana interpolates per selection.
+        description = "Average blackbox-probe availability of each monitored service over the $service_window dropdown at the top of the dashboard — not the (hidden) global time picker. Green ≥ 99.9%, yellow ≥ 95%, red below. Change the dropdown to see a shorter or longer availability window.";
         expr = serviceUptimeExpr;
         legend = "{{service}}";
         thresholds = {
@@ -488,6 +493,7 @@ in
         x = 0;
         y = 22;
         title = "CPU busy % (per host)";
+        description = "Average CPU utilization per host (100% minus idle time, averaged across all cores) over the $trend_window dropdown below.";
         expr = "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)";
         unit = "percent";
         max = 100;
@@ -498,6 +504,7 @@ in
         x = 8;
         y = 22;
         title = "Memory used % (per host)";
+        description = "Memory used per the kernel's own reclaim-aware estimate (1 - MemAvailable/MemTotal) — a conservative, capacity-planning-oriented number. It treats ZFS ARC as unavailable, so ARC-heavy hosts (see ZFS ARC usage % below) read much higher here than in the \"htop view\" panel alongside it. Use this one to judge real OOM risk / headroom; use the htop view for an intuitive at-a-glance read.";
         expr = "100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)";
         unit = "percent";
         max = 100;
@@ -511,6 +518,7 @@ in
         # Same normalization Node Exporter Full uses for its "Sys Load" gauge:
         # load1 as a % of core count (100% = load matches core count), rather
         # than the raw, unbounded load1 number.
+        description = "1-minute load average as a % of CPU core count (100% = load matches core count) — the same normalization Node Exporter Full's \"Sys Load\" gauge uses, so it's comparable across hosts with different core counts. Unlike the other panels in this row, it can legitimately exceed 100% (more work queued than cores available).";
         expr = "100 * node_load1 / on(instance) count by (instance) (count by (instance, cpu) (node_cpu_seconds_total))";
         unit = "percent";
         min = 0;
@@ -526,6 +534,7 @@ in
         # for — reads ~85% on an ARC-heavy host even when htop shows single
         # digits. This matches htop's own accounting instead (excludes
         # buffers, reclaimable slab, and ARC from "used"); see memoryUsedExpr.
+        description = "Memory used matching htop's own accounting: excludes buffers, reclaimable slab, and ZFS ARC from \"used\", since htop treats all of that as effectively free. Reads much lower than \"Memory used % (per host)\" on ARC-heavy hosts — that gap is exactly what the ZFS ARC usage % panel alongside it shows. Use this one for an intuitive read; use the MemAvailable-based panel for real headroom/OOM-risk judgment.";
         expr = memoryUsedExpr;
         unit = "percent";
         max = 100;
@@ -539,6 +548,7 @@ in
         title = "ZFS ARC usage % (per host)";
         # How much of total RAM the ARC currently holds — the gap between
         # the two memory panels above, made explicit. 0 on non-ZFS hosts.
+        description = "Share of total RAM currently held by the ZFS Adaptive Replacement Cache (ARC). Explains the gap between the two memory panels to the left: the MemAvailable-based one counts this as used, the htop-view one counts it as free. Reads 0% on non-ZFS hosts (caretaker, and sonic/usul if they start reporting).";
         expr = "100 * (node_zfs_arc_size or on(instance) (0 * node_memory_MemTotal_bytes)) / node_memory_MemTotal_bytes";
         unit = "percent";
         max = 100;
@@ -550,6 +560,7 @@ in
         y = 30;
         w = 8;
         title = "Swap used % (per host)";
+        description = "Percentage of configured swap space currently in use per host. Occasional low usage is normal; sustained non-zero swap under regular (non-spiky) load usually indicates real memory pressure.";
         expr = "100 * (1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)";
         unit = "percent";
         max = 100;
@@ -563,6 +574,7 @@ in
         y = 38;
         w = 8;
         title = "Disk used % (per host, per pool)";
+        description = "ZFS pool capacity (allocated/size) per pool, e.g. heartbeat's rpool/fpool/dpool shown as separate lines rather than blended into one number — every impermanence-backed service dataset shares its pool's free space, so a per-mountpoint view would balloon into 100+ near-duplicate rows. Non-ZFS hosts (caretaker; sonic/usul if they start reporting) fall back to root-filesystem usage, labeled \"root (/nix)\".";
         expr = diskUsedExpr;
         legend = "{{instance}} ({{pool}})";
         unit = "percent";
@@ -575,6 +587,7 @@ in
         y = 38;
         w = 8;
         title = "Disk I/O throughput by type (per host)";
+        description = "Combined read+write throughput per host, split by device class (nvme/hdd/ssd/virtual-other for cloud/KVM block volumes) since baselines differ wildly by type — an HDD near its ceiling looks nothing like an idle NVMe. A 5-minute rolling average, so short bursts are smoothed rather than shown as sharp peaks. Best used to spot which host and device is actively busy right now (a backup, scrub, big transfer), not to judge against theoretical hardware maximums — quiet numbers are normal and expected, since ZFS ARC absorbs most reads before they reach disk.";
         expr = diskIoByTypeExpr;
         legend = "{{instance}} ({{type}})";
         unit = "Bps";
@@ -586,6 +599,7 @@ in
         y = 38;
         w = 8;
         title = "Disk I/O wait % (per host)";
+        description = "CPU time spent blocked waiting on any disk I/O, per host. Host-level only — iowait has no per-disk breakdown, unlike the throughput panel next to it. Rising alongside high throughput suggests the disk is actually a bottleneck right now; low iowait during high throughput means the disk is keeping up fine.";
         expr = "avg by (instance) (rate(node_cpu_seconds_total{mode=\"iowait\"}[5m])) * 100";
         unit = "percent";
         min = 0;
@@ -598,6 +612,7 @@ in
         y = 46;
         w = 12;
         title = "Backups — hours since last success";
+        description = "Hours since each host's last successful backup completed, worst (longest) first. Red above 26 hours — enough slack over a 24h daily cadence to allow for normal run-time variance before flagging a genuinely missed backup.";
         expr = "sort_desc((time() - homelab_backup_last_success_timestamp_seconds) / 3600)";
         labelName = "Host";
         valueName = "Hours ago";
@@ -622,6 +637,7 @@ in
         y = 46;
         w = 12;
         title = "TLS certificate expiry";
+        description = "Days remaining before each monitored certificate expires, soonest first. Red under 14 days, yellow under 30, green beyond — matched to typical ACME renewal lead time, so yellow is an early warning, not yet an emergency.";
         expr = "sort((probe_ssl_earliest_cert_expiry - time()) / 86400)";
         labelName = "URL";
         valueName = "Days to expire";

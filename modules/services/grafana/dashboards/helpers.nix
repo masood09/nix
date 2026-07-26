@@ -41,6 +41,7 @@ in {
     unit ? "none",
     colorMode ? "value",
     mappings ? [],
+    description ? null, # shown as a hoverable info icon next to the title
     thresholds ? {
       mode = "absolute";
       steps = [
@@ -50,31 +51,35 @@ in {
         }
       ];
     },
-  }: {
-    type = "stat";
-    inherit title;
-    gridPos = {inherit x y w h;};
-    datasource = ds;
-    targets = [(stgt expr)];
-    fieldConfig = {
-      defaults = {
-        inherit unit thresholds mappings;
-        color = {mode = "thresholds";};
+  }:
+    {
+      type = "stat";
+      inherit title;
+      gridPos = {inherit x y w h;};
+      datasource = ds;
+      targets = [(stgt expr)];
+    }
+    // lib.optionalAttrs (description != null) {inherit description;}
+    // {
+      fieldConfig = {
+        defaults = {
+          inherit unit thresholds mappings;
+          color = {mode = "thresholds";};
+        };
+        overrides = [];
       };
-      overrides = [];
-    };
-    options = {
-      inherit colorMode;
-      graphMode = "none";
-      textMode = "value";
-      justifyMode = "auto";
-      reduceOptions = {
-        calcs = ["lastNotNull"];
-        fields = "";
-        values = false;
+      options = {
+        inherit colorMode;
+        graphMode = "none";
+        textMode = "value";
+        justifyMode = "auto";
+        reduceOptions = {
+          calcs = ["lastNotNull"];
+          fields = "";
+          values = false;
+        };
       };
     };
-  };
 
   # Multi-series stat rendered as a single vertical column: one colour-filled
   # block per series (name + value), tinted by threshold. Unlike mkStat this
@@ -90,48 +95,53 @@ in {
     unit ? "percent",
     thresholds,
     mappings ? [],
-  }: {
-    type = "stat";
-    inherit title;
-    gridPos = {inherit x y w h;};
-    datasource = ds;
-    targets = [
-      {
-        refId = "A";
-        inherit expr;
-        legendFormat = legend;
-        datasource = ds;
-        editorMode = "code";
-        instant = true;
-        range = false;
-      }
-    ];
-    fieldConfig = {
-      defaults = {
-        inherit unit thresholds mappings;
-        color = {mode = "thresholds";};
+    description ? null,
+  }:
+    {
+      type = "stat";
+      inherit title;
+      gridPos = {inherit x y w h;};
+      datasource = ds;
+      targets = [
+        {
+          refId = "A";
+          inherit expr;
+          legendFormat = legend;
+          datasource = ds;
+          editorMode = "code";
+          instant = true;
+          range = false;
+        }
+      ];
+    }
+    // lib.optionalAttrs (description != null) {inherit description;}
+    // {
+      fieldConfig = {
+        defaults = {
+          inherit unit thresholds mappings;
+          color = {mode = "thresholds";};
+        };
+        overrides = [];
       };
-      overrides = [];
+      options = {
+        colorMode = "background";
+        graphMode = "none";
+        textMode = "value_and_name";
+        justifyMode = "auto";
+        # horizontal = one full-width bar per service, stacked into rows
+        orientation = "horizontal";
+        # force legible text — otherwise many rows auto-shrink the font to nothing
+        text = {
+          titleSize = 13;
+          valueSize = 15;
+        };
+        reduceOptions = {
+          calcs = ["lastNotNull"];
+          fields = "";
+          values = false;
+        };
+      };
     };
-    options = {
-      colorMode = "background";
-      graphMode = "none";
-      textMode = "value_and_name";
-      justifyMode = "auto";
-      # horizontal = one full-width bar per service, stacked into rows
-      orientation = "horizontal";
-      # force legible text — otherwise many rows auto-shrink the font to nothing
-      text = {
-        titleSize = 13;
-        valueSize = 15;
-      };
-      reduceOptions = {
-        calcs = ["lastNotNull"];
-        fields = "";
-        values = false;
-      };
-    };
-  };
 
   mkTimeseries = {
     x,
@@ -145,6 +155,7 @@ in {
     min ? null,
     max ? null,
     timeFrom ? null, # per-panel relative window (e.g. "24h"), ignores the picker
+    description ? null,
   }:
     {
       type = "timeseries";
@@ -154,6 +165,7 @@ in {
       targets = [(tgt expr legend)];
     }
     // lib.optionalAttrs (timeFrom != null) {inherit timeFrom;}
+    // lib.optionalAttrs (description != null) {inherit description;}
     // {
       fieldConfig = {
         defaults =
@@ -201,6 +213,7 @@ in {
     mappings ? [],
     cellColor ? false,
     rowColor ? false, # tint the whole row by the value threshold, not just its cell
+    description ? null,
   }: let
     valueProps =
       [
@@ -227,61 +240,65 @@ in {
           {type = "color-background";}
           // lib.optionalAttrs rowColor {applyToRow = true;};
       };
-  in {
-    type = "table";
-    inherit title;
-    gridPos = {inherit x y w h;};
-    datasource = ds;
-    targets = [(ttgt expr)];
-    transformations = [
-      {
-        id = "organize";
-        options = {
-          excludeByName =
-            {
-              Time = true;
-              job = true;
-            }
-            // lib.genAttrs dropCols (_: true);
-          renameByName = {
-            "${labelCol}" = labelName;
-            Value = valueName;
+  in
+    {
+      type = "table";
+      inherit title;
+      gridPos = {inherit x y w h;};
+      datasource = ds;
+      targets = [(ttgt expr)];
+    }
+    // lib.optionalAttrs (description != null) {inherit description;}
+    // {
+      transformations = [
+        {
+          id = "organize";
+          options = {
+            excludeByName =
+              {
+                Time = true;
+                job = true;
+              }
+              // lib.genAttrs dropCols (_: true);
+            renameByName = {
+              "${labelCol}" = labelName;
+              Value = valueName;
+            };
+            indexByName = {};
           };
-          indexByName = {};
-        };
-      }
-    ];
-    fieldConfig = {
-      defaults = {custom = {align = "auto";};};
-      overrides =
-        [
-          {
+        }
+      ];
+      fieldConfig = {
+        defaults = {custom = {align = "auto";};};
+        overrides =
+          [
+            {
+              matcher = {
+                id = "byName";
+                options = valueName;
+              };
+              properties = valueProps;
+            }
+          ]
+          ++ lib.optional (labelMappings != []) {
             matcher = {
               id = "byName";
-              options = valueName;
+              options = labelName;
             };
-            properties = valueProps;
-          }
-        ]
-        ++ lib.optional (labelMappings != []) {
-          matcher = {
-            id = "byName";
-            options = labelName;
+            properties = [
+              {
+                id = "mappings";
+                value = labelMappings;
+              }
+            ];
           };
-          properties = [
-            {
-              id = "mappings";
-              value = labelMappings;
-            }
-          ];
-        };
+      };
+      options = {
+        showHeader = true;
+        cellHeight = "sm";
+        footer = {show = false;};
+      };
     };
-    options = {
-      showHeader = true;
-      cellHeight = "sm";
-      footer = {show = false;};
-    };
-  };
 
   # A "custom" template variable: a static dropdown of values. Used to expose a
   # window selector that drives per-panel timeFrom (e.g. the trend graphs).
