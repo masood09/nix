@@ -616,17 +616,16 @@ in
       })
 
       # --- backups & certs ------------------------------------------------
-      (mkMetricTable {
+      (mkStatBoard {
         x = 0;
         y = 30;
         w = 24;
-        title = "Backups — hours since last success";
-        description = "Hours since each host's last successful backup completed, worst (longest) first. Red above 26 hours — enough slack over a 24h daily cadence to allow for normal run-time variance before flagging a genuinely missed backup.";
+        h = 6;
+        title = "Backups";
+        description = "Whether each host's backups are healthy, not when they last ran. OK = last success within 26 hours (enough slack over a 24h daily cadence for normal run-time variance); MISSED = a backup has actually been missed.";
         expr = "sort_desc((time() - homelab_backup_last_success_timestamp_seconds) / 3600)";
-        labelName = "Host";
-        valueName = "Hours ago";
-        valueUnit = "h";
-        cellColor = true;
+        legend = "{{instance}}";
+        unit = "none";
         thresholds = {
           mode = "absolute";
           steps = [
@@ -640,6 +639,24 @@ in
             }
           ];
         };
+        mappings = [
+          {
+            type = "range";
+            options = {
+              from = 0;
+              to = 26;
+              result = {text = "OK";};
+            };
+          }
+          {
+            type = "range";
+            options = {
+              from = 26;
+              to = 999999;
+              result = {text = "MISSED";};
+            };
+          }
+        ];
       })
       (mkMetricTable {
         x = 0;
