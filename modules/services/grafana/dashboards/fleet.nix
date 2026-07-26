@@ -64,6 +64,53 @@
   ];
   expectedHosts = builtins.length expectedHostList;
 
+  # MemAvailable-based "used %" (the naive `1 - MemAvailable/MemTotal`) treats
+  # ZFS ARC as fully used memory, since ARC lives outside the reclaimable page
+  # cache MemAvailable accounts for — on an ARC-heavy host that reads as ~85%
+  # used even when htop shows single digits. Match htop's own accounting
+  # instead: exclude buffers, reclaimable slab, and ARC (all effectively
+  # freeable cache) from "used", the same way htop's LinuxMachine.c does for
+  # ZFS-aware systems. Falls back to 0 ARC on non-ZFS hosts (caretaker et al.)
+  # via the `or on(instance)` pattern, so one expression covers the whole fleet.
+  memoryUsedExpr = let
+    cachedMem = "(node_memory_Cached_bytes + node_memory_SReclaimable_bytes - node_memory_Shmem_bytes)";
+    arcOrZero = "(node_zfs_arc_size or on(instance) (0 * node_memory_MemTotal_bytes))";
+    usedBytes = "(node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Buffers_bytes - ${cachedMem} - ${arcOrZero})";
+  in "100 * ${usedBytes} / node_memory_MemTotal_bytes";
+
+  # Per-pool ZFS capacity (rpool/fpool/dpool on heartbeat, rpool-only on the
+  # single-pool hosts), not per-mountpoint filesystem stats: every
+  # impermanence-backed service dataset shares the pool's free space and
+  # mounts separately, so a per-mountpoint view balloons to 100+ near-
+  # duplicate rows on heartbeat alone without saying anything a per-pool
+  # number doesn't. Falls back to root-filesystem % on non-ZFS hosts
+  # (caretaker now; sonic/usul too, if they start reporting) via `unless`,
+  # so one expression covers the whole fleet without per-host branching.
+  diskUsedExpr = let
+    zfsPools = "100 * zfs_pool_allocated_bytes / zfs_pool_size_bytes";
+    nonZfsRoot = "label_replace(100 * (1 - node_filesystem_avail_bytes{mountpoint=\"/nix\"} / node_filesystem_size_bytes{mountpoint=\"/nix\"}) unless on(instance) (zfs_pool_size_bytes), \"pool\", \"root (/nix)\", \"\", \"\")";
+  in "${zfsPools} or ${nonZfsRoot}";
+
+  # Disk I/O throughput broken out by device class, not just summed per host —
+  # an HDD, a SATA SSD, and an NVMe drive have wildly different baselines, so
+  # a single blended number per host hides which device is actually busy.
+  # node_disk_ata_rotation_rate_rpm classifies ATA devices (>0 = HDD, 0 = SATA
+  # SSD); NVMe devices are matched by name since they aren't ATA and never
+  # report that metric; anything left (KVM/cloud virtio block volumes, e.g.
+  # meshcontrol's OCI BlockVolume) falls into "virtual/other". Device-mapper
+  # nodes (dm-*, e.g. caretaker's LUKS layer) are excluded everywhere — they
+  # sit on top of an already-counted physical device, so including them
+  # double-counts the same I/O twice.
+  diskIoByTypeExpr = let
+    ioRate = deviceFilter: "sum by (instance, device) (rate(node_disk_read_bytes_total${deviceFilter}[5m]) + rate(node_disk_written_bytes_total${deviceFilter}[5m]))";
+    tag = type: body: "label_replace(${body}, \"type\", \"${type}\", \"\", \"\")";
+    ioRateAll = ioRate "";
+    nvme = tag "nvme" (ioRate "{device=~\"nvme.*\"}");
+    hdd = tag "hdd" "${ioRateAll} and on(instance, device) (node_disk_ata_rotation_rate_rpm > 0)";
+    ssd = tag "ssd" "${ioRateAll} and on(instance, device) (node_disk_ata_rotation_rate_rpm == 0)";
+    other = tag "virtual/other" "${ioRate "{device!~\"nvme.*|zram.*|dm-.*\"}"} unless on(instance, device) (node_disk_ata_rotation_rate_rpm)";
+  in "sum by (instance, type) (${nvme} or ${hdd} or ${ssd} or ${other})";
+
   ###########################################################################
   # Host health rollup
   #
@@ -460,10 +507,87 @@ in
       (mkTimeseries {
         x = 16;
         y = 22;
-        title = "Fullest filesystem % (per host)";
-        expr = "max by (instance) (100 * (1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|ramfs|overlay|squashfs|efivarfs|nsfs|devtmpfs|autofs|fuse.*\"} / node_filesystem_size_bytes))";
+        title = "System load % (per host)";
+        # Same normalization Node Exporter Full uses for its "Sys Load" gauge:
+        # load1 as a % of core count (100% = load matches core count), rather
+        # than the raw, unbounded load1 number.
+        expr = "100 * node_load1 / on(instance) count by (instance) (count by (instance, cpu) (node_cpu_seconds_total))";
+        unit = "percent";
+        min = 0;
+        timeFrom = "$trend_window";
+      })
+      (mkTimeseries {
+        x = 0;
+        y = 30;
+        w = 8;
+        title = "Memory used % — htop view (per host)";
+        # MemAvailable-based "used %" above treats ZFS ARC as fully used,
+        # since ARC isn't the reclaimable page cache MemAvailable accounts
+        # for — reads ~85% on an ARC-heavy host even when htop shows single
+        # digits. This matches htop's own accounting instead (excludes
+        # buffers, reclaimable slab, and ARC from "used"); see memoryUsedExpr.
+        expr = memoryUsedExpr;
         unit = "percent";
         max = 100;
+        min = 0;
+        timeFrom = "$trend_window";
+      })
+      (mkTimeseries {
+        x = 8;
+        y = 30;
+        w = 8;
+        title = "ZFS ARC usage % (per host)";
+        # How much of total RAM the ARC currently holds — the gap between
+        # the two memory panels above, made explicit. 0 on non-ZFS hosts.
+        expr = "100 * (node_zfs_arc_size or on(instance) (0 * node_memory_MemTotal_bytes)) / node_memory_MemTotal_bytes";
+        unit = "percent";
+        max = 100;
+        min = 0;
+        timeFrom = "$trend_window";
+      })
+      (mkTimeseries {
+        x = 16;
+        y = 30;
+        w = 8;
+        title = "Swap used % (per host)";
+        expr = "100 * (1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)";
+        unit = "percent";
+        max = 100;
+        min = 0;
+        timeFrom = "$trend_window";
+      })
+
+      # --- disk ------------------------------------------------------------
+      (mkTimeseries {
+        x = 0;
+        y = 38;
+        w = 8;
+        title = "Disk used % (per host, per pool)";
+        expr = diskUsedExpr;
+        legend = "{{instance}} ({{pool}})";
+        unit = "percent";
+        max = 100;
+        min = 0;
+        timeFrom = "$trend_window";
+      })
+      (mkTimeseries {
+        x = 8;
+        y = 38;
+        w = 8;
+        title = "Disk I/O throughput by type (per host)";
+        expr = diskIoByTypeExpr;
+        legend = "{{instance}} ({{type}})";
+        unit = "Bps";
+        min = 0;
+        timeFrom = "$trend_window";
+      })
+      (mkTimeseries {
+        x = 16;
+        y = 38;
+        w = 8;
+        title = "Disk I/O wait % (per host)";
+        expr = "avg by (instance) (rate(node_cpu_seconds_total{mode=\"iowait\"}[5m])) * 100";
+        unit = "percent";
         min = 0;
         timeFrom = "$trend_window";
       })
@@ -471,7 +595,7 @@ in
       # --- backups & certs ------------------------------------------------
       (mkMetricTable {
         x = 0;
-        y = 30;
+        y = 46;
         w = 12;
         title = "Backups — hours since last success";
         expr = "sort_desc((time() - homelab_backup_last_success_timestamp_seconds) / 3600)";
@@ -495,7 +619,7 @@ in
       })
       (mkMetricTable {
         x = 12;
-        y = 30;
+        y = 46;
         w = 12;
         title = "TLS certificate expiry";
         expr = "sort((probe_ssl_earliest_cert_expiry - time()) / 86400)";
