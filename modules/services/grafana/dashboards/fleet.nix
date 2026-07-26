@@ -132,6 +132,7 @@
     crit = "CRITICAL";
   };
   hhCatText = {
+    upgrade = "Auto-upgrade";
     reboot = "Reboot";
     system = "System";
     thermal = "Thermal";
@@ -141,7 +142,10 @@
     disk = "Disk";
   };
   # Higher category code wins ties within a level (disk/ram most important).
+  # Auto-upgrade staleness sits below even reboot — a maintenance-hygiene
+  # signal, not a physical-failure risk.
   hhCatCode = {
+    upgrade = 0;
     reboot = 1;
     system = 2;
     thermal = 3;
@@ -294,6 +298,27 @@
       cat = "reboot";
       level = "crit";
       e = "node_reboot_required == 1 and (time() - node_reboot_required_since_seconds) >= 5184000";
+    }
+    # Same signals as the standalone Auto-upgrade status / Config age panels.
+    {
+      cat = "upgrade";
+      level = "warn";
+      e = "node_auto_upgrade_last_result == 0";
+    }
+    {
+      cat = "upgrade";
+      level = "notice";
+      e = "(time() - node_flake_commit_timestamp_seconds) >= 864000";
+    }
+    {
+      cat = "upgrade";
+      level = "warn";
+      e = "(time() - node_flake_commit_timestamp_seconds) >= 1209600";
+    }
+    {
+      cat = "upgrade";
+      level = "crit";
+      e = "(time() - node_flake_commit_timestamp_seconds) >= 1814400";
     }
   ];
 
@@ -458,7 +483,7 @@ in
         w = 24;
         h = 8;
         title = "Host health";
-        description = "Worst-case signal per host across disk, RAM, thermal, power, fans, system, and pending-reboot checks (see hhConditions in fleet.nix). No fill = nothing wrong. NOTICE/WARN/CRITICAL (light-orange/orange/red) name the worst active issue and its category — e.g. \"Disk WARN\". DOWN (purple) means the host has stopped reporting entirely — a different kind of signal than a detected problem. This collapses everything to one number per host; expand a specific category on the disk/memory panels below, or check Storage & Hardware for raw SMART/IPMI detail.";
+        description = "Worst-case signal per host across disk, RAM, thermal, power, fans, system, pending-reboot, and auto-upgrade checks (see hhConditions in fleet.nix). No fill = nothing wrong. NOTICE/WARN/CRITICAL (light-orange/orange/red) name the worst active issue and its category — e.g. \"Disk WARN\" or \"Auto-upgrade WARN\". DOWN (purple) means the host has stopped reporting entirely — a different kind of signal than a detected problem. This collapses everything to one number per host; expand a specific category on the disk/memory/auto-upgrade panels below, or check Storage & Hardware for raw SMART/IPMI detail.";
         expr = hostHealthExpr;
         legend = "{{instance}}";
         unit = "none";
@@ -504,7 +529,7 @@ in
       # --- resource trends ------------------------------------------------
       (mkTimeseries {
         x = 0;
-        y = 38;
+        y = 46;
         title = "CPU busy % (per host)";
         description = "Average CPU utilization per host (100% minus idle time, averaged across all cores) over the $trend_window dropdown below.";
         expr = "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)";
@@ -515,7 +540,7 @@ in
       })
       (mkTimeseries {
         x = 0;
-        y = 46;
+        y = 54;
         w = 8;
         title = "Memory used % (per host)";
         description = "Memory used per the kernel's own reclaim-aware estimate (1 - MemAvailable/MemTotal) — a conservative, capacity-planning-oriented number. It treats ZFS ARC as unavailable, so ARC-heavy hosts (see ZFS ARC usage % below) read much higher here than in the \"htop view\" panel alongside it. Use this one to judge real OOM risk / headroom; use the htop view for an intuitive at-a-glance read.";
@@ -527,7 +552,7 @@ in
       })
       (mkTimeseries {
         x = 16;
-        y = 38;
+        y = 46;
         title = "System load % (per host)";
         # Same normalization Node Exporter Full uses for its "Sys Load" gauge:
         # load1 as a % of core count (100% = load matches core count), rather
@@ -540,7 +565,7 @@ in
       })
       (mkTimeseries {
         x = 8;
-        y = 38;
+        y = 46;
         title = "Memory used % — htop view (per host)";
         # MemAvailable-based "used %" above treats ZFS ARC as fully used,
         # since ARC isn't the reclaimable page cache MemAvailable accounts
@@ -556,7 +581,7 @@ in
       })
       (mkTimeseries {
         x = 8;
-        y = 46;
+        y = 54;
         w = 8;
         title = "ZFS ARC usage % (per host)";
         # How much of total RAM the ARC currently holds — the gap between
@@ -570,7 +595,7 @@ in
       })
       (mkTimeseries {
         x = 16;
-        y = 46;
+        y = 54;
         w = 8;
         title = "Swap used % (per host)";
         description = "Percentage of configured swap space currently in use per host. Occasional low usage is normal; sustained non-zero swap under regular (non-spiky) load usually indicates real memory pressure.";
@@ -584,7 +609,7 @@ in
       # --- disk ------------------------------------------------------------
       (mkTimeseries {
         x = 0;
-        y = 54;
+        y = 62;
         w = 8;
         title = "Disk used % (per host, per pool)";
         description = "ZFS pool capacity (allocated/size) per pool, e.g. heartbeat's rpool/fpool/dpool shown as separate lines rather than blended into one number — every impermanence-backed service dataset shares its pool's free space, so a per-mountpoint view would balloon into 100+ near-duplicate rows. Non-ZFS hosts (caretaker; sonic/usul if they start reporting) fall back to root-filesystem usage, labeled \"root (/nix)\".";
@@ -597,7 +622,7 @@ in
       })
       (mkTimeseries {
         x = 8;
-        y = 54;
+        y = 62;
         w = 8;
         title = "Disk I/O throughput by type (per host)";
         description = "Combined read+write throughput per host, split by device class (nvme/hdd/ssd/virtual-other for cloud/KVM block volumes) since baselines differ wildly by type — an HDD near its ceiling looks nothing like an idle NVMe. A 5-minute rolling average, so short bursts are smoothed rather than shown as sharp peaks. Best used to spot which host and device is actively busy right now (a backup, scrub, big transfer), not to judge against theoretical hardware maximums — quiet numbers are normal and expected, since ZFS ARC absorbs most reads before they reach disk.";
@@ -609,7 +634,7 @@ in
       })
       (mkTimeseries {
         x = 16;
-        y = 54;
+        y = 62;
         w = 8;
         title = "Disk I/O wait % (per host)";
         description = "CPU time spent blocked waiting on any disk I/O, per host. Host-level only — iowait has no per-disk breakdown, unlike the throughput panel next to it. Rising alongside high throughput suggests the disk is actually a bottleneck right now; low iowait during high throughput means the disk is keeping up fine.";
@@ -662,9 +687,80 @@ in
           }
         ];
       })
+
+      # --- auto-upgrade -----------------------------------------------------
       (mkStatBoard {
         x = 0;
-        y = 62;
+        y = 38;
+        w = 12;
+        h = 8;
+        title = "Auto-upgrade status";
+        description = "Result of each host's last weekly nixos-upgrade.service run (system.autoUpgrade, Saturdays 07:00). OK = last run succeeded; FAILED = it didn't — check `journalctl -u nixos-upgrade` on that host.";
+        expr = "node_auto_upgrade_last_result";
+        legend = "{{instance}}";
+        unit = "none";
+        thresholds = {
+          mode = "absolute";
+          steps = [
+            {
+              value = null;
+              color = "red";
+            }
+            {
+              value = 1;
+              color = "transparent";
+            }
+          ];
+        };
+        mappings = [
+          {
+            type = "value";
+            options = {
+              "0" = {text = "FAILED";};
+              "1" = {text = "OK";};
+            };
+          }
+        ];
+      })
+      (mkStatBoard {
+        x = 12;
+        y = 38;
+        w = 12;
+        h = 8;
+        title = "Config age";
+        # Raw seconds + Grafana's built-in "s" duration unit, so it auto-scales
+        # to min/hours/days depending on magnitude instead of showing a tiny
+        # fractional-day number (0.0150 days) for a config deployed minutes ago.
+        description = "Time since the deployed flake's commit (not since the last upgrade attempt — a failed run still leaves this growing). The weekly auto-upgrade cadence should keep this under ~10 days; growing well past that suggests the auto-upgrade timer itself has stopped working, not just a single failed run.";
+        expr = "time() - node_flake_commit_timestamp_seconds";
+        legend = "{{instance}}";
+        unit = "s";
+        thresholds = {
+          mode = "absolute";
+          steps = [
+            {
+              value = null;
+              color = "transparent";
+            }
+            {
+              value = 864000;
+              color = "light-orange";
+            }
+            {
+              value = 1209600;
+              color = "orange";
+            }
+            {
+              value = 1814400;
+              color = "red";
+            }
+          ];
+        };
+      })
+
+      (mkStatBoard {
+        x = 0;
+        y = 70;
         w = 24;
         h = 16;
         title = "TLS certificate expiry";
