@@ -25,6 +25,13 @@
             default = "example.com";
             description = "Name the dns module resolves against each dnsTargets resolver — an external canary for resolver health.";
           };
+
+          tcpTargets = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [];
+            example = ["minecraft.example.com:25565"];
+            description = "host:port targets probed with the tcp_connect module: bare TCP reachability, for non-HTTP services (e.g. a Minecraft proxy).";
+          };
         };
       };
     };

@@ -45,8 +45,9 @@
 
         # External black-box probing from the watcher host — reachability, HTTP
         # status, latency, and TLS cert expiry for the public vhosts, plus DNS
-        # resolver health. Mirrors the endpoints tracked in uptime-kuma, but
-        # feeds the central Prometheus so it can join dashboards and alerting.
+        # resolver health and raw TCP reachability for non-HTTP services (e.g.
+        # the Minecraft proxy). Mirrors the endpoints tracked in uptime-kuma,
+        # but feeds the central Prometheus so it can join dashboards and alerting.
         blackbox-exporter = {
           enable = true;
 
@@ -71,6 +72,17 @@
           dnsTargets = [
             "100.64.0.17:53"
             "100.64.0.22:53"
+          ];
+
+          # Per-world forced-host names, not the bare minecraft.mantannest.com —
+          # Velocity's forced-hosts map only recognizes forever./ourworld.,
+          # so those are the actual player-facing addresses. Bare tcp_connect
+          # can't tell the two apart (both hit the same Velocity listener; a
+          # per-backend crash wouldn't show here), but at least confirms the
+          # public proxy port is reachable under each name.
+          tcpTargets = [
+            "forever.minecraft.mantannest.com:25565"
+            "ourworld.minecraft.mantannest.com:25565"
           ];
         };
 

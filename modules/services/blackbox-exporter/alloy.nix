@@ -48,12 +48,14 @@
 
   httpBlock = lib.optionalString (cfg.httpTargets != []) (mkScrapeBlock "http" "http_2xx" cfg.httpTargets);
   dnsBlock = lib.optionalString (cfg.dnsTargets != []) (mkScrapeBlock "dns" "dns_a" cfg.dnsTargets);
+  tcpBlock = lib.optionalString (cfg.tcpTargets != []) (mkScrapeBlock "tcp" "tcp_connect" cfg.tcpTargets);
 in {
   config = {
     environment.etc."alloy/blackbox.alloy" = lib.mkIf (cfg.enable && alloyEnabled) {
       text = ''
         ${httpBlock}
         ${dnsBlock}
+        ${tcpBlock}
       '';
     };
   };

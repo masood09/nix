@@ -32,6 +32,8 @@
     "https://passwords.mantannest.com" = "Vaultwarden (heartbeat)";
     "100.64.0.17:53" = "Primary DNS (caretaker)";
     "100.64.0.22:53" = "Secondary DNS (trialunit)";
+    "forever.minecraft.mantannest.com:25565" = "Minecraft Forever (heartbeat)";
+    "ourworld.minecraft.mantannest.com:25565" = "Minecraft Ourworld (heartbeat)";
   };
 
   # Curated names -> a `service` label per probe (exact instance match), so the
