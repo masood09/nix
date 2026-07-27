@@ -407,6 +407,7 @@ in {
     thresholdsMode ? "absolute",
     step ? null, # pin the query step (seconds), which feeds $__rate_interval
     decimals ? null,
+    instant ? true, # upstream sometimes uses a range query even for a last-value bargauge
     thresholds,
   }: let
     refIds = lib.stringToCharacters "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -417,8 +418,8 @@ in {
         legendFormat = t.legend;
         datasource = ds;
         editorMode = "code";
-        instant = true;
-        range = false;
+        inherit instant;
+        range = !instant;
         format = "time_series";
       }
       // lib.optionalAttrs (step != null) {inherit step;};

@@ -1936,5 +1936,2933 @@ in
               // {id = 131;})
           ];
         }
+        {
+          type = "row";
+          title = "System Processes";
+          collapsed = true;
+          gridPos = {
+            x = 0;
+            y = 24;
+            w = 24;
+            h = 1;
+          };
+          panels = [
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 735;
+                h = 10;
+                title = "Processes Status";
+                description = "Processes currently in runnable or blocked states. Helps identify CPU contention or I/O wait bottlenecks.";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_procs_blocked{${nodeFilter}}";
+                    legend = "Blocked (I/O Wait)";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_procs_running{${nodeFilter}}";
+                    legend = "Runnable (Ready for CPU)";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 132;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 735;
+                h = 10;
+                title = "Processes Detailed States";
+                description = "Current number of processes in each state (e.g., running, sleeping, zombie). Requires --collector.processes to be enabled in node_exporter";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                stacking = {
+                  group = "A";
+                  mode = "normal";
+                };
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "D";
+                    };
+                    properties = [
+                      {
+                        id = "displayName";
+                        value = "Uninterruptible Sleeping";
+                      }
+                    ];
+                  }
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "I";
+                    };
+                    properties = [
+                      {
+                        id = "displayName";
+                        value = "Idle Kernel Thread";
+                      }
+                    ];
+                  }
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "R";
+                    };
+                    properties = [
+                      {
+                        id = "displayName";
+                        value = "Running";
+                      }
+                    ];
+                  }
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "S";
+                    };
+                    properties = [
+                      {
+                        id = "displayName";
+                        value = "Interruptible Sleeping";
+                      }
+                    ];
+                  }
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "T";
+                    };
+                    properties = [
+                      {
+                        id = "displayName";
+                        value = "Stopped";
+                      }
+                    ];
+                  }
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "X";
+                    };
+                    properties = [
+                      {
+                        id = "displayName";
+                        value = "Dead";
+                      }
+                    ];
+                  }
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "Z";
+                    };
+                    properties = [
+                      {
+                        id = "displayName";
+                        value = "Zombie";
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_processes_state{${nodeFilter}}";
+                    legend = "{{ state }}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 133;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 765;
+                h = 10;
+                title = "Processes Forks";
+                description = "Rate of new processes being created on the system (forks/sec).";
+                unit = "ops";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "rate(node_forks_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "Process Forks per second";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 134;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 765;
+                h = 10;
+                title = "CPU Saturation per Core";
+                description = "Shows CPU saturation per core, calculated as the proportion of time spent waiting to run relative to total time demanded (running + waiting).";
+                unit = "percentunit";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/.*waiting.*/";
+                    };
+                    properties = [
+                      {
+                        id = "custom.transform";
+                        value = "negative-Y";
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "rate(node_schedstat_running_seconds_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "CPU {{ cpu }} - Running";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_schedstat_waiting_seconds_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "CPU {{cpu}} - Waiting Queue";
+                    step = 240;
+                  }
+                  {
+                    expr = "((rate(node_schedstat_running_seconds_total{${nodeFilter}}[$__rate_interval]) + rate(node_schedstat_waiting_seconds_total{${nodeFilter}}[$__rate_interval])) > bool 0) * (rate(node_schedstat_waiting_seconds_total{${nodeFilter}}[$__rate_interval]) / (rate(node_schedstat_running_seconds_total{${nodeFilter}}[$__rate_interval]) + rate(node_schedstat_waiting_seconds_total{${nodeFilter}}[$__rate_interval])))";
+                    legend = "CPU {{cpu}}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 135;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 775;
+                h = 10;
+                title = "PIDs Number and Limit";
+                description = "Number of active PIDs on the system and the configured maximum allowed. Useful for detecting PID exhaustion risk. Requires --collector.processes in node_exporter";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "PIDs limit";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "#F2495C";
+                          mode = "fixed";
+                        };
+                      }
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                      {
+                        id = "custom.lineStyle";
+                        value = {
+                          dash = [10 10];
+                          fill = "dash";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_processes_pids{${nodeFilter}}";
+                    legend = "Number of PIDs";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_processes_max_processes{${nodeFilter}}";
+                    legend = "PIDs limit";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 136;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 775;
+                h = 10;
+                title = "Threads Number and Limit";
+                description = "Number of active threads on the system and the configured thread limit. Useful for monitoring thread pressure. Requires --collector.processes in node_exporter";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "Threads limit";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "#F2495C";
+                          mode = "fixed";
+                        };
+                      }
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                      {
+                        id = "custom.lineStyle";
+                        value = {
+                          dash = [10 10];
+                          fill = "dash";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_processes_threads{${nodeFilter}}";
+                    legend = "Allocated threads";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_processes_max_threads{${nodeFilter}}";
+                    legend = "Threads limit";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 137;})
+          ];
+        }
+        {
+          type = "row";
+          title = "System Misc";
+          collapsed = true;
+          gridPos = {
+            x = 0;
+            y = 25;
+            w = 24;
+            h = 1;
+          };
+          panels = [
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 816;
+                h = 10;
+                title = "Context Switches / Interrupts";
+                description = "Per-second rate of context switches and hardware interrupts. High values may indicate intense CPU or I/O activity";
+                unit = "ops";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "rate(node_context_switches_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "Context switches";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_intr_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "Interrupts";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 138;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 816;
+                h = 10;
+                title = "System Load";
+                description = "System load average over 1, 5, and 15 minutes. Reflects the number of active or waiting processes. Values above CPU core count may indicate overload";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "CPU Core Count";
+                    };
+                    properties = [
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                      {
+                        id = "custom.lineStyle";
+                        value = {
+                          dash = [10 10];
+                          fill = "dash";
+                        };
+                      }
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "dark-red";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_load1{${nodeFilter}}";
+                    legend = "Load 1m";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_load5{${nodeFilter}}";
+                    legend = "Load 5m";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_load15{${nodeFilter}}";
+                    legend = "Load 15m";
+                    step = 240;
+                  }
+                  {
+                    expr = "count(count(node_cpu_seconds_total{${nodeFilter}}) by (cpu))";
+                    legend = "CPU Core Count";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 139;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 826;
+                h = 10;
+                title = "CPU Frequency Scaling";
+                description = "Real-time CPU frequency scaling per core, including average minimum and maximum allowed scaling frequencies";
+                unit = "hertz";
+                fillOpacity = 0;
+                tooltipSort = "desc";
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "Max";
+                    };
+                    properties = [
+                      {
+                        id = "custom.lineStyle";
+                        value = {
+                          dash = [10 10];
+                          fill = "dash";
+                        };
+                      }
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "dark-red";
+                          mode = "fixed";
+                        };
+                      }
+                      {
+                        id = "custom.hideFrom";
+                        value = {
+                          legend = true;
+                          tooltip = false;
+                          viz = false;
+                        };
+                      }
+                    ];
+                  }
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "Min";
+                    };
+                    properties = [
+                      {
+                        id = "custom.lineStyle";
+                        value = {
+                          dash = [10 10];
+                          fill = "dash";
+                        };
+                      }
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "blue";
+                          mode = "fixed";
+                        };
+                      }
+                      {
+                        id = "custom.hideFrom";
+                        value = {
+                          legend = true;
+                          tooltip = false;
+                          viz = false;
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_cpu_scaling_frequency_hertz{${nodeFilter}}";
+                    legend = "CPU {{ cpu }}";
+                    step = 240;
+                  }
+                  {
+                    expr = "avg(node_cpu_scaling_frequency_max_hertz{${nodeFilter}})";
+                    legend = "Max";
+                    step = 240;
+                  }
+                  {
+                    expr = "avg(node_cpu_scaling_frequency_min_hertz{${nodeFilter}})";
+                    legend = "Min";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 140;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 826;
+                h = 10;
+                title = "CPU Schedule Timeslices";
+                description = "Rate of scheduling timeslices executed per CPU. Reflects how frequently the scheduler switches tasks on each core";
+                unit = "ops";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "rate(node_schedstat_timeslices_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "CPU {{ cpu }}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 141;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 836;
+                h = 10;
+                title = "IRQ Detail";
+                description = "Breaks down hardware interrupts by type and device. Useful for diagnosing IRQ load on network, disk, or CPU interfaces. Requires --collector.interrupts to be enabled in node_exporter";
+                unit = "ops";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "rate(node_interrupts_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{ type }} - {{ info }}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 142;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 836;
+                h = 10;
+                title = "Entropy";
+                description = "Number of bits of entropy currently available to the system's random number generators (e.g., /dev/random). Low values may indicate that random number generation could block or degrade performance of cryptographic operations";
+                unit = "decbits";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "Entropy pool max";
+                    };
+                    properties = [
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                      {
+                        id = "custom.lineStyle";
+                        value = {
+                          dash = [10 10];
+                          fill = "dash";
+                        };
+                      }
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "dark-red";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_entropy_available_bits{${nodeFilter}}";
+                    legend = "Entropy available";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_entropy_pool_size_bits{${nodeFilter}}";
+                    legend = "Entropy pool max";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 143;})
+          ];
+        }
+        {
+          type = "row";
+          title = "Hardware Misc";
+          collapsed = true;
+          gridPos = {
+            x = 0;
+            y = 26;
+            w = 24;
+            h = 1;
+          };
+          panels = [
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 737;
+                h = 10;
+                title = "Hardware Temperature Monitor";
+                description = "Monitors hardware sensor temperatures and critical thresholds as exposed by Linux hwmon. Includes CPU, GPU, and motherboard sensors where available";
+                unit = "celsius";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/.*Critical.*/";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "#E24D42";
+                          mode = "fixed";
+                        };
+                      }
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_hwmon_temp_celsius{${nodeFilter}} * on(chip) group_left(chip_name) node_hwmon_chip_names{${nodeFilter}}";
+                    legend = "{{ chip_name }} {{ sensor }}";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_hwmon_temp_crit_alarm_celsius{${nodeFilter}} * on(chip) group_left(chip_name) node_hwmon_chip_names{${nodeFilter}}";
+                    legend = "{{ chip_name }} {{ sensor }} Critical Alarm";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_hwmon_temp_crit_celsius{${nodeFilter}} * on(chip) group_left(chip_name) node_hwmon_chip_names{${nodeFilter}}";
+                    legend = "{{ chip_name }} {{ sensor }} Critical";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_hwmon_temp_crit_hyst_celsius{${nodeFilter}} * on(chip) group_left(chip_name) node_hwmon_chip_names{${nodeFilter}}";
+                    legend = "{{ chip_name }} {{ sensor }} Critical Hysteresis";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_hwmon_temp_max_celsius{${nodeFilter}} * on(chip) group_left(chip_name) node_hwmon_chip_names{${nodeFilter}}";
+                    legend = "{{ chip_name }} {{ sensor }} Max";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 144;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 737;
+                h = 10;
+                title = "Cooling Device Utilization";
+                description = "Shows how hard each cooling device (fan/throttle) is working relative to its maximum capacity";
+                unit = "percent";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/.*Max.*/";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "#EF843C";
+                          mode = "fixed";
+                        };
+                      }
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "(node_cooling_device_max_state{${nodeFilter}} > bool 0) * (100 * node_cooling_device_cur_state{${nodeFilter}} / node_cooling_device_max_state{${nodeFilter}})";
+                    legend = "{{name}} - {{type}}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 145;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 747;
+                h = 10;
+                title = "Power Supply";
+                description = "Shows the online status of power supplies (e.g., AC, battery). A value of 1-Yes indicates the power supply is active/online";
+                unit = "bool_yes_no";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_power_supply_online{${nodeFilter}}";
+                    legend = "{{ power_supply }} online";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 146;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 747;
+                h = 10;
+                title = "Hardware Fan Speed";
+                description = "Displays the current fan speeds (RPM) from hardware sensors via the hwmon interface";
+                unit = "rotrpm";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_hwmon_fan_rpm{${nodeFilter}} * on(chip) group_left(chip_name) node_hwmon_chip_names{${nodeFilter}}";
+                    legend = "{{ chip_name }} {{ sensor }}";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_hwmon_fan_min_rpm{${nodeFilter}} * on(chip) group_left(chip_name) node_hwmon_chip_names{${nodeFilter}}";
+                    legend = "{{ chip_name }} {{ sensor }} rpm min";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 147;})
+          ];
+        }
+        {
+          type = "row";
+          title = "Systemd";
+          collapsed = true;
+          gridPos = {
+            x = 0;
+            y = 27;
+            w = 24;
+            h = 1;
+          };
+          panels = [
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 4228;
+                h = 10;
+                title = "Systemd Units State";
+                description = "Current number of systemd units in each operational state, such as active, failed, inactive, or transitioning";
+                unit = "short";
+                fillOpacity = 20;
+                stacking = {
+                  group = "A";
+                  mode = "normal";
+                };
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "Failed";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "#F2495C";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "Active";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "#73BF69";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "Activating";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "#C8F2C2";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "Deactivating";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "orange";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "Inactive";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "dark-blue";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_systemd_units{${nodeFilter},state=\"activating\"}";
+                    legend = "Activating";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_systemd_units{${nodeFilter},state=\"active\"}";
+                    legend = "Active";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_systemd_units{${nodeFilter},state=\"deactivating\"}";
+                    legend = "Deactivating";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_systemd_units{${nodeFilter},state=\"failed\"}";
+                    legend = "Failed";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_systemd_units{${nodeFilter},state=\"inactive\"}";
+                    legend = "Inactive";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 148;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 4228;
+                h = 10;
+                title = "Systemd Sockets Current";
+                description = "Current number of active connections per systemd socket, as reported by the Node Exporter systemd collector";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_systemd_socket_current_connections{${nodeFilter}}";
+                    legend = "{{ name }}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 149;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 4238;
+                h = 10;
+                title = "Systemd Sockets Accepted";
+                description = "Rate of accepted connections per second for each systemd socket";
+                unit = "eps";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "rate(node_systemd_socket_accepted_connections_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{ name }}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 150;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 4238;
+                h = 10;
+                title = "Systemd Sockets Refused";
+                description = "Rate of systemd socket connection refusals per second, typically due to service unavailability or backlog overflow";
+                unit = "eps";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "rate(node_systemd_socket_refused_connections_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{ name }}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 151;})
+          ];
+        }
+        {
+          type = "row";
+          title = "Storage Disk";
+          collapsed = true;
+          gridPos = {
+            x = 0;
+            y = 28;
+            w = 24;
+            h = 1;
+          };
+          panels = let
+            diskOverrides = [
+              {
+                matcher = {
+                  id = "byRegexp";
+                  options = "/.*Read.*/";
+                };
+                properties = [
+                  {
+                    id = "custom.transform";
+                    value = "negative-Y";
+                  }
+                ];
+              }
+              {
+                matcher = {
+                  id = "byRegexp";
+                  options = "/sda.*/";
+                };
+                properties = [
+                  {
+                    id = "color";
+                    value = {
+                      fixedColor = "orange";
+                      mode = "fixed";
+                    };
+                  }
+                ];
+              }
+            ];
+            sdaOrange = [
+              {
+                matcher = {
+                  id = "byRegexp";
+                  options = "/sda.*/";
+                };
+                properties = [
+                  {
+                    id = "color";
+                    value = {
+                      fixedColor = "orange";
+                      mode = "fixed";
+                    };
+                  }
+                ];
+              }
+            ];
+          in [
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 29;
+                h = 10;
+                title = "Disk Read/Write IOps";
+                description = "Number of I/O operations completed per second for the device (after merges), including both reads and writes";
+                unit = "iops";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = diskOverrides;
+                targets = [
+                  {
+                    expr = "rate(node_disk_reads_completed_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Read";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_disk_writes_completed_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Write";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 152;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 29;
+                h = 10;
+                title = "Disk Read/Write Data";
+                description = "Number of bytes read from or written to the device per second";
+                unit = "Bps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = diskOverrides;
+                targets = [
+                  {
+                    expr = "rate(node_disk_read_bytes_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Read";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_disk_written_bytes_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Write";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 153;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 389;
+                h = 10;
+                title = "Disk Average Wait Time";
+                description = "Average time for requests issued to the device to be served. This includes the time spent by the requests in queue and the time spent servicing them.";
+                unit = "s";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = diskOverrides;
+                targets = [
+                  {
+                    expr = "(rate(node_disk_reads_completed_total{${nodeFilter}}[$__rate_interval]) > bool 0) * (rate(node_disk_read_time_seconds_total{${nodeFilter}}[$__rate_interval]) / rate(node_disk_reads_completed_total{${nodeFilter}}[$__rate_interval]))";
+                    legend = "{{device}} - Read";
+                    step = 240;
+                  }
+                  {
+                    expr = "(rate(node_disk_writes_completed_total{${nodeFilter}}[$__rate_interval]) > bool 0) * (rate(node_disk_write_time_seconds_total{${nodeFilter}}[$__rate_interval]) / rate(node_disk_writes_completed_total{${nodeFilter}}[$__rate_interval]))";
+                    legend = "{{device}} - Write";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 154;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 389;
+                h = 10;
+                title = "Average Queue Size";
+                description = "Average queue length of the requests that were issued to the device";
+                unit = "none";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/sda_*/";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "#7EB26D";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "rate(node_disk_io_time_weighted_seconds_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 155;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 399;
+                h = 10;
+                title = "Disk R/W Merged";
+                description = "Number of read and write requests merged per second that were queued to the device";
+                unit = "iops";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = diskOverrides;
+                targets = [
+                  {
+                    expr = "rate(node_disk_reads_merged_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Read";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_disk_writes_merged_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Write";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 156;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 399;
+                h = 10;
+                title = "Time Spent Doing I/Os";
+                description = "Percentage of time the disk spent actively processing I/O operations, including general I/O, discards (TRIM), and write cache flushes";
+                unit = "percentunit";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = sdaOrange;
+                targets = [
+                  {
+                    expr = "rate(node_disk_io_time_seconds_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - General IO";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_disk_discard_time_seconds_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Discard/TRIM";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_disk_flush_requests_time_seconds_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Flush (write cache)";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 157;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 409;
+                h = 10;
+                title = "Disk Ops Discards / Flush";
+                description = "Per-second rate of discard (TRIM) and flush (write cache) operations. Useful for monitoring low-level disk activity on SSDs and advanced storage";
+                unit = "ops";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = sdaOrange;
+                targets = [
+                  {
+                    expr = "rate(node_disk_discards_completed_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Discards completed";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_disk_discards_merged_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Discards merged";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_disk_flush_requests_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Flush";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 158;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 409;
+                h = 10;
+                title = "Disk Sectors Discarded Successfully";
+                description = "Shows how many disk sectors are discarded (TRIMed) per second. Useful for monitoring SSD behavior and storage efficiency";
+                unit = "short";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = sdaOrange;
+                targets = [
+                  {
+                    expr = "rate(node_disk_discarded_sectors_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 159;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 419;
+                h = 10;
+                title = "Instantaneous Queue Size";
+                description = "Number of in-progress I/O requests at the time of sampling (active requests in the disk queue)";
+                unit = "none";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = sdaOrange;
+                targets = [
+                  {
+                    expr = "node_disk_io_now{${nodeFilter}}";
+                    legend = "{{device}}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 160;})
+          ];
+        }
+        {
+          type = "row";
+          title = "Storage Filesystem";
+          collapsed = true;
+          gridPos = {
+            x = 0;
+            y = 29;
+            w = 24;
+            h = 1;
+          };
+          panels = [
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 30;
+                h = 10;
+                title = "File Descriptor";
+                description = "Number of file descriptors currently allocated system-wide versus the system limit. Important for detecting descriptor exhaustion risks";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/.*Max.*/";
+                    };
+                    properties = [
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                      {
+                        id = "custom.lineStyle";
+                        value = {
+                          dash = [10 10];
+                          fill = "dash";
+                        };
+                      }
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "dark-red";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_filefd_maximum{${nodeFilter}}";
+                    legend = "Max open files";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_filefd_allocated{${nodeFilter}}";
+                    legend = "Open files";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 161;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 30;
+                h = 10;
+                title = "File Nodes Free";
+                description = "Number of free file nodes (inodes) available per mounted filesystem. A low count may prevent file creation even if disk space is available";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_filesystem_files_free{${nodeFilter},device!~'rootfs'}";
+                    legend = "{{mountpoint}}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 162;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 370;
+                h = 10;
+                title = "Filesystem in ReadOnly / Error";
+                description = "Indicates filesystems mounted in read-only mode or reporting device-level I/O errors.";
+                unit = "bool_yes_no";
+                min = 0;
+                max = 1;
+                fillOpacity = 20;
+                stacking = {
+                  group = "A";
+                  mode = "normal";
+                };
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_filesystem_readonly{${nodeFilter},device!~'rootfs'}";
+                    legend = "{{mountpoint}} - ReadOnly";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_filesystem_device_error{${nodeFilter},device!~'rootfs',fstype!~'tmpfs'}";
+                    legend = "{{mountpoint}} - Device error";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 163;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 370;
+                h = 10;
+                title = "File Nodes Size";
+                description = "Number of file nodes (inodes) available per mounted filesystem. Reflects maximum file capacity regardless of disk size";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_filesystem_files{${nodeFilter},device!~'rootfs'}";
+                    legend = "{{mountpoint}}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 164;})
+          ];
+        }
+        {
+          type = "row";
+          title = "Network Traffic";
+          collapsed = true;
+          gridPos = {
+            x = 0;
+            y = 30;
+            w = 24;
+            h = 1;
+          };
+          panels = let
+            outNegativeY = [
+              {
+                matcher = {
+                  id = "byRegexp";
+                  options = "/.*out.*/";
+                };
+                properties = [
+                  {
+                    id = "custom.transform";
+                    value = "negative-Y";
+                  }
+                ];
+              }
+            ];
+          in [
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 31;
+                h = 10;
+                title = "Network Traffic by Packets";
+                description = "Number of network packets received and transmitted per second, by interface.";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                overrides = outNegativeY;
+                targets = [
+                  {
+                    expr = "rate(node_network_receive_packets_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Rx in";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_network_transmit_packets_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Tx out";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 165;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 31;
+                h = 10;
+                title = "Network Traffic Errors";
+                description = "Rate of packet-level errors for each network interface. Receive errors may indicate physical or driver issues; transmit errors may reflect collisions or hardware faults";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                overrides = outNegativeY;
+                targets = [
+                  {
+                    expr = "rate(node_network_receive_errs_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Rx in";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_network_transmit_errs_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Tx out";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 166;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 251;
+                h = 10;
+                title = "Network Traffic Drop";
+                description = "Rate of dropped packets per network interface. Receive drops can indicate buffer overflow or driver issues; transmit drops may result from outbound congestion or queuing limits";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                overrides = outNegativeY;
+                targets = [
+                  {
+                    expr = "rate(node_network_receive_drop_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Rx in";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_network_transmit_drop_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Tx out";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 167;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 251;
+                h = 10;
+                title = "Network Traffic Compressed";
+                description = "Rate of compressed network packets received and transmitted per interface. These are common in low-bandwidth or special interfaces like PPP or SLIP";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                overrides = outNegativeY;
+                targets = [
+                  {
+                    expr = "rate(node_network_receive_compressed_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Rx in";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_network_transmit_compressed_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Tx out";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 168;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 261;
+                h = 10;
+                title = "Network Traffic Multicast";
+                description = "Rate of incoming multicast packets received per network interface. Multicast is used by protocols such as mDNS, SSDP, and some streaming or cluster services";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                targets = [
+                  {
+                    expr = "rate(node_network_receive_multicast_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Rx in";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 169;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 261;
+                h = 10;
+                title = "Network Traffic NoHandler";
+                description = "Rate of received packets that could not be processed due to missing protocol or handler in the kernel. May indicate unsupported traffic or misconfiguration";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                targets = [
+                  {
+                    expr = "rate(node_network_receive_nohandler_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Rx in";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 170;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 271;
+                h = 10;
+                title = "Network Traffic Frame";
+                description = "Rate of frame errors on received packets, typically caused by physical layer issues such as bad cables, duplex mismatches, or hardware problems";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                targets = [
+                  {
+                    expr = "rate(node_network_receive_frame_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Rx in";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 171;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 271;
+                h = 10;
+                title = "Network Traffic Fifo";
+                description = "Tracks FIFO buffer overrun errors on network interfaces. These occur when incoming or outgoing packets are dropped due to queue or buffer overflows, often indicating congestion or hardware limits";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                overrides = outNegativeY;
+                targets = [
+                  {
+                    expr = "rate(node_network_receive_fifo_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Rx in";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_network_transmit_fifo_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Tx out";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 172;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 281;
+                h = 10;
+                title = "Network Traffic Collision";
+                description = "Rate of packet collisions detected during transmission. Mostly relevant on half-duplex or legacy Ethernet networks";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                overrides = outNegativeY;
+                targets = [
+                  {
+                    expr = "rate(node_network_transmit_colls_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Tx out";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 173;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 281;
+                h = 10;
+                title = "Network Traffic Carrier Errors";
+                description = "Rate of carrier errors during transmission. These typically indicate physical layer issues like faulty cabling or duplex mismatches";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                targets = [
+                  {
+                    expr = "rate(node_network_transmit_carrier_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "{{device}} - Tx out";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 174;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 291;
+                h = 10;
+                title = "ARP Entries";
+                description = "Number of ARP entries per interface. Useful for detecting excessive ARP traffic or table growth due to scanning or misconfiguration";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_arp_entries{${nodeFilter}}";
+                    legend = "{{ device }} ARP Table";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 175;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 291;
+                h = 10;
+                title = "NF Conntrack";
+                description = "Current and maximum connection tracking entries used by Netfilter (nf_conntrack). High usage approaching the limit may cause packet drops or connection issues";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "NF conntrack limit";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "dark-red";
+                          mode = "fixed";
+                        };
+                      }
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                      {
+                        id = "custom.lineStyle";
+                        value = {
+                          dash = [10 10];
+                          fill = "dash";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_nf_conntrack_entries{${nodeFilter}}";
+                    legend = "NF conntrack entries";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_nf_conntrack_entries_limit{${nodeFilter}}";
+                    legend = "NF conntrack limit";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 176;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 301;
+                h = 10;
+                title = "Network Operational Status";
+                description = "Operational and physical link status of each network interface. Values are Yes for 'up' or link present, and No for 'down' or no carrier.";
+                unit = "bool_yes_no";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                targets = [
+                  {
+                    expr = "node_network_up{operstate=\"up\",${nodeFilter}}";
+                    legend = "{{interface}} - Operational state UP";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_network_carrier{${nodeFilter}}";
+                    legend = "{{device}} - Physical link";
+                  }
+                ];
+              }
+              // {id = 177;})
+            (mkBarGauge
+              {
+                x = 12;
+                y = 301;
+                w = 6;
+                h = 10;
+                title = "Speed";
+                description = "Maximum speed of each network interface as reported by the operating system. This is a static hardware capability, not current throughput";
+                unit = "bps";
+                min = 0;
+                max = null;
+                decimals = 0;
+                instant = false;
+                thresholds = [
+                  {
+                    value = null;
+                    color = "green";
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_network_speed_bytes{${nodeFilter}} * 8";
+                    legend = "{{ device }}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 178;})
+            (mkBarGauge
+              {
+                x = 18;
+                y = 301;
+                w = 6;
+                h = 10;
+                title = "MTU";
+                description = "MTU (Maximum Transmission Unit) in bytes for each network interface. Affects packet size and transmission efficiency";
+                unit = "none";
+                min = 0;
+                max = null;
+                decimals = 0;
+                instant = false;
+                thresholds = [
+                  {
+                    value = null;
+                    color = "green";
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_network_mtu_bytes{${nodeFilter}}";
+                    legend = "{{ device }}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 179;})
+          ];
+        }
+        {
+          type = "row";
+          title = "Network Sockstat";
+          collapsed = true;
+          gridPos = {
+            x = 0;
+            y = 31;
+            w = 24;
+            h = 1;
+          };
+          panels = [
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 32;
+                h = 10;
+                title = "Sockstat TCP";
+                description = "Tracks TCP socket usage and memory per node";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                targets = [
+                  {
+                    expr = "node_sockstat_TCP_alloc{${nodeFilter}}";
+                    legend = "Allocated Sockets";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_sockstat_TCP_inuse{${nodeFilter}}";
+                    legend = "In-Use Sockets";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_sockstat_TCP_orphan{${nodeFilter}}";
+                    legend = "Orphaned Sockets";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_sockstat_TCP_tw{${nodeFilter}}";
+                    legend = "TIME_WAIT Sockets";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 180;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 32;
+                h = 10;
+                title = "Sockstat UDP";
+                description = "Number of UDP and UDPLite sockets currently in use";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                targets = [
+                  {
+                    expr = "node_sockstat_UDPLITE_inuse{${nodeFilter}}";
+                    legend = "UDPLite - In-Use Sockets";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_sockstat_UDP_inuse{${nodeFilter}}";
+                    legend = "UDP - In-Use Sockets";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 181;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 42;
+                h = 10;
+                title = "Sockstat Used";
+                description = "Total number of sockets currently in use across all protocols (TCP, UDP, UNIX, etc.), as reported by /proc/net/sockstat";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                targets = [
+                  {
+                    expr = "node_sockstat_sockets_used{${nodeFilter}}";
+                    legend = "Total sockets";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 182;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 42;
+                h = 10;
+                title = "Sockstat FRAG / RAW";
+                description = "Number of FRAG and RAW sockets currently in use. RAW sockets are used for custom protocols or tools like ping; FRAG sockets are used internally for IP packet defragmentation";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                targets = [
+                  {
+                    expr = "node_sockstat_FRAG_inuse{${nodeFilter}}";
+                    legend = "FRAG - In-Use Sockets";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_sockstat_RAW_inuse{${nodeFilter}}";
+                    legend = "RAW - In-Use Sockets";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 183;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 52;
+                h = 10;
+                title = "Sockstat Memory Size";
+                description = "Kernel memory used by TCP, UDP, and IP fragmentation buffers";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                targets = [
+                  {
+                    expr = "node_sockstat_TCP_mem_bytes{${nodeFilter}}";
+                    legend = "TCP";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_sockstat_UDP_mem_bytes{${nodeFilter}}";
+                    legend = "UDP";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_sockstat_FRAG_memory{${nodeFilter}}";
+                    legend = "Fragmentation";
+                  }
+                ];
+              }
+              // {id = 184;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 52;
+                h = 10;
+                title = "Sockstat Average Socket Memory";
+                description = "Average memory used per socket (TCP/UDP). Helps tune net.ipv4.tcp_rmem / tcp_wmem";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                targets = [
+                  {
+                    expr = "(node_sockstat_TCP_inuse{${nodeFilter}} > bool 0) * (node_sockstat_TCP_mem_bytes{${nodeFilter}} / node_sockstat_TCP_inuse{${nodeFilter}})";
+                    legend = "TCP";
+                    step = 240;
+                  }
+                  {
+                    expr = "(node_sockstat_UDP_inuse{${nodeFilter}} > bool 0) * (node_sockstat_UDP_mem_bytes{${nodeFilter}} / node_sockstat_UDP_inuse{${nodeFilter}})";
+                    legend = "UDP";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 185;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 62;
+                h = 10;
+                title = "TCP/UDP Kernel Buffer Memory Pages";
+                description = "TCP/UDP socket memory usage in kernel (in pages)";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                targets = [
+                  {
+                    expr = "node_sockstat_TCP_mem{${nodeFilter}}";
+                    legend = "TCP";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_sockstat_UDP_mem{${nodeFilter}}";
+                    legend = "UDP";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 186;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 62;
+                h = 10;
+                title = "Softnet Packets";
+                description = "Packets processed and dropped by the softnet network stack per CPU. Drops may indicate CPU saturation or network driver limitations";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/.*Dropped.*/";
+                    };
+                    properties = [
+                      {
+                        id = "custom.transform";
+                        value = "negative-Y";
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "rate(node_softnet_processed_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "CPU {{cpu}} - Processed";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_softnet_dropped_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "CPU {{cpu}} - Dropped";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 187;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 72;
+                h = 10;
+                title = "Softnet Out of Quota";
+                description = "How often the kernel was unable to process all packets in the softnet queue before time ran out. Frequent squeezes may indicate CPU contention or driver inefficiency";
+                unit = "eps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                targets = [
+                  {
+                    expr = "rate(node_softnet_times_squeezed_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "CPU {{cpu}} - Times Squeezed";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 188;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 72;
+                h = 10;
+                title = "Softnet RPS";
+                description = "Tracks the number of packets processed or dropped by Receive Packet Steering (RPS), a mechanism to distribute packet processing across CPUs";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/.*Dropped.*/";
+                    };
+                    properties = [
+                      {
+                        id = "custom.transform";
+                        value = "negative-Y";
+                      }
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "dark-red";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "rate(node_softnet_received_rps_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "CPU {{cpu}} - Processed";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_softnet_flow_limit_count_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "CPU {{cpu}} - Dropped";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 189;})
+          ];
+        }
+        {
+          type = "row";
+          title = "Network Netstat";
+          collapsed = true;
+          gridPos = {
+            x = 0;
+            y = 32;
+            w = 24;
+            h = 1;
+          };
+          panels = let
+            outNegativeY = [
+              {
+                matcher = {
+                  id = "byRegexp";
+                  options = "/.*out.*/";
+                };
+                properties = [
+                  {
+                    id = "custom.transform";
+                    value = "negative-Y";
+                  }
+                ];
+              }
+            ];
+          in [
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 163;
+                h = 10;
+                title = "Netstat IP In / Out Octets";
+                description = "Rate of octets sent and received at the IP layer, as reported by /proc/net/netstat";
+                unit = "Bps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                legendWidth = 300;
+                overrides = outNegativeY;
+                targets = [
+                  {
+                    expr = "rate(node_netstat_IpExt_InOctets{${nodeFilter}}[$__rate_interval])";
+                    legend = "IP Rx in";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_netstat_IpExt_OutOctets{${nodeFilter}}[$__rate_interval])";
+                    legend = "IP Tx out";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 190;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 163;
+                h = 10;
+                title = "TCP In / Out";
+                description = "Rate of TCP segments sent and received per second, including data and control segments";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = outNegativeY;
+                targets = [
+                  {
+                    expr = "rate(node_netstat_Tcp_InSegs{${nodeFilter}}[$__rate_interval])";
+                    legend = "TCP Rx in";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_netstat_Tcp_OutSegs{${nodeFilter}}[$__rate_interval])";
+                    legend = "TCP Tx out";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 191;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 193;
+                h = 10;
+                title = "UDP In / Out";
+                description = "Rate of UDP datagrams sent and received per second, based on /proc/net/netstat";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = outNegativeY;
+                targets = [
+                  {
+                    expr = "rate(node_netstat_Udp_InDatagrams{${nodeFilter}}[$__rate_interval])";
+                    legend = "UDP Rx in";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_netstat_Udp_OutDatagrams{${nodeFilter}}[$__rate_interval])";
+                    legend = "UDP Tx out";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 192;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 193;
+                h = 10;
+                title = "ICMP In / Out";
+                description = "Number of ICMP messages sent and received per second, including error and control messages";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = outNegativeY;
+                targets = [
+                  {
+                    expr = "rate(node_netstat_Icmp_InMsgs{${nodeFilter}}[$__rate_interval])";
+                    legend = "ICMP Rx in";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_netstat_Icmp_OutMsgs{${nodeFilter}}[$__rate_interval])";
+                    legend = "ICMP Tx out";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 193;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 203;
+                h = 10;
+                title = "TCP Errors";
+                description = "Tracks various TCP error and congestion-related events, including retransmissions, timeouts, dropped connections, and buffer issues";
+                unit = "pps";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "rate(node_netstat_TcpExt_ListenOverflows{${nodeFilter}}[$__rate_interval])";
+                    legend = "Listen Overflows";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_netstat_TcpExt_ListenDrops{${nodeFilter}}[$__rate_interval])";
+                    legend = "Listen Drops";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_netstat_TcpExt_TCPSynRetrans{${nodeFilter}}[$__rate_interval])";
+                    legend = "SYN Retransmits";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_netstat_Tcp_RetransSegs{${nodeFilter}}[$__rate_interval])";
+                    legend = "Segment Retransmits";
+                  }
+                  {
+                    expr = "rate(node_netstat_Tcp_InErrs{${nodeFilter}}[$__rate_interval])";
+                    legend = "Receive Errors";
+                  }
+                  {
+                    expr = "rate(node_netstat_Tcp_OutRsts{${nodeFilter}}[$__rate_interval])";
+                    legend = "RST Sent";
+                  }
+                  {
+                    expr = "rate(node_netstat_TcpExt_TCPRcvQDrop{${nodeFilter}}[$__rate_interval])";
+                    legend = "Receive Queue Drops";
+                  }
+                  {
+                    expr = "rate(node_netstat_TcpExt_TCPOFOQueue{${nodeFilter}}[$__rate_interval])";
+                    legend = "Out-of-order Queued";
+                  }
+                  {
+                    expr = "rate(node_netstat_TcpExt_TCPTimeouts{${nodeFilter}}[$__rate_interval])";
+                    legend = "TCP Timeouts";
+                  }
+                ];
+              }
+              // {id = 194;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 203;
+                h = 10;
+                title = "UDP Errors";
+                description = "Rate of UDP and UDPLite datagram delivery errors, including missing listeners, buffer overflows, and protocol-specific issues";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "rate(node_netstat_Udp_InErrors{${nodeFilter}}[$__rate_interval])";
+                    legend = "UDP Rx in Errors";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_netstat_Udp_NoPorts{${nodeFilter}}[$__rate_interval])";
+                    legend = "UDP No Listener";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_netstat_UdpLite_InErrors{${nodeFilter}}[$__rate_interval])";
+                    legend = "UDPLite Rx in Errors";
+                  }
+                  {
+                    expr = "rate(node_netstat_Udp_RcvbufErrors{${nodeFilter}}[$__rate_interval])";
+                    legend = "UDP Rx in Buffer Errors";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_netstat_Udp_SndbufErrors{${nodeFilter}}[$__rate_interval])";
+                    legend = "UDP Tx out Buffer Errors";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 195;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 213;
+                h = 10;
+                title = "ICMP Errors";
+                description = "Rate of incoming ICMP messages that contained protocol-specific errors, such as bad checksums or invalid lengths";
+                unit = "pps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "rate(node_netstat_Icmp_InErrors{${nodeFilter}}[$__rate_interval])";
+                    legend = "ICMP Rx In";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 196;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 213;
+                h = 10;
+                title = "TCP SynCookie";
+                description = "Rate of TCP SYN cookies sent, validated, and failed. These are used to protect against SYN flood attacks and manage TCP handshake resources under load";
+                unit = "eps";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/.*Failed.*/";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "dark-red";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "rate(node_netstat_TcpExt_SyncookiesFailed{${nodeFilter}}[$__rate_interval])";
+                    legend = "SYN Cookies Failed";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_netstat_TcpExt_SyncookiesRecv{${nodeFilter}}[$__rate_interval])";
+                    legend = "SYN Cookies Validated";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_netstat_TcpExt_SyncookiesSent{${nodeFilter}}[$__rate_interval])";
+                    legend = "SYN Cookies Sent";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 197;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 223;
+                h = 10;
+                title = "TCP Connections";
+                description = "Number of currently established TCP connections and the system's max supported limit. On Linux, MaxConn may return -1 to indicate a dynamic/unlimited configuration";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/.*Max.*/";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "#890F02";
+                          mode = "fixed";
+                        };
+                      }
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                      {
+                        id = "custom.lineStyle";
+                        value = {
+                          dash = [10 10];
+                          fill = "dash";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_netstat_Tcp_CurrEstab{${nodeFilter}}";
+                    legend = "Current Connections";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_netstat_Tcp_MaxConn{${nodeFilter}}";
+                    legend = "Max Connections";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 198;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 223;
+                h = 10;
+                title = "UDP Queue";
+                description = "Number of UDP packets currently queued in the receive (RX) and transmit (TX) buffers. A growing queue may indicate a bottleneck";
+                unit = "short";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_udp_queues{${nodeFilter},ip=\"v4\",queue=\"rx\"}";
+                    legend = "UDP Rx in Queue";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_udp_queues{${nodeFilter},ip=\"v4\",queue=\"tx\"}";
+                    legend = "UDP Tx out Queue";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 199;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 233;
+                h = 10;
+                title = "TCP Direct Transition";
+                description = "Rate of TCP connection initiations per second. 'Active' opens are initiated by this host. 'Passive' opens are accepted from incoming connections";
+                unit = "eps";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "rate(node_netstat_Tcp_ActiveOpens{${nodeFilter}}[$__rate_interval])";
+                    legend = "Active Opens";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_netstat_Tcp_PassiveOpens{${nodeFilter}}[$__rate_interval])";
+                    legend = "Passive Opens";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 200;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 233;
+                h = 10;
+                title = "TCP Stat Persistent";
+                description = "Number of TCP sockets in key connection states. Requires the --collector.tcpstat flag on node_exporter";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_tcp_connection_states{state=\"established\",${nodeFilter}}";
+                    legend = "Established";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_tcp_connection_states{state=\"fin_wait2\",${nodeFilter}}";
+                    legend = "FIN_WAIT2";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_tcp_connection_states{state=\"listen\",${nodeFilter}}";
+                    legend = "Listen";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_tcp_connection_states{state=\"time_wait\",${nodeFilter}}";
+                    legend = "TIME_WAIT";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_tcp_connection_states{state=\"close_wait\", ${nodeFilter}}";
+                    legend = "CLOSE_WAIT";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 201;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 243;
+                h = 10;
+                title = "TCP Stat Transient";
+                description = "Transient TCP connection states. These are typically short-lived during connection establishment and teardown";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_tcp_connection_states{state=\"syn_sent\",${nodeFilter}}";
+                    legend = "SYN_SENT";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_tcp_connection_states{state=\"syn_recv\",${nodeFilter}}";
+                    legend = "SYN_RECV";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_tcp_connection_states{state=\"fin_wait1\",${nodeFilter}}";
+                    legend = "FIN_WAIT1";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_tcp_connection_states{state=\"close\",${nodeFilter}}";
+                    legend = "CLOSE";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_tcp_connection_states{state=\"last_ack\",${nodeFilter}}";
+                    legend = "LAST_ACK";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_tcp_connection_states{state=\"closing\",${nodeFilter}}";
+                    legend = "CLOSING";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 202;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 243;
+                h = 10;
+                title = "TCP Socket Queue";
+                description = "TCP socket queue sizes. High rx_queued_bytes indicates application not reading fast enough. High tx_queued_bytes indicates network congestion or slow receiver";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_tcp_connection_states{state=\"rx_queued_bytes\",${nodeFilter}}";
+                    legend = "RX Queued (waiting to be read)";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_tcp_connection_states{state=\"tx_queued_bytes\",${nodeFilter}}";
+                    legend = "TX Queued (waiting to be sent)";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 203;})
+          ];
+        }
+        {
+          type = "row";
+          title = "Node Exporter";
+          collapsed = true;
+          gridPos = {
+            x = 0;
+            y = 33;
+            w = 24;
+            h = 1;
+          };
+          panels = [
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 164;
+                h = 10;
+                title = "Node Exporter Scrape Time";
+                description = "Duration of each individual collector executed during a Node Exporter scrape. Useful for identifying slow or failing collectors";
+                unit = "s";
+                fillOpacity = 20;
+                stacking = {
+                  group = "A";
+                  mode = "normal";
+                };
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_scrape_collector_duration_seconds{${nodeFilter}}";
+                    legend = "{{collector}}";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 204;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 164;
+                h = 10;
+                title = "Exporter Process CPU Usage";
+                description = "Rate of CPU time used by the process exposing this metric (user + system mode)";
+                unit = "percentunit";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "rate(process_cpu_seconds_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "Process CPU Usage";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 205;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 174;
+                w = 10;
+                h = 10;
+                title = "Exporter Processes Memory";
+                description = "Tracks the memory usage of the process exposing this metric (e.g., node_exporter), including current virtual memory and maximum virtual memory limit";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "Virtual Memory Limit";
+                    };
+                    properties = [
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                      {
+                        id = "custom.lineStyle";
+                        value = {
+                          dash = [10 10];
+                          fill = "dash";
+                        };
+                      }
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "dark-red";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                  {
+                    __systemRef = "hideSeriesFrom";
+                    matcher = {
+                      id = "byNames";
+                      options = {
+                        mode = "exclude";
+                        names = ["Virtual Memory"];
+                        prefix = "All except:";
+                        readOnly = true;
+                      };
+                    };
+                    properties = [
+                      {
+                        id = "custom.hideFrom";
+                        value = {
+                          legend = false;
+                          tooltip = false;
+                          viz = true;
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "process_virtual_memory_bytes{${nodeFilter}}";
+                    legend = "Virtual Memory";
+                    step = 240;
+                  }
+                  {
+                    expr = "process_virtual_memory_max_bytes{${nodeFilter}}";
+                    legend = "Virtual Memory Limit";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 206;})
+            (mkStackedTimeseries
+              {
+                x = 10;
+                y = 174;
+                w = 10;
+                h = 10;
+                title = "Exporter File Descriptor Usage";
+                description = "Number of file descriptors used by the exporter process versus its configured limit";
+                unit = "short";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/.*Max.*/";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "#890F02";
+                          mode = "fixed";
+                        };
+                      }
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                      {
+                        id = "custom.lineStyle";
+                        value = {
+                          dash = [10 10];
+                          fill = "dash";
+                        };
+                      }
+                    ];
+                  }
+                  {
+                    __systemRef = "hideSeriesFrom";
+                    matcher = {
+                      id = "byNames";
+                      options = {
+                        mode = "exclude";
+                        names = ["Open file descriptors"];
+                        prefix = "All except:";
+                        readOnly = true;
+                      };
+                    };
+                    properties = [
+                      {
+                        id = "custom.hideFrom";
+                        value = {
+                          legend = false;
+                          tooltip = false;
+                          viz = true;
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "process_max_fds{${nodeFilter}}";
+                    legend = "Maximum open file descriptors";
+                    step = 240;
+                  }
+                  {
+                    expr = "process_open_fds{${nodeFilter}}";
+                    legend = "Open file descriptors";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 207;})
+            (mkBarGauge
+              {
+                x = 20;
+                y = 174;
+                w = 4;
+                h = 10;
+                title = "Node Exporter Scrape";
+                description = "Shows whether each Node Exporter collector scraped successfully (1 = success, 0 = failure), and whether the textfile collector returned an error.";
+                unit = "bool";
+                min = null;
+                max = null;
+                instant = false;
+                thresholds = [
+                  {
+                    value = null;
+                    color = "green";
+                  }
+                  {
+                    value = 0;
+                    color = "dark-red";
+                  }
+                  {
+                    value = 1;
+                    color = "green";
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_scrape_collector_success{${nodeFilter}}";
+                    legend = "{{collector}}";
+                    step = 240;
+                  }
+                  {
+                    expr = "1 - node_textfile_scrape_error{${nodeFilter}}";
+                    legend = "textfile";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 208;})
+          ];
+        }
       ];
   }
