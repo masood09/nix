@@ -333,7 +333,7 @@
     expectedVec = lib.concatStringsSep " or " (map (h: "label_replace(vector(1), \"instance\", \"${h}\", \"\", \"\")") expectedHostList);
     down = tag "down" "40 * ((${expectedVec}) unless ${reporting})";
     terms = [baseline] ++ contribs ++ [down];
-  in "max by (instance) (${lib.concatStringsSep " or " terms})";
+  in "sort_desc(max by (instance) (${lib.concatStringsSep " or " terms}))";
 
   # Value mappings: encoded number -> "<category>" text, plus OK/DOWN. The
   # level (NOTICE/WARN/CRITICAL) isn't spelled out in the text — tile color
