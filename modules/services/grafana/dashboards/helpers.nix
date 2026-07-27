@@ -214,12 +214,14 @@ in {
     labelMappings ? [], # value mappings for the label column (raw value -> display)
     valueUnit ? "short",
     valueAlign ? null, # override the value column's alignment (e.g. "right")
+    decimals ? null,
     thresholds ? null,
     mappings ? [],
     cellColor ? false,
     rowColor ? false, # tint the whole row by the value threshold, not just its cell
     description ? null,
     links ? [], # per-field data links, attached to the label column
+    sortDesc ? true, # default table sort: worst-first on valueName, then labelName A-Z
   }: let
     valueProps =
       [
@@ -228,6 +230,10 @@ in {
           value = valueUnit;
         }
       ]
+      ++ lib.optional (decimals != null) {
+        id = "decimals";
+        value = decimals;
+      }
       ++ lib.optional (thresholds != null) {
         id = "thresholds";
         value = thresholds;
@@ -320,6 +326,16 @@ in {
         showHeader = true;
         cellHeight = "sm";
         footer = {show = false;};
+        sortBy = [
+          {
+            displayName = valueName;
+            desc = sortDesc;
+          }
+          {
+            displayName = labelName;
+            desc = false;
+          }
+        ];
       };
     };
 
