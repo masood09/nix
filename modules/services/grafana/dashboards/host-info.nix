@@ -31,6 +31,8 @@ in
   mkDashboard {
     uid = "host-info";
     title = "Host Info";
+    from = "now-24h"; # matches upstream's default time range
+    graphTooltip = 1; # matches upstream: shared crosshair across panels
     variables = [
       (mkQueryVar {
         name = "node";
