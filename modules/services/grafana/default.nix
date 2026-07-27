@@ -106,14 +106,6 @@ in {
                   ];
               in [
                 {
-                  name = "Node Exporter Full";
-                  type = "file";
-                  url = "https://grafana.com/api/dashboards/1860/revisions/45/download";
-                  options = {
-                    path = makeReadOnly ./dashboards/node-exporter-full.json;
-                  };
-                }
-                {
                   name = "PostgreSQL";
                   type = "file";
                   url = "https://grafana.com/api/dashboards/9628/revisions/8/download";
