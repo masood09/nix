@@ -520,11 +520,11 @@ in
         };
         panels = [];
       }
-      (mkStatBoard {
+      (mkMetricTable {
         x = 0;
         y = 14;
         w = 24;
-        h = 18;
+        h = 8;
         title = "Service uptime ($service_window availability)";
         # Availability over the $service_window dropdown, one colour-filled row
         # per service. Names come from the serviceNames map, folded into a
@@ -532,7 +532,12 @@ in
         # PromQL range selector, which Grafana interpolates per selection.
         description = "Average blackbox-probe availability of each monitored service over the $service_window dropdown at the top of the dashboard — not the (hidden) global time picker. No fill ≥ 99.9% (under ~10 min downtime/week); NOTICE ≥ 99.5% (up to ~50 min/week); WARN ≥ 95% (up to ~8.4 hours/week); CRITICAL below that. Change the dropdown to see a shorter or longer availability window.";
         expr = serviceUptimeExpr;
-        legend = "{{service}}";
+        labelCol = "service";
+        labelName = "Service";
+        dropCols = ["instance"];
+        valueName = "Uptime";
+        valueUnit = "percent";
+        rowColor = true;
         thresholds = {
           mode = "absolute";
           steps = [
@@ -563,7 +568,7 @@ in
         collapsed = true;
         gridPos = {
           x = 0;
-          y = 48;
+          y = 38;
           w = 24;
           h = 1;
         };
@@ -710,7 +715,7 @@ in
         collapsed = false;
         gridPos = {
           x = 0;
-          y = 32;
+          y = 22;
           w = 24;
           h = 1;
         };
@@ -718,7 +723,7 @@ in
       }
       (mkStatBoard {
         x = 0;
-        y = 33;
+        y = 23;
         w = 24;
         h = 6;
         title = "Backups";
@@ -762,7 +767,7 @@ in
       # --- auto-upgrade -----------------------------------------------------
       (mkStatBoard {
         x = 0;
-        y = 40;
+        y = 30;
         w = 12;
         h = 8;
         title = "Auto-upgrade status";
@@ -795,7 +800,7 @@ in
       })
       (mkStatBoard {
         x = 12;
-        y = 40;
+        y = 30;
         w = 12;
         h = 8;
         title = "Config age";
@@ -835,7 +840,7 @@ in
         collapsed = true;
         gridPos = {
           x = 0;
-          y = 49;
+          y = 39;
           w = 24;
           h = 1;
         };
