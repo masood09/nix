@@ -474,9 +474,21 @@ in
       })
 
       # --- status boards --------------------------------------------------
+      {
+        type = "row";
+        title = "Host Health";
+        collapsed = false;
+        gridPos = {
+          x = 0;
+          y = 4;
+          w = 24;
+          h = 1;
+        };
+        panels = [];
+      }
       (mkStatBoard {
         x = 0;
-        y = 4;
+        y = 5;
         w = 24;
         h = 8;
         title = "Host health";
@@ -494,9 +506,21 @@ in
           }
         ];
       })
+      {
+        type = "row";
+        title = "Service Availability";
+        collapsed = false;
+        gridPos = {
+          x = 0;
+          y = 13;
+          w = 24;
+          h = 1;
+        };
+        panels = [];
+      }
       (mkStatBoard {
         x = 0;
-        y = 12;
+        y = 14;
         w = 24;
         h = 18;
         title = "Service uptime ($service_window availability)";
@@ -530,128 +554,169 @@ in
         };
       })
 
-      # --- resource trends ------------------------------------------------
-      (mkTimeseries {
-        x = 0;
-        y = 46;
-        title = "CPU busy % (per host)";
-        description = "Average CPU utilization per host (100% minus idle time, averaged across all cores) over the $trend_window dropdown below.";
-        expr = "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)";
-        unit = "percent";
-        max = 100;
-        min = 0;
-        timeFrom = "$trend_window";
-      })
-      (mkTimeseries {
-        x = 0;
-        y = 54;
-        w = 8;
-        title = "Memory used % (per host)";
-        description = "Memory used per the kernel's own reclaim-aware estimate (1 - MemAvailable/MemTotal) — a conservative, capacity-planning-oriented number. It treats ZFS ARC as unavailable, so ARC-heavy hosts (see ZFS ARC usage % below) read much higher here than in the \"htop view\" panel alongside it. Use this one to judge real OOM risk / headroom; use the htop view for an intuitive at-a-glance read.";
-        expr = "100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)";
-        unit = "percent";
-        max = 100;
-        min = 0;
-        timeFrom = "$trend_window";
-      })
-      (mkTimeseries {
-        x = 16;
-        y = 46;
-        title = "System load % (per host)";
-        # Same normalization Node Exporter Full uses for its "Sys Load" gauge:
-        # load1 as a % of core count (100% = load matches core count), rather
-        # than the raw, unbounded load1 number.
-        description = "1-minute load average as a % of CPU core count (100% = load matches core count) — the same normalization Node Exporter Full's \"Sys Load\" gauge uses, so it's comparable across hosts with different core counts. Unlike the other panels in this row, it can legitimately exceed 100% (more work queued than cores available).";
-        expr = "100 * node_load1 / on(instance) count by (instance) (count by (instance, cpu) (node_cpu_seconds_total))";
-        unit = "percent";
-        min = 0;
-        timeFrom = "$trend_window";
-      })
-      (mkTimeseries {
-        x = 8;
-        y = 46;
-        title = "Memory used % — htop view (per host)";
-        # MemAvailable-based "used %" above treats ZFS ARC as fully used,
-        # since ARC isn't the reclaimable page cache MemAvailable accounts
-        # for — reads ~85% on an ARC-heavy host even when htop shows single
-        # digits. This matches htop's own accounting instead (excludes
-        # buffers, reclaimable slab, and ARC from "used"); see memoryUsedExpr.
-        description = "Memory used matching htop's own accounting: excludes buffers, reclaimable slab, and ZFS ARC from \"used\", since htop treats all of that as effectively free. Reads much lower than \"Memory used % (per host)\" on ARC-heavy hosts — that gap is exactly what the ZFS ARC usage % panel alongside it shows. Use this one for an intuitive read; use the MemAvailable-based panel for real headroom/OOM-risk judgment.";
-        expr = memoryUsedExpr;
-        unit = "percent";
-        max = 100;
-        min = 0;
-        timeFrom = "$trend_window";
-      })
-      (mkTimeseries {
-        x = 8;
-        y = 54;
-        w = 8;
-        title = "ZFS ARC usage % (per host)";
-        # How much of total RAM the ARC currently holds — the gap between
-        # the two memory panels above, made explicit. 0 on non-ZFS hosts.
-        description = "Share of total RAM currently held by the ZFS Adaptive Replacement Cache (ARC). Explains the gap between the two memory panels to the left: the MemAvailable-based one counts this as used, the htop-view one counts it as free. Reads 0% on non-ZFS hosts (caretaker, and sonic/usul if they start reporting).";
-        expr = "100 * (node_zfs_arc_size or on(instance) (0 * node_memory_MemTotal_bytes)) / node_memory_MemTotal_bytes";
-        unit = "percent";
-        max = 100;
-        min = 0;
-        timeFrom = "$trend_window";
-      })
-      (mkTimeseries {
-        x = 16;
-        y = 54;
-        w = 8;
-        title = "Swap used % (per host)";
-        description = "Percentage of configured swap space currently in use per host. Occasional low usage is normal; sustained non-zero swap under regular (non-spiky) load usually indicates real memory pressure.";
-        expr = "100 * (1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)";
-        unit = "percent";
-        max = 100;
-        min = 0;
-        timeFrom = "$trend_window";
-      })
-
-      # --- disk ------------------------------------------------------------
-      (mkTimeseries {
-        x = 0;
-        y = 62;
-        w = 8;
-        title = "Disk used % (per host, per pool)";
-        description = "ZFS pool capacity (allocated/size) per pool, e.g. heartbeat's rpool/fpool/dpool shown as separate lines rather than blended into one number — every impermanence-backed service dataset shares its pool's free space, so a per-mountpoint view would balloon into 100+ near-duplicate rows. Non-ZFS hosts (caretaker; sonic/usul if they start reporting) fall back to root-filesystem usage, labeled \"root (/nix)\".";
-        expr = diskUsedExpr;
-        legend = "{{instance}} ({{pool}})";
-        unit = "percent";
-        max = 100;
-        min = 0;
-        timeFrom = "$trend_window";
-      })
-      (mkTimeseries {
-        x = 8;
-        y = 62;
-        w = 8;
-        title = "Disk I/O throughput by type (per host)";
-        description = "Combined read+write throughput per host, split by device class (nvme/hdd/ssd/virtual-other for cloud/KVM block volumes) since baselines differ wildly by type — an HDD near its ceiling looks nothing like an idle NVMe. A 5-minute rolling average, so short bursts are smoothed rather than shown as sharp peaks. Best used to spot which host and device is actively busy right now (a backup, scrub, big transfer), not to judge against theoretical hardware maximums — quiet numbers are normal and expected, since ZFS ARC absorbs most reads before they reach disk.";
-        expr = diskIoByTypeExpr;
-        legend = "{{instance}} ({{type}})";
-        unit = "Bps";
-        min = 0;
-        timeFrom = "$trend_window";
-      })
-      (mkTimeseries {
-        x = 16;
-        y = 62;
-        w = 8;
-        title = "Disk I/O wait % (per host)";
-        description = "CPU time spent blocked waiting on any disk I/O, per host. Host-level only — iowait has no per-disk breakdown, unlike the throughput panel next to it. Rising alongside high throughput suggests the disk is actually a bottleneck right now; low iowait during high throughput means the disk is keeping up fine.";
-        expr = "avg by (instance) (rate(node_cpu_seconds_total{mode=\"iowait\"}[5m])) * 100";
-        unit = "percent";
-        min = 0;
-        timeFrom = "$trend_window";
-      })
+      # --- resource trends + disk ------------------------------------------
+      {
+        type = "row";
+        title = "Resource Trends";
+        collapsed = true;
+        gridPos = {
+          x = 0;
+          y = 48;
+          w = 24;
+          h = 1;
+        };
+        panels = [
+          (mkTimeseries
+            {
+              x = 0;
+              y = 0;
+              title = "CPU busy % (per host)";
+              description = "Average CPU utilization per host (100% minus idle time, averaged across all cores) over the $trend_window dropdown below.";
+              expr = "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)";
+              unit = "percent";
+              max = 100;
+              min = 0;
+              timeFrom = "$trend_window";
+            }
+            // {id = 100;})
+          (mkTimeseries
+            {
+              x = 8;
+              y = 0;
+              title = "Memory used % — htop view (per host)";
+              # MemAvailable-based "used %" above treats ZFS ARC as fully used,
+              # since ARC isn't the reclaimable page cache MemAvailable accounts
+              # for — reads ~85% on an ARC-heavy host even when htop shows single
+              # digits. This matches htop's own accounting instead (excludes
+              # buffers, reclaimable slab, and ARC from "used"); see memoryUsedExpr.
+              description = "Memory used matching htop's own accounting: excludes buffers, reclaimable slab, and ZFS ARC from \"used\", since htop treats all of that as effectively free. Reads much lower than \"Memory used % (per host)\" on ARC-heavy hosts — that gap is exactly what the ZFS ARC usage % panel alongside it shows. Use this one for an intuitive read; use the MemAvailable-based panel for real headroom/OOM-risk judgment.";
+              expr = memoryUsedExpr;
+              unit = "percent";
+              max = 100;
+              min = 0;
+              timeFrom = "$trend_window";
+            }
+            // {id = 101;})
+          (mkTimeseries
+            {
+              x = 16;
+              y = 0;
+              title = "System load % (per host)";
+              # Same normalization Node Exporter Full uses for its "Sys Load" gauge:
+              # load1 as a % of core count (100% = load matches core count), rather
+              # than the raw, unbounded load1 number.
+              description = "1-minute load average as a % of CPU core count (100% = load matches core count) — the same normalization Node Exporter Full's \"Sys Load\" gauge uses, so it's comparable across hosts with different core counts. Unlike the other panels in this row, it can legitimately exceed 100% (more work queued than cores available).";
+              expr = "100 * node_load1 / on(instance) count by (instance) (count by (instance, cpu) (node_cpu_seconds_total))";
+              unit = "percent";
+              min = 0;
+              timeFrom = "$trend_window";
+            }
+            // {id = 102;})
+          (mkTimeseries
+            {
+              x = 0;
+              y = 8;
+              w = 8;
+              title = "Memory used % (per host)";
+              description = "Memory used per the kernel's own reclaim-aware estimate (1 - MemAvailable/MemTotal) — a conservative, capacity-planning-oriented number. It treats ZFS ARC as unavailable, so ARC-heavy hosts (see ZFS ARC usage % below) read much higher here than in the \"htop view\" panel alongside it. Use this one to judge real OOM risk / headroom; use the htop view for an intuitive at-a-glance read.";
+              expr = "100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)";
+              unit = "percent";
+              max = 100;
+              min = 0;
+              timeFrom = "$trend_window";
+            }
+            // {id = 103;})
+          (mkTimeseries
+            {
+              x = 8;
+              y = 8;
+              w = 8;
+              title = "ZFS ARC usage % (per host)";
+              # How much of total RAM the ARC currently holds — the gap between
+              # the two memory panels above, made explicit. 0 on non-ZFS hosts.
+              description = "Share of total RAM currently held by the ZFS Adaptive Replacement Cache (ARC). Explains the gap between the two memory panels to the left: the MemAvailable-based one counts this as used, the htop-view one counts it as free. Reads 0% on non-ZFS hosts (caretaker, and sonic/usul if they start reporting).";
+              expr = "100 * (node_zfs_arc_size or on(instance) (0 * node_memory_MemTotal_bytes)) / node_memory_MemTotal_bytes";
+              unit = "percent";
+              max = 100;
+              min = 0;
+              timeFrom = "$trend_window";
+            }
+            // {id = 104;})
+          (mkTimeseries
+            {
+              x = 16;
+              y = 8;
+              w = 8;
+              title = "Swap used % (per host)";
+              description = "Percentage of configured swap space currently in use per host. Occasional low usage is normal; sustained non-zero swap under regular (non-spiky) load usually indicates real memory pressure.";
+              expr = "100 * (1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)";
+              unit = "percent";
+              max = 100;
+              min = 0;
+              timeFrom = "$trend_window";
+            }
+            // {id = 105;})
+          (mkTimeseries
+            {
+              x = 0;
+              y = 16;
+              w = 8;
+              title = "Disk used % (per host, per pool)";
+              description = "ZFS pool capacity (allocated/size) per pool, e.g. heartbeat's rpool/fpool/dpool shown as separate lines rather than blended into one number — every impermanence-backed service dataset shares its pool's free space, so a per-mountpoint view would balloon into 100+ near-duplicate rows. Non-ZFS hosts (caretaker; sonic/usul if they start reporting) fall back to root-filesystem usage, labeled \"root (/nix)\".";
+              expr = diskUsedExpr;
+              legend = "{{instance}} ({{pool}})";
+              unit = "percent";
+              max = 100;
+              min = 0;
+              timeFrom = "$trend_window";
+            }
+            // {id = 106;})
+          (mkTimeseries
+            {
+              x = 8;
+              y = 16;
+              w = 8;
+              title = "Disk I/O throughput by type (per host)";
+              description = "Combined read+write throughput per host, split by device class (nvme/hdd/ssd/virtual-other for cloud/KVM block volumes) since baselines differ wildly by type — an HDD near its ceiling looks nothing like an idle NVMe. A 5-minute rolling average, so short bursts are smoothed rather than shown as sharp peaks. Best used to spot which host and device is actively busy right now (a backup, scrub, big transfer), not to judge against theoretical hardware maximums — quiet numbers are normal and expected, since ZFS ARC absorbs most reads before they reach disk.";
+              expr = diskIoByTypeExpr;
+              legend = "{{instance}} ({{type}})";
+              unit = "Bps";
+              min = 0;
+              timeFrom = "$trend_window";
+            }
+            // {id = 107;})
+          (mkTimeseries
+            {
+              x = 16;
+              y = 16;
+              w = 8;
+              title = "Disk I/O wait % (per host)";
+              description = "CPU time spent blocked waiting on any disk I/O, per host. Host-level only — iowait has no per-disk breakdown, unlike the throughput panel next to it. Rising alongside high throughput suggests the disk is actually a bottleneck right now; low iowait during high throughput means the disk is keeping up fine.";
+              expr = "avg by (instance) (rate(node_cpu_seconds_total{mode=\"iowait\"}[5m])) * 100";
+              unit = "percent";
+              min = 0;
+              timeFrom = "$trend_window";
+            }
+            // {id = 108;})
+        ];
+      }
 
       # --- backups & certs ------------------------------------------------
+      {
+        type = "row";
+        title = "Backups";
+        collapsed = false;
+        gridPos = {
+          x = 0;
+          y = 32;
+          w = 24;
+          h = 1;
+        };
+        panels = [];
+      }
       (mkStatBoard {
         x = 0;
-        y = 30;
+        y = 33;
         w = 24;
         h = 6;
         title = "Backups";
@@ -695,7 +760,7 @@ in
       # --- auto-upgrade -----------------------------------------------------
       (mkStatBoard {
         x = 0;
-        y = 38;
+        y = 40;
         w = 12;
         h = 8;
         title = "Auto-upgrade status";
@@ -728,7 +793,7 @@ in
       })
       (mkStatBoard {
         x = 12;
-        y = 38;
+        y = 40;
         w = 12;
         h = 8;
         title = "Config age";
@@ -762,43 +827,58 @@ in
         };
       })
 
-      (mkStatBoard {
-        x = 0;
-        y = 70;
-        w = 24;
-        h = 16;
-        title = "TLS certificate expiry";
-        # unit = "suffix: days" (a literal string appended after the number)
-        # rather than Grafana's "d" time unit, which auto-scales to weeks for
-        # larger values — the point is a plain day count, not adaptive
-        # duration formatting.
-        description = "Days remaining before each monitored certificate expires. CRITICAL under 7 days (renewal has clearly failed), WARN under 14 (should have auto-renewed already), NOTICE under 30 (approaching the typical ACME renewal window), no fill beyond.";
-        # Strip scheme + path from the probe URL, leaving just the domain —
-        # the path doesn't matter for a cert (it's issued per-domain).
-        expr = "label_replace(sort((probe_ssl_earliest_cert_expiry - time()) / 86400), \"domain\", \"$1\", \"instance\", \"https?://([^/]+).*\")";
-        legend = "{{domain}}";
-        unit = "suffix: days";
-        thresholds = {
-          mode = "absolute";
-          steps = [
-            {
-              value = null;
-              color = "red";
-            }
-            {
-              value = 7;
-              color = "orange";
-            }
-            {
-              value = 14;
-              color = "light-orange";
-            }
-            {
-              value = 30;
-              color = "transparent";
-            }
-          ];
+      {
+        type = "row";
+        title = "Certificates";
+        collapsed = true;
+        gridPos = {
+          x = 0;
+          y = 49;
+          w = 24;
+          h = 1;
         };
-      })
+        panels = [
+          (mkStatBoard
+            {
+              x = 0;
+              y = 0;
+              w = 24;
+              h = 16;
+              title = "TLS certificate expiry";
+              # unit = "suffix: days" (a literal string appended after the number)
+              # rather than Grafana's "d" time unit, which auto-scales to weeks for
+              # larger values — the point is a plain day count, not adaptive
+              # duration formatting.
+              description = "Days remaining before each monitored certificate expires. CRITICAL under 7 days (renewal has clearly failed), WARN under 14 (should have auto-renewed already), NOTICE under 30 (approaching the typical ACME renewal window), no fill beyond.";
+              # Strip scheme + path from the probe URL, leaving just the domain —
+              # the path doesn't matter for a cert (it's issued per-domain).
+              expr = "label_replace(sort((probe_ssl_earliest_cert_expiry - time()) / 86400), \"domain\", \"$1\", \"instance\", \"https?://([^/]+).*\")";
+              legend = "{{domain}}";
+              unit = "suffix: days";
+              thresholds = {
+                mode = "absolute";
+                steps = [
+                  {
+                    value = null;
+                    color = "red";
+                  }
+                  {
+                    value = 7;
+                    color = "orange";
+                  }
+                  {
+                    value = 14;
+                    color = "light-orange";
+                  }
+                  {
+                    value = 30;
+                    color = "transparent";
+                  }
+                ];
+              };
+            }
+            // {id = 109;})
+        ];
+      }
     ];
   }
