@@ -476,7 +476,7 @@ in
       # --- status boards --------------------------------------------------
       {
         type = "row";
-        title = "Host Health";
+        title = "Health & Availability";
         collapsed = false;
         gridPos = {
           x = 0;
@@ -489,7 +489,7 @@ in
       (mkMetricTable {
         x = 0;
         y = 5;
-        w = 24;
+        w = 12;
         h = 8;
         title = "Host health";
         description = "Worst-case signal per host across disk, RAM, thermal, power, fans, system, pending-reboot, and auto-upgrade checks (see hhConditions in fleet.nix). No fill = nothing wrong. Row names the category of the worst active issue (e.g. \"Disk\" or \"Auto-upgrade\"); row color (light-orange/orange/red) conveys severity (NOTICE/WARN/CRITICAL). DOWN (purple) means the host has stopped reporting entirely — a different kind of signal than a detected problem. This collapses everything to one number per host; expand a specific category on the disk/memory/auto-upgrade panels below, or check Storage & Hardware for raw SMART/IPMI detail.";
@@ -508,22 +508,10 @@ in
           }
         ];
       })
-      {
-        type = "row";
-        title = "Service Availability";
-        collapsed = false;
-        gridPos = {
-          x = 0;
-          y = 13;
-          w = 24;
-          h = 1;
-        };
-        panels = [];
-      }
       (mkMetricTable {
-        x = 0;
-        y = 14;
-        w = 24;
+        x = 12;
+        y = 5;
+        w = 12;
         h = 8;
         title = "Service uptime ($service_window availability)";
         # Availability over the $service_window dropdown, one colour-filled row
@@ -568,7 +556,7 @@ in
         collapsed = true;
         gridPos = {
           x = 0;
-          y = 39;
+          y = 30;
           w = 24;
           h = 1;
         };
@@ -715,7 +703,7 @@ in
         collapsed = false;
         gridPos = {
           x = 0;
-          y = 22;
+          y = 13;
           w = 24;
           h = 1;
         };
@@ -723,7 +711,7 @@ in
       }
       (mkMetricTable {
         x = 0;
-        y = 23;
+        y = 14;
         w = 24;
         h = 8;
         title = "Backups";
@@ -770,7 +758,7 @@ in
       # --- auto-upgrade -----------------------------------------------------
       (mkMetricTable {
         x = 0;
-        y = 31;
+        y = 22;
         w = 12;
         h = 8;
         title = "Auto-upgrade status";
@@ -806,7 +794,7 @@ in
       })
       (mkMetricTable {
         x = 12;
-        y = 31;
+        y = 22;
         w = 12;
         h = 8;
         title = "Config age";
@@ -849,7 +837,7 @@ in
         collapsed = true;
         gridPos = {
           x = 0;
-          y = 40;
+          y = 31;
           w = 24;
           h = 1;
         };
