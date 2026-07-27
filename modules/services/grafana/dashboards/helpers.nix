@@ -100,6 +100,7 @@ in {
     thresholds,
     mappings ? [],
     description ? null,
+    links ? [], # per-field data links (e.g. click-through to another dashboard)
   }:
     {
       type = "stat";
@@ -122,7 +123,7 @@ in {
     // {
       fieldConfig = {
         defaults = {
-          inherit unit thresholds mappings;
+          inherit unit thresholds mappings links;
           color = {mode = "thresholds";};
         };
         overrides = [];
