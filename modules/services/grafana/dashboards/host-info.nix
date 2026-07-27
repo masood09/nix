@@ -1,9 +1,8 @@
 # Host Info — rebuilt from Nix attrsets instead of vendored upstream JSON,
 # one section at a time. Derived from the "Node Exporter Full" community
 # dashboard (https://grafana.com/grafana/dashboards/1860), rev 45
-# (https://grafana.com/api/dashboards/1860/revisions/45/download) — see
-# node-exporter-full.json for the community dashboard this eventually
-# replaces once complete.
+# (https://grafana.com/api/dashboards/1860/revisions/45/download), which this
+# fully replaces — the community dashboard is no longer provisioned.
 #
 # Simplified from upstream:
 # - Fixed "prometheus" datasource (matching every other dashboard here)
