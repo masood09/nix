@@ -7,7 +7,7 @@
   lib,
   helpers,
 }: let
-  inherit (helpers) mkStat mkStatBoard mkTimeseries mkMetricTable mkDashboard mkCustomVar greenAtOne upTotalSuffix upTotalThresholds;
+  inherit (helpers) mkStat mkTimeseries mkMetricTable mkDashboard mkCustomVar greenAtOne upTotalSuffix upTotalThresholds;
 
   # Curated probe-target -> "Product (host it runs on)" map. The host is where
   # the *app* runs (from the machine configs), not the edge that fronts it —
@@ -534,7 +534,7 @@ in
         expr = serviceUptimeExpr;
         labelCol = "service";
         labelName = "Service";
-        dropCols = ["instance"];
+        dropCols = ["instance" "__name__"];
         valueName = "Uptime";
         valueUnit = "percent";
         rowColor = true;
@@ -568,7 +568,7 @@ in
         collapsed = true;
         gridPos = {
           x = 0;
-          y = 38;
+          y = 39;
           w = 24;
           h = 1;
         };
@@ -721,16 +721,19 @@ in
         };
         panels = [];
       }
-      (mkStatBoard {
+      (mkMetricTable {
         x = 0;
         y = 23;
         w = 24;
-        h = 6;
+        h = 8;
         title = "Backups";
         description = "Whether each host's backups are healthy, not when they last ran. OK = last success within 26 hours (enough slack over a 24h daily cadence for normal run-time variance); MISSED = a backup has actually been missed.";
         expr = "sort_desc((time() - homelab_backup_last_success_timestamp_seconds) / 3600)";
-        legend = "{{instance}}";
-        unit = "none";
+        labelName = "Host";
+        dropCols = ["__name__"];
+        valueName = "Status";
+        valueUnit = "none";
+        rowColor = true;
         thresholds = {
           mode = "absolute";
           steps = [
@@ -765,16 +768,19 @@ in
       })
 
       # --- auto-upgrade -----------------------------------------------------
-      (mkStatBoard {
+      (mkMetricTable {
         x = 0;
-        y = 30;
+        y = 31;
         w = 12;
         h = 8;
         title = "Auto-upgrade status";
         description = "Result of each host's last weekly nixos-upgrade.service run (system.autoUpgrade, Saturdays 07:00). OK = last run succeeded; FAILED = it didn't — check `journalctl -u nixos-upgrade` on that host.";
         expr = "node_auto_upgrade_last_result";
-        legend = "{{instance}}";
-        unit = "none";
+        labelName = "Host";
+        dropCols = ["__name__"];
+        valueName = "Status";
+        valueUnit = "none";
+        rowColor = true;
         thresholds = {
           mode = "absolute";
           steps = [
@@ -798,9 +804,9 @@ in
           }
         ];
       })
-      (mkStatBoard {
+      (mkMetricTable {
         x = 12;
-        y = 30;
+        y = 31;
         w = 12;
         h = 8;
         title = "Config age";
@@ -809,8 +815,11 @@ in
         # fractional-day number (0.0150 days) for a config deployed minutes ago.
         description = "Time since the deployed flake's commit (not since the last upgrade attempt — a failed run still leaves this growing). The weekly auto-upgrade cadence should keep this under ~10 days; growing well past that suggests the auto-upgrade timer itself has stopped working, not just a single failed run.";
         expr = "time() - node_flake_commit_timestamp_seconds";
-        legend = "{{instance}}";
-        unit = "s";
+        labelName = "Host";
+        dropCols = ["__name__"];
+        valueName = "Age";
+        valueUnit = "s";
+        rowColor = true;
         thresholds = {
           mode = "absolute";
           steps = [
@@ -840,17 +849,17 @@ in
         collapsed = true;
         gridPos = {
           x = 0;
-          y = 39;
+          y = 40;
           w = 24;
           h = 1;
         };
         panels = [
-          (mkStatBoard
+          (mkMetricTable
             {
               x = 0;
               y = 0;
               w = 24;
-              h = 16;
+              h = 8;
               title = "TLS certificate expiry";
               # unit = "suffix: days" (a literal string appended after the number)
               # rather than Grafana's "d" time unit, which auto-scales to weeks for
@@ -860,8 +869,12 @@ in
               # Strip scheme + path from the probe URL, leaving just the domain —
               # the path doesn't matter for a cert (it's issued per-domain).
               expr = "label_replace(sort((probe_ssl_earliest_cert_expiry - time()) / 86400), \"domain\", \"$1\", \"instance\", \"https?://([^/]+).*\")";
-              legend = "{{domain}}";
-              unit = "suffix: days";
+              labelCol = "domain";
+              labelName = "Domain";
+              dropCols = ["instance" "__name__"];
+              valueName = "Days left";
+              valueUnit = "suffix: days";
+              rowColor = true;
               thresholds = {
                 mode = "absolute";
                 steps = [
