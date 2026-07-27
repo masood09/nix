@@ -1553,5 +1553,205 @@ in
               // {id = 121;})
           ];
         }
+        {
+          type = "row";
+          title = "Memory Vmstat";
+          collapsed = true;
+          gridPos = {
+            x = 0;
+            y = 22;
+            w = 24;
+            h = 1;
+          };
+          panels = [
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 733;
+                h = 10;
+                title = "Memory Pages In / Out";
+                description = "Rate of memory pages being read from or written to disk (page-in and page-out operations). High page-out may indicate memory pressure or swapping activity";
+                unit = "ops";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/.*out.*/";
+                    };
+                    properties = [
+                      {
+                        id = "custom.transform";
+                        value = "negative-Y";
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "rate(node_vmstat_pgpgin{${nodeFilter}}[$__rate_interval])";
+                    legend = "Pagesin - Page in ops";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_vmstat_pgpgout{${nodeFilter}}[$__rate_interval])";
+                    legend = "Pagesout - Page out ops";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 122;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 733;
+                h = 10;
+                title = "Memory Pages Swap In / Out";
+                description = "Rate at which memory pages are being swapped in from or out to disk. High swap-out activity may indicate memory pressure";
+                unit = "ops";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/.*out.*/";
+                    };
+                    properties = [
+                      {
+                        id = "custom.transform";
+                        value = "negative-Y";
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "rate(node_vmstat_pswpin{${nodeFilter}}[$__rate_interval])";
+                    legend = "Pswpin - Pages swapped in";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_vmstat_pswpout{${nodeFilter}}[$__rate_interval])";
+                    legend = "Pswpout - Pages swapped out";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 123;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 913;
+                h = 10;
+                title = "Memory Page Faults";
+                description = "Rate of memory page faults, split into total, major (disk-backed), and derived minor (non-disk) faults. High major fault rates may indicate memory pressure or insufficient RAM";
+                unit = "ops";
+                min = 0;
+                fillOpacity = 20;
+                stacking = {
+                  group = "A";
+                  mode = "normal";
+                };
+                legendWidth = 350;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "Pgfault - Page major and minor fault ops";
+                    };
+                    properties = [
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                      {
+                        id = "custom.stacking";
+                        value = {
+                          group = false;
+                          mode = "none";
+                        };
+                      }
+                      {
+                        id = "custom.lineStyle";
+                        value = {
+                          dash = [10 10];
+                          fill = "dash";
+                        };
+                      }
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "dark-red";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "rate(node_vmstat_pgfault{${nodeFilter}}[$__rate_interval])";
+                    legend = "Pgfault - Page major and minor fault ops";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_vmstat_pgmajfault{${nodeFilter}}[$__rate_interval])";
+                    legend = "Pgmajfault - Major page fault ops";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_vmstat_pgfault{${nodeFilter}}[$__rate_interval])  - rate(node_vmstat_pgmajfault{${nodeFilter}}[$__rate_interval])";
+                    legend = "Pgminfault - Minor page fault ops";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 124;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 913;
+                h = 10;
+                title = "OOM Killer";
+                description = "Rate of Out-of-Memory (OOM) kill events. A non-zero value indicates the kernel has terminated one or more processes due to memory exhaustion";
+                unit = "ops";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byName";
+                      options = "OOM Kills";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "dark-red";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "rate(node_vmstat_oom_kill{${nodeFilter}}[$__rate_interval])";
+                    legend = "OOM Kills";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 125;})
+          ];
+        }
       ];
   }
