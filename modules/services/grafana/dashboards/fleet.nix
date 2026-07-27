@@ -750,7 +750,7 @@ in
         h = 8;
         title = "Auto-upgrade status";
         description = "Result of each host's last weekly nixos-upgrade.service run (system.autoUpgrade, Saturdays 07:00). OK = last run succeeded; FAILED = it didn't — check `journalctl -u nixos-upgrade` on that host.";
-        expr = "node_auto_upgrade_last_result";
+        expr = "sort(node_auto_upgrade_last_result)";
         labelName = "Host";
         dropCols = ["__name__"];
         valueName = "Status";
