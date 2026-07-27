@@ -1086,5 +1086,472 @@ in
               // {id = 109;})
           ];
         }
+        {
+          type = "row";
+          title = "Memory Meminfo";
+          collapsed = true;
+          gridPos = {
+            x = 0;
+            y = 21;
+            w = 24;
+            h = 1;
+          };
+          panels = let
+            byRegexColor = regex: color: {
+              matcher = {
+                id = "byRegexp";
+                options = regex;
+              };
+              properties = [
+                {
+                  id = "color";
+                  value = {
+                    fixedColor = color;
+                    mode = "fixed";
+                  };
+                }
+              ];
+            };
+          in [
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 732;
+                h = 10;
+                title = "Memory Committed";
+                description = "Displays committed memory usage versus the system's commit limit. Exceeding the limit is allowed under Linux overcommit policies but may increase OOM risks under high load";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                legendWidth = 350;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/.*CommitLimit - *./";
+                    };
+                    properties = [
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "#BF1B00";
+                          mode = "fixed";
+                        };
+                      }
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_memory_Committed_AS_bytes{${nodeFilter}}";
+                    legend = "Committed_AS – Memory promised to processes (not necessarily used)";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_CommitLimit_bytes{${nodeFilter}}";
+                    legend = "CommitLimit - Max allowable committed memory";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 110;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 732;
+                h = 10;
+                title = "Memory Writeback and Dirty";
+                description = "Memory currently dirty (modified but not yet written to disk), being actively written back, or held by writeback buffers. High dirty or writeback memory may indicate disk I/O pressure or delayed flushing";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_memory_Writeback_bytes{${nodeFilter}}";
+                    legend = "Writeback – Memory currently being flushed to disk";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_WritebackTmp_bytes{${nodeFilter}}";
+                    legend = "WritebackTmp – FUSE temporary writeback buffers";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_Dirty_bytes{${nodeFilter}}";
+                    legend = "Dirty – Memory marked dirty (pending write to disk)";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_NFS_Unstable_bytes{${nodeFilter}}";
+                    legend = "NFS Unstable – Pages sent to NFS server, awaiting storage commit";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 111;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 932;
+                h = 10;
+                title = "Memory Slab";
+                description = "Kernel slab memory usage, separated into reclaimable and non-reclaimable categories. Reclaimable memory can be freed under memory pressure (e.g., caches), while unreclaimable memory is locked by the kernel for core functions";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                stacking = {
+                  group = "A";
+                  mode = "normal";
+                };
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_memory_SUnreclaim_bytes{${nodeFilter}}";
+                    legend = "SUnreclaim – Non-reclaimable slab memory (kernel objects)";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_SReclaimable_bytes{${nodeFilter}}";
+                    legend = "SReclaimable – Potentially reclaimable slab memory (e.g., inode cache)";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 112;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 932;
+                h = 10;
+                title = "Memory Shared and Mapped";
+                description = "Memory used for mapped files (such as libraries) and shared memory (shmem and tmpfs), including variants backed by huge pages";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                legendWidth = 350;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_memory_Mapped_bytes{${nodeFilter}}";
+                    legend = "Mapped – Memory mapped from files (e.g., libraries, mmap)";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_Shmem_bytes{${nodeFilter}}";
+                    legend = "Shmem – Shared memory used by processes and tmpfs";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_ShmemHugePages_bytes{${nodeFilter}}";
+                    legend = "ShmemHugePages – Shared memory (shmem/tmpfs) allocated with HugePages";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_ShmemPmdMapped_bytes{${nodeFilter}}";
+                    legend = "PMD Mapped – Shmem/tmpfs backed by Transparent HugePages (PMD)";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 113;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 942;
+                h = 10;
+                title = "Memory LRU Active / Inactive (%)";
+                description = "Proportion of memory pages in the kernel's active and inactive LRU lists relative to total RAM. Active pages have been recently used, while inactive pages are less recently accessed but still resident in memory";
+                unit = "percentunit";
+                min = 0;
+                fillOpacity = 20;
+                stacking = {
+                  group = "A";
+                  mode = "normal";
+                };
+                legendWidth = 350;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  (byRegexColor "/.*Active.*/" "green")
+                  (byRegexColor "/.*Inactive.*/" "dark-blue")
+                ];
+                targets = [
+                  {
+                    expr = "(node_memory_Inactive_bytes{${nodeFilter}}) \n/ \n(node_memory_MemTotal_bytes{${nodeFilter}})";
+                    legend = "Inactive – Less recently used memory, more likely to be reclaimed";
+                    step = 240;
+                  }
+                  {
+                    expr = "(node_memory_Active_bytes{${nodeFilter}}) \n/ \n(node_memory_MemTotal_bytes{${nodeFilter}})\n";
+                    legend = "Active – Recently used memory, retained unless under pressure";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 114;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 942;
+                h = 10;
+                title = "Memory LRU Active / Inactive Detail";
+                description = "Breakdown of memory pages in the kernel's active and inactive LRU lists, separated by anonymous (heap, tmpfs) and file-backed (caches, mmap) pages.";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                stacking = {
+                  group = "A";
+                  mode = "normal";
+                };
+                legendWidth = 350;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_memory_Inactive_file_bytes{${nodeFilter}}";
+                    legend = "Inactive_file - File-backed memory on inactive LRU list";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_Inactive_anon_bytes{${nodeFilter}}";
+                    legend = "Inactive_anon – Anonymous memory on inactive LRU (incl. tmpfs & swap cache)";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_Active_file_bytes{${nodeFilter}}";
+                    legend = "Active_file - File-backed memory on active LRU list";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_Active_anon_bytes{${nodeFilter}}";
+                    legend = "Active_anon – Anonymous memory on active LRU (incl. tmpfs & swap cache)";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 115;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 952;
+                h = 10;
+                title = "Memory Kernel / CPU / IO";
+                description = "Tracks kernel memory used for CPU-local structures, per-thread stacks, and bounce buffers used for I/O on DMA-limited devices. These areas are typically small but critical for low-level operations";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                legendWidth = 350;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_memory_KernelStack_bytes{${nodeFilter}}";
+                    legend = "KernelStack – Kernel stack memory (per-thread, non-reclaimable)";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_Percpu_bytes{${nodeFilter}}";
+                    legend = "PerCPU – Dynamically allocated per-CPU memory (used by kernel modules)";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_Bounce_bytes{${nodeFilter}}";
+                    legend = "Bounce Memory – I/O buffer for DMA-limited devices";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 116;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 952;
+                h = 10;
+                title = "Memory Vmalloc";
+                description = "Usage of the kernel's vmalloc area, which provides virtual memory allocations for kernel modules and drivers. Includes total, used, and largest free block sizes";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                overrides = [
+                  {
+                    matcher = {
+                      id = "byRegexp";
+                      options = "/.*Total.*/";
+                    };
+                    properties = [
+                      {
+                        id = "custom.fillOpacity";
+                        value = 0;
+                      }
+                      {
+                        id = "custom.lineStyle";
+                        value = {
+                          dash = [10 10];
+                          fill = "dash";
+                        };
+                      }
+                      {
+                        id = "color";
+                        value = {
+                          fixedColor = "dark-red";
+                          mode = "fixed";
+                        };
+                      }
+                    ];
+                  }
+                ];
+                targets = [
+                  {
+                    expr = "node_memory_VmallocChunk_bytes{${nodeFilter}}";
+                    legend = "Vmalloc Free Chunk – Largest available block in vmalloc area";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_VmallocTotal_bytes{${nodeFilter}}";
+                    legend = "Vmalloc Total – Total size of the vmalloc memory area";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_VmallocUsed_bytes{${nodeFilter}}";
+                    legend = "Vmalloc Used – Portion of vmalloc area currently in use";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 117;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 962;
+                h = 10;
+                title = "Memory Anonymous";
+                description = "Memory used by anonymous pages (not backed by files), including standard and huge page allocations. Includes heap, stack, and memory-mapped anonymous regions";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_memory_AnonHugePages_bytes{${nodeFilter}}";
+                    legend = "AnonHugePages – Anonymous memory using HugePages";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_AnonPages_bytes{${nodeFilter}}";
+                    legend = "AnonPages – Anonymous memory (non-file-backed)";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 118;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 962;
+                h = 10;
+                title = "Memory Unevictable and MLocked";
+                description = "Memory that is locked in RAM and cannot be swapped out. Includes both kernel-unevictable memory and user-level memory locked with mlock()";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                legendWidth = 350;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_memory_Unevictable_bytes{${nodeFilter}}";
+                    legend = "Unevictable – Kernel-pinned memory (not swappable)";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_Mlocked_bytes{${nodeFilter}}";
+                    legend = "Mlocked – Application-locked memory via mlock()";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 119;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 972;
+                h = 10;
+                title = "Memory DirectMap";
+                description = "How much memory is directly mapped in the kernel using different page sizes (4K, 2M, 1G). Helps monitor large page utilization in the direct map region";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_memory_DirectMap1G_bytes{${nodeFilter}}";
+                    legend = "DirectMap 1G – Memory mapped with 1GB pages";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_DirectMap2M_bytes{${nodeFilter}}";
+                    legend = "DirectMap 2M – Memory mapped with 2MB pages";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_DirectMap4k_bytes{${nodeFilter}}";
+                    legend = "DirectMap 4K – Memory mapped with 4KB pages";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 120;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 972;
+                h = 10;
+                title = "Memory HugePages";
+                description = "Displays HugePages memory usage in bytes, including allocated, free, reserved, and surplus memory. All values are calculated based on the number of huge pages multiplied by their configured size";
+                unit = "bytes";
+                min = 0;
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "(node_memory_HugePages_Total{${nodeFilter}} - node_memory_HugePages_Free{${nodeFilter}}) * node_memory_Hugepagesize_bytes{${nodeFilter}}";
+                    legend = "HugePages Used – Currently allocated";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_HugePages_Rsvd{${nodeFilter}} * node_memory_Hugepagesize_bytes{${nodeFilter}}";
+                    legend = "HugePages Reserved – Promised but unused";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_HugePages_Surp{${nodeFilter}} * node_memory_Hugepagesize_bytes{${nodeFilter}}";
+                    legend = "HugePages Surplus – Dynamic pool extension";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_memory_HugePages_Total{${nodeFilter}} * node_memory_Hugepagesize_bytes{${nodeFilter}}";
+                    legend = "HugePages Total – Reserved memory";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 121;})
+          ];
+        }
       ];
   }
