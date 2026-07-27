@@ -36,6 +36,11 @@
           preferred_ip_protocol = "ip4";
         };
       };
+
+      tcp_connect = {
+        prober = "tcp";
+        timeout = "5s";
+      };
     };
   };
 in {
