@@ -608,8 +608,9 @@ in {
     refresh ? "1m",
     from ? "now-6h",
     hideTimePicker ? false,
+    graphTooltip ? 0, # 0 = independent tooltips, 1 = shared crosshair
   }: {
-    inherit uid title tags refresh;
+    inherit uid title tags refresh graphTooltip;
     schemaVersion = 39;
     editable = false;
     timezone = "browser";
