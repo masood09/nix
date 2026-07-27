@@ -46,6 +46,18 @@
       base (builtins.attrNames serviceNames);
   in "sort(${labeled})";
 
+  # Current up/down state per service (not availability over a window like
+  # serviceUptimeExpr) — the "which one is actually down right now" board.
+  # Ascending sort puts 0 (down) above 1 (up).
+  serviceStatusExpr = let
+    base = "probe_success";
+    labeled =
+      lib.foldl' (
+        inner: url: "label_replace(${inner}, \"service\", \"${serviceNames.${url}}\", \"instance\", \"${url}\")"
+      )
+      base (builtins.attrNames serviceNames);
+  in "sort(${labeled})";
+
   # "up / total" denominators. The push/remote-write model means no live metric
   # enumerates the expected totals, so these are the source of truth:
   #   totalServices — derived from serviceNames, so adding a probe target (which
@@ -489,7 +501,7 @@ in
       (mkMetricTable {
         x = 0;
         y = 5;
-        w = 12;
+        w = 8;
         h = 8;
         title = "Host health";
         description = "Worst-case signal per host across disk, RAM, thermal, power, fans, system, pending-reboot, and auto-upgrade checks (see hhConditions in fleet.nix). No fill = nothing wrong. Row names the category of the worst active issue (e.g. \"Disk\" or \"Auto-upgrade\"); row color (light-orange/orange/red) conveys severity (NOTICE/WARN/CRITICAL). DOWN (purple) means the host has stopped reporting entirely — a different kind of signal than a detected problem. This collapses everything to one number per host; expand a specific category on the disk/memory/auto-upgrade panels below, or check Storage & Hardware for raw SMART/IPMI detail.";
@@ -509,9 +521,46 @@ in
         ];
       })
       (mkMetricTable {
-        x = 12;
+        x = 8;
         y = 5;
-        w = 12;
+        w = 8;
+        h = 8;
+        title = "Service status";
+        description = "Whether each monitored service is passing its health probe right now (not availability over a window like the panel to the right). Red rows are down; check the service on its host. Sorted with any down services first.";
+        expr = serviceStatusExpr;
+        labelCol = "service";
+        labelName = "Service";
+        dropCols = ["instance" "__name__"];
+        valueName = "Status";
+        valueUnit = "none";
+        rowColor = true;
+        thresholds = {
+          mode = "absolute";
+          steps = [
+            {
+              value = null;
+              color = "red";
+            }
+            {
+              value = 1;
+              color = "transparent";
+            }
+          ];
+        };
+        mappings = [
+          {
+            type = "value";
+            options = {
+              "0" = {text = "DOWN";};
+              "1" = {text = "UP";};
+            };
+          }
+        ];
+      })
+      (mkMetricTable {
+        x = 16;
+        y = 5;
+        w = 8;
         h = 8;
         title = "Service uptime ($service_window availability)";
         # Availability over the $service_window dropdown, one colour-filled row
