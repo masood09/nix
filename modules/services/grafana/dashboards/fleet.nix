@@ -126,11 +126,6 @@
     warn = 2;
     crit = 3;
   };
-  hhLevelText = {
-    notice = "NOTICE";
-    warn = "WARN";
-    crit = "CRITICAL";
-  };
   hhCatText = {
     upgrade = "Auto-upgrade";
     reboot = "Reboot";
@@ -340,13 +335,15 @@
     terms = [baseline] ++ contribs ++ [down];
   in "max by (instance) (${lib.concatStringsSep " or " terms})";
 
-  # Value mappings: encoded number -> "<category> <LEVEL>" text, plus OK/DOWN.
+  # Value mappings: encoded number -> "<category>" text, plus OK/DOWN. The
+  # level (NOTICE/WARN/CRITICAL) isn't spelled out in the text — tile color
+  # already conveys severity (see hostHealthThresholds below).
   hostHealthMappings = let
     combos = lib.unique (map (c: {inherit (c) cat level;}) hhConditions);
     comboEntries =
       map (c: {
         name = toString (hhEncode c.cat c.level);
-        text = "${hhCatText.${c.cat}} ${hhLevelText.${c.level}}";
+        text = hhCatText.${c.cat};
       })
       combos;
     entries =
@@ -483,7 +480,7 @@ in
         w = 24;
         h = 8;
         title = "Host health";
-        description = "Worst-case signal per host across disk, RAM, thermal, power, fans, system, pending-reboot, and auto-upgrade checks (see hhConditions in fleet.nix). No fill = nothing wrong. NOTICE/WARN/CRITICAL (light-orange/orange/red) name the worst active issue and its category — e.g. \"Disk WARN\" or \"Auto-upgrade WARN\". DOWN (purple) means the host has stopped reporting entirely — a different kind of signal than a detected problem. This collapses everything to one number per host; expand a specific category on the disk/memory/auto-upgrade panels below, or check Storage & Hardware for raw SMART/IPMI detail.";
+        description = "Worst-case signal per host across disk, RAM, thermal, power, fans, system, pending-reboot, and auto-upgrade checks (see hhConditions in fleet.nix). No fill = nothing wrong. Tile names the category of the worst active issue (e.g. \"Disk\" or \"Auto-upgrade\"); tile color (light-orange/orange/red) conveys severity (NOTICE/WARN/CRITICAL). DOWN (purple) means the host has stopped reporting entirely — a different kind of signal than a detected problem. This collapses everything to one number per host; expand a specific category on the disk/memory/auto-upgrade panels below, or check Storage & Hardware for raw SMART/IPMI detail.";
         expr = hostHealthExpr;
         legend = "{{instance}}";
         unit = "none";
