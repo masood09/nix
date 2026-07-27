@@ -1753,5 +1753,188 @@ in
               // {id = 125;})
           ];
         }
+        {
+          type = "row";
+          title = "System Timesync";
+          collapsed = true;
+          gridPos = {
+            x = 0;
+            y = 23;
+            w = 24;
+            h = 1;
+          };
+          panels = [
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 734;
+                h = 10;
+                title = "Time Synchronized Drift";
+                description = "Tracks the system clock's estimated and maximum error, as well as its offset from the reference clock (e.g., via NTP). Useful for detecting synchronization drift";
+                unit = "s";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_timex_estimated_error_seconds{${nodeFilter}}";
+                    legend = "Estimated error";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_timex_offset_seconds{${nodeFilter}}";
+                    legend = "Offset local vs reference";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_timex_maxerror_seconds{${nodeFilter}}";
+                    legend = "Maximum error";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 126;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 734;
+                h = 10;
+                title = "Time PLL Adjust";
+                description = "NTP phase-locked loop (PLL) time constant used by the kernel to control time adjustments. Lower values mean faster correction but less stability";
+                unit = "short";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_timex_loop_time_constant{${nodeFilter}}";
+                    legend = "PLL Time Constant";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 127;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 884;
+                h = 10;
+                title = "Time Synchronized Status";
+                description = "Shows whether the system clock is synchronized to a reliable time source, and the current frequency correction ratio applied by the kernel to maintain synchronization";
+                unit = "short";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_timex_sync_status{${nodeFilter}}";
+                    legend = "Sync status (1 = ok)";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_timex_frequency_adjustment_ratio{${nodeFilter}}";
+                    legend = "Frequency Adjustment";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_timex_tick_seconds{${nodeFilter}}";
+                    legend = "Tick Interval";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_timex_tai_offset_seconds{${nodeFilter}}";
+                    legend = "TAI Offset";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 128;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 884;
+                h = 10;
+                title = "PPS Frequency / Stability";
+                description = "Displays the PPS signal's frequency offset and stability (jitter) in hertz. Useful for monitoring high-precision time sources like GPS or atomic clocks";
+                unit = "hertz";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_timex_pps_frequency_hertz{${nodeFilter}}";
+                    legend = "PPS Frequency Offset";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_timex_pps_stability_hertz{${nodeFilter}}";
+                    legend = "PPS Frequency Stability";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 129;})
+            (mkStackedTimeseries
+              {
+                x = 0;
+                y = 894;
+                h = 10;
+                title = "PPS Time Accuracy";
+                description = "Tracks PPS signal timing jitter and shift compared to system clock";
+                unit = "s";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "node_timex_pps_jitter_seconds{${nodeFilter}}";
+                    legend = "PPS Jitter";
+                    step = 240;
+                  }
+                  {
+                    expr = "node_timex_pps_shift_seconds{${nodeFilter}}";
+                    legend = "PPS Shift";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 130;})
+            (mkStackedTimeseries
+              {
+                x = 12;
+                y = 894;
+                h = 10;
+                title = "PPS Sync Events";
+                description = "Rate of PPS synchronization diagnostics including calibration events, jitter violations, errors, and frequency stability exceedances";
+                unit = "ops";
+                fillOpacity = 20;
+                legendCalcs = ["min" "mean" "max"];
+                legendDisplayMode = "table";
+                targets = [
+                  {
+                    expr = "rate(node_timex_pps_calibration_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "PPS Calibrations/sec";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_timex_pps_error_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "PPS Errors/sec";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_timex_pps_stability_exceeded_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "PPS Stability Exceeded/sec";
+                    step = 240;
+                  }
+                  {
+                    expr = "rate(node_timex_pps_jitter_total{${nodeFilter}}[$__rate_interval])";
+                    legend = "PPS Jitter Events/sec";
+                    step = 240;
+                  }
+                ];
+              }
+              // {id = 131;})
+          ];
+        }
       ];
   }
