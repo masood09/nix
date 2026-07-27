@@ -486,18 +486,20 @@ in
         };
         panels = [];
       }
-      (mkStatBoard {
+      (mkMetricTable {
         x = 0;
         y = 5;
         w = 24;
         h = 8;
         title = "Host health";
-        description = "Worst-case signal per host across disk, RAM, thermal, power, fans, system, pending-reboot, and auto-upgrade checks (see hhConditions in fleet.nix). No fill = nothing wrong. Tile names the category of the worst active issue (e.g. \"Disk\" or \"Auto-upgrade\"); tile color (light-orange/orange/red) conveys severity (NOTICE/WARN/CRITICAL). DOWN (purple) means the host has stopped reporting entirely — a different kind of signal than a detected problem. This collapses everything to one number per host; expand a specific category on the disk/memory/auto-upgrade panels below, or check Storage & Hardware for raw SMART/IPMI detail.";
+        description = "Worst-case signal per host across disk, RAM, thermal, power, fans, system, pending-reboot, and auto-upgrade checks (see hhConditions in fleet.nix). No fill = nothing wrong. Row names the category of the worst active issue (e.g. \"Disk\" or \"Auto-upgrade\"); row color (light-orange/orange/red) conveys severity (NOTICE/WARN/CRITICAL). DOWN (purple) means the host has stopped reporting entirely — a different kind of signal than a detected problem. This collapses everything to one number per host; expand a specific category on the disk/memory/auto-upgrade panels below, or check Storage & Hardware for raw SMART/IPMI detail.";
         expr = hostHealthExpr;
-        legend = "{{instance}}";
-        unit = "none";
+        labelName = "Host";
+        valueName = "Status";
+        valueUnit = "none";
         thresholds = hostHealthThresholds;
         mappings = hostHealthMappings;
+        rowColor = true;
         links = [
           {
             title = "Host Info: \${__field.labels.instance}";
