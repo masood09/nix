@@ -486,6 +486,13 @@ in
         unit = "none";
         thresholds = hostHealthThresholds;
         mappings = hostHealthMappings;
+        links = [
+          {
+            title = "Host Info: \${__field.labels.instance}";
+            url = "/d/host-info/host-info?var-node=\${__field.labels.instance}";
+            targetBlank = false;
+          }
+        ];
       })
       (mkStatBoard {
         x = 0;
