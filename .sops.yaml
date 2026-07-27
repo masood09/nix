@@ -45,15 +45,8 @@ creation_rules:
           - *trialunit
           - *masoodahmed
 
-  # Scoped secrets — headscale DNS/ACL only need meshcontrol + trialunit
+  # Scoped secrets — headscale DNS only needs meshcontrol + trialunit
   - path_regex: ^secrets/headscale-dns\.sops\.yaml$
-    key_groups:
-      - age:
-        - *meshcontrol
-        - *trialunit
-        - *masoodahmed
-
-  - path_regex: ^secrets/headscale-acl\.sops\.yaml$
     key_groups:
       - age:
         - *meshcontrol
