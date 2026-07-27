@@ -476,7 +476,7 @@ in
       # --- status boards --------------------------------------------------
       {
         type = "row";
-        title = "Health & Availability";
+        title = "Fleet Status";
         collapsed = false;
         gridPos = {
           x = 0;
@@ -556,7 +556,7 @@ in
         collapsed = true;
         gridPos = {
           x = 0;
-          y = 30;
+          y = 21;
           w = 24;
           h = 1;
         };
@@ -696,23 +696,11 @@ in
         ];
       }
 
-      # --- backups & certs ------------------------------------------------
-      {
-        type = "row";
-        title = "Backups";
-        collapsed = false;
-        gridPos = {
-          x = 0;
-          y = 13;
-          w = 24;
-          h = 1;
-        };
-        panels = [];
-      }
+      # --- maintenance -------------------------------------------------------
       (mkMetricTable {
         x = 0;
-        y = 14;
-        w = 24;
+        y = 13;
+        w = 8;
         h = 8;
         title = "Backups";
         description = "Whether each host's backups are healthy, not when they last ran. OK = last success within 26 hours (enough slack over a 24h daily cadence for normal run-time variance); MISSED = a backup has actually been missed.";
@@ -755,11 +743,10 @@ in
         ];
       })
 
-      # --- auto-upgrade -----------------------------------------------------
       (mkMetricTable {
-        x = 0;
-        y = 22;
-        w = 12;
+        x = 8;
+        y = 13;
+        w = 8;
         h = 8;
         title = "Auto-upgrade status";
         description = "Result of each host's last weekly nixos-upgrade.service run (system.autoUpgrade, Saturdays 07:00). OK = last run succeeded; FAILED = it didn't — check `journalctl -u nixos-upgrade` on that host.";
@@ -793,9 +780,9 @@ in
         ];
       })
       (mkMetricTable {
-        x = 12;
-        y = 22;
-        w = 12;
+        x = 16;
+        y = 13;
+        w = 8;
         h = 8;
         title = "Config age";
         # Raw seconds + Grafana's built-in "s" duration unit, so it auto-scales
@@ -837,7 +824,7 @@ in
         collapsed = true;
         gridPos = {
           x = 0;
-          y = 31;
+          y = 22;
           w = 24;
           h = 1;
         };
