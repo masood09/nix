@@ -219,6 +219,7 @@ in {
     cellColor ? false,
     rowColor ? false, # tint the whole row by the value threshold, not just its cell
     description ? null,
+    links ? [], # per-field data links, attached to the label column
   }: let
     valueProps =
       [
@@ -274,7 +275,12 @@ in {
         }
       ];
       fieldConfig = {
-        defaults = {custom = {align = "auto";};};
+        defaults = {
+          custom = {
+            align = "auto";
+            filterable = false;
+          };
+        };
         overrides =
           [
             {
@@ -294,6 +300,18 @@ in {
               {
                 id = "mappings";
                 value = labelMappings;
+              }
+            ];
+          }
+          ++ lib.optional (links != []) {
+            matcher = {
+              id = "byName";
+              options = labelName;
+            };
+            properties = [
+              {
+                id = "links";
+                value = links;
               }
             ];
           };
