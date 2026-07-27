@@ -39,8 +39,12 @@
   # Curated names -> a `service` label per probe (exact instance match), so the
   # single-column stat board can render them via {{service}}. A chained
   # label_replace: each call wraps the previous, tagging one target's series.
+  # Rounded to the same precision it's displayed at (1 decimal) so two
+  # services that *look* tied on screen are actually tied for sorting —
+  # otherwise hidden precision beyond the displayed digit silently wins
+  # over the alphabetical tiebreak, which looks like a sorting bug.
   serviceUptimeExpr = let
-    base = "avg_over_time(probe_success[$service_window]) * 100";
+    base = "round(avg_over_time(probe_success[$service_window]) * 100, 0.1)";
     labeled =
       lib.foldl' (
         inner: url: "label_replace(${inner}, \"service\", \"${serviceNames.${url}}\", \"instance\", \"${url}\")"
@@ -536,6 +540,7 @@ in
         valueName = "Status";
         valueUnit = "none";
         rowColor = true;
+        sortDesc = false;
         thresholds = {
           mode = "absolute";
           steps = [
@@ -576,7 +581,9 @@ in
         dropCols = ["instance" "__name__"];
         valueName = "Uptime";
         valueUnit = "percent";
+        decimals = 1;
         rowColor = true;
+        sortDesc = false;
         thresholds = {
           mode = "absolute";
           steps = [
@@ -755,7 +762,12 @@ in
         h = 8;
         title = "Backups";
         description = "Whether each host's backups are healthy, not when they last ran. OK = last success within 26 hours (enough slack over a 24h daily cadence for normal run-time variance); MISSED = a backup has actually been missed.";
-        expr = "sort_desc((time() - homelab_backup_last_success_timestamp_seconds) / 3600)";
+        # Bucketed to the same OK/MISSED boolean the display already collapses
+        # to (>= bool), rather than the raw continuous hours-elapsed value —
+        # otherwise two hosts both showing "OK" would still sort by their
+        # differing hour counts instead of tying and falling back to the
+        # alphabetical secondary sort.
+        expr = "sort_desc(((time() - homelab_backup_last_success_timestamp_seconds) / 3600) >= bool 26)";
         labelName = "Host";
         dropCols = ["__name__"];
         valueName = "Status";
@@ -769,26 +781,17 @@ in
               color = "transparent";
             }
             {
-              value = 26;
+              value = 1;
               color = "red";
             }
           ];
         };
         mappings = [
           {
-            type = "range";
+            type = "value";
             options = {
-              from = 0;
-              to = 26;
-              result = {text = "OK";};
-            };
-          }
-          {
-            type = "range";
-            options = {
-              from = 26;
-              to = 999999;
-              result = {text = "MISSED";};
+              "0" = {text = "OK";};
+              "1" = {text = "MISSED";};
             };
           }
         ];
@@ -807,6 +810,7 @@ in
         valueName = "Status";
         valueUnit = "none";
         rowColor = true;
+        sortDesc = false;
         thresholds = {
           mode = "absolute";
           steps = [
@@ -845,6 +849,7 @@ in
         dropCols = ["__name__"];
         valueName = "Age";
         valueUnit = "s";
+        decimals = 0;
         rowColor = true;
         thresholds = {
           mode = "absolute";
@@ -894,13 +899,17 @@ in
               description = "Days remaining before each monitored certificate expires. CRITICAL under 7 days (renewal has clearly failed), WARN under 14 (should have auto-renewed already), NOTICE under 30 (approaching the typical ACME renewal window), no fill beyond.";
               # Strip scheme + path from the probe URL, leaving just the domain —
               # the path doesn't matter for a cert (it's issued per-domain).
-              expr = "label_replace(sort((probe_ssl_earliest_cert_expiry - time()) / 86400), \"domain\", \"$1\", \"instance\", \"https?://([^/]+).*\")";
+              # Rounded to the displayed precision (1 decimal) so certs that
+              # look tied on screen actually tie for sorting purposes.
+              expr = "label_replace(sort(round((probe_ssl_earliest_cert_expiry - time()) / 86400, 1)), \"domain\", \"$1\", \"instance\", \"https?://([^/]+).*\")";
               labelCol = "domain";
               labelName = "Domain";
               dropCols = ["instance" "__name__"];
               valueName = "Days left";
               valueUnit = "suffix: days";
+              decimals = 0;
               rowColor = true;
+              sortDesc = false;
               thresholds = {
                 mode = "absolute";
                 steps = [
