@@ -1,6 +1,13 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
+  "packageRules": [
+    {
+      "matchDepNames": ["docker.io/collabora/code"],
+      "allowedVersions": "<=26.04.2.1.1",
+      "description": "26.04.2.2.1+ dropped the shell from the image, breaking our bash-based entrypoint wrapper. See modules/services/opencloud/containers.nix."
+    }
+  ],
   "customManagers": [
     {
       "customType": "regex",
