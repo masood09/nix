@@ -157,7 +157,12 @@ in {
 
           "opencloud-collabora" = {
             # renovate: datasource=docker depName=docker.io/collabora/code
-            image = "docker.io/collabora/code:26.04.2.4.1";
+            # Pinned: 26.04.2.2.1+ dropped /bin/bash (and any shell) from the
+            # image, breaking the bash-based entrypoint wrapper below (crun:
+            # executable file `/bin/bash` not found). 26.04.2.1.1 is the last
+            # tag confirmed to still ship a shell. Re-evaluate the entrypoint
+            # to not depend on a shell before bumping past this.
+            image = "docker.io/collabora/code:26.04.2.1.1";
 
             environment = {
               DONT_GEN_SSL_CERT = "YES";
