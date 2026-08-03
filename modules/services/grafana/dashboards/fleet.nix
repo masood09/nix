@@ -33,7 +33,6 @@
     "100.64.0.17:53" = "DNS - Primary (caretaker)";
     "100.64.0.22:53" = "DNS - Secondary (trialunit)";
     "forever.minecraft.mantannest.com:25565" = "Minecraft Forever (heartbeat)";
-    "ourworld.minecraft.mantannest.com:25565" = "Minecraft Ourworld (heartbeat)";
   };
 
   # Curated names -> a `service` label per probe (exact instance match), so the

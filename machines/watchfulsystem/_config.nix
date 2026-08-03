@@ -74,15 +74,13 @@
             "100.64.0.22:53"
           ];
 
-          # Per-world forced-host names, not the bare minecraft.mantannest.com —
-          # Velocity's forced-hosts map only recognizes forever./ourworld.,
-          # so those are the actual player-facing addresses. Bare tcp_connect
-          # can't tell the two apart (both hit the same Velocity listener; a
-          # per-backend crash wouldn't show here), but at least confirms the
-          # public proxy port is reachable under each name.
+          # Per-world forced-host name, not the bare minecraft.mantannest.com —
+          # Velocity's forced-hosts map only recognizes forever., so that's
+          # the actual player-facing address. Bare tcp_connect can't tell a
+          # per-backend crash from a proxy crash (both hit the same Velocity
+          # listener), but at least confirms the public proxy port is reachable.
           tcpTargets = [
             "forever.minecraft.mantannest.com:25565"
-            "ourworld.minecraft.mantannest.com:25565"
           ];
         };
 
