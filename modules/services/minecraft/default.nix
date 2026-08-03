@@ -61,7 +61,7 @@
       function-permission-level = 4;
       op-permission-level = 4;
       spawn-protection = 0;
-      view-distance = 12;
+      view-distance = 10;
       pvp = false;
     };
   };
