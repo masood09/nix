@@ -207,13 +207,13 @@ in ''
     }
 
     // -------------------------
-    // Minecraft (Fabric): parse "[HH:MM:SS] [Thread/LEVEL]:" prefix and
+    // Minecraft: parse "[HH:MM:SS] [Thread/LEVEL]:" prefix and
     // override `level`. Same class of fix as Velocity, but the log4j thread
     // tag sits before the level instead of a bare bracket.
     // Example: [02:11:05] [Server thread/WARN]: Can't keep up! ...
     // -------------------------
     stage.match {
-    	selector = "{unit=~\"minecraft-server-(forever|ourworld).service\"}"
+    	selector = "{unit=\"minecraft-server-forever.service\"}"
 
     	stage.regex {
     		expression = "^\\[\\d{2}:\\d{2}:\\d{2}\\] \\[[^/\\]]+/(?P<mc_level>[A-Z]+)\\]:"

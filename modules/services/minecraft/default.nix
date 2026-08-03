@@ -17,11 +17,9 @@
   publicPort = 25565;
   # awesomeServerPort = 25566;
   foreverServerPort = 25567;
-  ourworldServerPort = 25568;
 
   serverNames = [
     "velocity"
-    "ourworld"
     "forever"
     # "awesome"
   ];
@@ -66,25 +64,6 @@
       view-distance = 12;
       pvp = false;
     };
-
-    ourworld = {
-      server-ip = "127.0.0.1";
-      server-port = ourworldServerPort;
-      gamemode = "survival";
-      difficulty = "normal";
-      motd = "Our World Minecraft Server";
-      "online-mode" = false;
-      level-name = "world";
-      level-seed = "100000459812896461";
-      max-players = 20;
-      white-list = false;
-      enable-command-block = true;
-      function-permission-level = 4;
-      op-permission-level = 4;
-      spawn-protection = 0;
-      view-distance = 12;
-      pvp = false;
-    };
   };
 
   hostFor = name: "${name}.${cfg.hostDomain}";
@@ -105,14 +84,12 @@
     servers = {
       # awesome = "127.0.0.1:${toString awesomeServerPort}";
       forever = "127.0.0.1:${toString foreverServerPort}";
-      ourworld = "127.0.0.1:${toString ourworldServerPort}";
-      try = ["ourworld"];
+      try = ["forever"];
     };
 
     forced-hosts = {
       # ${hostFor "awesome"} = ["awesome"];
       ${hostFor "forever"} = ["forever"];
-      ${hostFor "ourworld"} = ["ourworld"];
     };
   };
 
@@ -258,19 +235,6 @@ in {
               );
             };
           };
-
-          ourworld = {
-            enable = true;
-            package = minecraftPackages.fabricServers."fabric-1_21_11";
-            jvmOpts = "-Xms2G -Xmx8G";
-            serverProperties = serverProperties.ourworld;
-
-            symlinks = {
-              mods = pkgs.linkFarmFromDrvs "ourworld-mods" (
-                builtins.attrValues (import ./ourworld-server-mods.nix {inherit pkgs;})
-              );
-            };
-          };
         };
       };
     };
@@ -307,12 +271,10 @@ in {
             after = [
               # "minecraft-server-awesome.service"
               "minecraft-server-forever.service"
-              "minecraft-server-ourworld.service"
             ];
             wants = [
               # "minecraft-server-awesome.service"
               "minecraft-server-forever.service"
-              "minecraft-server-ourworld.service"
             ];
           };
         };
