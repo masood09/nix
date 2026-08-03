@@ -207,13 +207,54 @@ in {
 
           forever = {
             enable = true;
-            package = minecraftPackages.fabricServers."fabric-1_20_1";
+            package = minecraftPackages.neoforgeServers."neoforge-1_21_1-21_1_248";
             jvmOpts = "-Xms2G -Xmx8G";
             serverProperties = serverProperties.forever;
 
             symlinks = {
               mods = pkgs.linkFarmFromDrvs "forever-mods" (
                 builtins.attrValues (import ./forever-server-mods.nix {inherit pkgs;})
+              );
+            };
+
+            files = {
+              # Proxy Compatible Forge defaults to requiring Velocity's MODERN
+              # forwarding mode; velocity.toml above uses player-info-forwarding-mode
+              # = "NONE", so forwarding must be disabled here too or PCF rejects
+              # every connection with "This server requires you to connect with Velocity".
+              "config/proxy-compatible-forge.toml" = {
+                value = {
+                  version = 2.0;
+                  forwarding = {
+                    enabled = false;
+                    mode = "MODERN";
+                    secret = "";
+                    approvedProxyHosts = [];
+                  };
+                  crossStitch = {
+                    enabled = true;
+                    forceWrappedArguments = [];
+                    forceWrapVanillaArguments = false;
+                  };
+                  debug = {
+                    enabled = false;
+                    disabledMixins = [];
+                  };
+                  advanced = {
+                    modernForwardingVersion = "NO_OVERRIDE";
+                  };
+                };
+                format = pkgs.formats.toml {};
+              };
+
+              # Baseline pulled from the mod's own generated defaults, with
+              # numberOfThreads raised 3 -> 6 for faster distant generation and
+              # showGenerationProgress set to "LOG" so progress is visible via
+              # journalctl instead of silently running. Content is inlined via
+              # writeText (not a bare path) so it's a self-contained store object
+              # that survives closure-copy to the remote host during deploy.
+              "config/DistantHorizons.toml" = pkgs.writeText "forever-distant-horizons.toml" (
+                builtins.readFile ./forever-distant-horizons.toml
               );
             };
           };
