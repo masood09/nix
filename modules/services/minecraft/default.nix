@@ -50,7 +50,7 @@
       server-ip = "127.0.0.1";
       server-port = foreverServerPort;
       gamemode = "survival";
-      difficulty = "normal";
+      difficulty = "easy";
       motd = "Forever Minecraft Server";
       "online-mode" = false;
       level-name = "world";
