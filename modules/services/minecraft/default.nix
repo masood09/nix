@@ -223,16 +223,6 @@ in {
                 };
                 format = pkgs.formats.toml {};
               };
-
-              # Baseline pulled from the mod's own generated defaults, with
-              # numberOfThreads raised 3 -> 6 for faster distant generation and
-              # showGenerationProgress set to "LOG" so progress is visible via
-              # journalctl instead of silently running. Content is inlined via
-              # writeText (not a bare path) so it's a self-contained store object
-              # that survives closure-copy to the remote host during deploy.
-              "config/DistantHorizons.toml" = pkgs.writeText "forever-distant-horizons.toml" (
-                builtins.readFile ./forever-distant-horizons.toml
-              );
             };
           };
         };
