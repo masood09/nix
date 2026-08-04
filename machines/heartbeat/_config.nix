@@ -40,7 +40,6 @@
             "mailarchiver.service"
             "matrix-authentication-service.service"
             "matrix-synapse.service"
-            # "minecraft-server-awesome.service"
             "minecraft-server-forever.service"
             "minecraft-server-velocity.service"
             "nightscout.service"

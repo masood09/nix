@@ -15,37 +15,17 @@
   minecraftPackages = inputs.nix-minecraft.legacyPackages.${pkgs.stdenv.hostPlatform.system};
   dataDir = "/srv/minecraft";
   publicPort = 25565;
-  # awesomeServerPort = 25566;
   foreverServerPort = 25567;
 
   serverNames = [
     "velocity"
     "forever"
-    # "awesome"
   ];
 
   serviceNames = map (name: "minecraft-server-${name}") serverNames;
   serverDataDirs = map (name: "${dataDir}/${name}") serverNames;
 
   serverProperties = {
-    # awesome = {
-    #   server-ip = "127.0.0.1";
-    #   server-port = awesomeServerPort;
-    #   gamemode = "survival";
-    #   difficulty = "peaceful";
-    #   motd = "Awesome Minecraft Server";
-    #   "online-mode" = false;
-    #   level-name = "myworld";
-    #   level-seed = "8491026976556481134";
-    #   max-players = 20;
-    #   white-list = false;
-    #   enable-command-block = true;
-    #   function-permission-level = 4;
-    #   op-permission-level = 4;
-    #   spawn-protection = 0;
-    #   view-distance = 12;
-    # };
-
     forever = {
       server-ip = "127.0.0.1";
       server-port = foreverServerPort;
@@ -82,13 +62,11 @@
     enable-player-address-logging = true;
 
     servers = {
-      # awesome = "127.0.0.1:${toString awesomeServerPort}";
       forever = "127.0.0.1:${toString foreverServerPort}";
       try = ["forever"];
     };
 
     forced-hosts = {
-      # ${hostFor "awesome"} = ["awesome"];
       ${hostFor "forever"} = ["forever"];
     };
   };
@@ -175,13 +153,6 @@ in {
             };
           };
 
-          #   awesome = {
-          #     enable = true;
-          #     package = minecraftPackages.fabricServers."fabric-1_21_10";
-          #     jvmOpts = "-Xms4G -Xmx4G";
-          #     serverProperties = serverProperties.awesome;
-          #   };
-
           forever = {
             enable = true;
             package = minecraftPackages.neoforgeServers."neoforge-1_21_1-21_1_248";
@@ -259,11 +230,9 @@ in {
 
           minecraft-server-velocity = {
             after = [
-              # "minecraft-server-awesome.service"
               "minecraft-server-forever.service"
             ];
             wants = [
-              # "minecraft-server-awesome.service"
               "minecraft-server-forever.service"
             ];
           };
