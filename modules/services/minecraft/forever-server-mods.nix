@@ -171,12 +171,6 @@
     sha512 = "6d21ceb6cd91e63a248251ded3812208ed5ea4f36abb11e8c6e16aa119a95b0e714f59ec7689ae1b1248c9831e5e3e63aa681aa7dfa9b220d93741118466cbd6";
   };
 
-  # Distant Horizons 3.2.0-b-1.21.1 (fabric/neoforge)
-  distant_horizons = pkgs.fetchurl {
-    url = "https://cdn.modrinth.com/data/uCdwusMi/versions/ZpKb4kZp/DistantHorizons-3.2.0-b-1.21.1-fabric-neoforge.jar";
-    sha512 = "d4199f92f992fbd2c75a3b0e4e81c8a98bee889013f7347f2149ffa62c86748bde22135e9b2c82a10875db94fa576571c661c5ee16d2f567bd8a93d6f255fd22";
-  };
-
   # EnchantmentDescriptions 21.1.10 (neoforge)
   enchantmentdescriptions = pkgs.fetchurl {
     url = "https://cdn.modrinth.com/data/UVtY3ZAC/versions/OuJDPGSM/enchdesc-neoforge-1.21.1-21.1.10.jar";
