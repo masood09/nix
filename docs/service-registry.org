@@ -108,7 +108,6 @@ Next available UID/GID: *3015*
 | Authentik (Built-in HTTPS)           |  9443 |                                   |
 | Grafana Alloy (HTTP)                 | 12345 | Upstream default                  |
 | Minecraft Velocity                   | 25565 | Public proxy on heartbeat         |
-| Minecraft Awesome backend            | 25566 | Localhost only, Fabric 1.21.10    |
 | Minecraft Forever backend            | 25567 | Localhost only, Fabric 1.20.1     |
 | MongoDB                              | 27017 | Localhost only (Nightscout)       |
 | LiveKit RTC (UDP range)              | 50100 | 50100–50200                       |
