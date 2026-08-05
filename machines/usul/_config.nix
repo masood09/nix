@@ -1,6 +1,20 @@
 # Homelab options — ThinkPad T14 Gen 3 laptop with Niri desktop, bluetooth, gaming.
 {
   config = {
+    # thinkpad_acpi ships with the volume/mute/brightness/kbd-backlight hotkey
+    # bits (20-22, 15-17) disabled by default, so Fn+F1-F4 never reach evdev
+    # even though niri's XF86Audio* binds are correct. hotkey_mask resets on
+    # every boot, so re-enable it (to hotkey_all_mask, measured via
+    # /sys/devices/platform/thinkpad_acpi/hotkey_all_mask) each time the
+    # device appears.
+    services = {
+      udev = {
+        extraRules = ''
+          SUBSYSTEM=="platform", KERNEL=="thinkpad_acpi", ATTR{hotkey_mask}="0xfffffffb"
+        '';
+      };
+    };
+
     homelab = {
       role = "desktop";
       purpose = "Primary Laptop (NixOS Desktop)";
