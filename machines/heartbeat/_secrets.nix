@@ -7,6 +7,110 @@
           restartUnits = ["alloy.service"];
         };
 
+        # Arr media stack (nixflix) — see modules/services/arr/. API keys can be
+        # generated with `uuidgen | base64`; web-UI passwords are your choice.
+        "arr/jellyfin/api-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "jellyfin";
+          restartUnits = ["jellyfin.service"];
+        };
+
+        "arr/jellyfin/admin-password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "jellyfin";
+          restartUnits = ["jellyfin.service"];
+        };
+
+        "arr/sonarr/api-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "sonarr";
+          restartUnits = ["sonarr.service"];
+        };
+
+        "arr/sonarr/password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "sonarr";
+          restartUnits = ["sonarr.service"];
+        };
+
+        "arr/radarr/api-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "radarr";
+          restartUnits = ["radarr.service"];
+        };
+
+        "arr/radarr/password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "radarr";
+          restartUnits = ["radarr.service"];
+        };
+
+        "arr/prowlarr/api-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "prowlarr";
+          restartUnits = ["prowlarr.service"];
+        };
+
+        "arr/prowlarr/password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "prowlarr";
+          restartUnits = ["prowlarr.service"];
+        };
+
+        "arr/sabnzbd/api-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "sabnzbd";
+          restartUnits = ["sabnzbd.service"];
+        };
+
+        "arr/sabnzbd/nzb-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "sabnzbd";
+          restartUnits = ["sabnzbd.service"];
+        };
+
+        "arr/sabnzbd/username" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "sabnzbd";
+          restartUnits = ["sabnzbd.service"];
+        };
+
+        "arr/sabnzbd/password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "sabnzbd";
+          restartUnits = ["sabnzbd.service"];
+        };
+
+        "arr/seerr/api-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "seerr";
+          restartUnits = ["seerr.service"];
+        };
+
+        "arr/usenet/frugalusenet/username" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "sabnzbd";
+          restartUnits = ["sabnzbd.service"];
+        };
+
+        "arr/usenet/frugalusenet/password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "sabnzbd";
+          restartUnits = ["sabnzbd.service"];
+        };
+
+        "arr/indexers/nzbgeek/api-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "prowlarr";
+          restartUnits = ["prowlarr.service"];
+        };
+
+        "arr/indexers/nzbplanet/api-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "prowlarr";
+          restartUnits = ["prowlarr.service"];
+        };
+
         "caddy/.env" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "caddy";

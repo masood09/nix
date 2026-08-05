@@ -64,6 +64,15 @@
       url = "github:Infinidoge/nix-minecraft";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Declarative Servarr media stack (Jellyfin/Sonarr/Radarr/Prowlarr/Seerr/
+    # SABnzbd/Recyclarr), wrapped by modules/services/arr. No dedicated binary
+    # cache, so `follows` is safe (and is what upstream itself recommends). In
+    # sharedNixOSModules like authentik-nix/headplane — available everywhere,
+    # self-gated by homelab.services.arr.enable, only actually used on heartbeat.
+    nixflix = {
+      url = "github:kiriwalawren/nixflix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # Pin below 0.7.x while the newer Headplane module shape regresses eval for
     # our Headscale integration on meshcontrol/trialunit.
     headplane = {
@@ -150,6 +159,7 @@
       inputs.sops-nix.nixosModules.sops
       inputs.home-manager.nixosModules.home-manager
       inputs.authentik-nix.nixosModules.default
+      inputs.nixflix.nixosModules.default
       inputs.impermanence.nixosModules.impermanence
       # nixos-26.05 ships a native services.headplane module that collides with
       # the pinned v0.6.2 flake module below (our Headscale integration targets

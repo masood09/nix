@@ -1,5 +1,5 @@
 # Homelab options — primary server (NAS + shared services on Dell R730xd).
-{
+{config, ...}: {
   config = {
     homelab = {
       purpose = "Primary Homelab Core (NAS + Shared Services)";
@@ -46,6 +46,105 @@
             "podman-babybuddy.service"
             "podman-compose-opencloud-root.target"
             "vaultwarden.service"
+          ];
+        };
+
+        arr = {
+          enable = true;
+
+          jellyfin = {
+            enable = true;
+          };
+
+          sonarr = {
+            enable = true;
+          };
+
+          radarr = {
+            enable = true;
+          };
+
+          prowlarr = {
+            enable = true;
+          };
+
+          sabnzbd = {
+            enable = true;
+          };
+
+          recyclarr = {
+            enable = true;
+          };
+
+          seerr = {
+            enable = true;
+          };
+
+          # Frugal Usenet. Connections/retention below are typical published defaults —
+          # verify the exact numbers against your account panel before deploying.
+          usenetProviders = [
+            {
+              name = "FrugalUsenet";
+              host = "news.frugalusenet.com";
+              port = 563;
+              ssl = true;
+              connections = 20;
+              retention = 4000;
+              priority = 0;
+              username = {
+                _secret = config.sops.secrets."arr/usenet/frugalusenet/username".path;
+              };
+              password = {
+                _secret = config.sops.secrets."arr/usenet/frugalusenet/password".path;
+              };
+            }
+            {
+              name = "FrugalUsenet (EU backup)";
+              host = "eunews.frugalusenet.com";
+              port = 563;
+              ssl = true;
+              connections = 20;
+              retention = 4000;
+              priority = 1;
+              backup = true;
+              username = {
+                _secret = config.sops.secrets."arr/usenet/frugalusenet/username".path;
+              };
+              password = {
+                _secret = config.sops.secrets."arr/usenet/frugalusenet/password".path;
+              };
+            }
+            {
+              name = "FrugalUsenet (bonus)";
+              host = "bonus.frugalusenet.com";
+              port = 563;
+              ssl = true;
+              connections = 20;
+              retention = 4000;
+              priority = 2;
+              backup = true;
+              username = {
+                _secret = config.sops.secrets."arr/usenet/frugalusenet/username".path;
+              };
+              password = {
+                _secret = config.sops.secrets."arr/usenet/frugalusenet/password".path;
+              };
+            }
+          ];
+
+          indexers = [
+            {
+              name = "NZBgeek";
+              apiKey = {
+                _secret = config.sops.secrets."arr/indexers/nzbgeek/api-key".path;
+              };
+            }
+            {
+              name = "NzbPlanet";
+              apiKey = {
+                _secret = config.sops.secrets."arr/indexers/nzbplanet/api-key".path;
+              };
+            }
           ];
         };
 
