@@ -24,6 +24,10 @@
       services = {
         authentik = {
           enable = true;
+
+          ldapOutpost = {
+            enable = true;
+          };
         };
 
         acme = {
@@ -92,6 +96,20 @@
 
           zfs = {
             enable = true;
+          };
+        };
+      };
+    };
+
+    # Authentik's embedded LDAP outpost (jellyfin's LDAP Authentication plugin) —
+    # listens on 3389/tcp, not the standard 389. Scoped to the tailnet interface only,
+    # matching postgresql's 100.64.0.0/16 pg_hba scoping convention rather than a
+    # single peer IP.
+    networking = {
+      firewall = {
+        interfaces = {
+          tailscale0 = {
+            allowedTCPPorts = [3389];
           };
         };
       };

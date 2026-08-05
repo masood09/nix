@@ -35,6 +35,11 @@ in {
         };
       };
 
+      authentik-ldap = lib.mkIf authentikCfg.ldapOutpost.enable {
+        enable = true;
+        environmentFile = config.sops.secrets."authentik/ldap-outpost.env".path;
+      };
+
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = {
           "${authentikCfg.webDomain}" = {

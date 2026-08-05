@@ -3,12 +3,17 @@
 {
   config,
   lib,
+  inputs,
   ...
 }: let
   cfg = config.homelab.services.arr;
   caddyEnabled = config.homelab.services.caddy.enable;
   resticEnabled = config.homelab.services.restic.enable;
   domain = config.networking.domain;
+
+  ldapCfg = cfg.jellyfin.ldap;
+  ldapGroupDn = group: "cn=${group},ou=groups,${ldapCfg.baseDn}";
+  ldapSearchFilter = "(|${lib.concatMapStringsSep "" (g: "(memberOf=${ldapGroupDn g})") ldapCfg.accessGroups})";
 in {
   imports = [
     ./options.nix
@@ -46,6 +51,40 @@ in {
           # SDR for non-HDR/DV-capable clients (e.g. 1080p laptops) instead of a naive
           # (washed out) conversion or an unnecessary software fallback.
           enableTonemapping = cfg.jellyfin.hardwareAcceleration;
+        };
+
+        plugins = lib.mkIf ldapCfg.enable {
+          "LDAP Authentication" = {
+            package = inputs.nixflix.lib.jellyfinPlugins.fromRepo {
+              version = "23.0.0.0";
+              hash = "sha256-yuOAJTj+QKj6bxlJ+irDE2BjxH1ZbsgAri7fauDMOBM=";
+            };
+
+            # Manifest name ("LDAP Authentication") differs from the name it reports via
+            # Jellyfin's own /Plugins API ("LDAP-Auth") — confirmed live, same class of
+            # mismatch nixflix's own docs call out for the SSO-Auth plugin.
+            apiName = "LDAP-Auth";
+
+            config = {
+              LdapServer = ldapCfg.server;
+              LdapPort = ldapCfg.port;
+              UseSsl = false;
+              UseStartTls = false;
+
+              LdapBindUser = ldapCfg.bindDn;
+              LdapBindPassword = {
+                _secret = config.sops.secrets."arr/jellyfin/ldap-bind-password".path;
+              };
+
+              LdapBaseDn = ldapCfg.baseDn;
+              LdapSearchFilter = ldapSearchFilter;
+              LdapAdminFilter = "(memberOf=${ldapGroupDn ldapCfg.adminGroup})";
+
+              LdapUidAttribute = "uid";
+              LdapUsernameAttribute = "cn";
+              CreateUsersFromLdap = true;
+            };
+          };
         };
 
         users = {

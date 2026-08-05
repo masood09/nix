@@ -21,6 +21,12 @@
           restartUnits = ["jellyfin.service"];
         };
 
+        "arr/jellyfin/ldap-bind-password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "jellyfin";
+          restartUnits = ["jellyfin-plugins.service"];
+        };
+
         "arr/sonarr/api-key" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "sonarr";
