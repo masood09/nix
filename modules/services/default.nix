@@ -5,6 +5,7 @@
 {
   imports = [
     ./alloy
+    ./arr
     ./authentik
     ./babybuddy
     ./backup

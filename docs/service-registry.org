@@ -44,6 +44,15 @@ This file should be consulted *before* adding any new service, container, or sys
 
 Next available UID/GID: *3015*
 
+*Exception:* the arr media stack (Jellyfin/Sonarr/Radarr/Prowlarr/SABnzbd/Seerr/Recyclarr,
+via the =nixflix= flake input — see =modules/services/arr/=, enabled per-machine via
+=homelab.services.arr.enable=) brings its own fixed, low-numbered uid/gid scheme matching
+the well-known LinuxServer.io PUID convention (jellyfin=146, sonarr=274, radarr=275,
+prowlarr=293, sabnzbd=38, seerr=262, recyclarr=269, plus a shared =media= group at gid 169
+that every media-touching service joins for library directory access). These don't
+collide with the 3000+ block above and don't need anything registered here beyond this
+note, same as disko's sole exemption from the nested-attrs code style rule.
+
 
 * Port Registry
 
@@ -113,6 +122,18 @@ Next available UID/GID: *3015*
 | LiveKit RTC (UDP range)              | 50100 | 50100–50200                       |
 
 Next available port in 89xx block: *8915*
+
+** Arr Media Stack (heartbeat only)
+Upstream defaults kept as-is (same convention as Immich/Vaultwarden above) — these sit
+outside the 89xx block since they're upstream-default ports for upstream modules, not
+this repo's own custom apps.
+| Jellyfin   | 8096 |                                |
+| Sonarr     | 8989 |                                |
+| Radarr     | 7878 |                                |
+| Prowlarr   | 9696 |                                |
+| SABnzbd    | 8080 |                                |
+| Seerr      | 5055 | =homelab.services.arr.seerr= — https://seerr.dev, media request/discovery manager |
+Recyclarr has no listening port (nixflix runs it as a scheduled sync, not a service).
 
 
 * Conventions
