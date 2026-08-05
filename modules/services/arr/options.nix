@@ -38,6 +38,47 @@
               default = true;
               description = "Enable VAAPI/QuickSync hardware transcoding (requires an Intel iGPU with /dev/dri present).";
             };
+
+            ldap = {
+              enable = lib.mkEnableOption "SSO via the LDAP Authentication plugin, against Authentik's embedded LDAP outpost";
+
+              server = lib.mkOption {
+                type = lib.types.str;
+                description = "Authentik LDAP outpost hostname (no scheme/port — see the Jellyfin plugin's LdapServer field).";
+                example = "ldap.authentik.example.com";
+              };
+
+              port = lib.mkOption {
+                type = lib.types.port;
+                default = 3389;
+                description = "Authentik's embedded LDAP outpost port (3389, not the standard 389).";
+              };
+
+              baseDn = lib.mkOption {
+                type = lib.types.str;
+                description = "LDAP provider's base DN, as configured in Authentik.";
+                example = "dc=ldap,dc=example,dc=com";
+              };
+
+              bindDn = lib.mkOption {
+                type = lib.types.str;
+                description = "DN of the Authentik service account used to bind/search LDAP.";
+                example = "cn=jellyfin-ldap-bind,ou=users,dc=ldap,dc=example,dc=com";
+              };
+
+              accessGroups = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [];
+                description = "Authentik group names (relative to baseDn's ou=groups) allowed to log in.";
+                example = ["kids" "parents" "homelab-admins"];
+              };
+
+              adminGroup = lib.mkOption {
+                type = lib.types.str;
+                description = "Authentik group name (relative to baseDn's ou=groups) granted Jellyfin admin rights.";
+                example = "homelab-admins";
+              };
+            };
           };
 
           sonarr.enable = lib.mkEnableOption "Sonarr";

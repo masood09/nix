@@ -63,6 +63,15 @@
 
           jellyfin = {
             enable = true;
+
+            ldap = {
+              enable = true;
+              server = "ldap.authentik.mantannest.com";
+              baseDn = "dc=ldap,dc=mantannest,dc=com";
+              bindDn = "cn=jellyfin-ldap-bind,ou=users,dc=ldap,dc=mantannest,dc=com";
+              accessGroups = ["kids" "parents" "homelab-admins"];
+              adminGroup = "homelab-admins";
+            };
           };
 
           sonarr = {
