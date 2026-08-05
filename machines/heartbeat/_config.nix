@@ -80,15 +80,18 @@
             enable = true;
           };
 
-          # Frugal Usenet. Connections/retention below are typical published defaults —
-          # verify the exact numbers against your account panel before deploying.
+          # Frugal Usenet, per their own newsreader setup guide (billing.frugalusenet.com/page/newsreader):
+          # primary server 50-75 connections recommended for optimal speeds (up to 100
+          # allowed) on a fast line, EU server as ~30-connection insurance ("will likely
+          # not provide much traffic"), bonus server separate system with a 1000GB/month
+          # cap, lower priority.
           usenetProviders = [
             {
               name = "FrugalUsenet";
               host = "news.frugalusenet.com";
               port = 563;
               ssl = true;
-              connections = 20;
+              connections = 75;
               retention = 4000;
               priority = 0;
               username = {
@@ -103,7 +106,7 @@
               host = "eunews.frugalusenet.com";
               port = 563;
               ssl = true;
-              connections = 20;
+              connections = 30;
               retention = 4000;
               priority = 1;
               backup = true;
