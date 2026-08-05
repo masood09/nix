@@ -61,7 +61,7 @@ in {
         containers = {
           babybuddy = {
             # renovate: datasource=docker depName=lscr.io/linuxserver/babybuddy
-            image = "lscr.io/linuxserver/babybuddy:2.9.2";
+            image = "lscr.io/linuxserver/babybuddy:2.10.0";
             autoStart = true;
 
             volumes = [
