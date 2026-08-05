@@ -11,6 +11,15 @@
         hostName = "heartbeat";
       };
 
+      # Intel i5-8500T UHD 630 iGPU — VAAPI/QuickSync for Jellyfin hardware transcoding
+      # (homelab.services.arr.jellyfin.hardwareAcceleration).
+      hardware = {
+        graphics = {
+          enable = true;
+          driver = "intel";
+        };
+      };
+
       programs = {
         fastfetch = {
           zpools = [
