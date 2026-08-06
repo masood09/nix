@@ -120,6 +120,13 @@ in {
               password = {
                 _secret = config.sops.secrets."arr/sabnzbd/password".path;
               };
+
+              web_dir = "Glitter";
+              # Glitter's colour schemes are its actual CSS filenames (Light/Night/Auto),
+              # not the UI's display label ("Dark") — SABnzbd silently resets anything
+              # else to "" (Auto) on startup. Confirmed against the shipped stylesheets
+              # at interfaces/Glitter/templates/static/stylesheets/colorschemes/.
+              web_color = "Night";
             };
 
             servers = cfg.usenetProviders;
