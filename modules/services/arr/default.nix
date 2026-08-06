@@ -196,6 +196,69 @@ in {
         apiKey = {
           _secret = config.sops.secrets."arr/seerr/api-key".path;
         };
+
+        settings = {
+          users = {
+            # LDAP (via Jellyfin) is the only login path — no separate local Seerr accounts.
+            localLogin = false;
+          };
+        };
+
+        jellyfin = {
+          hostname = "jellyfin.${domain}";
+          port = 443;
+          useSsl = true;
+        };
+
+        # nixflix's per-app default instance (hostname/port/apiKey/directory/etc.) lives
+        # entirely in its option-level `default`, which is discarded the moment any
+        # module defines part of the same attrset key — NixOS falls back to each
+        # submodule field's own (unwired) default instead of merging with nixflix's
+        # auto-derivation. So this has to fully replicate that default, not just add
+        # activeProfileName on top of it (confirmed the hard way: a partial override
+        # silently nulled out apiKey and broke eval).
+        radarr = lib.mkIf cfg.radarr.enable {
+          Radarr = {
+            hostname = config.nixflix.radarr.connectionAddress;
+            port = config.nixflix.radarr.config.hostConfig.port or 7878;
+            inherit (config.nixflix.radarr.config) apiKey;
+            baseUrl = config.nixflix.radarr.config.hostConfig.urlBase;
+            activeDirectory = builtins.head (config.nixflix.radarr.mediaDirs or ["/data/media/movies"]);
+            isDefault = true;
+            externalUrl =
+              if config.nixflix.reverseProxy.enable
+              then "${config.nixflix.seerr.externalUrlScheme}://${config.nixflix.radarr.subdomain}.${config.nixflix.reverseProxy.domain}${config.nixflix.radarr.config.hostConfig.urlBase}"
+              else "";
+
+            activeProfileName =
+              if cfg.recyclarr.radarrQuality == "4K"
+              then "[SQP] SQP-1 (2160p)"
+              else "[SQP] SQP-1 (1080p)";
+          };
+        };
+
+        sonarr = lib.mkIf cfg.sonarr.enable {
+          Sonarr = {
+            hostname = config.nixflix.sonarr.connectionAddress;
+            port = config.nixflix.sonarr.config.hostConfig.port or 8989;
+            inherit (config.nixflix.sonarr.config) apiKey;
+            baseUrl = config.nixflix.sonarr.config.hostConfig.urlBase;
+            activeDirectory = builtins.head (config.nixflix.sonarr.mediaDirs or ["/data/media/tv"]);
+            activeAnimeDirectory = builtins.head (config.nixflix.sonarr.mediaDirs or ["/data/media/tv"]);
+            seriesType = "standard";
+            animeSeriesType = "standard";
+            isDefault = true;
+            externalUrl =
+              if config.nixflix.reverseProxy.enable
+              then "${config.nixflix.seerr.externalUrlScheme}://${config.nixflix.sonarr.subdomain}.${config.nixflix.reverseProxy.domain}${config.nixflix.sonarr.config.hostConfig.urlBase}"
+              else "";
+
+            activeProfileName =
+              if cfg.recyclarr.sonarrQuality == "4K"
+              then "WEB-2160p (Alternative)"
+              else "WEB-1080p (Alternative)";
+          };
+        };
       };
     };
 
