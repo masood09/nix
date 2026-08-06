@@ -30,6 +30,22 @@
               this dedicated outpost to actually listen on the wire.
             '';
           };
+
+          forwardAuthHosts = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [];
+            example = ["sabnzbd.mantannest.com"];
+            description = ''
+              External hostnames — in addition to webDomain — that front a Proxy Provider
+              app served by Authentik's embedded outpost (see infra-tofu's
+              modules/authentik/proxy.tf). The embedded outpost shares authentik-server's
+              own listener and dispatches by Host header internally, but Caddy still picks
+              the site block by Host header *before* that — a request for
+              sabnzbd.mantannest.com with no matching Caddy vhost here never reaches
+              authentik at all; Caddy just returns an empty 200 fallback. Every app domain
+              onboarded onto forward-auth/proxy-mode SSO must be listed here.
+            '';
+          };
         };
       };
     };

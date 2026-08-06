@@ -114,12 +114,14 @@ in {
               nzb_key = {
                 _secret = config.sops.secrets."arr/sabnzbd/nzb-key".path;
               };
-              username = {
-                _secret = config.sops.secrets."arr/sabnzbd/username".path;
-              };
-              password = {
-                _secret = config.sops.secrets."arr/sabnzbd/password".path;
-              };
+
+              # Deliberately no username/password: SABnzbd's own check_login() only
+              # requires one when *both* are set, so leaving them unset drops its web
+              # login entirely — the SABnzbd equivalent of Sonarr's documented
+              # AuthenticationMethod=External trust model, now that Authentik's outpost
+              # gates access before any request reaches SABnzbd. Otherwise it's a second,
+              # redundant login on top of Authentik's. Doesn't affect Radarr/Sonarr/
+              # Prowlarr's SABnzbd integration, which uses api_key, not this.
 
               web_dir = "Glitter";
               # Glitter's colour schemes are its actual CSS filenames (Light/Night/Auto),
@@ -127,6 +129,32 @@ in {
               # else to "" (Auto) on startup. Confirmed against the shipped stylesheets
               # at interfaces/Glitter/templates/static/stylesheets/colorschemes/.
               web_color = "Night";
+
+              # Authentik's outpost proxies to SABnzbd via internal_host (see infra-tofu's
+              # proxy-apps.sops.json) and may send that hostname as the Host header rather
+              # than sabnzbd.${domain} — SABnzbd's Host-header check (check_hostname,
+              # DNS-rebinding protection) would otherwise reject it. Needs both: the public
+              # app domain and the internal tailnet hostname the outpost connects through.
+              host_whitelist = "sabnzbd.${domain},heartbeat.dns.headscale.${domain}";
+
+              # The actual "External internet access denied" error hit in practice comes
+              # from a *different*, earlier check (check_access/inet_exposure), which
+              # only ever looks at the direct TCP peer's IP — the outpost's own tailnet
+              # IP (accesscontrolsystem, 100.64.0.0/10), not the original browser's IP.
+              # SABnzbd's default local_ranges is RFC1918 only, which doesn't cover
+              # Tailscale's CGNAT range, so the outpost's connection reads as "external"
+              # even though nothing is actually exposed past the tailnet.
+              local_ranges = "100.64.0.0/10";
+
+              # With local_ranges fixed, the direct peer (the outpost, 100.64.0.1) passes —
+              # but verify_xff_header then separately re-checks every hop in
+              # X-Forwarded-For against local_ranges too, including the original client's
+              # real public IP forwarded through Caddy. That's a real, non-local address by
+              # design here (SSO-gated access from outside the LAN is the whole point), so
+              # this spoofing check — meant for plain reverse-proxy setups where every
+              # legitimate caller really is LAN-local — has to be off. Authentik's outpost
+              # is what actually gates access; this would just reject genuine users.
+              verify_xff_header = false;
             };
 
             servers = cfg.usenetProviders;
@@ -269,6 +297,19 @@ in {
       };
     };
 
+    # Authentik's embedded outpost (running on accesscontrolsystem, reached over the
+    # tailnet) proxies SABnzbd directly via the Proxy Provider's internal_host — it needs
+    # to reach this machine's SABnzbd backend itself, not go through Caddy. Scoped to the
+    # tailscale0 interface, matching the LDAP outpost's port-3389 rule on
+    # accesscontrolsystem (machines/accesscontrolsystem/_config.nix).
+    networking.firewall = lib.mkIf cfg.sabnzbd.enable {
+      interfaces = {
+        tailscale0 = {
+          allowedTCPPorts = [config.nixflix.usenetClients.sabnzbd.settings.misc.port];
+        };
+      };
+    };
+
     assertions = [
       {
         assertion = !(cfg.jellyfin.enable && cfg.jellyfin.hardwareAcceleration) || config.homelab.hardware.graphics.enable;
@@ -368,8 +409,25 @@ in {
           (lib.mkIf cfg.sabnzbd.enable {
             "sabnzbd.${domain}" = {
               useACMEHost = domain;
+              # SSO via Authentik's embedded outpost (Proxy Provider, mode = proxy — see
+              # infra-tofu's modules/authentik/proxy.tf). SABnzbd has no OIDC/SAML of its
+              # own, unlike Jellyfin's LDAP plugin, so this is the only way to put SSO in
+              # front of it. Deliberately full Proxy mode, not forward_single/forward_domain:
+              # a forward_single split (Caddy asking the outpost "is this OK?" via a side
+              # channel, then separately proxying to the backend itself) was tried first and
+              # its auth-check endpoint returned 200 for fully anonymous requests — an
+              # unexplained bypass. In Proxy mode the outpost IS the reverse proxy (it
+              # forwards to the provider's internal_host itself once authenticated), so
+              # there's no separate unauthenticated path to the backend for Caddy to
+              # accidentally take.
+              #
+              # header_up Host is required: Authentik's outpost matches the incoming
+              # request against a provider by Host header, which must equal the app's own
+              # external_host (sabnzbd.${domain}), not auth.${domain}.
               extraConfig = ''
-                reverse_proxy http://127.0.0.1:8080
+                reverse_proxy https://auth.${domain} {
+                  header_up Host {http.request.host}
+                }
               '';
             };
           })
