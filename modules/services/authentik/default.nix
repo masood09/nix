@@ -41,13 +41,16 @@ in {
       };
 
       caddy = lib.mkIf caddyEnabled {
-        virtualHosts = {
-          "${authentikCfg.webDomain}" = {
+        virtualHosts = let
+          # authentik 2026.5.x serves the app only on its HTTPS listener (:9443);
+          # the plain-HTTP :9000 listener returns empty 200s for every route.
+          # Proxy to :9443 and skip verification of authentik's internal
+          # self-signed cert (the upstream authentik-nix nginx example does the same).
+          # Shared verbatim with forwardAuthHosts below — the embedded outpost dispatches
+          # by Host header internally, so every SSO-fronted app domain needs the exact
+          # same proxy target, not just webDomain.
+          vhost = {
             useACMEHost = config.networking.domain;
-            # authentik 2026.5.x serves the app only on its HTTPS listener (:9443);
-            # the plain-HTTP :9000 listener returns empty 200s for every route.
-            # Proxy to :9443 and skip verification of authentik's internal
-            # self-signed cert (the upstream authentik-nix nginx example does the same).
             extraConfig = ''
               reverse_proxy https://127.0.0.1:9443 {
                 transport http {
@@ -56,7 +59,11 @@ in {
               }
             '';
           };
-        };
+        in
+          {
+            "${authentikCfg.webDomain}" = vhost;
+          }
+          // lib.genAttrs authentikCfg.forwardAuthHosts (_: vhost);
       };
 
       postgresqlBackup = lib.mkIf (postgresqlEnabled && postgresqlBackupEnabled) {
