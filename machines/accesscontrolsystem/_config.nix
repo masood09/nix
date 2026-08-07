@@ -32,7 +32,7 @@
           # Every app domain onboarded onto the embedded outpost's Proxy Provider SSO
           # (see infra-tofu's modules/authentik/proxy.tf) needs a Caddy vhost here, or
           # Caddy never forwards it to authentik in the first place.
-          forwardAuthHosts = ["sabnzbd.mantannest.com"];
+          forwardAuthHosts = ["sabnzbd.mantannest.com" "sonarr.mantannest.com" "radarr.mantannest.com"];
         };
 
         acme = {
