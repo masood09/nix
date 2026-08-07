@@ -14,6 +14,25 @@
   ldapCfg = cfg.jellyfin.ldap;
   ldapGroupDn = group: "cn=${group},ou=groups,${ldapCfg.baseDn}";
   ldapSearchFilter = "(|${lib.concatMapStringsSep "" (g: "(memberOf=${ldapGroupDn g})") ldapCfg.accessGroups})";
+
+  # "Remux + WEB" — TRaSH-Guides' own mainstream-documented, genuinely remux-primary
+  # profile (cutoff: Remux-2160p/1080p). Deliberately not nixflix's radarrQuality-driven
+  # SQP-1 default: SQP-1 was found to actually *exclude* Remux entirely
+  # (Remux-2160p/1080p: allowed=false in its own trash-guides.info JSON) — the opposite
+  # of the remux-primary strategy this repo actually wants (Jellyfin transcodes down for
+  # 1080p clients, so one 4K/remux source serves every resolution). SQP has also since
+  # been pulled from TRaSH's public docs entirely (Discord-gated as of 2025), where
+  # Remux + WEB remains a normal, currently-documented profile.
+  radarrRemuxProfile =
+    if cfg.recyclarr.radarrQuality == "4K"
+    then {
+      trashId = "fd161a61e3ab826d3a22d53f935696dd";
+      name = "Remux + WEB 2160p";
+    }
+    else {
+      trashId = "9ca12ea80aa55ef916e3751f4b874151";
+      name = "Remux + WEB 1080p";
+    };
 in {
   imports = [
     ./options.nix
@@ -248,11 +267,56 @@ in {
       recyclarr = lib.mkIf cfg.recyclarr.enable {
         enable = true;
 
-        # Matches a 4K/remux-primary download strategy (Jellyfin transcodes down for
-        # 1080p clients). See the Apple TV/Infuse TrueHD caveat noted in the plan doc —
-        # deprioritize/allow transcode-fallback for TrueHD custom formats even though DV
-        # and Atmos passthrough are fine there.
-        inherit (cfg.recyclarr) radarrQuality sonarrQuality;
+        # sonarrQuality still drives nixflix's own WEB-Alternative default (no
+        # radarrQuality here — Radarr's profile is fully hand-specified below, since it
+        # needs to be the actual Remux + WEB profile rather than nixflix's SQP-1 default).
+        inherit (cfg.recyclarr) sonarrQuality;
+
+        config = {
+          radarr = {
+            radarr = lib.mkIf cfg.radarr.enable {
+              quality_definition = {
+                type = "movie";
+              };
+
+              quality_profiles = [
+                {
+                  trash_id = radarrRemuxProfile.trashId;
+                  reset_unmatched_scores.enabled = true;
+                }
+              ];
+
+              # All audio formats score at TRaSH's own defaults, no TrueHD penalty —
+              # confirmed Apple TV + Infuse plays all of these back fine (Infuse decodes
+              # HD audio to LPCM in software rather than relying on passthrough).
+              custom_formats = [
+                {
+                  trash_ids = [
+                    "496f355514737f7d83bf7aa4d24f8169" # TrueHD Atmos
+                    "2f22d89048b01681dde8afe203bf2e95" # DTS X
+                    "417804f7f2c4308c1f4c5d380d4c4475" # ATMOS (undefined)
+                    "1af239278386be2919e1bcee0bde047e" # DD+ ATMOS
+                    "3cafb66171b47f226146a0770576870f" # TrueHD
+                    "dcf3ec6938fa32445f590a4da84256cd" # DTS-HD MA
+                    "a570d4a0e56a2874b64e5bfa55202a1b" # FLAC
+                    "e7c2fcae07cbada050a0af3357491d7b" # PCM
+                    "8e109e50e0a0b83a5098b056e13bf6db" # DTS-HD HRA
+                    "185f1dd7264c4562b9022d963ac37424" # DD+
+                    "f9f847ac70a0af62ea4a08280b859636" # DTS-ES
+                    "1c1a4c5e823891c75bc50380a6866f73" # DTS
+                    "240770601cc226190c367ef59aba7463" # AAC
+                    "c2998bd0d90ed5621d8df281e839436e" # DD
+                  ];
+                  assign_scores_to = [
+                    {
+                      trash_id = radarrRemuxProfile.trashId;
+                    }
+                  ];
+                }
+              ];
+            };
+          };
+        };
       };
 
       seerr = lib.mkIf cfg.seerr.enable {
@@ -296,10 +360,7 @@ in {
             # links pointing at http://127.0.0.1:<port>, unreachable from a browser.
             externalUrl = "https://radarr.${domain}${config.nixflix.radarr.config.hostConfig.urlBase}";
 
-            activeProfileName =
-              if cfg.recyclarr.radarrQuality == "4K"
-              then "[SQP] SQP-1 (2160p)"
-              else "[SQP] SQP-1 (1080p)";
+            activeProfileName = radarrRemuxProfile.name;
           };
         };
 
