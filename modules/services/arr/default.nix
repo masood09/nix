@@ -190,10 +190,23 @@ in {
           };
 
           hostConfig = {
-            bindAddress = "127.0.0.1";
+            # Authentik's outpost (accesscontrolsystem) connects to Sonarr's backend
+            # directly over the tailnet via internal_host — 127.0.0.1 would refuse that
+            # connection entirely (confirmed live: Bad Gateway, connection refused).
+            # Matches SABnzbd's equivalent tailscale0 firewall scoping below.
+            bindAddress = "0.0.0.0";
             password = {
               _secret = config.sops.secrets."arr/sonarr/password".path;
             };
+
+            # Trust Authentik's outpost, which now sits in front via Caddy (see the
+            # sonarr.${domain} vhost below) — matches Authentik's own documented Sonarr
+            # integration guide exactly (config.xml AuthenticationMethod=External).
+            # authenticationRequired stays "enabled": with authenticationMethod=external
+            # Sonarr never shows its own login regardless, and this keeps the setting
+            # correct/inert rather than silently trusting all local addresses too.
+            authenticationMethod = "external";
+            applicationUrl = "https://sonarr.${domain}";
           };
         };
       };
@@ -207,10 +220,15 @@ in {
           };
 
           hostConfig = {
-            bindAddress = "127.0.0.1";
+            # See the matching comment on sonarr's hostConfig above.
+            bindAddress = "0.0.0.0";
             password = {
               _secret = config.sops.secrets."arr/radarr/password".path;
             };
+
+            # See the matching comment on sonarr's hostConfig above.
+            authenticationMethod = "external";
+            applicationUrl = "https://radarr.${domain}";
           };
         };
       };
@@ -297,14 +315,17 @@ in {
     };
 
     # Authentik's embedded outpost (running on accesscontrolsystem, reached over the
-    # tailnet) proxies SABnzbd directly via the Proxy Provider's internal_host — it needs
-    # to reach this machine's SABnzbd backend itself, not go through Caddy. Scoped to the
-    # tailscale0 interface, matching the LDAP outpost's port-3389 rule on
-    # accesscontrolsystem (machines/accesscontrolsystem/_config.nix).
-    networking.firewall = lib.mkIf cfg.sabnzbd.enable {
+    # tailnet) proxies each SSO-fronted app directly via its Proxy Provider's
+    # internal_host — it needs to reach this machine's backends itself, not go through
+    # Caddy. Scoped to the tailscale0 interface, matching the LDAP outpost's port-3389
+    # rule on accesscontrolsystem (machines/accesscontrolsystem/_config.nix).
+    networking.firewall = lib.mkIf (cfg.sabnzbd.enable || cfg.sonarr.enable || cfg.radarr.enable) {
       interfaces = {
         tailscale0 = {
-          allowedTCPPorts = [config.nixflix.usenetClients.sabnzbd.settings.misc.port];
+          allowedTCPPorts =
+            lib.optional cfg.sabnzbd.enable config.nixflix.usenetClients.sabnzbd.settings.misc.port
+            ++ lib.optional cfg.sonarr.enable config.nixflix.sonarr.config.hostConfig.port
+            ++ lib.optional cfg.radarr.enable config.nixflix.radarr.config.hostConfig.port;
         };
       };
     };
@@ -384,16 +405,24 @@ in {
           (lib.mkIf cfg.sonarr.enable {
             "sonarr.${domain}" = {
               useACMEHost = domain;
+              # SSO via Authentik's embedded outpost — see the matching comment on
+              # sabnzbd's vhost below for why this is full Proxy mode, not forward_single.
               extraConfig = ''
-                reverse_proxy http://127.0.0.1:${toString config.nixflix.sonarr.config.hostConfig.port}
+                reverse_proxy https://auth.${domain} {
+                  header_up Host {http.request.host}
+                }
               '';
             };
           })
           (lib.mkIf cfg.radarr.enable {
             "radarr.${domain}" = {
               useACMEHost = domain;
+              # SSO via Authentik's embedded outpost — see the matching comment on
+              # sabnzbd's vhost below for why this is full Proxy mode, not forward_single.
               extraConfig = ''
-                reverse_proxy http://127.0.0.1:${toString config.nixflix.radarr.config.hostConfig.port}
+                reverse_proxy https://auth.${domain} {
+                  header_up Host {http.request.host}
+                }
               '';
             };
           })
