@@ -171,10 +171,17 @@ in {
           };
 
           hostConfig = {
-            bindAddress = "127.0.0.1";
+            # Authentik's outpost (accesscontrolsystem) connects to Prowlarr's backend
+            # directly over the tailnet via internal_host — 127.0.0.1 refuses that
+            # connection entirely (confirmed with Sonarr/Radarr: Bad Gateway).
+            bindAddress = "0.0.0.0";
             password = {
               _secret = config.sops.secrets."arr/prowlarr/password".path;
             };
+
+            # Trust Authentik's outpost — matches Sonarr/Radarr's hostConfig above.
+            authenticationMethod = "external";
+            applicationUrl = "https://prowlarr.${domain}";
           };
 
           inherit (cfg) indexers;
@@ -319,13 +326,14 @@ in {
     # internal_host — it needs to reach this machine's backends itself, not go through
     # Caddy. Scoped to the tailscale0 interface, matching the LDAP outpost's port-3389
     # rule on accesscontrolsystem (machines/accesscontrolsystem/_config.nix).
-    networking.firewall = lib.mkIf (cfg.sabnzbd.enable || cfg.sonarr.enable || cfg.radarr.enable) {
+    networking.firewall = lib.mkIf (cfg.sabnzbd.enable || cfg.sonarr.enable || cfg.radarr.enable || cfg.prowlarr.enable) {
       interfaces = {
         tailscale0 = {
           allowedTCPPorts =
             lib.optional cfg.sabnzbd.enable config.nixflix.usenetClients.sabnzbd.settings.misc.port
             ++ lib.optional cfg.sonarr.enable config.nixflix.sonarr.config.hostConfig.port
-            ++ lib.optional cfg.radarr.enable config.nixflix.radarr.config.hostConfig.port;
+            ++ lib.optional cfg.radarr.enable config.nixflix.radarr.config.hostConfig.port
+            ++ lib.optional cfg.prowlarr.enable config.nixflix.prowlarr.config.hostConfig.port;
         };
       };
     };
@@ -429,8 +437,12 @@ in {
           (lib.mkIf cfg.prowlarr.enable {
             "prowlarr.${domain}" = {
               useACMEHost = domain;
+              # SSO via Authentik's embedded outpost — see the matching comment on
+              # sabnzbd's vhost below for why this is full Proxy mode, not forward_single.
               extraConfig = ''
-                reverse_proxy http://127.0.0.1:${toString config.nixflix.prowlarr.config.hostConfig.port}
+                reverse_proxy https://auth.${domain} {
+                  header_up Host {http.request.host}
+                }
               '';
             };
           })
