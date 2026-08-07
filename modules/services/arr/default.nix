@@ -260,10 +260,11 @@ in {
             baseUrl = config.nixflix.radarr.config.hostConfig.urlBase;
             activeDirectory = builtins.head (config.nixflix.radarr.mediaDirs or ["/data/media/movies"]);
             isDefault = true;
-            externalUrl =
-              if config.nixflix.reverseProxy.enable
-              then "${config.nixflix.seerr.externalUrlScheme}://${config.nixflix.radarr.subdomain}.${config.nixflix.reverseProxy.domain}${config.nixflix.radarr.config.hostConfig.urlBase}"
-              else "";
+            # nixflix's own default derives this from nixflix.reverseProxy.enable, which
+            # is false here — we run our own Caddy, not nixflix's built-in reverse proxy —
+            # so that default always evaluates to "", leaving Seerr's "open in Radarr"
+            # links pointing at http://127.0.0.1:<port>, unreachable from a browser.
+            externalUrl = "https://radarr.${domain}${config.nixflix.radarr.config.hostConfig.urlBase}";
 
             activeProfileName =
               if cfg.recyclarr.radarrQuality == "4K"
@@ -283,10 +284,8 @@ in {
             seriesType = "standard";
             animeSeriesType = "standard";
             isDefault = true;
-            externalUrl =
-              if config.nixflix.reverseProxy.enable
-              then "${config.nixflix.seerr.externalUrlScheme}://${config.nixflix.sonarr.subdomain}.${config.nixflix.reverseProxy.domain}${config.nixflix.sonarr.config.hostConfig.urlBase}"
-              else "";
+            # See the matching comment on radarr's externalUrl above.
+            externalUrl = "https://sonarr.${domain}${config.nixflix.sonarr.config.hostConfig.urlBase}";
 
             activeProfileName =
               if cfg.recyclarr.sonarrQuality == "4K"
