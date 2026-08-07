@@ -175,9 +175,9 @@ in {
             # directly over the tailnet via internal_host — 127.0.0.1 refuses that
             # connection entirely (confirmed with Sonarr/Radarr: Bad Gateway).
             bindAddress = "0.0.0.0";
-            password = {
-              _secret = config.sops.secrets."arr/prowlarr/password".path;
-            };
+            # See the matching comment on sonarr's hostConfig above.
+            username = "prowlarr";
+            password = "unused-authenticationMethod-is-external";
 
             # Trust Authentik's outpost — matches Sonarr/Radarr's hostConfig above.
             authenticationMethod = "external";
@@ -202,9 +202,14 @@ in {
             # connection entirely (confirmed live: Bad Gateway, connection refused).
             # Matches SABnzbd's equivalent tailscale0 firewall scoping below.
             bindAddress = "0.0.0.0";
-            password = {
-              _secret = config.sops.secrets."arr/sonarr/password".path;
-            };
+            # Not a real secret — authenticationMethod=external below means Sonarr never
+            # actually checks this. But nixflix gates its *entire* sonarr-config.service
+            # (which applies every hostConfig field, not just auth) behind
+            # `password != null`, and sonarr-rootfolders/mediamanagement/downloadclients
+            # all Requires= that unit — leaving it null broke all of those too, not just
+            # auth. A placeholder satisfies the gate without needing a real secret.
+            username = "sonarr";
+            password = "unused-authenticationMethod-is-external";
 
             # Trust Authentik's outpost, which now sits in front via Caddy (see the
             # sonarr.${domain} vhost below) — matches Authentik's own documented Sonarr
@@ -229,9 +234,9 @@ in {
           hostConfig = {
             # See the matching comment on sonarr's hostConfig above.
             bindAddress = "0.0.0.0";
-            password = {
-              _secret = config.sops.secrets."arr/radarr/password".path;
-            };
+            # See the matching comment on sonarr's hostConfig above.
+            username = "radarr";
+            password = "unused-authenticationMethod-is-external";
 
             # See the matching comment on sonarr's hostConfig above.
             authenticationMethod = "external";

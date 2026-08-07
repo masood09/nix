@@ -33,31 +33,13 @@
           restartUnits = ["sonarr.service"];
         };
 
-        "arr/sonarr/password" = {
-          sopsFile = ./secrets.sops.yaml;
-          owner = "sonarr";
-          restartUnits = ["sonarr.service"];
-        };
-
         "arr/radarr/api-key" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "radarr";
           restartUnits = ["radarr.service"];
         };
 
-        "arr/radarr/password" = {
-          sopsFile = ./secrets.sops.yaml;
-          owner = "radarr";
-          restartUnits = ["radarr.service"];
-        };
-
         "arr/prowlarr/api-key" = {
-          sopsFile = ./secrets.sops.yaml;
-          owner = "prowlarr";
-          restartUnits = ["prowlarr.service"];
-        };
-
-        "arr/prowlarr/password" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "prowlarr";
           restartUnits = ["prowlarr.service"];
@@ -70,18 +52,6 @@
         };
 
         "arr/sabnzbd/nzb-key" = {
-          sopsFile = ./secrets.sops.yaml;
-          owner = "sabnzbd";
-          restartUnits = ["sabnzbd.service"];
-        };
-
-        "arr/sabnzbd/username" = {
-          sopsFile = ./secrets.sops.yaml;
-          owner = "sabnzbd";
-          restartUnits = ["sabnzbd.service"];
-        };
-
-        "arr/sabnzbd/password" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "sabnzbd";
           restartUnits = ["sabnzbd.service"];
