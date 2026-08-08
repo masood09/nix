@@ -46,7 +46,7 @@ in {
         containers = {
           dell-idrac-fan-controller = {
             # renovate: datasource=docker depName=tigerblue77/dell_idrac_fan_controller
-            image = "tigerblue77/dell_idrac_fan_controller:v1.12";
+            image = "tigerblue77/dell_idrac_fan_controller:v1.30";
             autoStart = true;
 
             environment =
