@@ -34,6 +34,17 @@ in {
   ];
 
   config = lib.mkIf immichCfg.enable {
+    # TECH DEBT: nixpkgs marks immich-2.7.5 insecure (CVE-2026-59258,
+    # CVE-2026-82272). Immich 2.x gets no further fixes; a patched 3.x line
+    # only exists in NixOS 26.11 (unstable), not this repo's 26.05 pin.
+    # Permit it until 26.11 is available or a backport lands. Immich sits
+    # behind Authentik SSO, not directly internet-facing.
+    homelab = {
+      insecurePackages = [
+        "immich-2.7.5"
+      ];
+    };
+
     assertions = [
       {
         assertion = postgresqlEnabled;
