@@ -2,6 +2,7 @@
 # Authenticates via Authentik OIDC with password auth disabled.
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -9,6 +10,7 @@
   homelabCfg = config.homelab;
   cfg = homelabCfg.services.karakeep;
   caddyEnabled = config.services.caddy.enable;
+  karakeepPackage = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.karakeep;
 
   persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
@@ -29,15 +31,6 @@ in {
   ];
 
   config = lib.mkIf cfg.enable {
-    # TECH DEBT: karakeep in nixos-26.05 builds with pnpm 9.15.9, which nixpkgs
-    # marks insecure (CVE-2026-48995 and friends). Permit it on karakeep hosts
-    # until nixpkgs bumps the karakeep pnpm pin to a patched release.
-    homelab = {
-      insecurePackages = [
-        "pnpm-9.15.9"
-      ];
-    };
-
     # ZFS dataset for dataDir
     homelab = {
       zfs = {
@@ -63,6 +56,10 @@ in {
     services = {
       karakeep = {
         enable = true;
+
+        # NixOS 26.05 packages Karakeep with unsupported pnpm 9. Use the
+        # supported package from the pinned unstable input.
+        package = karakeepPackage;
 
         environmentFile = config.sops.secrets."karakeep/.env".path;
 
