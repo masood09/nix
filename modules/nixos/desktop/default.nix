@@ -107,15 +107,6 @@ in {
 
   config = lib.mkMerge [
     (lib.mkIf homelabCfg.desktop.enable {
-      # bitwarden-desktop in nixos-26.05 still pins electron_39, which upstream
-      # marked EOL/insecure. Permit it here on desktop closures until nixpkgs
-      # bumps the package to electron_41+.
-      homelab = {
-        insecurePackages = [
-          "electron-39.8.10"
-        ];
-      };
-
       # System-wide desktop glue that is not owned by a single service module.
       # Today this is only the Bitwarden polkit action used for "system auth"
       # unlocks. Gated on homelab.programs.bitwarden.systemAuthUnlock.enable; the
