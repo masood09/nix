@@ -36,7 +36,16 @@
             hardwareAcceleration = lib.mkOption {
               type = lib.types.bool;
               default = true;
-              description = "Enable VAAPI/QuickSync hardware transcoding (requires an Intel iGPU with /dev/dri present).";
+              description = "Enable Jellyfin hardware transcoding.";
+            };
+
+            hardwareAccelerationType = lib.mkOption {
+              type = lib.types.enum [
+                "vaapi"
+                "nvenc"
+              ];
+              default = "vaapi";
+              description = "Jellyfin hardware transcoding backend.";
             };
 
             ldap = {

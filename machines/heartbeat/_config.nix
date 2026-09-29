@@ -65,6 +65,7 @@
 
           jellyfin = {
             enable = true;
+            hardwareAccelerationType = "nvenc";
 
             ldap = {
               enable = true;
