@@ -23,6 +23,7 @@
       "original": {
         "owner": "nix-community",
         "repo": "authentik-nix",
+        "rev": "28f0b3bc96b8e0f664aabb540a2ed61a352e8fc7",
         "type": "github"
       }
     },
