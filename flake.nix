@@ -57,18 +57,10 @@
     # Overriding nixpkgs re-hashes the build → cache miss → compile from source
     # (which OOM/deadlocks the small aarch64 SSO box). Upstream explicitly does
     # not support the follows override.
-    # TECH DEBT: pinned to the pre-2026.8 commit (authentik 2026.5.6).
-    # 2026.8.x (.2 and .3 both confirmed) crash-loops on startup: the embedded
-    # outpost's startup task completes successfully, then ~100ms later the
-    # whole arbiter shuts down gracefully for no logged reason, in a tight
-    # restart loop that never stabilizes. Upstream bug, not a config issue —
-    # see goauthentik/authentik#26274 ("Error while closing socket [Errno 9]
-    # Bad file descriptor", same signature, sporadic for others but hits us on
-    # every startup, likely because we run an embedded LDAP outpost. `just up`
-    # will not move this past the pinned rev; re-test and bump the rev
-    # directly once upstream ships a fix.
+    # Tracks the latest authentik-nix release. Keep this input on its own
+    # nixpkgs revision so authentik's cached Rust artifacts remain usable.
     authentik-nix = {
-      url = "github:nix-community/authentik-nix/28f0b3bc96b8e0f664aabb540a2ed61a352e8fc7";
+      url = "github:nix-community/authentik-nix";
     };
     nix-minecraft = {
       url = "github:Infinidoge/nix-minecraft";

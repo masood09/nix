@@ -102,7 +102,8 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | lk-jwt-service (Matrix RTC)          |  8912 |                                   |
 | MailArchiver                         |  8913 |                                   |
 | Nightscout                           |  8914 |                                   |
-| Authentik                            |  9000 |                                   |
+| Authentik (HTTP/health)              |  9000 | 127.0.0.1 only; server listener    |
+| Authentik Worker (HTTP)              |  9001 | 127.0.0.1 only; worker listener    |
 | Prometheus                           |  9090 | Upstream default                  |
 | Headscale (Metrics)                  |  9091 |                                   |
 | prometheus-node-exporter             |  9100 | Upstream default (via Alloy)      |
@@ -113,8 +114,9 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | prometheus-mongodb-exporter          |  9216 | Upstream default                  |
 | prometheus-blackbox-exporter         |  9115 | Upstream default; watcher host    |
 | Karakeep (Chrome, remote debugging)  |  9222 | Upstream default                  |
-| Authentik (Metrics)                  |  9300 |                                   |
-| Authentik (Built-in HTTPS)           |  9443 |                                   |
+| Authentik (Metrics)                  |  9300 | 127.0.0.1 only; server metrics     |
+| Authentik Worker (Metrics)           |  9301 | 127.0.0.1 only; worker metrics     |
+| Authentik (Built-in HTTPS)           |  9443 | 127.0.0.1 only; server application |
 | Grafana Alloy (HTTP)                 | 12345 | Upstream default                  |
 | Minecraft Velocity                   | 25565 | Public proxy on heartbeat         |
 | Minecraft Forever backend            | 25567 | Localhost only, Fabric 1.20.1     |
