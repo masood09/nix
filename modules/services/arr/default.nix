@@ -4,6 +4,7 @@
   config,
   lib,
   inputs,
+  pkgs,
   ...
 }: let
   cfg = config.homelab.services.arr;
@@ -546,6 +547,81 @@ in {
             };
           })
         ];
+      };
+    };
+
+    # Prowlarr 2.6 rejects the host-config payload from nixflix because it does
+    # not yet include the new required AllowedHosts field. Keep the rest of
+    # nixflix's declarative payload intact and add the explicit host allow-list
+    # until the upstream module grows support for it.
+    systemd.services = {
+      # nixflix's generated readiness hook probes bindAddress (0.0.0.0), which
+      # Prowlarr's host filter rejects. Probe the loopback address instead.
+      prowlarr = lib.mkIf cfg.prowlarr.enable {
+        serviceConfig.ExecStartPost = lib.mkForce (pkgs.writeShellScript "prowlarr-wait-for-api-local" ''
+          set -eu
+          API_KEY=$(cat /run/credentials/prowlarr.service/apiKey)
+          for i in $(seq 1 90); do
+            if ${pkgs.curl}/bin/curl -fsS -H "X-Api-Key: $API_KEY" \
+              http://127.0.0.1:${toString config.nixflix.prowlarr.config.hostConfig.port}/api/${config.nixflix.prowlarr.config.apiVersion}/system/status \
+              >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Prowlarr API not available after 90 seconds" >&2
+          exit 1
+        '');
+      };
+
+      prowlarr-config = lib.mkIf cfg.prowlarr.enable {
+        serviceConfig = {
+          ExecStartPre = lib.mkForce [];
+          ExecStartPost = lib.mkForce [];
+        };
+
+        script = lib.mkForce ''
+          set -eu
+
+          BASE_URL="http://127.0.0.1:${toString config.nixflix.prowlarr.config.hostConfig.port}${config.nixflix.prowlarr.config.hostConfig.urlBase}/api/${config.nixflix.prowlarr.config.apiVersion}"
+          API_KEY=$(cat ${lib.escapeShellArg config.sops.secrets."arr/prowlarr/api-key".path})
+
+          echo "Fetching current host configuration..."
+          HOST_CONFIG=$(${pkgs.curl}/bin/curl -fsS -H "X-Api-Key: $API_KEY" "$BASE_URL/config/host")
+          CONFIG_ID=$(echo "$HOST_CONFIG" | ${pkgs.jq}/bin/jq -r '.id')
+
+          echo "Building configuration..."
+          NEW_CONFIG=$(echo "$HOST_CONFIG" | ${pkgs.jq}/bin/jq \
+            --arg apiKey "$API_KEY" \
+            --arg bindAddress ${lib.escapeShellArg config.nixflix.prowlarr.config.hostConfig.bindAddress} \
+            --arg authenticationMethod ${lib.escapeShellArg config.nixflix.prowlarr.config.hostConfig.authenticationMethod} \
+            --arg authenticationRequired ${lib.escapeShellArg config.nixflix.prowlarr.config.hostConfig.authenticationRequired} \
+            --arg applicationUrl ${lib.escapeShellArg config.nixflix.prowlarr.config.hostConfig.applicationUrl} \
+            --arg allowedHosts ${lib.escapeShellArg "prowlarr.${domain},heartbeat.dns.headscale.${domain},localhost,127.0.0.1,0.0.0.0"} \
+            '. + {
+              bindAddress: $bindAddress,
+              port: ${toString config.nixflix.prowlarr.config.hostConfig.port},
+              authenticationMethod: $authenticationMethod,
+              authenticationRequired: $authenticationRequired,
+              username: "prowlarr",
+              password: "unused-authenticationMethod-is-external",
+              passwordConfirmation: "unused-authenticationMethod-is-external",
+              apiKey: $apiKey,
+              applicationUrl: $applicationUrl,
+              allowedHosts: $allowedHosts
+            }')
+
+          echo "Updating Prowlarr configuration via API..."
+          ${pkgs.curl}/bin/curl -fsS -X PUT \
+            -H "X-Api-Key: $API_KEY" \
+            -H "Content-Type: application/json" \
+            --data "$NEW_CONFIG" \
+            "$BASE_URL/config/host/$CONFIG_ID" > /dev/null
+
+          # The API applies this host configuration live. An explicit restart here
+          # deadlocks with the wantedBy config unit and times out during activation.
+          echo "Configuration updated successfully"
+        '';
       };
     };
   };
