@@ -17,6 +17,7 @@
   gfxCfg = homelabCfg.hardware.graphics;
   isIntel = gfxCfg.driver == "intel";
   isAmd = gfxCfg.driver == "amd";
+  isNvidia = gfxCfg.driver == "nvidia";
   bwUnlockCfg = homelabCfg.programs.bitwarden.systemAuthUnlock;
   # "yes" auto-grants the active session (silent unlock); "auth_self" prompts.
   # allow_any/allow_inactive stay at auth_self so remote/inactive sessions
@@ -97,8 +98,26 @@ in {
             type = lib.types.enum [
               "intel"
               "amd"
+              "nvidia"
             ];
-            description = "GPU driver family — determines which VA-API/VDPAU packages to install.";
+            description = "GPU driver family — determines which graphics and video-acceleration packages to install.";
+          };
+
+          nvidia = {
+            driverBranch = lib.mkOption {
+              type = lib.types.enum [
+                "stable"
+                "production"
+                "latest"
+                "legacy_580"
+                "legacy_535"
+                "legacy_470"
+                "legacy_390"
+                "legacy_340"
+              ];
+              default = "stable";
+              description = "NVIDIA driver branch selected for the installed GPU generation.";
+            };
           };
         };
       };
@@ -340,10 +359,20 @@ in {
               libva-vdpau-driver # VDPAU compatibility layer over VA-API
               libvdpau-va-gl # VDPAU fallback via OpenGL
             ]
-            else [
+            else if isAmd
+            then [
               # AMD uses mesa's built-in RADV/radeonsi — no extra VA-API driver needed
               libvdpau-va-gl # VDPAU fallback via OpenGL
-            ];
+            ]
+            else [];
+        };
+
+        # Heartbeat's Pascal GPU requires the proprietary legacy branch; the open
+        # kernel module is not available for this generation.
+        nvidia = lib.mkIf isNvidia {
+          modesetting.enable = true;
+          open = false;
+          package = config.boot.kernelPackages.nvidiaPackages.${gfxCfg.nvidia.driverBranch};
         };
 
         # AMD GPU kernel driver
@@ -353,6 +382,8 @@ in {
           };
         };
       };
+
+      services.xserver.videoDrivers = lib.mkIf isNvidia ["nvidia"];
 
       # OpenCL ICD registration — hardware.graphics.extraPackages only wires up
       # /run/opengl-driver (VAAPI/DRI search path); the standard OpenCL loader looks at
