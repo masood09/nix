@@ -91,10 +91,9 @@ in {
             description = ''
               Absolute paths Codex should treat as trusted workspaces.
 
-              Codex normally records the answer to its "trust this folder?"
-              prompt by writing back into `~/.codex/config.toml`, which Home
-              Manager owns as a read-only store symlink. Listing a path here
-              declares the trust up front so the prompt never has to write.
+              These paths are merged into Codex's writable config.toml on
+              activation. Codex can also remember additional trusted paths
+              interactively; those are preserved across rebuilds.
             '';
           };
         };
