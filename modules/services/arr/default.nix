@@ -64,8 +64,8 @@ in {
           # supplementary groups) — the actual accel backend is a separate field that
           # otherwise defaults to "none", silently leaving Jellyfin on pure CPU transcode.
           enableHardwareEncoding = cfg.jellyfin.hardwareAcceleration;
-          hardwareAccelerationType = lib.mkIf cfg.jellyfin.hardwareAcceleration "vaapi";
-          vaapiDevice = lib.mkIf cfg.jellyfin.hardwareAcceleration "/dev/dri/renderD128";
+          hardwareAccelerationType = lib.mkIf cfg.jellyfin.hardwareAcceleration cfg.jellyfin.hardwareAccelerationType;
+          vaapiDevice = lib.mkIf (cfg.jellyfin.hardwareAcceleration && cfg.jellyfin.hardwareAccelerationType == "vaapi") "/dev/dri/renderD128";
 
           # Library is largely UHD BluRay HDR/DV — needed to properly tone-map down to
           # SDR for non-HDR/DV-capable clients (e.g. 1080p laptops) instead of a naive
@@ -410,7 +410,7 @@ in {
         assertion = !(cfg.jellyfin.enable && cfg.jellyfin.hardwareAcceleration) || config.homelab.hardware.graphics.enable;
         message = ''
           homelab.services.arr.jellyfin.hardwareAcceleration is on but homelab.hardware.graphics.enable
-          is not set on this machine. The VAAPI/OpenCL driver packages that back /dev/dri/renderD128
+          is not set on this machine. The GPU driver packages required by the selected backend
           won't be installed, and every hardware transcode will fail. Set
           homelab.hardware.graphics = { enable = true; driver = "intel"; }; in this machine's
           _config.nix (a hardware fact about the machine, not something this service should assert).
