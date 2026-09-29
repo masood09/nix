@@ -3,6 +3,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   authentikCfg = config.homelab.services.authentik;
@@ -42,7 +43,7 @@ in {
 
       caddy = lib.mkIf caddyEnabled {
         virtualHosts = let
-          # authentik 2026.5.x serves the app only on its HTTPS listener (:9443);
+          # authentik 2026.8.x serves the app only on its HTTPS listener (:9443);
           # the plain-HTTP :9000 listener returns empty 200s for every route.
           # Proxy to :9443 and skip verification of authentik's internal
           # self-signed cert (the upstream authentik-nix nginx example does the same).
@@ -72,6 +73,18 @@ in {
         ];
       };
     };
+
+    # The shared environment file contains the server listener values. Since
+    # authentik 2026.8, systemd's EnvironmentFile overrides authentik-nix's
+    # dedicated worker ports, causing the worker to occupy 9000/9300 before
+    # the server starts and leaving the server in an address-in-use loop.
+    systemd.services.authentik-worker.serviceConfig.EnvironmentFile = lib.mkForce [
+      config.sops.secrets."authentik/.env".path
+      (pkgs.writeText "authentik-worker-listeners.env" ''
+        AUTHENTIK_LISTEN__HTTP=127.0.0.1:9001
+        AUTHENTIK_LISTEN__METRICS=127.0.0.1:9301
+      '')
+    ];
 
     # -------------------------
     # Loki drop rules (Alloy)
