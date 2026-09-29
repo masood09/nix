@@ -42,6 +42,18 @@ in {
         # initrd (the nixos-26.05 default) the old /bin/cryptsetup-askpass login
         # shell is unavailable — systemd-tty-ask-password-agent is its analog.
         # ZFS machines set no shell and use `zfs load-key` from the initrd shell.
+        #
+        # If `zpool import` reports the pool as MISSING (check with
+        # `systemctl status zfs-import-<pool>.service`), that's a device
+        # detection issue, not a key issue — a reboot is usually enough to
+        # get the pool visible again. Once the pool is found, upstream's
+        # zfs-import-<pool>.service runs its own internal `zfs load-key`
+        # gated by `systemd-ask-password`, independent of anything typed
+        # into the interactive shell — its prompt is bound to a console you
+        # can't type into over SSH. Answer it with
+        # `systemd-tty-ask-password-agent` from the SSH shell, which surfaces
+        # any pending ask-password request there and lets you type the
+        # passphrase directly.
         systemd = {
           users = {
             root = {
