@@ -156,8 +156,7 @@ in {
       };
 
       services = {
-        # Flatpak for apps that cannot ship via nixpkgs cleanly (e.g. Stremio,
-        # which depends on the insecure Qt5 WebEngine). After first boot:
+        # Flatpak for apps that cannot ship via nixpkgs cleanly. After first boot:
         #   flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
         flatpak = {
           enable = true;
