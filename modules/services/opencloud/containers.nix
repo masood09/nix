@@ -34,6 +34,12 @@ in {
       oci-containers = {
         containers = {
           "opencloud-opencloud" = {
+            # TECH DEBT: do not bump to v7.x without testing on a non-prod
+            # instance first. v7.2.4 (tested 2026-09-28) crash-loops NATS/
+            # JetStream on startup — repeated "Stream state detected prior
+            # state, could not locate msg block" warnings followed by exit 1,
+            # failing slightly earlier on each restart. Likely an incompatible
+            # on-disk JetStream format from skipping 3 major versions at once.
             # renovate: datasource=docker depName=docker.io/opencloudeu/opencloud
             image = "docker.io/opencloudeu/opencloud:4.0.8";
 
@@ -110,6 +116,12 @@ in {
           };
 
           "opencloud-wopi" = {
+            # TECH DEBT: do not bump to v7.x without testing on a non-prod
+            # instance first. v7.2.4 (tested 2026-09-28) crash-loops NATS/
+            # JetStream on startup — repeated "Stream state detected prior
+            # state, could not locate msg block" warnings followed by exit 1,
+            # failing slightly earlier on each restart. Likely an incompatible
+            # on-disk JetStream format from skipping 3 major versions at once.
             # renovate: datasource=docker depName=docker.io/opencloudeu/opencloud
             image = "docker.io/opencloudeu/opencloud:4.0.8";
 
