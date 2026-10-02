@@ -285,12 +285,92 @@ in {
                   trash_id = radarrRemuxProfile.trashId;
                   reset_unmatched_scores.enabled = true;
                 }
+                {
+                  trash_id = "9ca12ea80aa55ef916e3751f4b874151"; # Remux + WEB 1080p
+                  reset_unmatched_scores.enabled = true;
+                }
               ];
 
               # All audio formats score at TRaSH's own defaults, no TrueHD penalty —
               # confirmed Apple TV + Infuse plays all of these back fine (Infuse decodes
               # HD audio to LPCM in software rather than relying on passthrough).
               custom_formats = [
+                {
+                  trash_ids = [
+                    "0d7824bb924701997f874e7ff7d4844a" # TrueHD ATMOS
+                    "9d00418ba386a083fbf4d58235fc37ef" # DTS X
+                    "b6fbafa7942952a13e17e2b1152b539a" # ATMOS (undefined)
+                    "4232a509ce60c4e208d13825b7c06264" # DD+ ATMOS
+                    "1808e4b9cee74e064dfae3f1db99dbfe" # TrueHD
+                    "c429417a57ea8c41d57e6990a8b0033f" # DTS-HD MA
+                    "851bd64e04c9374c51102be3dd9ae4cc" # FLAC
+                    "30f70576671ca933adbdcfc736a69718" # PCM
+                    "cfa5fbd8f02a86fc55d8d223d06a5e1f" # DTS-HD HRA
+                    "63487786a8b01b7f20dd2bc90dd4a477" # DD+
+                    "c1a25cd67b5d2e08287c957b1eb903ec" # DTS-ES
+                    "5964f2a8b3be407d083498e4459d05d0" # DTS
+                    "a50b8a0c62274a7c38b09a9619ba9d86" # AAC
+                    "dbe00161b08a25ac6154c55f95e6318d" # DD
+                  ];
+                  assign_scores_to = [
+                    {
+                      trash_id = "fd161a61e3ab826d3a22d53f935696dd";
+                    }
+                    {
+                      trash_id = "9ca12ea80aa55ef916e3751f4b874151";
+                    }
+                  ];
+                }
+                {
+                  trash_ids = [
+                    "923b6abef9b17f937fab56cfcf89e1f1" # DV (w/o HDR fallback)
+                    "b337d6812e06c200ec9a2d3cfa9d20a7" # DV Boost
+                    "caa37d0df9c348912df1fb1d88f9273a" # HDR10+ Boost
+                    "493b6d1dbec3c3364c59d7607f7e3405" # HDR
+                  ];
+                  assign_scores_to = [
+                    {
+                      trash_id = "fd161a61e3ab826d3a22d53f935696dd";
+                    }
+                    {
+                      trash_id = "9ca12ea80aa55ef916e3751f4b874151";
+                    }
+                  ];
+                }
+              ];
+            };
+          };
+
+          sonarr = {
+            sonarr = lib.mkIf cfg.sonarr.enable {
+              quality_profiles = [
+                {
+                  trash_id = "dfa5eaae7894077ad6449169b6eb03e0"; # WEB-2160p (Alternative)
+                  reset_unmatched_scores.enabled = true;
+                }
+                {
+                  trash_id = "9d142234e45d6143785ac55f5a9e8dc9"; # WEB-1080p (Alternative)
+                  reset_unmatched_scores.enabled = true;
+                }
+              ];
+
+              custom_formats = [
+                {
+                  trash_ids = [
+                    "9b27ab6498ec0f31a3353992e19434ca" # DV (w/o HDR fallback)
+                    "7c3a61a9c6cb04f52f1544be6d44a026" # DV Boost
+                    "0c4b99df9206d2cfac3c05ab897dd62a" # HDR10+ Boost
+                    "505d871304820ba7106b693be6fe4a9e" # HDR
+                  ];
+                  assign_scores_to = [
+                    {
+                      trash_id = "dfa5eaae7894077ad6449169b6eb03e0";
+                    }
+                    {
+                      trash_id = "9d142234e45d6143785ac55f5a9e8dc9";
+                    }
+                  ];
+                }
                 {
                   trash_ids = [
                     "496f355514737f7d83bf7aa4d24f8169" # TrueHD Atmos
@@ -310,7 +390,10 @@ in {
                   ];
                   assign_scores_to = [
                     {
-                      trash_id = radarrRemuxProfile.trashId;
+                      trash_id = "dfa5eaae7894077ad6449169b6eb03e0";
+                    }
+                    {
+                      trash_id = "9d142234e45d6143785ac55f5a9e8dc9";
                     }
                   ];
                 }
