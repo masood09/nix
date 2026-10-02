@@ -41,8 +41,7 @@ in {
         # `_element-desktop.nix` so it can carry package overrides/settings.
         bitwarden-desktop
         jellyfin-media-player # Jellyfin desktop client for self-hosted media
-        # Stremio is installed via flatpak (com.stremio.Stremio) rather than
-        # nixpkgs because it depends on the insecure Qt5 WebEngine.
+        stremio-linux-shell # Stremio desktop client; avoids the removed Qt5 package
       ])
       # macOS-specific (coreutils for GNU compat, nixos-rebuild for remote deploys)
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
