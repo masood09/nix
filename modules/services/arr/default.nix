@@ -85,10 +85,7 @@ in {
 
         plugins = lib.mkIf ldapCfg.enable {
           "LDAP Authentication" = {
-            package = inputs.nixflix.lib.jellyfinPlugins.fromRepo {
-              version = "23.0.0.0";
-              hash = "sha256-yuOAJTj+QKj6bxlJ+irDE2BjxH1ZbsgAri7fauDMOBM=";
-            };
+            enable = true;
 
             # Manifest name ("LDAP Authentication") differs from the name it reports via
             # Jellyfin's own /Plugins API ("LDAP-Auth") — confirmed live, same class of
