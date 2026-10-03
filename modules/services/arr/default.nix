@@ -73,6 +73,16 @@ in {
           enableTonemapping = cfg.jellyfin.hardwareAcceleration;
         };
 
+        libraries = {
+          Movies = {
+            enableRealtimeMonitor = true;
+          };
+
+          Shows = {
+            enableRealtimeMonitor = true;
+          };
+        };
+
         plugins = lib.mkIf ldapCfg.enable {
           "LDAP Authentication" = {
             package = inputs.nixflix.lib.jellyfinPlugins.fromRepo {
