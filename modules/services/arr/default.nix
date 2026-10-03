@@ -112,6 +112,10 @@ in {
               CreateUsersFromLdap = true;
             };
           };
+
+          "Kodi Sync Queue" = {
+            enable = true;
+          };
         };
 
         users = {
