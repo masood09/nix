@@ -34,6 +34,166 @@
       trashId = "9ca12ea80aa55ef916e3751f4b874151";
       name = "Remux + WEB 1080p";
     };
+
+  lidarrQualityItems =
+    map (quality: {
+      inherit quality;
+      items = [];
+      allowed = builtins.elem quality.name ["FLAC" "FLAC 24bit"];
+    }) [
+      {
+        id = 0;
+        name = "Unknown";
+      }
+      {
+        id = 32;
+        name = "MP3-8";
+      }
+      {
+        id = 31;
+        name = "MP3-16";
+      }
+      {
+        id = 30;
+        name = "MP3-24";
+      }
+      {
+        id = 29;
+        name = "MP3-32";
+      }
+      {
+        id = 28;
+        name = "MP3-40";
+      }
+      {
+        id = 27;
+        name = "MP3-48";
+      }
+      {
+        id = 26;
+        name = "MP3-56";
+      }
+      {
+        id = 25;
+        name = "MP3-64";
+      }
+      {
+        id = 24;
+        name = "MP3-80";
+      }
+      {
+        id = 23;
+        name = "MP3-96";
+      }
+      {
+        id = 33;
+        name = "MP3-112";
+      }
+      {
+        id = 22;
+        name = "MP3-128";
+      }
+      {
+        id = 19;
+        name = "OGG Vorbis Q5";
+      }
+      {
+        id = 5;
+        name = "MP3-160";
+      }
+      {
+        id = 1;
+        name = "MP3-192";
+      }
+      {
+        id = 18;
+        name = "OGG Vorbis Q6";
+      }
+      {
+        id = 9;
+        name = "AAC-192";
+      }
+      {
+        id = 20;
+        name = "WMA";
+      }
+      {
+        id = 34;
+        name = "MP3-224";
+      }
+      {
+        id = 17;
+        name = "OGG Vorbis Q7";
+      }
+      {
+        id = 8;
+        name = "MP3-VBR-V2";
+      }
+      {
+        id = 3;
+        name = "MP3-256";
+      }
+      {
+        id = 16;
+        name = "OGG Vorbis Q8";
+      }
+      {
+        id = 10;
+        name = "AAC-256";
+      }
+      {
+        id = 2;
+        name = "MP3-VBR-V0";
+      }
+      {
+        id = 12;
+        name = "AAC-VBR";
+      }
+      {
+        id = 4;
+        name = "MP3-320";
+      }
+      {
+        id = 15;
+        name = "OGG Vorbis Q9";
+      }
+      {
+        id = 11;
+        name = "AAC-320";
+      }
+      {
+        id = 14;
+        name = "OGG Vorbis Q10";
+      }
+      {
+        id = 6;
+        name = "FLAC";
+      }
+      {
+        id = 7;
+        name = "ALAC";
+      }
+      {
+        id = 35;
+        name = "APE";
+      }
+      {
+        id = 36;
+        name = "WavPack";
+      }
+      {
+        id = 21;
+        name = "FLAC 24bit";
+      }
+      {
+        id = 37;
+        name = "ALAC 24bit";
+      }
+      {
+        id = 13;
+        name = "WAV";
+      }
+    ];
 in {
   imports = [
     ./options.nix
@@ -293,6 +453,15 @@ in {
             authenticationMethod = "external";
             applicationUrl = "https://lidarr.${domain}";
           };
+
+          qualityProfiles = [
+            {
+              name = "Any";
+              upgradeAllowed = true;
+              cutoff = 21;
+              items = lidarrQualityItems;
+            }
+          ];
         };
       };
 
@@ -730,50 +899,6 @@ in {
             urlBase = "";
           }}' \
             "$BASE_URL/api/v1/settings/jellyfin" >/dev/null
-        '';
-      };
-
-      # Lidarr is not covered by Recyclarr. Keep its lossless profile declarative
-      # without relying on a database-assigned profile ID.
-      lidarr-qualityprofiles = lib.mkIf cfg.lidarr.enable {
-        script = lib.mkForce ''
-          set -euo pipefail
-
-          BASE_URL="http://127.0.0.1:${toString config.nixflix.lidarr.config.hostConfig.port}/api/v1"
-          API_KEY_HEADER="/run/secrets/arr/lidarr/api-key"
-          CURL="${pkgs.curl}/bin/curl"
-          JQ="${pkgs.jq}/bin/jq"
-
-          profiles=$(cat "$API_KEY_HEADER" | "$CURL" --variable apiKey@- --expand-header "X-Api-Key: {{apiKey:trim}}" -fsS "$BASE_URL/qualityprofile")
-          flac=$(echo "$profiles" | "$JQ" -c 'first(.[] | select(.name == "FLAC")) // empty')
-          template="$flac"
-          [ -n "$template" ] || template=$(echo "$profiles" | "$JQ" -c '.[0]')
-
-          if [ -z "$template" ] || [ "$template" = "null" ]; then
-            echo "Lidarr has no quality profile template" >&2
-            exit 1
-          fi
-
-          build_profile() {
-            "$JQ" '
-              .name = "FLAC"
-              | .upgradeAllowed = true
-              | .cutoffFormatScore = 0
-              | .formatItems = []
-              | .items |= map(if (.items | length) > 0 then .items[] else . end)
-              | .items |= map(.allowed = (.quality.name == "FLAC" or .quality.name == "FLAC 24bit"))
-              | .cutoff = (.items[] | select(.quality.name == "FLAC 24bit") | .quality.id)'
-          }
-
-          if [ -n "$flac" ]; then
-            echo "$template" | build_profile | "$CURL" --variable apiKey@"$API_KEY_HEADER" --expand-header "X-Api-Key: {{apiKey:trim}}" \
-              -fsS -X PUT -H "Content-Type: application/json" --data-binary @- "$BASE_URL/qualityprofile/$($JQ -r '.id' <<< "$flac")" >/dev/null
-          else
-            echo "$template" | "$JQ" 'del(.id)' | build_profile | "$CURL" --variable apiKey@"$API_KEY_HEADER" --expand-header "X-Api-Key: {{apiKey:trim}}" \
-              -fsS -X POST -H "Content-Type: application/json" --data-binary @- "$BASE_URL/qualityprofile" >/dev/null
-          fi
-
-          echo "Lidarr FLAC quality profile configured"
         '';
       };
 
