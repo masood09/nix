@@ -879,9 +879,8 @@ in {
     # until the upstream module grows support for it.
     systemd.services = {
       # Seerr rejects an empty externalHostname on its current API (HTTP 503
-      # INVALID_URL), while nixflix always serializes the unset field as "".
-      # Keep the generated service dependencies and credentials, but submit the
-      # same settings payload without that invalid optional field.
+      # INVALID_URL). Keep the generated service dependencies and credentials,
+      # but submit a valid external Jellyfin URL explicitly.
       seerr-jellyfin = lib.mkIf cfg.seerr.enable {
         script = ''
           set -euo pipefail
@@ -896,11 +895,12 @@ in {
           ${pkgs.curl}/bin/curl -fsS -X POST \
             --header @"$API_KEY_HEADER" \
             -H "Content-Type: application/json" \
-            -d '${builtins.toJSON {
-            ip = "jellyfin.${domain}";
-            port = 443;
-            useSsl = true;
+          -d '${builtins.toJSON {
+            ip = config.nixflix.seerr.jellyfin.hostname;
+            port = config.nixflix.seerr.jellyfin.port;
+            useSsl = config.nixflix.seerr.jellyfin.useSsl;
             urlBase = "";
+            externalHostname = "https://${config.nixflix.seerr.jellyfin.hostname}";
           }}' \
             "$BASE_URL/api/v1/settings/jellyfin" >/dev/null
         '';
