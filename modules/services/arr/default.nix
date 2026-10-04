@@ -705,6 +705,34 @@ in {
     # nixflix's declarative payload intact and add the explicit host allow-list
     # until the upstream module grows support for it.
     systemd.services = {
+      # Seerr rejects an empty externalHostname on its current API (HTTP 503
+      # INVALID_URL), while nixflix always serializes the unset field as "".
+      # Keep the generated service dependencies and credentials, but submit the
+      # same settings payload without that invalid optional field.
+      seerr-jellyfin = lib.mkIf cfg.seerr.enable {
+        script = ''
+          set -euo pipefail
+
+          BASE_URL="http://127.0.0.1:${toString config.nixflix.seerr.port}"
+          API_KEY_HEADER="/run/seerr/api-key-header"
+          if [ ! -r "$API_KEY_HEADER" ]; then
+            echo "Seerr API key header is missing" >&2
+            exit 1
+          fi
+
+          ${pkgs.curl}/bin/curl -fsS -X POST \
+            --header @"$API_KEY_HEADER" \
+            -H "Content-Type: application/json" \
+            -d '${builtins.toJSON {
+            ip = "jellyfin.${domain}";
+            port = 443;
+            useSsl = true;
+            urlBase = "";
+          }}' \
+            "$BASE_URL/api/v1/settings/jellyfin" >/dev/null
+        '';
+      };
+
       # nixflix's generated readiness hook probes bindAddress (0.0.0.0), which
       # Prowlarr's host filter rejects. Probe the loopback address instead.
       prowlarr = lib.mkIf cfg.prowlarr.enable {
