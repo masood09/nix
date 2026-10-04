@@ -276,6 +276,34 @@ in {
         };
       };
 
+      lidarr = lib.mkIf cfg.lidarr.enable {
+        enable = true;
+
+        mediaDirs = ["${cfg.mediaDir}/music"];
+
+        config = {
+          apiKey = {
+            _secret = config.sops.secrets."arr/lidarr/api-key".path;
+          };
+
+          hostConfig = {
+            bindAddress = "0.0.0.0";
+            username = "lidarr";
+            password = "unused-authenticationMethod-is-external";
+            authenticationMethod = "external";
+            applicationUrl = "https://lidarr.${domain}";
+          };
+        };
+      };
+
+      navidrome = lib.mkIf cfg.navidrome.enable {
+        enable = true;
+
+        settings = {
+          MusicFolder = "${cfg.mediaDir}/music";
+        };
+      };
+
       recyclarr = lib.mkIf cfg.recyclarr.enable {
         enable = true;
 
@@ -487,19 +515,25 @@ in {
     # internal_host — it needs to reach this machine's backends itself, not go through
     # Caddy. Scoped to the tailscale0 interface, matching the LDAP outpost's port-3389
     # rule on accesscontrolsystem (machines/accesscontrolsystem/_config.nix).
-    networking.firewall = lib.mkIf (cfg.sabnzbd.enable || cfg.sonarr.enable || cfg.radarr.enable || cfg.prowlarr.enable) {
+    networking.firewall = lib.mkIf (cfg.sabnzbd.enable || cfg.sonarr.enable || cfg.radarr.enable || cfg.lidarr.enable || cfg.prowlarr.enable || cfg.navidrome.enable) {
       interfaces = {
         tailscale0 = {
           allowedTCPPorts =
             lib.optional cfg.sabnzbd.enable config.nixflix.usenetClients.sabnzbd.settings.misc.port
             ++ lib.optional cfg.sonarr.enable config.nixflix.sonarr.config.hostConfig.port
             ++ lib.optional cfg.radarr.enable config.nixflix.radarr.config.hostConfig.port
-            ++ lib.optional cfg.prowlarr.enable config.nixflix.prowlarr.config.hostConfig.port;
+            ++ lib.optional cfg.lidarr.enable config.nixflix.lidarr.config.hostConfig.port
+            ++ lib.optional cfg.prowlarr.enable config.nixflix.prowlarr.config.hostConfig.port
+            ++ lib.optional cfg.navidrome.enable config.nixflix.navidrome.settings.Port;
         };
       };
     };
 
     assertions = [
+      {
+        assertion = !cfg.navidrome.enable || cfg.lidarr.enable;
+        message = "homelab.services.arr.navidrome.enable requires homelab.services.arr.lidarr.enable so both services share the music directory.";
+      }
       {
         assertion = !(cfg.jellyfin.enable && cfg.jellyfin.hardwareAcceleration) || config.homelab.hardware.graphics.enable;
         message = ''
@@ -526,7 +560,9 @@ in {
               ++ lib.optional cfg.radarr.enable "radarr.service"
               ++ lib.optional cfg.prowlarr.enable "prowlarr.service"
               ++ lib.optional cfg.sabnzbd.enable "sabnzbd.service"
-              ++ lib.optional cfg.seerr.enable "seerr.service";
+              ++ lib.optional cfg.seerr.enable "seerr.service"
+              ++ lib.optional cfg.lidarr.enable "lidarr.service"
+              ++ lib.optional cfg.navidrome.enable "navidrome.service";
 
             restic = {
               enable = true;
@@ -543,7 +579,9 @@ in {
             ++ lib.optional cfg.radarr.enable "radarr.service"
             ++ lib.optional cfg.prowlarr.enable "prowlarr.service"
             ++ lib.optional cfg.sabnzbd.enable "sabnzbd.service"
-            ++ lib.optional cfg.seerr.enable "seerr.service";
+            ++ lib.optional cfg.seerr.enable "seerr.service"
+            ++ lib.optional cfg.lidarr.enable "lidarr.service"
+            ++ lib.optional cfg.navidrome.enable "navidrome.service";
         };
       };
     };
@@ -595,6 +633,16 @@ in {
               '';
             };
           })
+          (lib.mkIf cfg.lidarr.enable {
+            "lidarr.${domain}" = {
+              useACMEHost = domain;
+              extraConfig = ''
+                reverse_proxy https://auth.${domain} {
+                  header_up Host {http.request.host}
+                }
+              '';
+            };
+          })
           (lib.mkIf cfg.prowlarr.enable {
             "prowlarr.${domain}" = {
               useACMEHost = domain;
@@ -637,6 +685,14 @@ in {
               useACMEHost = domain;
               extraConfig = ''
                 reverse_proxy http://127.0.0.1:${toString config.nixflix.seerr.port}
+              '';
+            };
+          })
+          (lib.mkIf cfg.navidrome.enable {
+            "navidrome.${domain}" = {
+              useACMEHost = domain;
+              extraConfig = ''
+                reverse_proxy http://127.0.0.1:${toString config.nixflix.navidrome.settings.Port}
               '';
             };
           })

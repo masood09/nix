@@ -92,9 +92,11 @@
 
           sonarr.enable = lib.mkEnableOption "Sonarr";
           radarr.enable = lib.mkEnableOption "Radarr";
+          lidarr.enable = lib.mkEnableOption "Lidarr";
           prowlarr.enable = lib.mkEnableOption "Prowlarr";
           sabnzbd.enable = lib.mkEnableOption "SABnzbd";
           seerr.enable = lib.mkEnableOption "Seerr (https://seerr.dev — media request/discovery manager for Jellyfin/Plex/Emby)";
+          navidrome.enable = lib.mkEnableOption "Navidrome music server";
 
           recyclarr = {
             enable = lib.mkEnableOption "Recyclarr TRaSH-guide quality-profile/custom-format sync";

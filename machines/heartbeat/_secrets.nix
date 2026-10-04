@@ -39,6 +39,12 @@
           restartUnits = ["radarr.service"];
         };
 
+        "arr/lidarr/api-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "lidarr";
+          restartUnits = ["lidarr.service"];
+        };
+
         "arr/prowlarr/api-key" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "prowlarr";

@@ -85,6 +85,10 @@
             enable = true;
           };
 
+          lidarr = {
+            enable = true;
+          };
+
           prowlarr = {
             enable = true;
           };
