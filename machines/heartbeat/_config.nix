@@ -89,6 +89,10 @@
             enable = true;
           };
 
+          navidrome = {
+            enable = true;
+          };
+
           prowlarr = {
             enable = true;
           };
@@ -362,6 +366,20 @@
 
           zfs = {
             enable = true;
+          };
+        };
+      };
+    };
+
+    nixflix = {
+      navidrome = {
+        users = {
+          "Masood Ahmed" = {
+            userName = "masood";
+            isAdmin = true;
+            password = {
+              _secret = config.sops.secrets."arr/navidrome/admin-password".path;
+            };
           };
         };
       };
