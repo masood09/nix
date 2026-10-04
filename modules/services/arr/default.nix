@@ -241,6 +241,10 @@ in {
           Shows = {
             enableRealtimeMonitor = true;
           };
+
+          Music = {
+            enableRealtimeMonitor = true;
+          };
         };
 
         plugins = lib.mkIf ldapCfg.enable {
