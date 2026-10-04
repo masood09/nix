@@ -733,6 +733,50 @@ in {
         '';
       };
 
+      # Lidarr is not covered by Recyclarr. Keep its lossless profile declarative
+      # without relying on a database-assigned profile ID.
+      lidarr-qualityprofiles = lib.mkIf cfg.lidarr.enable {
+        script = lib.mkForce ''
+          set -euo pipefail
+
+          BASE_URL="http://127.0.0.1:${toString config.nixflix.lidarr.config.hostConfig.port}/api/v1"
+          API_KEY_HEADER="/run/secrets/arr/lidarr/api-key"
+          CURL="${pkgs.curl}/bin/curl"
+          JQ="${pkgs.jq}/bin/jq"
+
+          profiles=$(cat "$API_KEY_HEADER" | "$CURL" --variable apiKey@- --expand-header "X-Api-Key: {{apiKey:trim}}" -fsS "$BASE_URL/qualityprofile")
+          flac=$(echo "$profiles" | "$JQ" -c 'first(.[] | select(.name == "FLAC")) // empty')
+          template="$flac"
+          [ -n "$template" ] || template=$(echo "$profiles" | "$JQ" -c '.[0]')
+
+          if [ -z "$template" ] || [ "$template" = "null" ]; then
+            echo "Lidarr has no quality profile template" >&2
+            exit 1
+          fi
+
+          build_profile() {
+            "$JQ" '
+              .name = "FLAC"
+              | .upgradeAllowed = true
+              | .cutoffFormatScore = 0
+              | .formatItems = []
+              | .items |= map(if (.items | length) > 0 then .items[] else . end)
+              | .items |= map(.allowed = (.quality.name == "FLAC" or .quality.name == "FLAC 24bit"))
+              | .cutoff = (.items[] | select(.quality.name == "FLAC 24bit") | .quality.id)'
+          }
+
+          if [ -n "$flac" ]; then
+            echo "$template" | build_profile | "$CURL" --variable apiKey@"$API_KEY_HEADER" --expand-header "X-Api-Key: {{apiKey:trim}}" \
+              -fsS -X PUT -H "Content-Type: application/json" --data-binary @- "$BASE_URL/qualityprofile/$($JQ -r '.id' <<< "$flac")" >/dev/null
+          else
+            echo "$template" | "$JQ" 'del(.id)' | build_profile | "$CURL" --variable apiKey@"$API_KEY_HEADER" --expand-header "X-Api-Key: {{apiKey:trim}}" \
+              -fsS -X POST -H "Content-Type: application/json" --data-binary @- "$BASE_URL/qualityprofile" >/dev/null
+          fi
+
+          echo "Lidarr FLAC quality profile configured"
+        '';
+      };
+
       # nixflix's generated readiness hook probes bindAddress (0.0.0.0), which
       # Prowlarr's host filter rejects. Probe the loopback address instead.
       prowlarr = lib.mkIf cfg.prowlarr.enable {
