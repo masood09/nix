@@ -27,6 +27,12 @@
           restartUnits = ["jellyfin-plugins.service"];
         };
 
+        "arr/navidrome/admin-password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "navidrome";
+          restartUnits = ["navidrome.service"];
+        };
+
         "arr/sonarr/api-key" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "sonarr";
