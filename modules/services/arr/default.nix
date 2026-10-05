@@ -12,6 +12,40 @@
   resticEnabled = config.homelab.services.restic.enable;
   domain = config.networking.domain;
 
+  lidarrNamingScript = pkgs.writeShellScript "lidarr-naming" ''
+    set -euo pipefail
+
+    api="http://127.0.0.1:${toString config.nixflix.lidarr.config.hostConfig.port}/api/v1"
+    api_key="$(cat ${lib.escapeShellArg config.sops.secrets."arr/lidarr/api-key".path})"
+
+    for attempt in $(seq 1 90); do
+      if naming="$(curl --fail --silent --show-error \
+        -H "X-Api-Key: $api_key" \
+        "$api/config/naming" 2>/dev/null)"; then
+        updated="$(printf '%s' "$naming" | ${pkgs.jq}/bin/jq '. + {
+          renameTracks: true,
+          replaceIllegalCharacters: true,
+          standardTrackFormat: "{Album CleanTitle} ({Release Year})/{Artist CleanName} - {Album CleanTitle} - {track:00} - {Track CleanTitle}",
+          multiDiscTrackFormat: "{Album CleanTitle} ({Release Year})/{Medium Format} {medium:00}/{Artist CleanName} - {Album CleanTitle} - {track:00} - {Track CleanTitle}",
+          artistFolderFormat: "{Artist CleanName}"
+        }')"
+
+        curl --fail --silent --show-error \
+          -X PUT \
+          -H "X-Api-Key: $api_key" \
+          -H "Content-Type: application/json" \
+          --data-raw "$updated" \
+          "$api/config/naming" >/dev/null
+        exit 0
+      fi
+      echo "Waiting for Lidarr API... ($attempt/90)" >&2
+      sleep 1
+    done
+
+    echo "Lidarr API not available after 90 seconds" >&2
+    exit 1
+  '';
+
   ldapCfg = cfg.jellyfin.ldap;
   ldapGroupDn = group: "cn=${group},ou=groups,${ldapCfg.baseDn}";
   ldapSearchFilter = "(|${lib.concatMapStringsSep "" (g: "(memberOf=${ldapGroupDn g})") ldapCfg.accessGroups})";
@@ -713,6 +747,18 @@ in {
     # media group so that tagging and finalization can succeed.
     systemd = {
       services = {
+        lidarr-naming = lib.mkIf cfg.lidarr.enable {
+          description = "Configure Lidarr naming convention";
+          wantedBy = ["multi-user.target"];
+          after = ["lidarr.service"];
+          requires = ["lidarr.service"];
+          path = [pkgs.curl pkgs.coreutils];
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStart = lidarrNamingScript;
+          };
+        };
+
         slskd = {
           serviceConfig = {
             UMask = "0007";
