@@ -33,6 +33,18 @@
           restartUnits = ["navidrome.service"];
         };
 
+        "aurral/api-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "aurral";
+          restartUnits = ["aurral.service"];
+        };
+
+        "aurral/oidc-client-secret" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "aurral";
+          restartUnits = ["aurral.service"];
+        };
+
         "arr/sonarr/api-key" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "sonarr";
