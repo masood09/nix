@@ -227,6 +227,9 @@
           };
           zfs = {
             enable = true;
+            restic = {
+              enable = true;
+            };
           };
         };
 
