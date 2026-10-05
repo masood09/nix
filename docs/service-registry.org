@@ -140,6 +140,7 @@ this repo's own custom apps.
 | Seerr      | 5055 | =homelab.services.arr.seerr= — https://seerr.dev, media request/discovery manager |
 | Navidrome  | 4533 | Music server; reads Lidarr's music library |
 | Aurral     | 8915 | Music discovery and playlist manager       |
+| slskd      | 5030 | Soulseek web interface; upstream default   |
 Recyclarr has no listening port (nixflix runs it as a scheduled sync, not a service).
 
 

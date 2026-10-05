@@ -681,6 +681,31 @@ in {
           };
         };
       };
+
+      slskd = lib.mkIf cfg.slskd.enable {
+        enable = true;
+        openFirewall = true;
+        username = cfg.slskd.username;
+        password = cfg.slskd.password;
+        apiKey = cfg.slskd.apiKey;
+        downloadsDir = cfg.slskd.downloadsDir;
+        vpn.enable = cfg.slskd.vpn.enable;
+        settings = {
+          # Authentik protects the public vhost. slskd's own JWT login cannot
+          # consume Authentik's proxy session, so leaving it enabled makes the
+          # UI load but causes every API request to return 401.
+          web = {
+            authentication = {
+              disabled = true;
+            };
+          };
+          shares.directories = cfg.slskd.shareDirs;
+          soulseek = {
+            username = cfg.slskd.soulseekUsername;
+            password = cfg.slskd.soulseekPassword;
+          };
+        };
+      };
     };
 
     # Authentik's embedded outpost (running on accesscontrolsystem, reached over the
@@ -688,7 +713,7 @@ in {
     # internal_host — it needs to reach this machine's backends itself, not go through
     # Caddy. Scoped to the tailscale0 interface, matching the LDAP outpost's port-3389
     # rule on accesscontrolsystem (machines/accesscontrolsystem/_config.nix).
-    networking.firewall = lib.mkIf (cfg.sabnzbd.enable || cfg.sonarr.enable || cfg.radarr.enable || cfg.lidarr.enable || cfg.prowlarr.enable || cfg.navidrome.enable) {
+    networking.firewall = lib.mkIf (cfg.sabnzbd.enable || cfg.sonarr.enable || cfg.radarr.enable || cfg.lidarr.enable || cfg.prowlarr.enable || cfg.navidrome.enable || cfg.slskd.enable) {
       interfaces = {
         tailscale0 = {
           allowedTCPPorts =
@@ -697,7 +722,8 @@ in {
             ++ lib.optional cfg.radarr.enable config.nixflix.radarr.config.hostConfig.port
             ++ lib.optional cfg.lidarr.enable config.nixflix.lidarr.config.hostConfig.port
             ++ lib.optional cfg.prowlarr.enable config.nixflix.prowlarr.config.hostConfig.port
-            ++ lib.optional cfg.navidrome.enable config.nixflix.navidrome.settings.Port;
+            ++ lib.optional cfg.navidrome.enable config.nixflix.navidrome.settings.Port
+            ++ lib.optional cfg.slskd.enable config.nixflix.slskd.settings.web.port;
         };
       };
     };
@@ -735,7 +761,8 @@ in {
               ++ lib.optional cfg.sabnzbd.enable "sabnzbd.service"
               ++ lib.optional cfg.seerr.enable "seerr.service"
               ++ lib.optional cfg.lidarr.enable "lidarr.service"
-              ++ lib.optional cfg.navidrome.enable "navidrome.service";
+              ++ lib.optional cfg.navidrome.enable "navidrome.service"
+              ++ lib.optional cfg.slskd.enable "slskd.service";
 
             restic = {
               enable = true;
@@ -866,6 +893,16 @@ in {
               useACMEHost = domain;
               extraConfig = ''
                 reverse_proxy http://127.0.0.1:${toString config.nixflix.navidrome.settings.Port}
+              '';
+            };
+          })
+          (lib.mkIf cfg.slskd.enable {
+            "slskd.${domain}" = {
+              useACMEHost = domain;
+              extraConfig = ''
+                reverse_proxy https://auth.${domain} {
+                  header_up Host {http.request.host}
+                }
               '';
             };
           })

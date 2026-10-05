@@ -93,6 +93,15 @@
             enable = true;
           };
 
+          slskd = {
+            enable = true;
+            username._secret = config.sops.secrets."arr/slskd/web-username".path;
+            password._secret = config.sops.secrets."arr/slskd/web-password".path;
+            apiKey._secret = config.sops.secrets."arr/slskd/api-key".path;
+            soulseekUsername._secret = config.sops.secrets."arr/slskd/soulseek-username".path;
+            soulseekPassword._secret = config.sops.secrets."arr/slskd/soulseek-password".path;
+          };
+
           prowlarr = {
             enable = true;
           };
