@@ -708,6 +708,19 @@ in {
       };
     };
 
+    # Aurral post-processes completed Soulseek files in place before moving
+    # them into its library. Keep slskd-created files writable by the shared
+    # media group so that tagging and finalization can succeed.
+    systemd = {
+      services = {
+        slskd = {
+          serviceConfig = {
+            UMask = "0007";
+          };
+        };
+      };
+    };
+
     # Authentik's embedded outpost (running on accesscontrolsystem, reached over the
     # tailnet) proxies each SSO-fronted app directly via its Proxy Provider's
     # internal_host — it needs to reach this machine's backends itself, not go through
