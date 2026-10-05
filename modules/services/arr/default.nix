@@ -536,6 +536,7 @@ in {
 
         settings = {
           MusicFolder = "${cfg.mediaDir}/music";
+          "Scanner.PurgeMissing" = "full";
         };
       };
 
@@ -790,6 +791,12 @@ in {
         slskd = {
           serviceConfig = {
             UMask = "0007";
+          };
+        };
+
+        navidrome = lib.mkIf cfg.navidrome.enable {
+          serviceConfig = {
+            BindReadOnlyPaths = lib.mkAfter ["${cfg.mediaDir}/downloads/aurral"];
           };
         };
       };
