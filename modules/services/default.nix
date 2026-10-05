@@ -6,6 +6,7 @@
   imports = [
     ./alloy
     ./arr
+    ./aurral
     ./authentik
     ./babybuddy
     ./backup

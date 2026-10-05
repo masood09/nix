@@ -41,8 +41,9 @@ This file should be consulted *before* adding any new service, container, or sys
 | mongodb                       | 3012 | 3012 | Document database (Nightscout backend)          |
 | nightscout                    | 3013 | 3013 | CGM dashboard for diabetes management           |
 | minecraft                     | 3014 | 3014 | Minecraft servers and Velocity proxy            |
+| aurral                        | 3015 | 3015 | Music discovery and playlist manager            |
 
-Next available UID/GID: *3015*
+Next available UID/GID: *3016*
 
 *Exception:* the arr media stack (Jellyfin/Sonarr/Radarr/Lidarr/Prowlarr/SABnzbd/Seerr/Recyclarr,
 via the =nixflix= flake input — see =modules/services/arr/=, enabled per-machine via
@@ -138,6 +139,7 @@ this repo's own custom apps.
 | SABnzbd    | 8080 |                                |
 | Seerr      | 5055 | =homelab.services.arr.seerr= — https://seerr.dev, media request/discovery manager |
 | Navidrome  | 4533 | Music server; reads Lidarr's music library |
+| Aurral     | 8915 | Music discovery and playlist manager       |
 Recyclarr has no listening port (nixflix runs it as a scheduled sync, not a service).
 
 

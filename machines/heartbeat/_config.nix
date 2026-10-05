@@ -210,6 +210,17 @@
           };
         };
 
+        aurral = {
+          enable = true;
+          oidc = {
+            enable = true;
+            adminUsers = ["me@ahmedmasood.com"];
+          };
+          zfs = {
+            enable = true;
+          };
+        };
+
         immich = {
           enable = true;
 
