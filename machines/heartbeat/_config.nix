@@ -95,6 +95,7 @@
 
           slskd = {
             enable = true;
+            vpn.enable = true;
             username._secret = config.sops.secrets."arr/slskd/web-username".path;
             password._secret = config.sops.secrets."arr/slskd/web-password".path;
             apiKey._secret = config.sops.secrets."arr/slskd/api-key".path;
@@ -395,6 +396,14 @@
     };
 
     nixflix = {
+      vpn = {
+        enable = true;
+        wgConfFile = config.sops.secrets."arr/vpn/proton-wireguard-config".path;
+        accessibleFrom = [
+          "10.0.20.0/24"
+        ];
+      };
+
       navidrome = {
         users = {
           "Masood Ahmed" = {

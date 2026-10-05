@@ -337,6 +337,8 @@ in {
       usenetClients = {
         sabnzbd = lib.mkIf cfg.sabnzbd.enable {
           enable = true;
+          # Keep Usenet on the normal host network; only slskd is VPN-confined.
+          vpn.enable = false;
 
           settings = {
             misc = {
@@ -530,6 +532,7 @@ in {
 
       navidrome = lib.mkIf cfg.navidrome.enable {
         enable = true;
+        vpn.enable = false;
 
         settings = {
           MusicFolder = "${cfg.mediaDir}/music";
