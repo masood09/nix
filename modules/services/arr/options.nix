@@ -98,6 +98,60 @@
           seerr.enable = lib.mkEnableOption "Seerr (https://seerr.dev — media request/discovery manager for Jellyfin/Plex/Emby)";
           navidrome.enable = lib.mkEnableOption "Navidrome music server";
 
+          slskd = {
+            enable = lib.mkEnableOption "slskd Soulseek client";
+
+            username = lib.mkOption {
+              type = lib.types.attrs;
+              default = {};
+              description = "Secret web UI username passed to nixflix.slskd.";
+            };
+
+            password = lib.mkOption {
+              type = lib.types.attrs;
+              default = {};
+              description = "Secret web UI password passed to nixflix.slskd.";
+            };
+
+            apiKey = lib.mkOption {
+              type = lib.types.attrs;
+              default = {};
+              description = "Secret slskd API key used by Aurral.";
+            };
+
+            soulseekUsername = lib.mkOption {
+              type = lib.types.attrs;
+              default = {};
+              description = "Secret Soulseek network username.";
+            };
+
+            soulseekPassword = lib.mkOption {
+              type = lib.types.attrs;
+              default = {};
+              description = "Secret Soulseek network password.";
+            };
+
+            downloadsDir = lib.mkOption {
+              type = lib.types.path;
+              default = "/mnt/tank/media/downloads/slskd";
+              description = "Directory where slskd stores completed downloads.";
+            };
+
+            shareDirs = lib.mkOption {
+              type = lib.types.listOf lib.types.path;
+              default = ["/mnt/tank/media/library/music"];
+              description = "Directories shared with the Soulseek network.";
+            };
+
+            vpn = {
+              enable = lib.mkOption {
+                type = lib.types.bool;
+                default = false;
+                description = "Route slskd through nixflix's VPN namespace.";
+              };
+            };
+          };
+
           recyclarr = {
             enable = lib.mkEnableOption "Recyclarr TRaSH-guide quality-profile/custom-format sync";
 

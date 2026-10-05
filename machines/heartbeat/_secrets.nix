@@ -63,6 +63,36 @@
           restartUnits = ["lidarr.service"];
         };
 
+        "arr/slskd/web-username" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "slskd";
+          restartUnits = ["slskd-env.service"];
+        };
+
+        "arr/slskd/web-password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "slskd";
+          restartUnits = ["slskd-env.service"];
+        };
+
+        "arr/slskd/api-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "slskd";
+          restartUnits = ["slskd-env.service"];
+        };
+
+        "arr/slskd/soulseek-username" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "slskd";
+          restartUnits = ["slskd-env.service"];
+        };
+
+        "arr/slskd/soulseek-password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "slskd";
+          restartUnits = ["slskd-env.service"];
+        };
+
         "arr/prowlarr/api-key" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "prowlarr";
