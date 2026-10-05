@@ -93,6 +93,10 @@
           restartUnits = ["slskd-env.service"];
         };
 
+        "arr/vpn/proton-wireguard-config" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
+
         "arr/prowlarr/api-key" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "prowlarr";
