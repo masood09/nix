@@ -1,6 +1,21 @@
 # Homelab options — primary server (NAS + shared services on Dell R730xd).
 {config, ...}: {
   config = {
+    sops = {
+      templates = {
+        "navidrome-last-fm.env" = {
+          content = ''
+            ND_LASTFM_APIKEY=${config.sops.placeholder."aurral/last-fm/api-key"}
+            ND_LASTFM_SECRET=${config.sops.placeholder."aurral/last-fm/api-secret"}
+          '';
+          owner = "navidrome";
+          group = "media";
+          mode = "0400";
+          restartUnits = ["navidrome.service"];
+        };
+      };
+    };
+
     homelab = {
       purpose = "Primary Homelab Core (NAS + Shared Services)";
       isRootZFS = true;
@@ -412,6 +427,16 @@
             password = {
               _secret = config.sops.secrets."arr/navidrome/admin-password".path;
             };
+          };
+        };
+      };
+    };
+
+    systemd = {
+      services = {
+        navidrome = {
+          serviceConfig = {
+            EnvironmentFile = [config.sops.templates."navidrome-last-fm.env".path];
           };
         };
       };
