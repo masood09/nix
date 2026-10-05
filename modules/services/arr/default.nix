@@ -500,6 +500,24 @@ in {
               items = lidarrQualityItems;
             }
           ];
+
+          metadataProfiles = [
+            {
+              name = "Standard";
+
+              primaryAlbumTypes = {
+                enableAlbum = true;
+              };
+
+              secondaryAlbumTypes = {
+                enableStudio = true;
+              };
+
+              releaseStatuses = {
+                enableOfficial = true;
+              };
+            }
+          ];
         };
       };
 
