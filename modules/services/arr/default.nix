@@ -12,6 +12,9 @@
   resticEnabled = config.homelab.services.restic.enable;
   domain = config.networking.domain;
 
+  # Nixflix exposes Lidarr's host, media-management, metadata, and quality
+  # endpoints declaratively, but it has no Lidarr config/naming option. Keep
+  # this small reconciler for the API-only naming settings.
   lidarrNamingScript = pkgs.writeShellScript "lidarr-naming" ''
     set -euo pipefail
 
@@ -518,6 +521,10 @@ in {
               };
             }
           ];
+
+          mediaManagement = {
+            rescanAfterRefresh = "afterManual";
+          };
         };
       };
 
