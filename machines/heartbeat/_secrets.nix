@@ -33,6 +33,18 @@
           restartUnits = ["navidrome.service"];
         };
 
+        "aurral/last-fm/api-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "navidrome";
+          restartUnits = ["navidrome.service"];
+        };
+
+        "aurral/last-fm/api-secret" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "navidrome";
+          restartUnits = ["navidrome.service"];
+        };
+
         "aurral/api-key" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "aurral";
