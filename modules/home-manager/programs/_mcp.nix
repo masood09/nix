@@ -60,9 +60,8 @@ in {
     # `programs.mcp.servers.<name>` above.
     mcp-servers = {
       programs = {
-        context7 = {
-          enable = true;
-        };
+        # Context7 currently evaluates pnpm-10.34.0, which is marked
+        # insecure by the pinned nixpkgs revision.
       };
     };
   };
