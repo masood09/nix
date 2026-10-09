@@ -476,7 +476,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Matrix                    | ZFS, TCP/IP, MAS with trusted proxies             |
 | Minecraft                 | ZFS (dpool), Java Edition servers, open firewall  |
 | MongoDB                   | ZFS-backed (Nightscout)                           |
-| Nightscout                | CGM dashboard, open firewall                      |
+| Nightscout                | CGM dashboard, LAN and Tailscale only             |
 | OpenCloud                 | ZFS-backed file sync                              |
 | Podman                    | ZFS-backed rootless containers                    |
 | PostgreSQL                | ZFS, TCP/IP enabled, backed up                    |
