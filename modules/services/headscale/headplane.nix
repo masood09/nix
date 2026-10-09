@@ -24,6 +24,13 @@
 in {
   config = lib.mkIf (headscaleCfg.enable && cfg.enable) {
     homelab = {
+      # Headplane's Nix build uses pnpm as a native build dependency. The
+      # pinned nixpkgs marks this pnpm release insecure, but it is not part of
+      # the runtime closure. Keep the exception scoped to enabled Headplane.
+      insecurePackages = [
+        "pnpm-10.34.0"
+      ];
+
       zfs = {
         datasets = {
           headplane = lib.mkIf cfg.zfs.enable {

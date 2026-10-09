@@ -78,9 +78,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # Pin below 0.7.x while the newer Headplane module shape regresses eval for
-    # our Headscale integration on meshcontrol/trialunit.
+    # our Headscale integration on meshcontrol/trialunit. v0.6.3 includes the
+    # security fix while retaining the compatible module shape.
     headplane = {
-      url = "github:tale/headplane/v0.6.2";
+      url = "github:tale/headplane/v0.6.3";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
