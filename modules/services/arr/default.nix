@@ -49,6 +49,59 @@
     exit 1
   '';
 
+  # Keep the custom-format definitions aligned with the release names Lidarr
+  # actually receives. These formats are created separately from quality
+  # profiles, so reconcile their expressions by name while preserving their
+  # existing IDs and UI metadata.
+  lidarrCustomFormatsScript = pkgs.writeShellScript "lidarr-custom-formats" ''
+    set -euo pipefail
+
+    api="http://127.0.0.1:${toString config.nixflix.lidarr.config.hostConfig.port}/api/v1"
+    api_key="$(cat ${lib.escapeShellArg config.sops.secrets."arr/lidarr/api-key".path})"
+
+    for attempt in $(seq 1 90); do
+      if formats="$(${pkgs.curl}/bin/curl --fail --silent --show-error \
+        -H "X-Api-Key: $api_key" \
+        "$api/customformat" 2>/dev/null)"; then
+        for name in CD Lossless Vinyl; do
+          format_id="$(printf '%s' "$formats" | ${pkgs.jq}/bin/jq -r --arg name "$name" \
+            '.[] | select(.name == $name) | .id')"
+
+          if [ -z "$format_id" ]; then
+            echo "Lidarr custom format not found: $name" >&2
+            exit 1
+          fi
+
+          updated="$(printf '%s' "$formats" | ${pkgs.jq}/bin/jq -c --arg name "$name" '
+            map(select(.name == $name) |
+              if .name == "CD" then
+                .specifications[0].fields[0].value = "(?:\\bCD\\b|\\b[0-9]+[- ]?CD\\b)"
+              elif .name == "Lossless" then
+                .specifications[0].fields[0].value = "\\b(?:FLAC|ALAC|APE|WAV|WavPack|lossless)\\b"
+              elif .name == "Vinyl" then
+                .specifications[0].fields[0].value = "\\b(?:Vinyl|[0-9]*LP|NeedleDrop)\\b"
+              else
+                .
+              end
+            ) | .[0]')"
+
+          ${pkgs.curl}/bin/curl --fail --silent --show-error \
+            -X PUT \
+            -H "X-Api-Key: $api_key" \
+            -H "Content-Type: application/json" \
+            --data-raw "$updated" \
+            "$api/customformat/$format_id" >/dev/null
+        done
+        exit 0
+      fi
+      echo "Waiting for Lidarr API... ($attempt/90)" >&2
+      sleep 1
+    done
+
+    echo "Lidarr API not available after 90 seconds" >&2
+    exit 1
+  '';
+
   ldapCfg = cfg.jellyfin.ldap;
   ldapGroupDn = group: "cn=${group},ou=groups,${ldapCfg.baseDn}";
   ldapSearchFilter = "(|${lib.concatMapStringsSep "" (g: "(memberOf=${ldapGroupDn g})") ldapCfg.accessGroups})";
@@ -237,6 +290,28 @@ in {
   ];
 
   config = lib.mkIf cfg.enable {
+    systemd = {
+      services = {
+        lidarr-custom-formats = {
+          description = "Configure Lidarr custom formats via API";
+          requires = ["lidarr-config.service"];
+          after = ["lidarr-config.service"];
+          before = ["lidarr-qualityprofiles.service"];
+          wantedBy = ["multi-user.target"];
+          serviceConfig = {
+            ExecStart = lidarrCustomFormatsScript;
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
+        };
+
+        lidarr-qualityprofiles = {
+          requires = ["lidarr-custom-formats.service"];
+          after = ["lidarr-custom-formats.service"];
+        };
+      };
+    };
+
     nixflix = {
       enable = true;
 
@@ -503,11 +578,12 @@ in {
               upgradeAllowed = true;
               cutoff = 21;
               items = lidarrQualityItems;
+              minFormatScore = 0;
               formatItems = [
                 {
                   format = 5;
                   name = "Vinyl";
-                  score = 0;
+                  score = -1000;
                 }
                 {
                   format = 4;
