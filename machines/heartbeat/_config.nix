@@ -359,8 +359,8 @@
 
         nightscout = {
           enable = true;
-          listenAddress = "0.0.0.0";
-          openFirewall = true;
+          listenAddress = "127.0.0.1";
+          openFirewall = false;
         };
 
         opencloud = {
