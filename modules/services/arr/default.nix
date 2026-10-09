@@ -72,7 +72,7 @@
       name = "Remux + WEB 1080p";
     };
 
-  lidarrQualityItems =
+  lidarrQualityItemsFlat =
     map (quality: {
       inherit quality;
       items = [];
@@ -231,6 +231,26 @@
         name = "WAV";
       }
     ];
+
+  # Lidarr 3.1 requires the cutoff to reference a top-level quality-group id.
+  # Keep the desired FLAC-only policy, but send it as the built-in Lossless
+  # group instead of using the nested FLAC quality id as the cutoff.
+  lidarrQualityItems = [
+    {
+      name = "Lossless";
+      id = 1005;
+      items = builtins.filter (item: builtins.elem item.quality.id [6 21]) lidarrQualityItemsFlat;
+      allowed = true;
+    }
+    {
+      quality = {
+        id = 13;
+        name = "WAV";
+      };
+      items = [];
+      allowed = false;
+    }
+  ];
 in {
   imports = [
     ./options.nix
@@ -501,7 +521,7 @@ in {
             {
               name = "Any";
               upgradeAllowed = true;
-              cutoff = 21;
+              cutoff = 1005;
               items = lidarrQualityItems;
             }
           ];
