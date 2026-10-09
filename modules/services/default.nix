@@ -17,6 +17,7 @@
     ./garage
     ./grafana
     ./headscale
+    ./home-assistant
     ./immich
     ./ipmi-exporter
     ./ittools
