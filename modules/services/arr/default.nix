@@ -874,9 +874,6 @@ in {
       };
     };
 
-    # Aurral post-processes completed Soulseek files in place before moving
-    # them into its library. Keep slskd-created files writable by the shared
-    # media group so that tagging and finalization can succeed.
     systemd = {
       services = {
         lidarr-naming = lib.mkIf cfg.lidarr.enable {
@@ -894,12 +891,6 @@ in {
         slskd = {
           serviceConfig = {
             UMask = "0007";
-          };
-        };
-
-        navidrome = lib.mkIf cfg.navidrome.enable {
-          serviceConfig = {
-            BindReadOnlyPaths = lib.mkAfter ["${cfg.mediaDir}/downloads/aurral"];
           };
         };
       };
