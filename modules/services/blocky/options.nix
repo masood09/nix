@@ -100,7 +100,7 @@
                 "https://v.firebog.net/hosts/Prigent-Adult.txt"
               ];
               doh = [
-                "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/doh.txt"
+                "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/doh-onlydomains.txt"
               ];
             };
             description = "Blocky denylist groups (name -> list of URLs).";
