@@ -11,9 +11,10 @@
     };
 
     services = {
-      timesyncd = {
-        # NetworkManager does not reliably pass DHCP-provided NTP servers to
-        # systemd-timesyncd, so configure the active server list explicitly.
+      chrony = {
+        # Chrony handles NetworkManager-managed laptop connectivity and resume
+        # more reliably than systemd-timesyncd.
+        enable = true;
         servers = [
           "0.nixos.pool.ntp.org"
           "1.nixos.pool.ntp.org"
