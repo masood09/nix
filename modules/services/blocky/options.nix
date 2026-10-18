@@ -99,6 +99,9 @@
                 "https://raw.githubusercontent.com/chadmayfield/my-pihole-blocklists/master/lists/pi_blocklist_porn_top1m.list"
                 "https://v.firebog.net/hosts/Prigent-Adult.txt"
               ];
+              doh = [
+                "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/domains/doh.txt"
+              ];
             };
             description = "Blocky denylist groups (name -> list of URLs).";
           };
@@ -117,9 +120,9 @@
           clientGroupsBlock = lib.mkOption {
             type = lib.types.attrsOf (lib.types.listOf lib.types.str);
             default = {
-              default = ["suspicious" "ads" "tracking" "malicious"];
-              "10.0.70.1/24" = ["suspicious" "ads" "tracking" "malicious" "adult"];
-              "10.0.200.1/24" = ["suspicious" "ads" "tracking" "malicious" "adult"];
+              default = ["suspicious" "ads" "tracking" "malicious" "doh"];
+              "10.0.70.1/24" = ["suspicious" "ads" "tracking" "malicious" "adult" "doh"];
+              "10.0.200.1/24" = ["suspicious" "ads" "tracking" "malicious" "adult" "doh"];
             };
             description = "Blocky clientGroupsBlock mapping (client CIDR/name -> denylist group names).";
           };
