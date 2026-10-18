@@ -1,5 +1,9 @@
 # Homelab options — primary server (NAS + shared services on Dell R730xd).
-{config, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   config = {
     sops = {
       templates = {
@@ -222,6 +226,8 @@
 
         ipmi-exporter = {
           enable = true;
+          # The Supermicro BMC does not support DCMI power readings; keep the
+          # other IPMI hardware and event-log collectors enabled.
         };
 
         grafana = {
@@ -439,6 +445,25 @@
             password = {
               _secret = config.sops.secrets."arr/navidrome/admin-password".path;
             };
+          };
+        };
+      };
+    };
+
+    services = {
+      prometheus = {
+        exporters = {
+          ipmi = {
+            configFile = pkgs.writeText "ipmi-exporter-heartbeat.yml" ''
+              modules:
+                default:
+                  collectors:
+                    - bmc
+                    - ipmi
+                    - chassis
+                    - sel
+                    - sel-events
+            '';
           };
         };
       };
