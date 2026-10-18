@@ -8,6 +8,17 @@
     # /sys/devices/platform/thinkpad_acpi/hotkey_all_mask) each time the
     # device appears.
     services = {
+      timesyncd = {
+        # NetworkManager does not reliably pass DHCP-provided NTP servers to
+        # systemd-timesyncd, so configure the active server list explicitly.
+        servers = [
+          "0.nixos.pool.ntp.org"
+          "1.nixos.pool.ntp.org"
+          "2.nixos.pool.ntp.org"
+          "3.nixos.pool.ntp.org"
+        ];
+      };
+
       udev = {
         extraRules = ''
           SUBSYSTEM=="platform", KERNEL=="thinkpad_acpi", ATTR{hotkey_mask}="0xfffffffb"
