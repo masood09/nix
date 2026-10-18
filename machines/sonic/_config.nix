@@ -10,6 +10,19 @@
       };
     };
 
+    services = {
+      timesyncd = {
+        # NetworkManager does not reliably pass DHCP-provided NTP servers to
+        # systemd-timesyncd, so configure the active server list explicitly.
+        servers = [
+          "0.nixos.pool.ntp.org"
+          "1.nixos.pool.ntp.org"
+          "2.nixos.pool.ntp.org"
+          "3.nixos.pool.ntp.org"
+        ];
+      };
+    };
+
     homelab = {
       role = "desktop";
       purpose = "Sonic Laptop (NixOS Desktop)";
