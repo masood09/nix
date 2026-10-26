@@ -28,6 +28,7 @@
     else "auth_self";
 in {
   imports = [
+    ./_file-manager.nix
     ./_gaming.nix
     ./_greetd.nix
     ./_niri.nix
