@@ -42,6 +42,11 @@ in {
             description = "Epson ET-8550 photo printer";
             deviceUri = "ipp://${printerHost}/ipp/print";
             model = "epson-inkjet-printer-escpr2/Epson-ET-8550_Series-epson-escpr2-en.ppd";
+            ppdOptions = {
+              # Epson's T-prefixed PageSize values select borderless media;
+              # T2L is 5x7 in (13x18 cm).
+              PageSize = "T2L";
+            };
           }
           {
             name = "et8550-ipp";
