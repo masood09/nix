@@ -7,6 +7,7 @@
     ./_config.nix
     ./_niri.nix
     ./_networking.nix
+    ./_printer.nix
     ./_secrets.nix
     ./_zen.nix
 
