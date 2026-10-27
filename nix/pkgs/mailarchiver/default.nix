@@ -6,7 +6,7 @@
   fetchFromGitHub,
 }: let
   # renovate: datasource=github-releases depName=s1t5/mail-archiver versioning=loose
-  version = "2602.4";
+  version = "2610.1";
 in
   buildDotnetModule {
     pname = "mail-archiver";
