@@ -5,7 +5,7 @@
   dotnetCorePackages,
   fetchFromGitHub,
 }: let
-  # renovate: datasource=github-releases depName=s1t5/mail-archiver versioning=semver
+  # renovate: datasource=github-releases depName=s1t5/mail-archiver versioning=loose
   version = "2602.2";
 in
   buildDotnetModule {
