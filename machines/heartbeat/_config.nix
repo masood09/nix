@@ -115,12 +115,6 @@
 
           slskd = {
             enable = true;
-            vpn.enable = true;
-            username._secret = config.sops.secrets."arr/slskd/web-username".path;
-            password._secret = config.sops.secrets."arr/slskd/web-password".path;
-            apiKey._secret = config.sops.secrets."arr/slskd/api-key".path;
-            soulseekUsername._secret = config.sops.secrets."arr/slskd/soulseek-username".path;
-            soulseekPassword._secret = config.sops.secrets."arr/slskd/soulseek-password".path;
           };
 
           prowlarr = {
@@ -447,6 +441,46 @@
             };
           };
         };
+      };
+
+      slskd = {
+        enable = true;
+        openFirewall = true;
+        username = {
+          _secret = config.sops.secrets."arr/slskd/web-username".path;
+        };
+        password = {
+          _secret = config.sops.secrets."arr/slskd/web-password".path;
+        };
+        apiKey = {
+          _secret = config.sops.secrets."arr/slskd/api-key".path;
+        };
+
+        settings = {
+          # Authentik protects the public vhost. slskd's own JWT login cannot
+          # consume Authentik's proxy session, so leaving it enabled makes the
+          # UI load but causes every API request to return 401.
+          web = {
+            authentication = {
+              disabled = true;
+            };
+          };
+
+          shares = {
+            directories = ["/mnt/tank/media/library/music"];
+          };
+
+          soulseek = {
+            username = {
+              _secret = config.sops.secrets."arr/slskd/soulseek-username".path;
+            };
+            password = {
+              _secret = config.sops.secrets."arr/slskd/soulseek-password".path;
+            };
+          };
+        };
+
+        vpn.enable = true;
       };
     };
 

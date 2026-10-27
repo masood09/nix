@@ -849,31 +849,6 @@ in {
           };
         };
       };
-
-      slskd = lib.mkIf cfg.slskd.enable {
-        enable = true;
-        openFirewall = true;
-        username = cfg.slskd.username;
-        password = cfg.slskd.password;
-        apiKey = cfg.slskd.apiKey;
-        downloadsDir = cfg.slskd.downloadsDir;
-        vpn.enable = cfg.slskd.vpn.enable;
-        settings = {
-          # Authentik protects the public vhost. slskd's own JWT login cannot
-          # consume Authentik's proxy session, so leaving it enabled makes the
-          # UI load but causes every API request to return 401.
-          web = {
-            authentication = {
-              disabled = true;
-            };
-          };
-          shares.directories = cfg.slskd.shareDirs;
-          soulseek = {
-            username = cfg.slskd.soulseekUsername;
-            password = cfg.slskd.soulseekPassword;
-          };
-        };
-      };
     };
 
     systemd = {
