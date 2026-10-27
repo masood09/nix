@@ -39,7 +39,7 @@ After making config changes, stop at preflight (`just preflight`, or `nix fmt --
   - `modules/nixos/` - NixOS system config (boot, networking, users, impermanence, zfs)
   - `modules/macos/` - nix-darwin system config
   - `modules/shared/` - Cross-platform option schemas imported by both NixOS and Darwin (role, purpose, primaryUser, networking)
-  - `modules/services/` - 28 declarative services (each in own directory)
+- `modules/services/` - 34 declarative service modules (each in its own directory)
 - `lib/` - Shared helper libraries:
   - `persistence-helpers.nix` - Impermanence bind-mount guard (three-part condition: `impermanence && !isRootZFS && !zfsEnable`)
   - `systemd-helpers.nix` - Permission-fixing oneshot service generator (`mkPermissionService`)

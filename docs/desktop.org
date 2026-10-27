@@ -1,6 +1,6 @@
 #+TITLE: Desktop Architecture
 #+AUTHOR: Masood Ahmed
-#+DATE: 2026-03-26
+#+DATE: 2026-10-27
 #+STARTUP: overview
 
 * Overview
@@ -87,9 +87,25 @@ Bitwarden also needs machine-wide integration: NixOS desktops that set ~homelab.
 
 Note the app-side prerequisite that Nix cannot manage: in Bitwarden's own settings you must enable "Unlock with system authentication" once per machine, since that state lives in the app's data directory rather than in this repo.
 
-*Status (2026-07): the polkit half of this is correct and deployed, but end-to-end silent auto-unlock does not actually work yet on our stack — see "Bitwarden system-auth auto-unlock does not work end-to-end" under Pain Points. The ~systemAuthUnlock~ option is kept in place, dormant, for when the upstream blockers clear.*
+*Status (2026-10): the polkit half is deployed, but end-to-end silent auto-unlock still requires validation after each desktop rebuild. The ~systemAuthUnlock~ option remains declarative; if the vault prompts after restart, unlock it once in Bitwarden and use password login when the GNOME Keyring is locked.*
 
 Element Desktop currently has no comparable system-wide integration in this repo, but on Linux its Home Manager module overrides the package to start Electron with ~--password-store=gnome-libsecret~. That forces Electron onto GNOME Keyring's Secret Service backend in the Niri session, where Electron's desktop auto-detection would otherwise fail and offer weaker local encryption. The module also declares a fuller ~settings~ baseline: it points Element at ~homelab.programs.element-desktop.baseUrl~ and ~homelab.programs.element-desktop.serverName~ (defaulting to ~https://chat.mantannest.com~ / ~chat.mantannest.com~), locks login to that homeserver, defaults to the dark theme, and leaves analytics disabled by not configuring ~posthog~. Using the native HM module also leaves room for future declarative extra ~profiles~ without pushing that app-specific config back into the generic package list.
+
+** Files, Photos, Printing, and Scanning
+
+Thunar is the default graphical file manager for both NixOS desktops, with GVFS
+and Tumbler enabled for mounts, thumbnails, and file-manager integration. Prev
+is the default PDF and image application and provides lightweight viewing,
+annotation, rotation, and editing. Darktable is used for photo development and
+printing on =usul=.
+
+The Epson ET-8550 is configured declaratively on =usul= through
+=epson-et8550.printer.homelab.mantannest.com=. CUPS provides the
+=et8550-photo= and =et8550-ipp= queues; SANE provides network scanning through
+eSCL and Epson Scan 2. For photo printing, use Darktable's print view with the
+desired 4x6, 5x7, 8x10, or 13x19 layout and Premium Glossy media/profile
+settings. Borderless output depends on selecting the Epson borderless media
+variant and a supported paper size.
 
 * Compositor
 
