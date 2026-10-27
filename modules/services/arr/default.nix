@@ -11,6 +11,7 @@
   caddyEnabled = config.homelab.services.caddy.enable;
   resticEnabled = config.homelab.services.restic.enable;
   domain = config.networking.domain;
+  seerrPackage = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.seerr;
 
   # Nixflix exposes Lidarr's host, media-management, metadata, and quality
   # endpoints declaratively, but it has no Lidarr config/naming option. Keep
@@ -783,6 +784,7 @@ in {
 
       seerr = lib.mkIf cfg.seerr.enable {
         enable = true;
+        package = seerrPackage;
 
         apiKey = {
           _secret = config.sops.secrets."arr/seerr/api-key".path;
