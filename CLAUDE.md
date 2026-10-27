@@ -126,6 +126,20 @@ Long-term direction on `work-okta` (the sole macOS machine) is to phase out Home
 - When falling back to a cask, leave a `TECH DEBT:` comment near the cask entry explaining what's blocking the nixpkgs route, and re-evaluate periodically.
 - When a Darwin build breaks and the easy fix is "just use the cask," frame it as tech debt rather than the preferred solution.
 
+### Known Technical Debt
+
+- OpenCloud is pinned to 4.0.8. A tested 7.x upgrade crash-looped NATS/JetStream against the existing on-disk state; test migration on a non-production instance before changing the image.
+- Collabora is pinned to 26.04.2.1.1 because the custom container entrypoint requires `/bin/bash`, which newer images removed. Replace the shell-dependent wrapper before upgrading.
+- The Arr module carries temporary nixflix compatibility workarounds for Prowlarr host validation/readiness and Seerr Jellyfin URL configuration. Remove them when upstream nixflix supports the current APIs.
+- nixflix notification provisioning can fail when Sonarr/Radarr/Lidarr reject an existing notification update with HTTP 400. Preserve the existing notification-reset workaround until the updater reports API response bodies and handles schema changes.
+- Immich, Karakeep, and Seerr currently use packages from `nixpkgs-unstable` because the stable channel is behind or incompatible. Re-test and remove each override when stable catches up.
+- `work-okta` cannot use several third-party Homebrew taps because of corporate Artifactory restrictions. Treat those casks/brews as blocked fallbacks and periodically re-check nixpkgs/HM and Artifactory availability.
+- Fingerprint login does not unlock GNOME Keyring; password login remains the workaround on affected desktops.
+- Zen uses `MOZ_LEGACY_PROFILES=1` as an upstream profile-pinning workaround. Re-evaluate after upstream fixes the profile behavior.
+- Custom packages with manually maintained versions, such as `cgm-remote-monitor`, need an explicit release-tracking decision before being considered fully automated.
+
+Do not treat normal `flake.lock` pinning, cache-preserving input decisions, or deliberate vendor/non-free printer plugins as technical debt by themselves.
+
 ### Service Registry
 Before adding services, check `docs/service-registry.org` for:
 - Service user UIDs (start at 3000)
@@ -163,7 +177,7 @@ Combine sources when useful: nixos MCP for the exact option name, then context7 
 - mcp-servers-nix: `natsukium/mcp-servers-nix` (declarative MCP server registry; HM bridge module reads `mcp-servers.programs.<name>.enable` and writes the resulting entries into `programs.mcp.servers`, which `_claude-code.nix`/`_codex-cli.nix`/`_opencode.nix` consume; imported in shared `home.nix` but the registry itself is gated on `homelab.programs.ai_tools` inside `modules/home-manager/programs/_mcp.nix` so server closures stay free of MCP packages)
 - zen-browser: `0xc000022070/zen-browser-flake` (Zen Browser HM module; included in `desktopNixOSModules` via `home-manager.sharedModules` for NixOS desktops and in `mkDarwinConfig` for macOS, not in shared `home.nix`, because the flake wrapper unconditionally pulls heavyweight browser/Qt packages into every closure even when the program is never enabled)
 - claude-code (`sadjow/claude-code-nix`) and codex-cli-nix (`sadjow/codex-cli-nix`): both auto-update hourly and ship their own binary caches. No nixpkgs `follows`, and they are consumed via `inputs.<name>.packages.<system>.default` — **not** their overlays, which would rebuild against our nixpkgs and miss the cache on every `just up`
-- headplane: pinned to `v0.6.2`; nixos-26.05's native `services.headplane` module is `disabledModules`-ed in `flake.nix` so only the flake module declares the option
+- headplane: pinned to `v0.8.2`; nixos-26.05's native `services.headplane` module is `disabledModules`-ed in `flake.nix` so only the flake module declares the option
 - authentik-nix: deliberately no nixpkgs `follows` (upstream doesn't support it; overriding causes a cache miss that OOMs the aarch64 SSO box)
 - Other inputs: disko, impermanence, sops-nix, nix-homebrew, nix-minecraft, betterfox
 
