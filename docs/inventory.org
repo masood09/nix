@@ -1,5 +1,6 @@
 #+TITLE: Infrastructure Inventory
 #+DESCRIPTION: Packages, services, and fonts per machine and shared modules.
+#+DATE: 2026-10-27
 #+STARTUP: overview
 
 * Shared Modules
@@ -211,6 +212,26 @@ Directional navigation is edge-aware: left/right focus or move columns across mo
 | light                 | Backlight control (udev rules for video group)                                       |
 | niri                  | Scrollable-tiling Wayland compositor                                                 |
 
+*** Desktop Applications
+
+Linux desktop GUI applications are enabled for the desktop role or by the
+desktop-specific system module rather than being tied to a single laptop.
+
+| Application              | Scope              | Purpose                                      |
+|--------------------------+--------------------+----------------------------------------------|
+| Thunar                   | NixOS desktops     | Graphical file manager; default directory app |
+| Prev                     | NixOS desktops     | PDF/image viewer and lightweight editor       |
+| Darktable                | usul                | Photo editing and print preparation           |
+| Simple Scan              | usul                | SANE/eSCL document scanning GUI               |
+| Epson Scan 2             | usul                | Epson scanner GUI and vendor scan features    |
+| System Config Printer    | usul                | CUPS printer administration                   |
+
+The Epson ET-8550 is configured as CUPS queues =et8550-photo= and
+=et8550-ipp= and as a SANE network scanner through
+=epson-et8550.printer.homelab.mantannest.com=. Darktable's print view is the
+intended photo workflow: choose the paper size, use the Epson photo queue, and
+select the matching glossy media/profile settings before printing.
+
 *** Graphics Packages
 
 *Intel GPU:*
@@ -377,6 +398,26 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 | MailArchiver              | nix/services/mailarchiver.nix | Email archival (.NET service)                 |
 | Dell iDRAC Fan Controller | dell-idrac-fan-controller/    | Fan speed control via IPMI                    |
 
+** Media Automation
+
+| Service   | Module Dir | Purpose                                                       |
+|-----------+------------+---------------------------------------------------------------|
+| Arr stack | arr/       | Jellyfin, Sonarr, Radarr, Lidarr, Prowlarr, SABnzbd, Seerr,  |
+|           |            | Recyclarr, Navidrome, and slskd integration on heartbeat      |
+| Aurral    | aurral/    | Music discovery and playlist management                       |
+
+** Exporters and Hardware Services
+
+| Service                 | Module Dir             | Purpose                                      |
+|-------------------------+------------------------+----------------------------------------------|
+| Blackbox Exporter       | blackbox-exporter/     | HTTP, DNS, and network probe metrics         |
+| IPMI Exporter           | ipmi-exporter/         | BMC and chassis metrics                      |
+| Smartctl Exporter       | smartctl-exporter/     | Disk health metrics                          |
+| Home Assistant          | home-assistant/        | Home automation                              |
+
+The service inventory above covers all 34 directories imported by
+=modules/services/default.nix=. The custom package inventory is:
+
 * Custom Packages
 
 Defined in =nix/pkgs/= and auto-discovered.
@@ -385,6 +426,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 |--------------------+----------------------------------------|
 | mailarchiver       | .NET email archiving application       |
 | cgm-remote-monitor | Nightscout Node.js CGM dashboard       |
+| prev               | Preview-style PDF and image viewer/editor |
 
 * Machines
 

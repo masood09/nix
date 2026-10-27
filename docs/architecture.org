@@ -1,6 +1,6 @@
 #+TITLE: Repository Architecture
 #+AUTHOR: Masood Ahmed
-#+DATE: 2026-04-07
+#+DATE: 2026-10-27
 #+STARTUP: overview
 
 * Overview
@@ -42,7 +42,7 @@ modules/                           Reusable configuration modules
   macos/                             nix-darwin system (dock, packages, networking)
   home-manager/                      User environment (shell, programs, theming)
   home-manager/programs/             Per-program configs (_emacs.nix, _git.nix, etc.)
-  services/                          28 declarative service modules
+  services/                          34 declarative service modules
 
 lib/                               Shared helpers
   persistence-helpers.nix            mkPersistenceDirs — impermanence bind-mount guard
@@ -259,6 +259,31 @@ Generates a oneshot systemd service that fixes directory ownership and permissio
 ** =lib/zfs-options.nix= — =mkZfsOptions=
 
 Builder for consistent =homelab.services.<name>.zfs.*= option declarations. Provides =enable=, =dataset=, and =mountpoint= with sensible defaults derived from the service name.
+
+* Current Status and Follow-up
+
+The repository currently tracks Headplane =v0.8.2=, authentik-nix from its
+default branch, and the native nixflix =slskd= module. The Arr wrapper still
+contains temporary Prowlarr and Seerr API compatibility services; remove those
+once nixflix handles the current APIs directly.
+
+OpenCloud remains on =4.0.8= until a staged JetStream migration is tested.
+Collabora remains on =26.04.2.1.1= because the local entrypoint still depends
+on =/bin/bash=. Immich, Karakeep, and Seerr use packages from
+=nixpkgs-unstable= while the stable channel catches up.
+
+The known desktop limitation is fingerprint login not unlocking GNOME Keyring.
+Password login remains the workaround. The Linux desktops use Thunar for
+directories and Prev for PDF/image viewing and editing; the Epson ET-8550 on
+usul is configured through CUPS and SANE using its DNS name.
+
+The nixflix notification provisioning service can still fail when an existing
+Sonarr/Radarr/Lidarr notification is rejected with HTTP 400. Deleting the
+affected connection and allowing the service to recreate it is the current
+recovery procedure.
+
+For the full debt register and agent-specific maintenance rules, see
+=AGENTS.md= and =CLAUDE.md=.
 
 * Related Documentation
 
