@@ -57,12 +57,8 @@
     # Overriding nixpkgs re-hashes the build → cache miss → compile from source
     # (which OOM/deadlocks the small aarch64 SSO box). Upstream explicitly does
     # not support the follows override.
-    # TECH DEBT: pinned to authentik 2026.8.2. The latest 2026.8.3 package
-    # currently fails to build on aarch64 in aws-lc's FIPS assembly
-    # ("fixup value out of range"); keep this input on its own nixpkgs
-    # revision so authentik's cached Rust artifacts remain usable.
     authentik-nix = {
-      url = "github:nix-community/authentik-nix/version/2026.8.2";
+      url = "github:nix-community/authentik-nix";
     };
     nix-minecraft = {
       url = "github:Infinidoge/nix-minecraft";
