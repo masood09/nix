@@ -15,6 +15,14 @@ in {
           mimeApps = {
             enable = true;
             defaultApplications = {
+              "application/pdf" = "io.github.scrambletools.prev.desktop";
+              "image/avif" = "io.github.scrambletools.prev.desktop";
+              "image/bmp" = "io.github.scrambletools.prev.desktop";
+              "image/gif" = "io.github.scrambletools.prev.desktop";
+              "image/jpeg" = "io.github.scrambletools.prev.desktop";
+              "image/png" = "io.github.scrambletools.prev.desktop";
+              "image/tiff" = "io.github.scrambletools.prev.desktop";
+              "image/webp" = "io.github.scrambletools.prev.desktop";
               "inode/directory" = "thunar.desktop";
             };
           };
@@ -30,6 +38,12 @@ in {
           pkgs.thunar-volman
         ];
       };
+    };
+
+    environment = {
+      systemPackages = [
+        pkgs.prev
+      ];
     };
 
     services = {
