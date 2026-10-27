@@ -73,11 +73,10 @@
       url = "github:kiriwalawren/nixflix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Pin below 0.7.x while the newer Headplane module shape regresses eval for
-    # our Headscale integration on meshcontrol/trialunit. v0.6.3 includes the
-    # security fix while retaining the compatible module shape.
+    # The NixOS-native Headplane module collides with the flake module's
+    # services.headplane namespace, so use only the upstream flake module.
     headplane = {
-      url = "github:tale/headplane/v0.6.3";
+      url = "github:tale/headplane/v0.8.2";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -163,9 +162,8 @@
       inputs.nixflix.nixosModules.default
       inputs.impermanence.nixosModules.impermanence
       # nixos-26.05 ships a native services.headplane module that collides with
-      # the pinned v0.6.2 flake module below (our Headscale integration targets
-      # the v0.6.2 option shape — see the Headplane pin note above). Disable the
-      # upstream module so only the flake module declares services.headplane.
+      # the flake module below. Disable the native module so only the flake
+      # module declares services.headplane.
       {disabledModules = ["services/networking/headplane.nix"];}
       inputs.headplane.nixosModules.headplane
       inputs.stylix.nixosModules.stylix
