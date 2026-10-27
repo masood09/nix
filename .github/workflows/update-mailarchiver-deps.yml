@@ -14,7 +14,7 @@ jobs:
   update-dependencies:
     if: >-
       github.event.pull_request.user.login == 'renovate[bot]' &&
-      startsWith(github.event.pull_request.head.ref, 'renovate/mail-archiver-') &&
+      startsWith(github.event.pull_request.head.ref, 'renovate/s1t5-mail-archiver-') &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
 
