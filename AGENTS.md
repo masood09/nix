@@ -192,6 +192,20 @@ services.greetd = {
 - Add comments when the constraint is non-obvious, cross-platform, or operationally important.
 - Prefer explaining why a rule exists, not narrating obvious syntax.
 
+## Known Technical Debt
+
+- OpenCloud is pinned to 4.0.8. A tested 7.x upgrade crash-looped NATS/JetStream against the existing on-disk state; test migration on a non-production instance before changing the image.
+- Collabora is pinned to 26.04.2.1.1 because the custom container entrypoint requires `/bin/bash`, which newer images removed. Replace the shell-dependent wrapper before upgrading.
+- The Arr module carries temporary nixflix compatibility workarounds for Prowlarr host validation/readiness and Seerr Jellyfin URL configuration. Remove them when upstream nixflix supports the current APIs.
+- nixflix notification provisioning can fail when Sonarr/Radarr/Lidarr reject an existing notification update with HTTP 400. Preserve the existing notification-reset workaround until the updater reports API response bodies and handles schema changes.
+- Immich, Karakeep, and Seerr currently use packages from `nixpkgs-unstable` because the stable channel is behind or incompatible. Re-test and remove each override when stable catches up.
+- `work-okta` cannot use several third-party Homebrew taps because of corporate Artifactory restrictions. Treat those casks/brews as blocked fallbacks and periodically re-check nixpkgs/HM and Artifactory availability.
+- Fingerprint login does not unlock GNOME Keyring; password login remains the workaround on affected desktops.
+- Zen uses `MOZ_LEGACY_PROFILES=1` as an upstream profile-pinning workaround. Re-evaluate after upstream fixes the profile behavior.
+- Custom packages with manually maintained versions, such as `cgm-remote-monitor`, need an explicit release-tracking decision before being considered fully automated.
+
+Do not treat normal `flake.lock` pinning, cache-preserving input decisions, or deliberate vendor/non-free printer plugins as technical debt by themselves.
+
 ## Policies Defined In CLAUDE.md
 
 `CLAUDE.md` is the authoritative source for several repo policies that are easy to violate accidentally. Read it before touching these areas:
