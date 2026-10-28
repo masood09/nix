@@ -95,6 +95,7 @@
           lidarr.enable = lib.mkEnableOption "Lidarr";
           prowlarr.enable = lib.mkEnableOption "Prowlarr";
           sabnzbd.enable = lib.mkEnableOption "SABnzbd";
+          qbittorrent.enable = lib.mkEnableOption "qBittorrent torrent client";
           seerr.enable = lib.mkEnableOption "Seerr (https://seerr.dev — media request/discovery manager for Jellyfin/Plex/Emby)";
           navidrome.enable = lib.mkEnableOption "Navidrome music server";
 

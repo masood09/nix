@@ -1,0 +1,15 @@
+#+TITLE: qBittorrent
+
+* Deployment
+
+qBittorrent runs on =heartbeat= through the nixflix torrent-client module. Its
+Web UI is bound inside the Proton WireGuard namespace, with the host port
+=8282= mapped for the Authentik outpost. Torrent data is stored below the
+existing Arr downloads dataset.
+
+* Access
+
+qBittorrent is not protected by Authentik. Caddy exposes
+=https://qbittorrent.mantannest.com= directly to the VPN-bound Web UI, and
+qBittorrent's native username/password login remains enabled. The same
+credential is used by the Arr services for API access.

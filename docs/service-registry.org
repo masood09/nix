@@ -142,6 +142,7 @@ this repo's own custom apps.
 | Navidrome  | 4533 | Music server; reads Lidarr's music library |
 | Aurral     | 8915 | Music discovery and playlist manager       |
 | Questarr   | 8916 | Game library manager; Podman container     |
+| qBittorrent | 8282 | Web UI; confined to the Proton VPN namespace |
 | slskd      | 5030 | Soulseek web interface; upstream default   |
 Recyclarr has no listening port (nixflix runs it as a scheduled sync, not a service).
 
