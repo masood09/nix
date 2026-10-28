@@ -1084,28 +1084,52 @@ in {
       # INVALID_URL). Keep the generated service dependencies and credentials,
       # but submit a valid external Jellyfin URL explicitly.
       seerr-jellyfin = lib.mkIf cfg.seerr.enable {
-        script = ''
-          set -euo pipefail
+        path = [pkgs.coreutils];
+        serviceConfig = {
+          # nixflix's `script` convenience option has already generated an
+          # ExecStart by the time this module is merged. Override ExecStart
+          # directly so the valid externalHostname workaround is effective.
+          ExecStart = lib.mkForce (pkgs.writeShellScript "seerr-jellyfin-configure" ''
+            set -euo pipefail
 
-          BASE_URL="http://127.0.0.1:${toString config.nixflix.seerr.port}"
-          API_KEY_HEADER="/run/seerr/api-key-header"
-          if [ ! -r "$API_KEY_HEADER" ]; then
-            echo "Seerr API key header is missing" >&2
+            BASE_URL="http://127.0.0.1:${toString config.nixflix.seerr.port}"
+            API_KEY_HEADER="/run/seerr/api-key-header"
+            if [ ! -r "$API_KEY_HEADER" ]; then
+              echo "Seerr API key header is missing" >&2
+              exit 1
+            fi
+
+            PAYLOAD='${builtins.toJSON {
+              ip = config.nixflix.seerr.jellyfin.hostname;
+              port = config.nixflix.seerr.jellyfin.port;
+              useSsl = config.nixflix.seerr.jellyfin.useSsl;
+              urlBase = "";
+              externalHostname = "https://${config.nixflix.seerr.jellyfin.hostname}";
+            }}'
+
+            for attempt in $(seq 1 90); do
+              RESPONSE=$(${pkgs.curl}/bin/curl -s -X POST \
+                --header @"$API_KEY_HEADER" \
+                -H "Content-Type: application/json" \
+                -d "$PAYLOAD" \
+                -w "\n%{http_code}" \
+                "$BASE_URL/api/v1/settings/jellyfin" || true)
+
+              HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+              if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ] || [ "$HTTP_CODE" = "204" ]; then
+                echo "Jellyfin settings configured successfully"
+                exit 0
+              fi
+
+              echo "Waiting for Seerr Jellyfin settings API (HTTP $HTTP_CODE, $attempt/90)..." >&2
+              sleep 1
+            done
+
+            echo "Failed to configure Jellyfin settings after 90 seconds (HTTP $HTTP_CODE)" >&2
+            echo "$RESPONSE" | head -n-1 >&2
             exit 1
-          fi
-
-          ${pkgs.curl}/bin/curl -fsS -X POST \
-            --header @"$API_KEY_HEADER" \
-            -H "Content-Type: application/json" \
-          -d '${builtins.toJSON {
-            ip = config.nixflix.seerr.jellyfin.hostname;
-            port = config.nixflix.seerr.jellyfin.port;
-            useSsl = config.nixflix.seerr.jellyfin.useSsl;
-            urlBase = "";
-            externalHostname = "https://${config.nixflix.seerr.jellyfin.hostname}";
-          }}' \
-            "$BASE_URL/api/v1/settings/jellyfin" >/dev/null
-        '';
+          '');
+        };
       };
 
       # nixflix's generated readiness hook probes bindAddress (0.0.0.0), which
