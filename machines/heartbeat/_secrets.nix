@@ -157,6 +157,16 @@
           restartUnits = ["prowlarr.service"];
         };
 
+        "questarr/jwt-secret" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["podman-questarr.service"];
+        };
+
+        "questarr/credentials-encryption-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["podman-questarr.service"];
+        };
+
         "caddy/.env" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "caddy";
