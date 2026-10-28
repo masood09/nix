@@ -42,6 +42,7 @@ This file should be consulted *before* adding any new service, container, or sys
 | nightscout                    | 3013 | 3013 | CGM dashboard for diabetes management           |
 | minecraft                     | 3014 | 3014 | Minecraft servers and Velocity proxy            |
 | aurral                        | 3015 | 3015 | Music discovery and playlist manager            |
+| questarr                      | 3016 | 3016 | Game library manager                             |
 
 Next available UID/GID: *3016*
 

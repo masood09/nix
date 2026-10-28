@@ -10,6 +10,20 @@
   cfg = homelabCfg.services.questarr;
   podmanEnabled = homelabCfg.services.podman.enable;
   caddyEnabled = config.services.caddy.enable;
+  mediaGroupId = config.nixflix.globals.gids.media;
+  systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
+  permSvc = systemdHelpers.mkPermissionService {
+    name = "questarr";
+    inherit (cfg) dataDir;
+    user = "questarr";
+    group = "questarr";
+    mainServices = ["podman-questarr"];
+    mode = "0750";
+    zfs = {
+      enable = true;
+      datasetServiceName = "zfs-dataset-arr";
+    };
+  };
 in {
   imports = [
     ./options.nix
@@ -59,6 +73,8 @@ in {
             environment = {
               HOST = "0.0.0.0";
               PORT = "5000";
+              PUID = toString cfg.userId;
+              PGID = toString cfg.groupId;
               TRUST_PROXY = "1";
               DISABLE_HSTS = "true";
             };
@@ -76,26 +92,33 @@ in {
             ports = [
               "${cfg.listenAddress}:${toString cfg.listenPort}:5000"
             ];
-          };
-        };
-      };
-    };
 
-    systemd = {
-      services = {
-        podman-questarr = {
-          unitConfig = {
-            RequiresMountsFor = [cfg.dataDir];
-          };
-
-          serviceConfig = {
-            ExecStartPre = lib.mkAfter [
-              "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}"
+            extraOptions = [
+              "--group-add=${toString mediaGroupId}"
             ];
           };
         };
       };
     };
+
+    users = {
+      users = {
+        questarr = {
+          isSystemUser = true;
+          group = "questarr";
+          extraGroups = ["media"];
+          uid = cfg.userId;
+        };
+      };
+
+      groups = {
+        questarr = {
+          gid = cfg.groupId;
+        };
+      };
+    };
+
+    inherit (permSvc) systemd;
 
     networking = {
       firewall = {
