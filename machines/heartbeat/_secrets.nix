@@ -127,6 +127,18 @@
           restartUnits = ["sabnzbd.service"];
         };
 
+        "arr/qbittorrent/password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "qbittorrent";
+          restartUnits = [
+            "qbittorrent.service"
+            "radarr-downloadclients.service"
+            "sonarr-downloadclients.service"
+            "lidarr-downloadclients.service"
+            "prowlarr-downloadclients.service"
+          ];
+        };
+
         "arr/seerr/api-key" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "seerr";
