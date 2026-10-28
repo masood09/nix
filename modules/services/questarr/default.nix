@@ -11,6 +11,12 @@
   podmanEnabled = homelabCfg.services.podman.enable;
   caddyEnabled = config.services.caddy.enable;
   mediaGroupId = config.nixflix.globals.gids.media;
+  podmanFirewallInterface =
+    if !config.networking.nftables.enable
+    then "podman+"
+    else "podman*";
+  prowlarrPort = config.nixflix.prowlarr.config.hostConfig.port;
+  sabnzbdPort = config.nixflix.usenetClients.sabnzbd.settings.misc.port;
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
     name = "questarr";
@@ -125,6 +131,13 @@ in {
         interfaces = {
           tailscale0 = {
             allowedTCPPorts = [cfg.listenPort];
+          };
+
+          "${podmanFirewallInterface}" = {
+            allowedTCPPorts = lib.unique (
+              (lib.optional homelabCfg.services.arr.prowlarr.enable prowlarrPort)
+              ++ lib.optional homelabCfg.services.arr.sabnzbd.enable sabnzbdPort
+            );
           };
         };
       };
