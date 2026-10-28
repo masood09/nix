@@ -452,9 +452,9 @@ in {
               # only ever looks at the direct TCP peer's IP — the outpost's own tailnet
               # IP (accesscontrolsystem, 100.64.0.0/10), not the original browser's IP.
               # SABnzbd's default local_ranges is RFC1918 only, which doesn't cover
-              # Tailscale's CGNAT range, so the outpost's connection reads as "external"
-              # even though nothing is actually exposed past the tailnet.
-              local_ranges = "100.64.0.0/10";
+              # Tailscale's CGNAT range or Podman's default network. Both the Authentik
+              # outpost and local containers must be treated as trusted peers here.
+              local_ranges = "100.64.0.0/10,10.88.0.0/16";
 
               # With local_ranges fixed, the direct peer (the outpost, 100.64.0.1) passes —
               # but verify_xff_header then separately re-checks every hop in
