@@ -34,6 +34,18 @@
             description = "Questarr downloads root.";
           };
 
+          userId = lib.mkOption {
+            type = lib.types.ints.u16;
+            default = 3016;
+            description = "UID for the Questarr service user.";
+          };
+
+          groupId = lib.mkOption {
+            type = lib.types.ints.u16;
+            default = 3016;
+            description = "GID for the Questarr service group.";
+          };
+
           listenAddress = lib.mkOption {
             type = lib.types.str;
             default = "0.0.0.0";
