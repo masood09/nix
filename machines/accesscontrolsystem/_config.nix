@@ -39,7 +39,6 @@
             "prowlarr.mantannest.com"
             "lidarr.mantannest.com"
             "slskd.mantannest.com"
-            "questarr.mantannest.com"
           ];
         };
 
