@@ -129,10 +129,6 @@ in {
     networking = {
       firewall = {
         interfaces = {
-          tailscale0 = {
-            allowedTCPPorts = [cfg.listenPort];
-          };
-
           "${podmanFirewallInterface}" = {
             allowedTCPPorts = lib.unique (
               (lib.optional homelabCfg.services.arr.prowlarr.enable prowlarrPort)
@@ -148,12 +144,8 @@ in {
         virtualHosts = {
           "${cfg.webDomain}" = {
             useACMEHost = config.networking.domain;
-            # Full Proxy Provider mode: the embedded outpost performs SSO and
-            # then forwards to its manually configured internal host.
             extraConfig = ''
-              reverse_proxy https://auth.${config.networking.domain} {
-                header_up Host {http.request.host}
-              }
+              reverse_proxy http://127.0.0.1:${toString cfg.listenPort}
             '';
           };
         };
