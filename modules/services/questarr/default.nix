@@ -73,7 +73,7 @@ in {
         containers = {
           questarr = {
             # renovate: datasource=docker depName=ghcr.io/doezer/questarr
-            image = "ghcr.io/doezer/questarr:v1.4.2";
+            image = "ghcr.io/doezer/questarr:v1.5.0";
             autoStart = true;
 
             environment = {
