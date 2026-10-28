@@ -94,6 +94,7 @@
           radarr.enable = lib.mkEnableOption "Radarr";
           lidarr.enable = lib.mkEnableOption "Lidarr";
           prowlarr.enable = lib.mkEnableOption "Prowlarr";
+          flaresolverr.enable = lib.mkEnableOption "FlareSolverr Cloudflare-challenge proxy for Prowlarr (nixflix auto-creates the indexer proxy and `flaresolverr` tag)";
           sabnzbd.enable = lib.mkEnableOption "SABnzbd";
           qbittorrent.enable = lib.mkEnableOption "qBittorrent torrent client";
           seerr.enable = lib.mkEnableOption "Seerr (https://seerr.dev — media request/discovery manager for Jellyfin/Plex/Emby)";

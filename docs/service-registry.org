@@ -138,6 +138,7 @@ this repo's own custom apps.
 | Lidarr     | 8686 |                                |
 | Prowlarr   | 9696 |                                |
 | SABnzbd    | 8080 |                                |
+| FlareSolverr | 8191 | Localhost only; Prowlarr indexer proxy |
 | Seerr      | 5055 | =homelab.services.arr.seerr= — https://seerr.dev, media request/discovery manager |
 | Navidrome  | 4533 | Music server; reads Lidarr's music library |
 | Aurral     | 8915 | Music discovery and playlist manager       |

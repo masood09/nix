@@ -322,6 +322,10 @@ in {
         enable = true;
       };
 
+      flaresolverr = lib.mkIf cfg.flaresolverr.enable {
+        enable = true;
+      };
+
       jellyfin = lib.mkIf cfg.jellyfin.enable {
         enable = true;
 
@@ -917,6 +921,10 @@ in {
     };
 
     assertions = [
+      {
+        assertion = !cfg.flaresolverr.enable || cfg.prowlarr.enable;
+        message = "homelab.services.arr.flaresolverr.enable requires homelab.services.arr.prowlarr.enable; FlareSolverr only serves Prowlarr's indexer proxy.";
+      }
       {
         assertion = !cfg.navidrome.enable || cfg.lidarr.enable;
         message = "homelab.services.arr.navidrome.enable requires homelab.services.arr.lidarr.enable so both services share the music directory.";

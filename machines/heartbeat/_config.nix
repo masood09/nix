@@ -122,6 +122,10 @@
             enable = true;
           };
 
+          flaresolverr = {
+            enable = true;
+          };
+
           sabnzbd = {
             enable = true;
           };
@@ -205,6 +209,11 @@
               apiKey = {
                 _secret = config.sops.secrets."arr/indexers/nzbplanet/api-key".path;
               };
+            }
+            {
+              # Public tracker behind Cloudflare; the tag routes it through FlareSolverr.
+              name = "1337x";
+              tags = ["flaresolverr"];
             }
           ];
         };
