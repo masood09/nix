@@ -124,6 +124,10 @@
     noctalia = {
       url = "github:noctalia-dev/noctalia/cachix";
     };
+    # Official Bambu Studio AppImage package; used by usul's desktop module.
+    bambu-studio = {
+      url = "github:TestkaJakub/bambu-studio-nix";
+    };
   };
 
   outputs = {
