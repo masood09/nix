@@ -127,18 +127,6 @@
           restartUnits = ["sabnzbd.service"];
         };
 
-        "arr/qbittorrent/password" = {
-          sopsFile = ./secrets.sops.yaml;
-          owner = "qbittorrent";
-          restartUnits = [
-            "qbittorrent.service"
-            "radarr-downloadclients.service"
-            "sonarr-downloadclients.service"
-            "lidarr-downloadclients.service"
-            "prowlarr-downloadclients.service"
-          ];
-        };
-
         "arr/seerr/api-key" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "seerr";
@@ -167,16 +155,6 @@
           sopsFile = ./secrets.sops.yaml;
           owner = "prowlarr";
           restartUnits = ["prowlarr.service"];
-        };
-
-        "questarr/jwt-secret" = {
-          sopsFile = ./secrets.sops.yaml;
-          restartUnits = ["podman-questarr.service"];
-        };
-
-        "questarr/credentials-encryption-key" = {
-          sopsFile = ./secrets.sops.yaml;
-          restartUnits = ["podman-questarr.service"];
         };
 
         "caddy/.env" = {

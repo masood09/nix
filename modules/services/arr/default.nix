@@ -853,29 +853,6 @@ in {
           };
         };
       };
-
-      torrentClients = {
-        qbittorrent = lib.mkIf cfg.qbittorrent.enable {
-          enable = true;
-          vpn.enable = true;
-          reverseProxy.expose = false;
-          webuiPort = 8282;
-          profileDir = "${cfg.stateDir}/qbittorrent";
-          downloadsDir = "${cfg.downloadsDir}/torrent";
-          group = "media";
-          password = {
-            _secret = config.sops.secrets."arr/qbittorrent/password".path;
-          };
-          serverConfig = {
-            Preferences = {
-              WebUI = {
-                Username = "admin";
-                Password_PBKDF2 = "@ByteArray(P2uvfTWFnJdkkbTvJnBxNw==:/vsKPHb8H+ULN3QKeY3/4Vhje4d8A7j7FhKf2Pq9sFXTnYQeH79JaPYBqi4P9ZNL0YFaD0lpf6kl4LNuHActgQ==)";
-              };
-            };
-          };
-        };
-      };
     };
 
     systemd = {
@@ -905,7 +882,7 @@ in {
     # internal_host — it needs to reach this machine's backends itself, not go through
     # Caddy. Scoped to the tailscale0 interface, matching the LDAP outpost's port-3389
     # rule on accesscontrolsystem (machines/accesscontrolsystem/_config.nix).
-    networking.firewall = lib.mkIf (cfg.sabnzbd.enable || cfg.sonarr.enable || cfg.radarr.enable || cfg.lidarr.enable || cfg.prowlarr.enable || cfg.navidrome.enable || cfg.slskd.enable || cfg.qbittorrent.enable) {
+    networking.firewall = lib.mkIf (cfg.sabnzbd.enable || cfg.sonarr.enable || cfg.radarr.enable || cfg.lidarr.enable || cfg.prowlarr.enable || cfg.navidrome.enable || cfg.slskd.enable) {
       interfaces = {
         tailscale0 = {
           allowedTCPPorts =
@@ -957,7 +934,6 @@ in {
               ++ lib.optional cfg.sabnzbd.enable "sabnzbd.service"
               ++ lib.optional cfg.seerr.enable "seerr.service"
               ++ lib.optional cfg.lidarr.enable "lidarr.service"
-              ++ lib.optional cfg.qbittorrent.enable "qbittorrent.service"
               ++ lib.optional cfg.navidrome.enable "navidrome.service"
               ++ lib.optional cfg.slskd.enable "slskd.service";
 
@@ -978,7 +954,6 @@ in {
             ++ lib.optional cfg.sabnzbd.enable "sabnzbd.service"
             ++ lib.optional cfg.seerr.enable "seerr.service"
             ++ lib.optional cfg.lidarr.enable "lidarr.service"
-            ++ lib.optional cfg.qbittorrent.enable "qbittorrent.service"
             ++ lib.optional cfg.navidrome.enable "navidrome.service";
         };
       };
@@ -1101,14 +1076,6 @@ in {
                 reverse_proxy https://auth.${domain} {
                   header_up Host {http.request.host}
                 }
-              '';
-            };
-          })
-          (lib.mkIf cfg.qbittorrent.enable {
-            "qbittorrent.${domain}" = {
-              useACMEHost = domain;
-              extraConfig = ''
-                reverse_proxy http://${config.nixflix.torrentClients.qbittorrent.connectionAddress}:${toString config.nixflix.torrentClients.qbittorrent.webuiPort}
               '';
             };
           })

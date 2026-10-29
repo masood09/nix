@@ -33,7 +33,6 @@
     ./podman
     ./postgresql
     ./prometheus
-    ./questarr
     ./smartctl-exporter
     ./ssh
     ./tailscale

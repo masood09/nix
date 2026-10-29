@@ -76,7 +76,6 @@
             "nightscout.service"
             "podman-babybuddy.service"
             "podman-compose-opencloud-root.target"
-            "podman-questarr.service"
             "vaultwarden.service"
           ];
         };
@@ -127,10 +126,6 @@
           };
 
           sabnzbd = {
-            enable = true;
-          };
-
-          qbittorrent = {
             enable = true;
           };
 
@@ -219,10 +214,6 @@
         };
 
         caddy = {
-          enable = true;
-        };
-
-        questarr = {
           enable = true;
         };
 

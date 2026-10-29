@@ -42,7 +42,6 @@ This file should be consulted *before* adding any new service, container, or sys
 | nightscout                    | 3013 | 3013 | CGM dashboard for diabetes management           |
 | minecraft                     | 3014 | 3014 | Minecraft servers and Velocity proxy            |
 | aurral                        | 3015 | 3015 | Music discovery and playlist manager            |
-| questarr                      | 3016 | 3016 | Game library manager                             |
 
 Next available UID/GID: *3016*
 
@@ -142,8 +141,6 @@ this repo's own custom apps.
 | Seerr      | 5055 | =homelab.services.arr.seerr= — https://seerr.dev, media request/discovery manager |
 | Navidrome  | 4533 | Music server; reads Lidarr's music library |
 | Aurral     | 8915 | Music discovery and playlist manager       |
-| Questarr   | 8916 | Game library manager; Podman container     |
-| qBittorrent | 8282 | Web UI; confined to the Proton VPN namespace |
 | slskd      | 5030 | Soulseek web interface; upstream default   |
 Recyclarr has no listening port (nixflix runs it as a scheduled sync, not a service).
 
