@@ -160,10 +160,8 @@ When the user describes a problem, pick the right tool yourself — they shouldn
 - **Option schema / type / default / which channel** → `mcp__nixos__*` (`darwin_search`, `home_manager_options_by_prefix`, `nixos_info`, etc.). Authoritative for the channels pinned in this flake.
 - **Package version availability / nixpkgs commit lookup** → `mcp__nixos__nixhub_package_versions` / `nixhub_find_version`.
 - **Idiomatic example, manual prose, third-party flake usage patterns** → `context7` (`resolve-library-id` then `get-library-docs` with a `topic` filter — never call `get-library-docs` without a topic).
-- **Anything in this repo** → `Read` / `Grep` / `Glob`, no MCP.
-- **Fast-moving flake inputs** (niri, noctalia, mcp-servers-nix, claude-code, codex-cli-nix, zen-browser, betterfox) → `WebFetch` the upstream repo, since context7's cache may lag the flake input.
-
-Combine sources when useful: nixos MCP for the exact option name, then context7 for an example of how to use it. Don't narrate routing decisions unless they matter.
+- **Anything in this repo** → local file inspection tools.
+- **Fast-moving flake inputs** (niri, noctalia, claude-code, codex-cli-nix, zen-browser, betterfox) → fetch the upstream repo, since cached documentation may lag the flake input.
 
 ## Key Dependencies
 
@@ -174,7 +172,6 @@ Combine sources when useful: nixos MCP for the exact option name, then context7 
 - stylix: `release-26.05`
 - niri: `epireyn/niri-flake` (fork of `sodiboo/niri-flake`; declarative Niri compositor config + Stylix integration. Included in `mkNixOSDesktopConfig`, not `mkNixOSConfig`, to avoid pulling niri into server closures. No nixpkgs `follows` — it must build against the fork's own nixpkgs to hit `niri-epireyn.cachix.org`, which covers 26.05)
 - noctalia: `noctalia-dev/noctalia`, `cachix` branch (desktop shell, v5. HM module included in `mkNixOSDesktopConfig` via `home-manager.sharedModules`, not in shared `home.nix`, because the flake wrapper unconditionally pulls the shell package into every closure. No nixpkgs `follows` so builds resolve from `noctalia.cachix.org`; v4 lives on the `legacy-v4` branch)
-- mcp-servers-nix: `natsukium/mcp-servers-nix` (declarative MCP server registry; HM bridge module reads `mcp-servers.programs.<name>.enable` and writes the resulting entries into `programs.mcp.servers`, which `_claude-code.nix`/`_codex-cli.nix`/`_opencode.nix` consume; imported in shared `home.nix` but the registry itself is gated on `homelab.programs.ai_tools` inside `modules/home-manager/programs/_mcp.nix` so server closures stay free of MCP packages)
 - zen-browser: `0xc000022070/zen-browser-flake` (Zen Browser HM module; included in `desktopNixOSModules` via `home-manager.sharedModules` for NixOS desktops and in `mkDarwinConfig` for macOS, not in shared `home.nix`, because the flake wrapper unconditionally pulls heavyweight browser/Qt packages into every closure even when the program is never enabled)
 - claude-code (`sadjow/claude-code-nix`) and codex-cli-nix (`sadjow/codex-cli-nix`): both auto-update hourly and ship their own binary caches. No nixpkgs `follows`, and they are consumed via `inputs.<name>.packages.<system>.default` — **not** their overlays, which would rebuild against our nixpkgs and miss the cache on every `just up`
 - headplane: pinned to `v0.8.2`; nixos-26.05's native `services.headplane` module is `disabledModules`-ed in `flake.nix` so only the flake module declares the option
