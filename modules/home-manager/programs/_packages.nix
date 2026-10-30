@@ -40,8 +40,14 @@ in {
         # Desktop is managed via Home Manager's native module in
         # `_element-desktop.nix` so it can carry package overrides/settings.
         bitwarden-desktop
+        file-roller # graphical archive manager
         jellyfin-media-player # Jellyfin desktop client for self-hosted media
+        p7zip # 7z compression and extraction
         stremio-linux-shell # Stremio desktop client; avoids the removed Qt5 package
+        thunar-archive-plugin # Thunar right-click archive actions
+        unar # RAR and other archive extraction, including RAR5
+        unzip
+        zip
       ])
       # macOS-specific (coreutils for GNU compat, nixos-rebuild for remote deploys)
       ++ lib.optionals (role == "desktop" && pkgs.stdenv.isDarwin) (with pkgs; [
