@@ -160,7 +160,10 @@ in {
 
             gestures = {
               hot-corners = {
-                enable = false;
+                bottom-left = false;
+                bottom-right = false;
+                top-left = false;
+                top-right = false;
               };
             };
 
