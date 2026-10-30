@@ -108,6 +108,29 @@ in {
       };
     };
 
+    # Wine ESYNC needs a large per-session file-descriptor limit. Without
+    # both PAM limits Lutris refuses to start ESYNC-enabled runners.
+    security = {
+      pam = {
+        # Append these after the shared 65536 limits so they take precedence
+        # in pam_limits.conf.
+        loginLimits = lib.mkAfter [
+          {
+            domain = "*";
+            item = "nofile";
+            type = "soft";
+            value = "1048576";
+          }
+          {
+            domain = "*";
+            item = "nofile";
+            type = "hard";
+            value = "1048576";
+          }
+        ];
+      };
+    };
+
     # MangoHud — Vulkan overlay for FPS/GPU/CPU stats (works with Steam,
     # native games, and Gamescope). ProtonUp-Qt — GUI for installing
     # additional Proton-GE versions into Steam's compatibilitytools.d,
@@ -116,6 +139,7 @@ in {
       systemPackages = with pkgs; [
         mangohud
         protonup-qt
+        vulkan-tools
       ];
     };
   };
