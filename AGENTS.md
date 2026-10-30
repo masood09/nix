@@ -214,7 +214,7 @@ Do not treat normal `flake.lock` pinning, cache-preserving input decisions, or d
 - **Darwin / Homebrew** — nixpkgs and Home Manager are the default on `work-okta`; a Homebrew cask is a fallback that needs a `TECH DEBT:` comment naming the blocker.
 - **Stylix** — one system-level source of truth (`modules/nixos/_stylix.nix`, `modules/macos/_stylix.nix`) propagating to HM. Servers gate GTK/Qt/KDE/GNOME targets off; removing those gates adds ~1 GB to every server closure.
 - **Linux-only HM behavior** — gate `dconf`, fontconfig files, and dbus-dependent activation behind `lib.mkIf pkgs.stdenv.isLinux`.
-- **Research routing** — use the `nixos` MCP server for option schemas and package availability rather than guessing from training data.
+- **Research routing** — use local Nix evaluation and authoritative upstream documentation for option schemas and package availability rather than guessing from training data.
 
 ## Rule Files Checked
 

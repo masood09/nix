@@ -8,7 +8,6 @@
   lib,
   pkgs,
   homelabCfg,
-  inputs,
   ...
 }: let
   # Servers don't enable homelab.stylix so the Stylix HM module is never
@@ -37,12 +36,6 @@ in {
 
   imports = [
     ./programs
-    # MCP server bridge — translates `mcp-servers.programs.<name>.enable`
-    # declarations in `programs/_mcp.nix` into entries under
-    # `programs.mcp.servers`. Imported unconditionally; the registry itself
-    # is gated on `homelab.programs.ai_tools` inside `_mcp.nix`, so this
-    # contributes nothing to closures on machines without AI tooling.
-    inputs.mcp-servers-nix.homeManagerModules.default
     # Zen browser and Noctalia HM modules are imported per-machine (not
     # here) because their flake wrappers unconditionally pull heavyweight
     # packages into every closure even when the program is never enabled.
