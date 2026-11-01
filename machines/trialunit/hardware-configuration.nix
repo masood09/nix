@@ -25,7 +25,7 @@
 
     # Static IP for initrd SSH (remote ZFS unlock)
     kernelParams = [
-      "ip=10.0.20.4::10.0.20.1:255.255.255.0:${config.homelab.networking.hostName}:ens18:"
+      "ip=10.0.20.4::10.0.20.1:255.255.255.0:${config.homelab.networking.hostName}:ens18:none"
     ];
 
     zfs = {

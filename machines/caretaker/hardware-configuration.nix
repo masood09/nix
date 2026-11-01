@@ -39,7 +39,7 @@
 
     # Static IP for initrd SSH (remote LUKS unlock)
     kernelParams = [
-      "ip=10.0.20.2::10.0.20.1:255.255.255.0:${config.homelab.networking.hostName}:enp1s0:"
+      "ip=10.0.20.2::10.0.20.1:255.255.255.0:${config.homelab.networking.hostName}:enp1s0:none"
     ];
 
     kernelModules = ["kvm-intel"];
