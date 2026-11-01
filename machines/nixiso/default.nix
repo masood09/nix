@@ -28,11 +28,7 @@
     };
 
     motd = ''
-      Welcome to the Masood's NixOS ISO installer!
-
-      To install the system, copy and paste the following command:
-
-      sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/masood09/nix/main/install.sh)"
+      Welcome to Masood's NixOS ISO Installer.
 
     '';
   };
@@ -47,6 +43,12 @@
   nix = {
     settings = {
       experimental-features = ["nix-command" "flakes"];
+    };
+  };
+
+  boot = {
+    zfs = {
+      forceImportRoot = false;
     };
   };
 
