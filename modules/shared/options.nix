@@ -6,9 +6,9 @@
     homelab = {
       role = lib.mkOption {
         default = "server";
-        type = lib.types.enum ["desktop" "server"];
+        type = lib.types.enum ["desktop" "htpc" "server"];
         description = ''
-          The role of this machine. Could be server or desktop.
+          The role of this machine: server, desktop, or a lean HTPC console.
         '';
       };
 

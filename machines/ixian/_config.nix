@@ -1,5 +1,9 @@
 # Homelab options — Gamescope Steam machine with a retained SSH admin account.
-{pkgs, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: {
   config = {
     environment = {
       persistence = {
@@ -34,7 +38,7 @@
     };
 
     homelab = {
-      role = "desktop";
+      role = "htpc";
       purpose = "Gamescope Steam Gaming and AI Inference PC";
       isRootZFS = false;
       isEncryptedRoot = true;
@@ -52,8 +56,8 @@
         };
       };
 
-      # Install the AMD graphics/compute driver stack without enabling a
-      # graphical login, compositor, or desktop session.
+      # Install the AMD graphics/compute driver stack for the Steam/Gamescope
+      # console without enabling a general-purpose desktop shell.
       hardware = {
         audio = {
           enable = true;
@@ -129,6 +133,21 @@
     security = {
       rtkit = {
         enable = true;
+      };
+    };
+
+    xdg = {
+      # Steam/Gamescope does not need the desktop MIME database. The explicit
+      # force resolves the conflict between the Steam session default and the
+      # server-style Stylix closure hygiene used by the htpc role.
+      icons = {
+        enable = lib.mkForce false;
+      };
+      mime = {
+        enable = lib.mkForce false;
+      };
+      sounds = {
+        enable = lib.mkForce false;
       };
     };
 

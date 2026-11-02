@@ -35,7 +35,7 @@ in {
               "wheel"
             ]
             # Desktop users need direct access to audio/input/video devices
-            ++ lib.optionals (homelabCfg.role == "desktop") [
+            ++ lib.optionals (builtins.elem homelabCfg.role ["desktop" "htpc"]) [
               "audio"
               "input"
               "video"
