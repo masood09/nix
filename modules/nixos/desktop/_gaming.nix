@@ -61,8 +61,11 @@ in {
       gamescope = {
         enable = true;
 
-        # Allow Gamescope to renice itself for lower input latency
-        capSysNice = true;
+        # Do not grant Gamescope CAP_SYS_NICE here. Steam inherits this
+        # capability and recent bubblewrap rejects the resulting sandbox,
+        # causing steam-gamescope to exit immediately. GameMode below still
+        # handles game-process priority and AMD performance tuning.
+        capSysNice = false;
       };
 
       # Feral GameMode — on-demand performance optimizations when games launch
