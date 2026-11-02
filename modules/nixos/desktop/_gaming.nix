@@ -31,9 +31,11 @@ in {
       steam = {
         enable = true;
 
-        # Translate X11 input events to uinput for Steam Input on Wayland (Niri)
+        # Translate X11 input events to uinput for Steam Input on Niri. Direct
+        # Gamescope consoles do not need XTest; enabling extest there can abort
+        # Steam inside libextest.so while it calls XTestFakeButtonEvent.
         extest = {
-          enable = true;
+          enable = homelabCfg.desktop.niri.enable;
         };
 
         # Winetricks wrapper for Proton-enabled games
