@@ -10,7 +10,7 @@
   ...
 }: let
   homelabCfg = config.homelab;
-  isDesktopSystemdBoot = homelabCfg.role == "desktop" && !homelabCfg.isRootZFS;
+  isDesktopSystemdBoot = builtins.elem homelabCfg.role ["desktop" "htpc"] && !homelabCfg.isRootZFS;
 in {
   options = {
     homelab = {
@@ -60,11 +60,11 @@ in {
 
           # Graphical framebuffer on desktops (needed for Plymouth); text on servers
           gfxmodeEfi =
-            if homelabCfg.role == "desktop"
+            if builtins.elem homelabCfg.role ["desktop" "htpc"]
             then "auto"
             else "text";
 
-          extraConfig = lib.mkIf (homelabCfg.role != "desktop") ''
+          extraConfig = lib.mkIf (!builtins.elem homelabCfg.role ["desktop" "htpc"]) ''
             terminal_output console
           '';
 

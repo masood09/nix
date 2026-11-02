@@ -8,6 +8,7 @@
   ...
 }: let
   homelabCfg = config.homelab;
+  isDesktopLike = builtins.elem homelabCfg.role ["desktop" "htpc"];
 in {
   options = {
     homelab = {
@@ -32,7 +33,7 @@ in {
             # impermanence creates the directory in /nix/persist automatically.
             # Bare "/home" won't create subdirectories, leaving the user homeless
             # after a fresh install. ZFS desktops get /home as a dataset instead.
-            (lib.mkIf (!homelabCfg.isRootZFS && homelabCfg.role == "desktop") [
+            (lib.mkIf (!homelabCfg.isRootZFS && isDesktopLike) [
               {
                 directory = "/home/${homelabCfg.primaryUser.userName}";
                 user = homelabCfg.primaryUser.userName;
@@ -43,7 +44,7 @@ in {
             # Desktop-specific state (login manager, bluetooth pairings, fingerprints, WiFi).
             # /var/lib/fprint is persisted unconditionally — harmless empty dir on
             # desktops without fingerprint hardware enabled.
-            (lib.mkIf (homelabCfg.role == "desktop") (
+            (lib.mkIf isDesktopLike (
               [
                 "/var/lib/bluetooth"
                 "/var/lib/fprint"
@@ -90,7 +91,7 @@ in {
             neededForBoot = true;
           };
         }
-        (lib.mkIf (homelabCfg.role == "desktop") {
+        (lib.mkIf isDesktopLike {
           "/home" = {
             neededForBoot = true;
           };

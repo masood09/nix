@@ -1,10 +1,12 @@
 # Security — sudo policy, PAM, and system limits.
 # Desktops require a password (or fingerprint) for sudo; servers are passwordless.
-{config, ...}: {
+{config, ...}: let
+  isDesktopLike = builtins.elem config.homelab.role ["desktop" "htpc"];
+in {
   security = {
     sudo = {
       # Desktops require password/fingerprint; servers allow passwordless sudo
-      wheelNeedsPassword = config.homelab.role == "desktop";
+      wheelNeedsPassword = isDesktopLike;
     };
 
     pam = {

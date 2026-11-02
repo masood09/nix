@@ -2,8 +2,8 @@
 #+AUTHOR: Masood Ahmed
 #+OPTIONS: toc:nil num:nil
 
-This document installs the headless-first =ixian= configuration for the AMD
-AI inference and gaming PC.
+This document installs the =ixian= configuration for the AMD AI inference,
+gaming, and HTPC console PC.
 
 The initial system uses:
 
@@ -13,7 +13,8 @@ The initial system uses:
 - tmpfs root with impermanence under =/nix/persist=
 - DHCP-based initrd SSH for remote disk unlock on port 2222
 - Normal SSH on port 22222
-- No graphical login or desktop session
+- A minimal greetd session that launches Steam Big Picture through Gamescope
+- No general-purpose desktop, Flatpak, printing, or file-manager stack
 
 * 1. Boot the NixOS USB
 
@@ -127,4 +128,5 @@ systemctl get-default
 #+end_src
 
 The system should have a tmpfs root, persistent =/nix= and =/srv/models=,
-normal SSH, no failed units, and no graphical login service.
+normal SSH, no failed units, and greetd launching the Steam Gamescope console
+as =voyageonwheels=.
