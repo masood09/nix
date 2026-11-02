@@ -16,6 +16,8 @@ keys:
     age1gqvw59226drpwn8942x55jcf5zca5gfupj9eppmeagfevx3pupzs78dfs6
   - &heartbeat
     age1r84yxudulk0jgdtgcmu0qx79ztuxzrzrk4jl5s9n52x4874q35cqzu4enh
+  - &ixian
+    age12w5erpg5tarhnuq4gwr6a9hzeyv6y9yzygp0xqt63lgqexa28yrsw3y39s
   - &usul
     age1qpdxlfwgwwnym09qjzr94chzwjnxj5f449nvvz4sgz8r2qrrn3sqtvvvzx
   - &sonic
@@ -40,6 +42,7 @@ creation_rules:
           - *watchfulsystem
           - *caretaker
           - *usul
+          - *ixian
           - *heartbeat
           - *sonic
           - *trialunit
