@@ -134,6 +134,12 @@
       rtkit = {
         enable = true;
       };
+
+      sudo = {
+        # ixian is a trusted single-admin console; voyageonwheels is not in
+        # wheel, so this applies only to masoodahmed.
+        wheelNeedsPassword = lib.mkForce false;
+      };
     };
 
     xdg = {
