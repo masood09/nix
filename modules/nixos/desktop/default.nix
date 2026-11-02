@@ -342,6 +342,28 @@ in {
       };
     })
 
+    # HTPC consoles keep the lean package set but still benefit from the same
+    # low-latency kernel and scheduler tuning as interactive desktops.
+    (lib.mkIf (homelabCfg.role == "htpc") {
+      boot = {
+        kernelPackages = pkgs.linuxPackages_zen;
+
+        kernel = {
+          sysctl = {
+            "vm.swappiness" = 150;
+            "vm.page-cluster" = 0;
+            "vm.dirty_background_bytes" = 67108864;
+            "vm.dirty_bytes" = 268435456;
+            "vm.vfs_cache_pressure" = 50;
+            "vm.compaction_proactiveness" = 0;
+            "vm.min_free_kbytes" = 67584;
+            "kernel.nmi_watchdog" = 0;
+            "kernel.split_lock_mitigate" = 0;
+          };
+        };
+      };
+    })
+
     # GPU driver stack — decoupled from homelab.desktop.enable so headless
     # servers (e.g. Jellyfin hardware transcoding) can pull in VA-API/VDPAU
     # support without any of the rest of the desktop config.
