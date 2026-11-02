@@ -263,7 +263,7 @@
       trialunit = mkNixOSConfig ./machines/trialunit;
 
       # Desktops — use mkNixOSDesktopConfig for niri + noctalia modules
-      ixian = mkNixOSDesktopConfig ./machines/ixian;
+      ixian = mkNixOSConfig ./machines/ixian;
       usul = mkNixOSDesktopConfig ./machines/usul;
       sonic = mkNixOSDesktopConfig ./machines/sonic;
 

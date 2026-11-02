@@ -1,12 +1,14 @@
 # Lightweight graphical file manager for NixOS desktops.
 {
   config,
+  lib,
   pkgs,
   ...
 }: let
+  homelabCfg = config.homelab;
   userName = config.homelab.primaryUser.userName;
 in {
-  config = {
+  config = lib.mkIf homelabCfg.desktop.enable {
     home-manager = {
       backupFileExtension = "hm-backup";
 

@@ -1,6 +1,21 @@
-# Homelab options — headless-first AI inference and gaming PC.
+# Homelab options — Gamescope Steam machine with a retained SSH admin account.
 {pkgs, ...}: {
   config = {
+    environment = {
+      persistence = {
+        "/nix/persist" = {
+          directories = [
+            {
+              directory = "/home/voyageonwheels";
+              user = "voyageonwheels";
+              group = "users";
+              mode = "0700";
+            }
+          ];
+        };
+      };
+    };
+
     boot = {
       initrd = {
         luks = {
@@ -19,8 +34,8 @@
     };
 
     homelab = {
-      role = "server";
-      purpose = "AI Inference and Gaming PC (Headless Base)";
+      role = "desktop";
+      purpose = "Gamescope Steam Gaming and AI Inference PC";
       isRootZFS = false;
       isEncryptedRoot = true;
       impermanence = true;
@@ -40,6 +55,10 @@
       # Install the AMD graphics/compute driver stack without enabling a
       # graphical login, compositor, or desktop session.
       hardware = {
+        audio = {
+          enable = true;
+        };
+
         graphics = {
           enable = true;
           driver = "amd";
@@ -47,7 +66,69 @@
       };
 
       desktop = {
+        # ixian is a dedicated Steam/Gamescope console, not a general-purpose
+        # desktop. Keep the shared desktop bundle disabled so Flatpak, CUPS,
+        # Thunar/GVFS, accounts-daemon, and desktop shells are not installed.
         enable = false;
+
+        gaming = {
+          enable = true;
+        };
+
+        shell = "none";
+
+        niri = {
+          enable = false;
+        };
+      };
+    };
+
+    programs = {
+      steam = {
+        gamescopeSession = {
+          enable = true;
+          args = [
+            "-e"
+          ];
+          steamArgs = [
+            "-tenfoot"
+            "-pipewire-dmabuf"
+          ];
+        };
+      };
+    };
+
+    services = {
+      pipewire = {
+        enable = true;
+        alsa = {
+          enable = true;
+          support32Bit = true;
+        };
+        pulse = {
+          enable = true;
+        };
+      };
+
+      greetd = {
+        enable = true;
+        settings = {
+          initial_session = {
+            command = "steam-gamescope";
+            user = "voyageonwheels";
+          };
+
+          default_session = {
+            command = "steam-gamescope";
+            user = "voyageonwheels";
+          };
+        };
+      };
+    };
+
+    security = {
+      rtkit = {
+        enable = true;
       };
     };
 
