@@ -1,0 +1,130 @@
+#+TITLE: Installing NixOS on ixian
+#+AUTHOR: Masood Ahmed
+#+OPTIONS: toc:nil num:nil
+
+This document installs the headless-first =ixian= configuration for the AMD
+AI inference and gaming PC.
+
+The initial system uses:
+
+- UEFI + systemd-boot
+- LUKS + LVM + ext4 for the system disk
+- A separate encrypted ext4 model disk mounted at =/srv/models=
+- tmpfs root with impermanence under =/nix/persist=
+- DHCP-based initrd SSH for remote disk unlock on port 2222
+- Normal SSH on port 22222
+- No graphical login or desktop session
+
+* 1. Boot the NixOS USB
+
+Boot the NixOS minimal ISO and verify the wired interface has a DHCP lease:
+
+#+begin_src bash
+ip -br addr
+ping -c 3 github.com
+#+end_src
+
+The current live-USB address is =10.0.30.216=, but initrd networking is DHCP
+based and the address should be confirmed after each boot.
+
+* 2. Prepare the installation target
+
+From the live environment, clone or otherwise make this flake available. The
+following command intentionally destroys both NVMe drives:
+
+#+begin_src bash
+nix --experimental-features "nix-command flakes" \
+  run --refresh github:nix-community/disko -- \
+  --mode destroy,format,mount \
+  --flake github:masood09/nix#ixian
+#+end_src
+
+The expected layout is:
+
+- =nvme-CT1000P3PSSD8_24504CBE7C25=: EFI + encrypted LVM system disk
+- =nvme-CT1000P3PSSD8_24504CBE7C73=: encrypted ext4 model disk at =/mnt/srv/models=
+
+Verify before continuing:
+
+#+begin_src bash
+lsblk
+findmnt -R /mnt
+#+end_src
+
+* 3. Create boot secrets
+
+#+begin_src bash
+mkdir -pv /mnt/nix/{secret/{initrd,age},persist/etc/ssh}
+chmod 0700 /mnt/nix/secret
+
+tr -dc 'A-Za-z0-9_@%+=:,.~-' </dev/urandom | head -c 64 > /mnt/nix/secret/ixian-models.key
+chmod 0400 /mnt/nix/secret/ixian-models.key
+
+cryptsetup luksAddKey \
+  /dev/disk/by-partlabel/disk-models-models \
+  /mnt/nix/secret/ixian-models.key
+
+ssh-keygen -t ed25519 -N "" -C "" \
+  -f /mnt/nix/secret/initrd/ssh_host_ed25519_key
+
+ssh-keygen -t ed25519 -N "" -C "" \
+  -f /mnt/nix/secret/age/ssh_ed25519_key
+
+nix-shell --extra-experimental-features flakes -p ssh-to-age \
+  --run 'cat /mnt/nix/secret/age/ssh_ed25519_key.pub | ssh-to-age'
+#+end_src
+
+Add the resulting age recipient to =.sops.yaml= as =ixian= and re-encrypt
+=secrets/secrets.sops.yaml= with the existing admin key. Do not commit the
+private age key or any plaintext secret.
+
+* 4. Install
+
+#+begin_src bash
+nixos-install \
+  --no-root-passwd \
+  --root /mnt \
+  --flake github:masood09/nix#ixian \
+  --option tarball-ttl 0
+#+end_src
+
+* 5. First boot and remote unlock
+
+Reboot with the USB removed. The initrd SSH server listens on port 2222 using
+the authorized keys from the configuration:
+
+#+begin_src bash
+ssh -p 2222 root@IXIAN_IP
+#+end_src
+
+Run the systemd password agent and enter the =cryptroot= passphrase when
+prompted:
+
+#+begin_src bash
+systemd-tty-ask-password-agent --watch
+#+end_src
+
+Once the root filesystem is available, the installed system automatically uses
+=/nix/secret/ixian-models.key= to unlock =cryptmodels=. The model filesystem is
+marked =nofail=, so a missing model drive does not prevent the base system from
+booting.
+
+After boot completes, connect to the normal SSH service:
+
+#+begin_src bash
+ssh -p 22222 masoodahmed@IXIAN_IP
+#+end_src
+
+* 6. Verify the base system
+
+#+begin_src bash
+hostname
+findmnt /
+findmnt /nix
+findmnt /srv/models
+systemctl --failed
+systemctl get-default
+#+end_src
+
+The system should have a tmpfs root, persistent =/nix= and =/srv/models=,
+normal SSH, no failed units, and no graphical login service.
