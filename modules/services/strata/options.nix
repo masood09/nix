@@ -83,6 +83,36 @@
             '';
           };
 
+          tvGuard = {
+            enable = lib.mkEnableOption ''
+              stopping Strata while an Android TV is on, freeing VRAM and RAM
+              for games. The TV is polled over network ADB; Strata is started
+              again once the TV has been off (unreachable) for offDelay
+              seconds, but only if the guard stopped it
+            '';
+
+            address = lib.mkOption {
+              type = lib.types.str;
+              example = "tv.example.lan:5555";
+              description = ''
+                host:port of the TV's network ADB. The TV must allow this host's
+                ADB key once (an "Allow USB debugging?" prompt on screen).
+              '';
+            };
+
+            interval = lib.mkOption {
+              type = lib.types.ints.positive;
+              default = 10;
+              description = "Seconds between TV power checks.";
+            };
+
+            offDelay = lib.mkOption {
+              type = lib.types.ints.unsigned;
+              default = 30;
+              description = "Seconds the TV must stay off before Strata is started again.";
+            };
+          };
+
           userId = lib.mkOption {
             type = lib.types.ints.u16;
             default = 3016;
