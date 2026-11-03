@@ -60,6 +60,12 @@
         alloy = {
           enable = false;
         };
+
+        # Qwen3.8-Flash-Next IQ3_XXS, 128K context, CPU picture reader, MTP
+        # draft layer (module defaults), on 127.0.0.1:8916.
+        strata = {
+          enable = true;
+        };
       };
 
       # Install the AMD graphics/compute driver stack for the Steam/Gamescope

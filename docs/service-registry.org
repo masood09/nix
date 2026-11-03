@@ -42,8 +42,9 @@ This file should be consulted *before* adding any new service, container, or sys
 | nightscout                    | 3013 | 3013 | CGM dashboard for diabetes management           |
 | minecraft                     | 3014 | 3014 | Minecraft servers and Velocity proxy            |
 | aurral                        | 3015 | 3015 | Music discovery and playlist manager            |
+| strata                        | 3016 | 3016 | Local LLM inference server (ixian)              |
 
-Next available UID/GID: *3016*
+Next available UID/GID: *3017*
 
 *Exception:* the arr media stack (Jellyfin/Sonarr/Radarr/Lidarr/Prowlarr/SABnzbd/Seerr/Recyclarr,
 via the =nixflix= flake input — see =modules/services/arr/=, enabled per-machine via
@@ -104,6 +105,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | lk-jwt-service (Matrix RTC)          |  8912 |                                   |
 | MailArchiver                         |  8913 |                                   |
 | Nightscout                           |  8914 |                                   |
+| Strata (LLM API)                     |  8916 | Localhost only (ixian); SSH tunnel |
 | Authentik (HTTP/health)              |  9000 | 127.0.0.1 only; server listener    |
 | Authentik Worker (HTTP)              |  9001 | 127.0.0.1 only; worker listener    |
 | Prometheus                           |  9090 | Upstream default                  |
@@ -125,7 +127,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | MongoDB                              | 27017 | Localhost only (Nightscout)       |
 | LiveKit RTC (UDP range)              | 50100 | 50100–50200                       |
 
-Next available port in 89xx block: *8915*
+Next available port in 89xx block: *8917*
 
 ** Arr Media Stack (heartbeat only)
 Upstream defaults kept as-is (same convention as Immich/Vaultwarden above) — these sit

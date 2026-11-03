@@ -35,6 +35,7 @@
     ./prometheus
     ./smartctl-exporter
     ./ssh
+    ./strata
     ./tailscale
     ./uptime-kuma
     ./vaultwarden
