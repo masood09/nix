@@ -1,5 +1,6 @@
 # Homelab options — Gamescope Steam machine with a retained SSH admin account.
 {
+  config,
   lib,
   pkgs,
   ...
@@ -62,8 +63,15 @@
         };
 
         # Qwen3.8-Flash-Next IQ3_XXS, 128K context, CPU picture reader, MTP
-        # draft layer (module defaults), on 127.0.0.1:8916.
+        # draft layer (module defaults), on 127.0.0.1:8916, served to the LAN
+        # by Caddy as ai.mantannest.com.
         strata = {
+          enable = true;
+        };
+
+        # LAN-only: ixian has no tailnet interface and no public DNS record;
+        # ai.mantannest.com resolves only through UniFi local DNS.
+        caddy = {
           enable = true;
         };
       };
@@ -143,6 +151,21 @@
     };
 
     security = {
+      acme = {
+        certs = {
+          # The LAN firewall redirects all port-53 traffic on ixian's VLAN to
+          # the internal resolvers, which answer NXDOMAIN for the ACME TXT
+          # record, so lego's propagation check (direct queries to
+          # Cloudflare's nameservers) can never pass from here. Wait a fixed
+          # time instead; Let's Encrypt validates from the public internet.
+          ${config.networking.domain} = {
+            extraLegoFlags = [
+              "--dns.propagation-wait=60s"
+            ];
+          };
+        };
+      };
+
       rtkit = {
         enable = true;
       };

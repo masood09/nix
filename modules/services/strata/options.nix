@@ -1,5 +1,9 @@
 # Options — Strata local LLM inference server.
-{lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   options = {
     homelab = {
       services = {
@@ -68,6 +72,15 @@
             type = lib.types.port;
             default = 8916;
             description = "Port on which the OpenAI-compatible API listens.";
+          };
+
+          webDomain = lib.mkOption {
+            type = lib.types.str;
+            default = "ai.${config.networking.domain}";
+            description = ''
+              Hostname Caddy serves the API on. Backend-neutral so clients keep
+              the same endpoint if the inference server changes.
+            '';
           };
 
           userId = lib.mkOption {
