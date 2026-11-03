@@ -105,6 +105,12 @@ creation_rules:
         - *sonic
         - *masoodahmed
 
+  - path_regex: ^machines/ixian/secrets\.sops\.yaml$
+    key_groups:
+      - age:
+        - *ixian
+        - *masoodahmed
+
   - path_regex: ^machines/trialunit/secrets\.sops\.yaml$
     key_groups:
       - age:

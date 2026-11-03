@@ -8,6 +8,10 @@
         "cloudflare/api-key" = {
           restartUnits = ["acme-setup.service"];
         };
+
+        "tailscale/preauth-key" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
       };
     };
   };

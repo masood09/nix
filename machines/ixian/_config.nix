@@ -69,9 +69,14 @@
           enable = true;
         };
 
-        # LAN-only: ixian has no tailnet interface and no public DNS record;
-        # ai.mantannest.com resolves only through UniFi local DNS.
+        # ai.mantannest.com has no public or Headscale DNS record; it
+        # resolves only through UniFi local DNS, so clients reach it over
+        # the LAN.
         caddy = {
+          enable = true;
+        };
+
+        tailscale = {
           enable = true;
         };
       };
