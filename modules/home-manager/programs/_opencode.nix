@@ -25,6 +25,30 @@
             '';
         });
 
+        settings = {
+          "$schema" = "https://opencode.ai/config.json";
+          model = "ixian-strata/qwen3.8-flash-next-iq3_xxs";
+
+          provider = {
+            ixian-strata = {
+              npm = "@ai-sdk/openai-compatible";
+              name = "Ixian Strata";
+              options = {
+                # Caddy on ixian (LAN-only DNS); see modules/services/strata.
+                baseURL = "https://ai.mantannest.com/v1";
+              };
+              models = {
+                "qwen3.8-flash-next-iq3_xxs" = {
+                  name = "Qwen3.8 Flash Next IQ3_XXS";
+                  limit = {
+                    context = 131072;
+                    output = 4096;
+                  };
+                };
+              };
+            };
+          };
+        };
       };
     };
   };
