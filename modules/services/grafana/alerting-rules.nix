@@ -198,7 +198,7 @@ in {
           title = "Host silent (telemetry stopped)";
           expr = "count(group by (instance) (alloy_build_info))";
           op = "lt";
-          threshold = 6;
+          threshold = 7;
           noData = "Alerting";
           summary = "Fewer hosts are reporting telemetry than expected — a host or its Alloy agent is down.";
         })
