@@ -95,6 +95,15 @@
     codex-cli-nix = {
       url = "github:sadjow/codex-cli-nix";
     };
+    # SteamOS-style Gaming Mode (Valve's gamescope fork, SDDM autologin with
+    # relogin) for ixian only. Upstream only supports nixos-unstable, which
+    # is why ixian is built from nixpkgs-unstable; imported in ixian's machine
+    # config rather than sharedNixOSModules because the module installs an
+    # overlay. No binary cache, so `follows` costs nothing.
+    jovian = {
+      url = "github:Jovian-Experiments/Jovian-NixOS";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs = {
@@ -200,6 +209,23 @@
         modules = sharedNixOSModules ++ [path];
       };
 
+    # NixOS configuration builder for hosts tracking nixos-unstable. Same
+    # shared modules as mkNixOSConfig, evaluated against nixpkgs-unstable.
+    # Used only where an input requires unstable (Jovian on ixian).
+    mkNixOSUnstableConfig = path:
+      inputs.nixpkgs-unstable.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules =
+          sharedNixOSModules
+          ++ [
+            # nixos-unstable ships native modules that collide with the custom
+            # ones in nix/services; keep the custom modules authoritative, as
+            # with headplane above.
+            {disabledModules = ["services/matrix/matrix-authentication-service.nix"];}
+            path
+          ];
+      };
+
     # NixOS configuration builder for desktops. Extends mkNixOSConfig
     # with niri, noctalia, and zen-browser flake modules that are too
     # heavy for servers.
@@ -263,7 +289,8 @@
       trialunit = mkNixOSConfig ./machines/trialunit;
 
       # Desktops — use mkNixOSDesktopConfig for niri + noctalia modules
-      ixian = mkNixOSConfig ./machines/ixian;
+      # Steam console on nixos-unstable, required by Jovian.
+      ixian = mkNixOSUnstableConfig ./machines/ixian;
       usul = mkNixOSDesktopConfig ./machines/usul;
       sonic = mkNixOSDesktopConfig ./machines/sonic;
 

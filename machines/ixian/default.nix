@@ -1,8 +1,11 @@
-# ixian — AMD desktop hardware for headless-first AI inference and gaming.
-# The desktop-capable flake builder is used now so this host can be promoted
-# to a graphical desktop later without changing its machine wiring.
-{
+# ixian — AMD desktop hardware for AI inference and a Steam Gaming Mode
+# console, built from nixos-unstable for Jovian.
+{inputs, ...}: {
   imports = [
+    # Jovian's module installs a package overlay, so it is imported here
+    # rather than in sharedNixOSModules to keep it off every other host.
+    inputs.jovian.nixosModules.default
+
     ./disko
     ./hardware-configuration.nix
     ./_config.nix
