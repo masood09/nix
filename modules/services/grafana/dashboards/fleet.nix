@@ -76,6 +76,7 @@
     "caretaker"
     "commrelay"
     "heartbeat"
+    "ixian"
     "meshcontrol"
     "watchfulsystem"
   ];
