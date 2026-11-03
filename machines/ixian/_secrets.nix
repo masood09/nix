@@ -3,6 +3,10 @@
   config = {
     sops = {
       secrets = {
+        "alloy/.env" = {
+          restartUnits = ["alloy.service"];
+        };
+
         # Shared Cloudflare DNS token for the wildcard ACME certificate Caddy
         # serves ai.mantannest.com with.
         "cloudflare/api-key" = {

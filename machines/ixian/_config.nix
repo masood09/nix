@@ -56,10 +56,10 @@
       };
 
       services = {
-        # Monitoring will be added after the base system and secret lifecycle
-        # are established for this new machine.
+        # Ships journald logs to Loki and node metrics to Prometheus on
+        # heartbeat via the shared alloy/.env endpoints.
         alloy = {
-          enable = false;
+          enable = true;
         };
 
         # Qwen3.8-Flash-Next IQ3_XXS, 128K context, CPU picture reader, MTP
