@@ -128,7 +128,9 @@ in {
           # systemd stage-1 initrd is the default as of nixos-26.05. Non-ZFS
           # desktops additionally rely on it for LUKS unlock via
           # systemd-cryptsetup (Plymouth's password agent integration).
-          enable = lib.mkIf isDesktopSystemdBoot true;
+          # nixos-unstable (26.11) removed the scripted initrd and turned this
+          # option into a removal error, so only set it on older releases.
+          enable = lib.mkIf (isDesktopSystemdBoot && lib.versionOlder lib.trivial.release "26.11") true;
 
           # Roll back root dataset to a blank snapshot on every boot
           # (impermanence). Under systemd stage-1 initrd the scripted

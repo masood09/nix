@@ -117,17 +117,60 @@
       };
     };
 
-    programs = {
+    # Boot straight into Steam Gaming Mode as voyageonwheels. Jovian's
+    # autoStart uses SDDM autologin with relogin, so if Steam or gamescope
+    # exits or crashes the session starts again instead of leaving a blank
+    # screen.
+    jovian = {
       steam = {
-        gamescopeSession = {
-          enable = true;
-          args = [
-            "-e"
-          ];
-          steamArgs = [
-            "-tenfoot"
-            "-pipewire-dmabuf"
-          ];
+        enable = true;
+        autoStart = true;
+        user = "voyageonwheels";
+        # No desktop session on this console: "Switch to Desktop" relaunches
+        # Gaming Mode.
+        desktopSession = "gamescope-wayland";
+      };
+
+      hardware = {
+        has = {
+          amd = {
+            gpu = true;
+          };
+        };
+      };
+
+      steamos = {
+        # SteamOS defaults are tuned for the Steam Deck. Its kernel
+        # parameters (amd_iommu=off, ttm.pages_min, …) are Deck-specific, and
+        # earlyoom would pick off Strata's ~47 GB resident model or a game
+        # under memory pressure. Bluetooth, sysctl, zram, CEC, and automount
+        # defaults stay on.
+        enableDefaultCmdlineConfig = false;
+        enableEarlyOOM = false;
+      };
+    };
+
+    # ixian deliberately runs the release-26.05 Stylix and Home Manager
+    # branches on nixos-unstable (Jovian requires unstable), so their release
+    # checks would warn on every build.
+    home-manager = {
+      sharedModules = [
+        {
+          home = {
+            enableNixpkgsReleaseCheck = false;
+          };
+        }
+      ];
+    };
+
+    # Stylix release-26.05's kmscon target writes options nixos-unstable has
+    # removed (services.kmscon.extraConfig/fonts). ixian runs no kmscon.
+    stylix = {
+      enableReleaseChecks = false;
+
+      targets = {
+        kmscon = {
+          enable = false;
         };
       };
     };
@@ -141,21 +184,6 @@
         };
         pulse = {
           enable = true;
-        };
-      };
-
-      greetd = {
-        enable = true;
-        settings = {
-          initial_session = {
-            command = "steam-gamescope";
-            user = "voyageonwheels";
-          };
-
-          default_session = {
-            command = "steam-gamescope";
-            user = "voyageonwheels";
-          };
         };
       };
     };
