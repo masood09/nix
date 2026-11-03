@@ -22,6 +22,18 @@
 }: let
   homelabCfg = config.homelab;
   cfg = homelabCfg.services.strata;
+  caddyEnabled = homelabCfg.services.caddy.enable;
+  upstream = "${cfg.listenAddress}:${toString cfg.listenPort}";
+
+  # OpenAI-style error body Caddy returns while Strata is stopped, restarting,
+  # or still loading the model, instead of a bare 502.
+  unavailableBody = builtins.toJSON {
+    error = {
+      type = "strata_unavailable";
+      code = "backend_unavailable";
+      message = "Local inference on ixian is temporarily unavailable (stopped, restarting, or loading the model). Retry shortly.";
+    };
+  };
 
   persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
@@ -181,6 +193,40 @@ in {
         ];
       })
     ];
+
+    services = {
+      caddy = lib.mkIf caddyEnabled {
+        virtualHosts = {
+          "${cfg.webDomain}" = {
+            useACMEHost = config.networking.domain;
+            # Strata rejects any Host other than its own (DNS-rebinding
+            # protection) and browser Origins it doesn't know. Present the
+            # upstream address for both; the Origin is rewritten only for this
+            # site's own pages, so other web pages still can't drive the API
+            # through a visitor's browser.
+            extraConfig = ''
+              @selfOrigin header Origin https://${cfg.webDomain}
+              request_header @selfOrigin Origin http://${upstream}
+
+              reverse_proxy http://${upstream} {
+                header_up Host {upstream_hostport}
+                # Stream tokens as they are generated.
+                flush_interval -1
+              }
+
+              # Only errors Caddy itself raises (upstream refused or timed
+              # out) land here; Strata's own error responses pass through.
+              # Already-open streams are cut when Strata stops.
+              handle_errors 502 503 504 {
+                header Content-Type application/json
+                header Retry-After 30
+                respond `${unavailableBody}` 503
+              }
+            '';
+          };
+        };
+      };
+    };
 
     systemd = lib.mkMerge [
       permSvc.systemd
