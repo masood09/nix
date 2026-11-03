@@ -49,9 +49,18 @@ in {
         authKeyFile = config.sops.secrets."tailscale/preauth-key".path;
         disableUpstreamLogging = true;
 
-        extraUpFlags = [
-          "--login-server=${cfg.loginServer}"
-          "--accept-routes"
+        extraUpFlags =
+          [
+            "--login-server=${cfg.loginServer}"
+          ]
+          ++ lib.optionals cfg.acceptRoutes [
+            "--accept-routes"
+          ];
+
+        # Up flags only apply at first login; `tailscale set` pins route
+        # acceptance on every start so already-joined nodes match the config.
+        extraSetFlags = [
+          "--accept-routes=${lib.boolToString cfg.acceptRoutes}"
         ];
       };
     };
