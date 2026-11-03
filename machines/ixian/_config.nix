@@ -69,9 +69,9 @@
           enable = true;
         };
 
-        # ai.mantannest.com has no public or Headscale DNS record; it
-        # resolves only through UniFi local DNS, so clients reach it over
-        # the LAN.
+        # ai.mantannest.com has no public DNS record; Headscale DNS
+        # resolves it to ixian's tailnet IP (100.64.0.2) and UniFi local
+        # DNS resolves it on the LAN.
         caddy = {
           enable = true;
         };

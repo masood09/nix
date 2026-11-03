@@ -696,6 +696,33 @@ Defined in =nix/pkgs/= and auto-discovered.
 | stylix                 | Custom scheme (sonic-dark.yaml)    |
 | zen                    | Web browser (layout in =machines/sonic/_zen.nix=) |
 
+** HTPC
+*** ixian
+
+- *Purpose:* Gamescope Steam Gaming and AI Inference PC
+- *Storage:* LUKS-encrypted ext4 + LVM root (tmpfs impermanence, non-ZFS); independent LUKS ext4 model disk at =/srv/models= unlocked from a root-resident key
+- *GPU:* AMD
+- *Console:* greetd auto-login into the =steam-gamescope= session; no general-purpose desktop shell
+- *Primary User:* voyageonwheels (uid 1001) — gaming account, no sudo
+- *Admin User:* masoodahmed — wheel (passwordless sudo), SSH-only admin
+- *Tailnet:* Headscale node =100.64.0.2=; Headscale DNS resolves =ai.mantannest.com= to it
+
+**** Services
+
+| Service    | Notes                                                    |
+|------------+----------------------------------------------------------|
+| Caddy      | Serves =ai.mantannest.com= (LAN via UniFi DNS, tailnet via Headscale DNS) |
+| Strata     | Local LLM inference on localhost:8916 behind Caddy       |
+| Tailscale  | Headscale node =100.64.0.2=                              |
+
+**** Programs
+
+| Program      | Notes                                        |
+|--------------+----------------------------------------------|
+| steam        | Gamescope session (-e), Steam -tenfoot       |
+| amdgpu_top   | AMD GPU/VRAM telemetry                       |
+| nvtop        | AMD variant (GPU/process monitor)            |
+
 ** macOS Machines
 *** work-okta
 
