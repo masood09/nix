@@ -147,6 +147,70 @@
     cd ${cfg.stateDir}
     exec ${strataFhs}/bin/strata-fhs ${strataBin} "$@"
   '';
+
+  # Polls the TV over network ADB. The TV leaves the network entirely in
+  # standby, so only a reachable, `mWakefulness=Awake` TV counts as on;
+  # unreachable means off (or unplugged). adb keeps a dead transport as
+  # "already connected" after the TV drops off, so every check reconnects.
+  tvGuardStateDir = "/var/lib/strata-tv-guard";
+  tvGuard = pkgs.writeShellApplication {
+    name = "strata-tv-guard";
+    runtimeInputs = [
+      pkgs.android-tools
+      pkgs.coreutils
+      pkgs.gnugrep
+      pkgs.systemd
+    ];
+    text = ''
+      tv=${lib.escapeShellArg cfg.tvGuard.address}
+      # Set only while Strata is down because of the TV, so a manual stop is
+      # never undone.
+      marker=/run/strata-tv-guard/stopped-by-guard
+      off_since=""
+      warned_unauthorized=""
+
+      tv_on() {
+        adb disconnect "$tv" >/dev/null 2>&1 || true
+        timeout 3 adb connect "$tv" >/dev/null 2>&1 || return 1
+        if adb devices | grep -q "^''${tv}[[:space:]]*unauthorized"; then
+          if [ -z "$warned_unauthorized" ]; then
+            echo "TV has not authorized this host's ADB key; accept the prompt on the TV" >&2
+            warned_unauthorized=1
+          fi
+          return 1
+        fi
+        warned_unauthorized=""
+        timeout 5 adb -s "$tv" shell dumpsys power 2>/dev/null | grep -q "mWakefulness=Awake"
+      }
+
+      strata_running() {
+        case "$(systemctl show -p ActiveState --value strata.service)" in
+          active | activating | reloading) return 0 ;;
+          *) return 1 ;;
+        esac
+      }
+
+      while true; do
+        if tv_on; then
+          off_since=""
+          if strata_running; then
+            echo "TV is on: stopping Strata"
+            touch "$marker"
+            systemctl stop strata.service || echo "stopping Strata failed" >&2
+          fi
+        else
+          now=$(date +%s)
+          off_since=''${off_since:-$now}
+          if [ -e "$marker" ] && [ $((now - off_since)) -ge ${toString cfg.tvGuard.offDelay} ]; then
+            echo "TV off for ${toString cfg.tvGuard.offDelay}s: starting Strata"
+            rm -f "$marker"
+            systemctl start --no-block strata.service
+          fi
+        fi
+        sleep ${toString cfg.tvGuard.interval}
+      done
+    '';
+  };
 in {
   imports = [
     ./options.nix
@@ -183,14 +247,22 @@ in {
       }
       (persistenceHelpers.mkPersistenceDirs {
         inherit homelabCfg;
-        directories = [
-          {
-            directory = cfg.stateDir;
-            user = "strata";
-            group = "strata";
-            mode = "0750";
-          }
-        ];
+        directories =
+          [
+            {
+              directory = cfg.stateDir;
+              user = "strata";
+              group = "strata";
+              mode = "0750";
+            }
+          ]
+          # The guard's ADB key; losing it means re-authorizing on the TV.
+          ++ lib.optionals cfg.tvGuard.enable [
+            {
+              directory = tvGuardStateDir;
+              mode = "0700";
+            }
+          ];
       })
     ];
 
@@ -360,6 +432,39 @@ in {
               PrivateTmp = true;
               ProtectHome = "tmpfs";
               ProtectSystem = "full";
+            };
+          };
+
+          strata-tv-guard = lib.mkIf cfg.tvGuard.enable {
+            description = "Stop Strata while the TV is on";
+            wantedBy = [
+              "multi-user.target"
+            ];
+            after = [
+              "network-online.target"
+            ];
+            wants = [
+              "network-online.target"
+            ];
+            # adb keeps its key in $HOME/.android.
+            environment = {
+              HOME = tvGuardStateDir;
+            };
+            serviceConfig = {
+              # Root only to stop and start strata.service.
+              ExecStart = lib.getExe tvGuard;
+              StateDirectory = "strata-tv-guard";
+              StateDirectoryMode = "0700";
+              RuntimeDirectory = "strata-tv-guard";
+              Restart = "always";
+              RestartSec = 10;
+              # Stopping Strata drains for up to TimeoutStopSec (90 s).
+              TimeoutStopSec = 120;
+
+              NoNewPrivileges = true;
+              PrivateTmp = true;
+              ProtectHome = true;
+              ProtectSystem = "strict";
             };
           };
         };

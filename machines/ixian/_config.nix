@@ -67,6 +67,13 @@
         # by Caddy as ai.mantannest.com.
         strata = {
           enable = true;
+
+          # Free the GPU for gaming: stop Strata while the living-room TCL
+          # Google TV is on, start it again once the TV has been off for 30 s.
+          tvGuard = {
+            enable = true;
+            address = "tcltv.iot.homelab.mantannest.com:5555";
+          };
         };
 
         # ai.mantannest.com has no public DNS record; Headscale DNS
