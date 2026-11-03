@@ -86,9 +86,14 @@
           tvGuard = {
             enable = lib.mkEnableOption ''
               stopping Strata while an Android TV is on, freeing VRAM and RAM
-              for games. The TV is polled over network ADB; Strata is started
-              again once the TV has been off (unreachable) for offDelay
-              seconds, but only if the guard stopped it
+              for games. Enabling it also makes the guard the only thing that
+              starts Strata: strata.service is left out of multi-user.target, so
+              neither boot nor a switch loads the model while the TV has the
+              GPU. The TV is polled over network ADB, and Strata starts once the
+              TV has been off (unreachable) for offDelay seconds, including the
+              first time after boot. A manual `systemctl stop strata` is
+              respected until the next TV on -> off cycle, or until a manual
+              `systemctl start strata`.
             '';
 
             address = lib.mkOption {
