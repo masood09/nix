@@ -238,6 +238,24 @@
     };
 
     systemd = {
+      # Steam's Deck-mode power policy suspends the PC after an hour without
+      # controller input on mains power ("Switching to power state
+      # k_ESystemPowerState_Sleep ... active: 3600 < 3600"), which takes
+      # Strata, Caddy, SSH, and monitoring down until someone presses the
+      # power button (no Wake-on-LAN). ixian is also a server, so refuse every
+      # sleep state: Steam's suspend request fails and the session stays up.
+      # Steam's own "suspend when inactive" setting is also set to Never.
+      sleep = {
+        settings = {
+          Sleep = {
+            AllowSuspend = "no";
+            AllowHibernation = "no";
+            AllowHybridSleep = "no";
+            AllowSuspendThenHibernate = "no";
+          };
+        };
+      };
+
       services = {
         cryptmodels-unlock = {
           description = "Unlock ixian model storage from the root-resident key";
