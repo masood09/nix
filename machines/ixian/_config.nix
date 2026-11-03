@@ -69,7 +69,10 @@
           enable = true;
 
           # Free the GPU for gaming: stop Strata while the living-room TCL
-          # Google TV is on, start it again once the TV has been off for 30 s.
+          # Google TV is on, start it again once the TV has been off for 30 s,
+          # and let the guard be the only thing that starts Strata (it drops the
+          # unit from multi-user.target, so boot and switch cannot load the
+          # model over a running game).
           tvGuard = {
             enable = true;
             address = "tcltv.iot.homelab.mantannest.com:5555";
