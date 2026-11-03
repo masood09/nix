@@ -58,9 +58,16 @@ in {
 
         environmentFile = config.sops.secrets."alloy/.env".path;
 
-        extraFlags = [
-          "--disable-reporting"
-        ];
+        extraFlags =
+          [
+            "--disable-reporting"
+          ]
+          # Alloy 1.21 moved the loki.write WAL (config.alloy) behind the
+          # experimental stability level; without the flag the initial config
+          # load fails and Alloy restart-loops. Older releases reject nothing.
+          ++ lib.optionals (lib.versionAtLeast config.services.alloy.package.version "1.21") [
+            "--stability.level=experimental"
+          ];
       };
     };
 
