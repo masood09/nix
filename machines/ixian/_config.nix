@@ -6,6 +6,12 @@
 }: {
   config = {
     environment = {
+      systemPackages = with pkgs; [
+        # AMD GPU/VRAM/process telemetry for Strata and gaming sessions.
+        nvtopPackages.amd
+        amdgpu_top
+      ];
+
       persistence = {
         "/nix/persist" = {
           directories = [
