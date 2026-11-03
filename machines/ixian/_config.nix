@@ -76,8 +76,13 @@
           enable = true;
         };
 
+        # ixian sits inside 10.0.30.0/24, which jumpbox-home advertises as a
+        # subnet route. Accepting it would send replies to LAN clients into
+        # the tunnel, cutting ixian off from its own LAN. Matches the module
+        # default; kept explicit so it isn't flipped without this context.
         tailscale = {
           enable = true;
+          acceptRoutes = false;
         };
       };
 
