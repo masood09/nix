@@ -702,8 +702,9 @@ Defined in =nix/pkgs/= and auto-discovered.
 - *Purpose:* Gamescope Steam Gaming and AI Inference PC
 - *Storage:* LUKS-encrypted ext4 + LVM root (tmpfs impermanence, non-ZFS); independent LUKS ext4 model disk at =/srv/models= unlocked from a root-resident key
 - *GPU:* AMD
-- *Console:* greetd auto-login into the =steam-gamescope= session; no general-purpose desktop shell
-- *Primary User:* voyageonwheels (uid 1001) — gaming account, no sudo
+- *Console:* Jovian SDDM auto-login into the =gamescope-wayland= session (Steam
+  Gaming Mode); no general-purpose desktop shell
+- *Console User:* voyageonwheels (uid 1002) — gaming account, no sudo, no SSH
 - *Admin User:* masoodahmed — wheel (passwordless sudo), SSH-only admin
 - *Tailnet:* Headscale node =100.64.0.2=; Headscale DNS resolves =ai.mantannest.com= to it
 

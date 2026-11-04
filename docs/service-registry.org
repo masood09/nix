@@ -18,10 +18,13 @@ This file should be consulted *before* adding any new service, container, or sys
 * Users & Groups Registry
 
 ** Human Users
-| Name        |  UID | Notes                                         |
-|-------------+------+-----------------------------------------------|
-| masoodahmed | 1000 | Admin on every machine                        |
-| zainahmed   | 1001 | Desktop-only user on =sonic= (no sudo, no SSH) |
+| Name           |  UID | Notes                                                                          |
+|----------------+------+--------------------------------------------------------------------------------|
+| masoodahmed    | 1000 | Admin on every machine                                                         |
+| zainahmed      | 1001 | Desktop-only user on =sonic= (no sudo, no SSH)                                 |
+| voyageonwheels | 1002 | Console account on =ixian= (autologin into Steam Gaming Mode; no sudo, no SSH) |
+
+Next available human UID: *1003*
 
 ** Service Users
 | Service                       |  UID |  GID | Description                                     |
@@ -150,7 +153,8 @@ Recyclarr has no listening port (nixflix runs it as a scheduled sync, not a serv
 * Conventions
 
 ** UID/GID Allocation
-- Human users: 1000+
+- Human users: 1000+, and every human UID is unique across the whole fleet (same
+  rule as service UIDs), so a UID never means a different person on another machine
 - Service users: 3000+ (UID always equals GID)
 
 ** Port Allocation
