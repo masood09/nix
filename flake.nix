@@ -81,19 +81,17 @@
     };
 
     # Applications
-    # Claude Code CLI (hourly auto-updates, binary cache). No nixpkgs
-    # `follows` — the package must build against the flake's own nixpkgs to
-    # match the prebuilt artifacts on claude-code.cachix.org. Following our
-    # nixpkgs re-hashes the derivation → cache miss → recompile on every
-    # `just up`. Consumed via `inputs.claude-code.packages.<system>.default`
-    # (NOT the overlay, which would rebuild against our nixpkgs regardless).
-    claude-code = {
-      url = "github:sadjow/claude-code-nix";
-    };
-    # Codex CLI (hourly auto-updates, binary cache). Same cache rationale as
-    # claude-code above — no `follows`, consumed via the input's package attr.
-    codex-cli-nix = {
-      url = "github:sadjow/codex-cli-nix";
+    # AI coding CLIs (Claude Code, Codex, opencode, Qwen Code). Updated daily
+    # and published to their own binary cache (https://cache.numtide.com), so no
+    # nixpkgs `follows`: upstream only builds and tests against its own pinned
+    # nixpkgs-unstable and warns that following a stable branch "will break
+    # eventually", and following ours would re-hash the derivations → cache miss
+    # → recompile on every `just up`. Consumed via
+    # `inputs.llm-agents.packages.<system>.<name>` (NOT the `overlays.shared-nixpkgs`
+    # overlay, which builds against our nixpkgs and only hits their cache when
+    # our revision matches theirs).
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
     };
     # SteamOS-style Gaming Mode (Valve's gamescope fork, SDDM autologin with
     # relogin) for ixian only. Upstream only supports nixos-unstable, which
@@ -146,10 +144,10 @@
 
     # Applied to all NixOS, Darwin, and package builds
     sharedOverlays = [
-      # claude-code / codex-cli overlays intentionally omitted: their overlays
-      # rebuild against our nixpkgs (cache miss). We consume the inputs'
-      # prebuilt packages directly in _claude-code.nix / _codex-cli.nix so the
-      # builds match their cachix caches.
+      # llm-agents overlays intentionally omitted: `overlays.shared-nixpkgs`
+      # rebuilds against our nixpkgs (cache miss). We consume the input's
+      # prebuilt packages directly in the AI program modules so the builds match
+      # the cache.numtide.com artifacts.
       inputs.headplane.overlays.default
       (import ./nix/overlays/default.nix)
       (import ./nix/overlays/darwin-setproctitle.nix)

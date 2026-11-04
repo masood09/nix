@@ -185,7 +185,7 @@ homelab
   +-- desktop         { enable, niri.enable, shell, gaming.enable, ... }
   +-- programs
   |     +-- emacs.enable
-  |     +-- ai_tools   { enable, tools, models }
+  |     +-- ai_tools   { enable, tools }
   |     +-- ...
   +-- services
   |     +-- backup     { enable, serviceUnits, extraPaths, backupRoot }

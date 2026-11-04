@@ -20,32 +20,13 @@ in {
         ai_tools = {
           enable = lib.mkEnableOption "Whether to enable AI tooling selection.";
 
-          models = lib.mkOption {
-            type = lib.types.listOf (
-              lib.types.enum [
-                "claude-code"
-                "codex"
-                "openai"
-                "copilot"
-                "openrouter"
-                "zen"
-              ]
-            );
-            default = [];
-            description = ''
-              Model providers to expose to AI-related integrations such as
-              Noctalia's model-usage widget. Values are validated against a
-              fixed enum so machine configs cannot drift from supported
-              provider identifiers.
-            '';
-          };
-
           tools = lib.mkOption {
             type = lib.types.listOf (
               lib.types.enum [
                 "claude-code"
                 "codex"
                 "opencode"
+                "qwen-code"
               ]
             );
             default = [];
@@ -298,6 +279,10 @@ in {
           enable = lib.mkEnableOption "Whether to enable Prism Launcher.";
         };
 
+        qwen-code = {
+          enable = lib.mkEnableOption "Whether to enable Qwen Code.";
+        };
+
         ripgrep = {
           enable = lib.mkOption {
             default = true;
@@ -375,6 +360,10 @@ in {
 
         opencode = {
           enable = lib.mkDefault (hasAiTool "opencode");
+        };
+
+        qwen-code = {
+          enable = lib.mkDefault (hasAiTool "qwen-code");
         };
       };
     };

@@ -1,4 +1,5 @@
-# opencode — AI coding assistant managed through Home Manager's native module.
+# opencode — AI coding assistant managed through Home Manager's native module
+# (package from numtide/llm-agents.nix)
 {
   homelabCfg,
   inputs,
@@ -11,19 +12,15 @@
       opencode = {
         enable = true;
 
-        # Track opencode from the flake's unstable nixpkgs input rather than the
-        # system package set so desktop laptops pick up newer releases sooner.
-        package = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.opencode.overrideAttrs (oldAttrs: {
-          # OpenCode 2.1.4 currently ships a truncated Fish completion file.
-          # A syntax error while Fish sources vendor completions is noisy at
-          # every shell start, while OpenCode itself remains usable without
-          # that optional completion.
-          postInstall =
-            (oldAttrs.postInstall or "")
-            + ''
-              rm -f $out/share/fish/vendor_completions.d/opencode.fish
-            '';
-        });
+        # llm-agents builds this daily against its own pinned nixpkgs and pushes
+        # the result to cache.numtide.com, so it substitutes instead of
+        # recompiling against our nixpkgs (its overlay would rebuild). The
+        # package is the upstream release binary, wrapped so fzf and ripgrep are
+        # on PATH, and installs only bin/opencode — there is no broken Fish
+        # completion to strip as there was with the nixpkgs build, and
+        # `overrideAttrs` here would make a new derivation instead of
+        # substituting.
+        package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode;
 
         settings = {
           "$schema" = "https://opencode.ai/config.json";

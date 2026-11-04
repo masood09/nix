@@ -103,16 +103,14 @@ in {
           "https://cache.nixos.org/?priority=10"
           "https://nix-community.cachix.org"
           "https://niri-epireyn.cachix.org" # epireyn/niri-flake
-          "https://claude-code.cachix.org" # sadjow/claude-code-nix (hourly updates)
-          "https://codex-cli.cachix.org" # sadjow/codex-cli-nix (hourly updates)
+          "https://cache.numtide.com" # numtide/llm-agents.nix (daily updates)
           "https://noctalia.cachix.org" # noctalia-dev/noctalia
         ];
 
         trusted-public-keys = [
           "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
           "niri-epireyn.cachix.org-1:tlVyFN7CtsDT+ZcLPS+ekFWeT1X6X4OqvWqbBMyIzFA="
-          "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
-          "codex-cli.cachix.org-1:1Br3H1hHoRYG22n//cGKJOk3cQXgYobUel6O8DgSing="
+          "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
           "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
         ];
       };
