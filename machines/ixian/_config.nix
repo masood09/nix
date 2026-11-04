@@ -67,9 +67,11 @@ in {
           enable = true;
         };
 
-        # Qwen3.8-Flash-Next IQ3_XXS, 128K context, CPU picture reader, MTP
-        # draft layer (module defaults), on 127.0.0.1:8916, served to the LAN
-        # by Caddy as ai.mantannest.com.
+        # Qwen3.8-Flash-Next IQ3_XXS, 128K context, CPU picture reader, on
+        # 127.0.0.1:8916 (module defaults). The module passes --mtp on, but
+        # drafting is left to upstream's auto choice, currently DFlash2;
+        # --drafting is deliberately not pinned. Caddy serves the API to the
+        # LAN and the tailnet as ai.mantannest.com, with no API key, by choice.
         strata = {
           enable = true;
 
