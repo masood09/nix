@@ -32,6 +32,7 @@
     ./_gpg.nix
     ./_neovim.nix
     ./_opencode.nix
+    ./_qwen-code.nix
 
     # Cloud & infrastructure
     ./_oci-cli.nix

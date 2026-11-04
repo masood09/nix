@@ -23,7 +23,7 @@ System programs enabled conditionally via =homelab.programs.*=:
 
 ** Home-Manager Programs (all machines via home-manager)
 
-Each program module guards itself with its own =homelab.programs.<name>.enable= flag. Machines opt in via =_config.nix=. AI-related CLIs now also share an aggregate selector at =homelab.programs.ai_tools=, which fans out to the underlying per-tool flags and declares a provider list (=models=). The provider list previously drove Noctalia's =model-usage= bar widget; that widget is not currently wired under Noctalia v5 (the plugin registry was removed), so the =models= list has no consumer for now — pending the v5 declarative-plugin story.
+Each program module guards itself with its own =homelab.programs.<name>.enable= flag. Machines opt in via =_config.nix=. AI coding CLIs also share an aggregate selector at =homelab.programs.ai_tools=, whose enum-backed =tools= list fans out to the underlying per-tool enable flags.
 
 *** Shell & Terminal
 
@@ -54,9 +54,10 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 
 | Module           | Package(s)                                                         | Purpose                            |
 |------------------+--------------------------------------------------------------------+------------------------------------|
-| _claude-code.nix | claude-code                                                        | Anthropic CLI via HM module        |
-| _codex-cli.nix   | codex, bubblewrap                                                  | OpenAI CLI via HM module           |
-| _opencode.nix    | opencode (from =nixpkgs-unstable=)                                   | opencode via HM module             |
+| _claude-code.nix | claude-code (=llm-agents=)                                         | Anthropic CLI via HM module        |
+| _codex-cli.nix   | codex (=llm-agents=), bubblewrap                                   | OpenAI CLI via HM module           |
+| _opencode.nix    | opencode (=llm-agents=)                                            | opencode via HM module             |
+| _qwen-code.nix   | qwen-code (=llm-agents=)                                           | Qwen CLI via =home.packages=       |
 | _emacs.nix       | emacs-pgtk, cmake, gcc, gnumake, libtool, gopls, nil, nodejs,      | Editor with LSP, Go tooling,       |
 |                  | gomodifytags, gore, gotests, html-tidy, jsbeautifier,              | formatters, tree-sitter grammars   |
 |                  | nixfmt-rfc-style, shellcheck, stylelint, multimarkdown, terraform, |                                    |
@@ -65,7 +66,7 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 | _gpg.nix         | gpg, gpg-agent (SSH agent mode)                                    | GPG encryption + smartcard/YubiKey |
 | _neovim.nix      | neovim                                                             | Editor (vi/vim aliases)            |
 
-The =homelab.programs.ai_tools= selector uses enum-backed =tools= and =models= lists. =tools= controls CLI installation (currently =claude-code=, =codex=, =opencode=) while =models= (currently =claude-code=, =codex=, =openai=, =copilot=, =openrouter=, =zen=) previously controlled provider visibility in Noctalia's =model-usage= plugin. That widget is not currently wired under Noctalia v5, so =models= has no active consumer for now.
+The =homelab.programs.ai_tools= selector uses an enum-backed =tools= list that controls CLI installation (currently =claude-code=, =codex=, =opencode=, =qwen-code=) and fans out to the per-tool enable flags. All four packages come from the =llm-agents= flake input (github:numtide/llm-agents.nix), which updates daily and publishes to its own binary cache (~https://cache.numtide.com~).
 
 *** Cloud & Infrastructure
 
@@ -642,7 +643,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 | Program                | Notes                                                                    |
 |------------------------+--------------------------------------------------------------------------|
-| ai_tools               | enabled; models: =claude-code=, =codex=; tools: =claude-code=, =codex=, =opencode= |
+| ai_tools               | enabled; tools: =claude-code=, =codex=, =opencode=, =qwen-code=          |
 | bitwarden-desktop      | Password manager                                                         |
 | element-desktop        | Matrix chat client                                                       |
 | emacs                  | Editor with LSP/Go tools                                                 |
@@ -654,7 +655,8 @@ Defined in =nix/pkgs/= and auto-discovered.
 | neovim                 | Editor                                                                   |
 | oci-cli                | Oracle Cloud CLI                                                         |
 | codex-cli              | OpenAI CLI                                                               |
-| opencode               | AI coding assistant, package from unstable                               |
+| opencode               | AI coding assistant                                                      |
+| qwen-code              | AI coding CLI                                                            |
 | opentofu               | Infrastructure-as-code                                                   |
 | prism-launcher         | Minecraft launcher (JRE 17 + JRE 21 + JRE 25 from unstable)            |
 | stremio                | Media player (Real-Debrid via Torrentio addon) — installed via flatpak   |

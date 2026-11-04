@@ -1,4 +1,4 @@
-# Codex CLI — OpenAI's CLI coding assistant (from sadjow/codex-cli-nix)
+# Codex CLI — OpenAI's CLI coding assistant (from numtide/llm-agents.nix)
 {
   config,
   homelabCfg,
@@ -23,10 +23,10 @@ in {
     programs = {
       codex = {
         enable = true;
-        # Input's prebuilt package (built against codex-cli-nix's own nixpkgs)
-        # so it resolves from codex-cli.cachix.org instead of recompiling. The
-        # overlay path (pkgs.codex) would rebuild against our nixpkgs.
-        package = inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default;
+        # llm-agents builds this daily against its own pinned nixpkgs and pushes
+        # the result to cache.numtide.com, so it substitutes instead of
+        # recompiling against our nixpkgs (its overlay would rebuild).
+        package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.codex;
 
         # Keep Codex on the upstream HM module while layering in local defaults.
         settings = {

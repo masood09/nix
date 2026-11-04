@@ -91,18 +91,15 @@
       };
 
       programs = {
-        # Central AI registry: install AI tools locally and expose Claude Code
-        # and Codex usage in Noctalia's model-usage widget.
+        # Central AI registry: the listed tools are installed locally, each via
+        # its own homelab.programs.<tool> flag.
         ai_tools = {
           enable = true;
-          models = [
-            "claude-code"
-            "codex"
-          ];
           tools = [
             "claude-code"
             "codex"
             "opencode"
+            "qwen-code"
           ];
         };
         # Bitwarden system-auth unlock: install the polkit action and grant it
