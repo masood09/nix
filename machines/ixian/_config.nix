@@ -67,13 +67,28 @@ in {
           enable = true;
         };
 
-        # Qwen3.8-Flash-Next IQ3_XXS, 128K context, CPU picture reader, on
-        # 127.0.0.1:8916 (module defaults). The module passes --mtp on, but
-        # drafting is left to upstream's auto choice, currently DFlash2;
-        # --drafting is deliberately not pinned. Caddy serves the API to the
-        # LAN and the tailnet as ai.mantannest.com, with no API key, by choice.
+        # Qwen3.8-Flash-Next IQ2_XS (served as qwen3.8-flash-next-iq2_xs), 256K
+        # context (the model's trained length, no rope scaling), one request at
+        # a time, CPU picture reader, on 127.0.0.1:8916. Conversation memory is
+        # upstream's default int8 (~13.7 KB/token, ~3.6 GB at 256K); only the
+        # newest 32K is kept on the card (--kv-resident), the rest in RAM.
+        #
+        # Model choice (2026-11-04): IQ3_XXS wants ~60 GB of RAM on this 62 GB
+        # box and swapped ~29 GB at 128K; IQ2_XS wants ~48 GB. Qwen3.6-35B-A3B
+        # was tried and dropped: its engine keeps conversation memory in fp32
+        # on the card (~45 KB/token, no --kv), so 256K ran the 16 GB RX 9070
+        # out of memory at load.
+        #
+        # parallel stays 1: DFlash2 drafting (upstream's auto choice, not
+        # pinned) only runs with one request at a time. Caddy serves the API
+        # to the LAN and the tailnet as ai.mantannest.com, with no API key, by
+        # choice.
         strata = {
           enable = true;
+          family = "qwen";
+          model = "iq2_xs";
+          context = "256k";
+          parallel = 1;
 
           # Free the GPU for gaming: stop Strata while the living-room TCL
           # Google TV is on, start it again once the TV has been off for 30 s,

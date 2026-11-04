@@ -44,6 +44,17 @@
             description = "Context size passed to `strata launch --context`.";
           };
 
+          parallel = lib.mkOption {
+            type = lib.types.ints.between 1 8;
+            default = 1;
+            description = ''
+              Requests answered at the same time, passed as `--parallel` to both
+              `strata launch` and `strata serve`. Each slot holds its own
+              conversation memory of `context` tokens, so N slots cost N times
+              the cache and leave less graphics memory for experts.
+            '';
+          };
+
           vision = lib.mkOption {
             type = lib.types.enum ["off" "on" "gpu" "cpu"];
             default = "cpu";
