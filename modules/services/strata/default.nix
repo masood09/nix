@@ -86,6 +86,8 @@
       cfg.model
       "--context"
       cfg.context
+      "--parallel"
+      (toString cfg.parallel)
       "--vision"
       cfg.vision
       "--mtp"
@@ -518,7 +520,7 @@ in {
                 "--config ${runConfig}"
                 "--host ${cfg.listenAddress}"
                 "--port ${toString cfg.listenPort}"
-                "--parallel 1"
+                "--parallel ${toString cfg.parallel}"
                 "--ready-file /run/strata/ready.json"
                 "--shutdown-timeout 30"
               ];
