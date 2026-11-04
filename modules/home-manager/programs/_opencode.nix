@@ -12,15 +12,34 @@
       opencode = {
         enable = true;
 
-        # llm-agents builds this daily against its own pinned nixpkgs and pushes
-        # the result to cache.numtide.com, so it substitutes instead of
-        # recompiling against our nixpkgs (its overlay would rebuild). The
-        # package is the upstream release binary, wrapped so fzf and ripgrep are
-        # on PATH, and installs only bin/opencode — there is no broken Fish
-        # completion to strip as there was with the nixpkgs build, and
-        # `overrideAttrs` here would make a new derivation instead of
-        # substituting.
-        package = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode;
+        # OpenCode 2, not llm-agents' v1 `opencode`: the existing config and
+        # data under ~/.config/opencode and ~/.local/share/opencode are in v2
+        # format, which v1 cannot read. llm-agents builds it daily against its
+        # own pinned nixpkgs and pushes it to cache.numtide.com, so it
+        # substitutes instead of recompiling. It installs the binary as
+        # bin/opencode2 so it can coexist with v1; the symlinkJoin only adds an
+        # `opencode` link to it, keeping the usual command name and giving the
+        # HM module's wrappers (which call bin/opencode) a target. The
+        # symlinkJoin builds locally in seconds; opencode2 itself still
+        # substitutes, since nothing overrides it.
+        package = let
+          opencode2 = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode2;
+        in
+          pkgs.symlinkJoin {
+            name = "opencode2-${opencode2.version}";
+            inherit (opencode2) version;
+            paths = [
+              opencode2
+            ];
+            postBuild = ''
+              ln -s $out/bin/opencode2 $out/bin/opencode
+            '';
+            meta =
+              opencode2.meta
+              // {
+                mainProgram = "opencode";
+              };
+          };
 
         settings = {
           "$schema" = "https://opencode.ai/config.json";
