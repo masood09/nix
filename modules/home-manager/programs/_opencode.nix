@@ -24,7 +24,7 @@
 
         settings = {
           "$schema" = "https://opencode.ai/config.json";
-          model = "ixian-strata/qwen3.8-flash-next-iq3_xxs";
+          model = "ixian-strata/qwen3.8-flash-next-iq2_xs";
 
           provider = {
             ixian-strata = {
@@ -35,10 +35,10 @@
                 baseURL = "https://ai.mantannest.com/v1";
               };
               models = {
-                "qwen3.8-flash-next-iq3_xxs" = {
-                  name = "Qwen3.8 Flash Next IQ3_XXS";
+                "qwen3.8-flash-next-iq2_xs" = {
+                  name = "Qwen3.8 Flash Next IQ2_XS";
                   limit = {
-                    context = 131072;
+                    context = 262144;
                     output = 4096;
                   };
                 };
