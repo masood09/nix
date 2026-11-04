@@ -75,9 +75,23 @@ in {
           OAUTH_ALLOW_DANGEROUS_EMAIL_ACCOUNT_LINKING = "true";
           DISABLE_PASSWORD_AUTH = "true";
 
+          # Local inference through an OpenAI-compatible endpoint. The
+          # placeholder OPENAI_API_KEY stays in the sops .env with the other
+          # *_KEY/*_SECRET values. systemd lets EnvironmentFile override these,
+          # so a value left in the .env still wins over the one set here.
+          OPENAI_BASE_URL = cfg.inference.baseUrl;
+          INFERENCE_TEXT_MODEL = cfg.inference.model;
+          INFERENCE_IMAGE_MODEL = cfg.inference.model;
+          # Generating up to INFERENCE_MAX_OUTPUT_TOKENS at ~50 tok/s, after the
+          # model's thinking, takes minutes, not Karakeep's default 30 s.
+          INFERENCE_JOB_TIMEOUT_SEC = toString cfg.inference.jobTimeoutSec;
           INFERENCE_CONTEXT_LENGTH = "16384";
           INFERENCE_MAX_OUTPUT_TOKENS = "16384";
           INFERENCE_ENABLE_AUTO_SUMMARIZATION = "true";
+
+          # Strata serves no /v1/embeddings, so embedding generation (and the
+          # semantic search that depends on it) stays off.
+          EMBEDDING_ENABLE_AUTO_INDEXING = "false";
         };
       };
 

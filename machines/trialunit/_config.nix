@@ -168,6 +168,13 @@
         karakeep = {
           enable = true;
 
+          # Strata on ixian is a single fleet endpoint under the production
+          # domain; the test-domain default (ai.test.mantannest.com) does not
+          # exist.
+          inference = {
+            baseUrl = "https://ai.mantannest.com/v1";
+          };
+
           zfs = {
             enable = true;
           };

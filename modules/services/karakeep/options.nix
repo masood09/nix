@@ -48,6 +48,32 @@ in {
             description = "Whether to open the listen port in the firewall.";
           };
 
+          inference = {
+            baseUrl = lib.mkOption {
+              type = lib.types.str;
+              default = "https://ai.${config.networking.domain}/v1";
+              description = "OpenAI-compatible endpoint for tagging and summaries (Strata on ixian by default).";
+            };
+
+            model = lib.mkOption {
+              type = lib.types.str;
+              default = "qwen3.8-flash-next-iq2_xs";
+              description = ''
+                Model id as reported by the endpoint's /v1/models, used for both
+                text and image inference (Strata's model reads pictures).
+              '';
+            };
+
+            jobTimeoutSec = lib.mkOption {
+              type = lib.types.ints.positive;
+              default = 600;
+              description = ''
+                Seconds an inference job may run. Karakeep's default of 30 is
+                too short for a local model that thinks before answering.
+              '';
+            };
+          };
+
           oauth = {
             providerHost = lib.mkOption {
               type = lib.types.str;
