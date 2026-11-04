@@ -4,7 +4,12 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  # The console account is defined once, in _users.nix, which also sets
+  # homelab.desktop.gaming.user. It is not homelab.primaryUser: the primary
+  # user here is the admin account used for SSH and sudo.
+  gamingUser = config.homelab.desktop.gaming.user;
+in {
   config = {
     environment = {
       systemPackages = with pkgs; [
@@ -17,8 +22,8 @@
         "/nix/persist" = {
           directories = [
             {
-              directory = "/home/voyageonwheels";
-              user = "voyageonwheels";
+              directory = "/home/${gamingUser}";
+              user = gamingUser;
               group = "users";
               mode = "0700";
             }
@@ -127,7 +132,8 @@
       };
     };
 
-    # Boot straight into Steam Gaming Mode as voyageonwheels. Jovian's
+    # Boot straight into Steam Gaming Mode as the console account (gamingUser,
+    # whose name is set by homelab.desktop.gaming.user in _users.nix). Jovian's
     # autoStart uses SDDM autologin with relogin, so if Steam or gamescope
     # exits or crashes the session starts again instead of leaving a blank
     # screen.
@@ -135,7 +141,7 @@
       steam = {
         enable = true;
         autoStart = true;
-        user = "voyageonwheels";
+        user = gamingUser;
         # No desktop session on this console: "Switch to Desktop" relaunches
         # Gaming Mode.
         desktopSession = "gamescope-wayland";
@@ -219,8 +225,9 @@
       };
 
       sudo = {
-        # ixian is a trusted single-admin console; voyageonwheels is not in
-        # wheel, so this applies only to masoodahmed.
+        # ixian is a trusted single-admin console; the gaming console account
+        # (gamingUser) is not in wheel, so passwordless sudo reaches every wheel
+        # member, which today means only the admin account (homelab.primaryUser).
         wheelNeedsPassword = lib.mkForce false;
       };
     };
