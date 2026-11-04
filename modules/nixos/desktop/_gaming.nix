@@ -21,6 +21,18 @@ in {
       desktop = {
         gaming = {
           enable = lib.mkEnableOption "Steam and gaming optimizations";
+
+          user = lib.mkOption {
+            type = lib.types.str;
+            # Defaults to the machine's own account. A dedicated console (the
+            # htpc role) sets this to a separate non-wheel account that
+            # autologins into the Steam session while the admin account stays
+            # out of it. defaultText keeps generated option docs from evaluating
+            # the reference against a stub config.
+            default = config.homelab.primaryUser.userName;
+            defaultText = lib.literalExpression "config.homelab.primaryUser.userName";
+            description = "Account that runs the Steam session on a console.";
+          };
         };
       };
     };
