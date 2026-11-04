@@ -13,7 +13,8 @@ The initial system uses:
 - tmpfs root with impermanence under =/nix/persist=
 - DHCP-based initrd SSH for remote disk unlock on port 2222
 - Normal SSH on port 22222
-- A minimal greetd session that launches Steam Big Picture through Gamescope
+- SDDM auto-login (provided by Jovian) into the =gamescope-wayland= session,
+  which launches Steam Big Picture through Gamescope
 - No general-purpose desktop, Flatpak, printing, or file-manager stack
 
 * 1. Boot the NixOS USB
@@ -128,5 +129,98 @@ systemctl get-default
 #+end_src
 
 The system should have a tmpfs root, persistent =/nix= and =/srv/models=,
-normal SSH, no failed units, and greetd launching the Steam Gamescope console
-as =voyageonwheels=.
+normal SSH, no failed units, and SDDM auto-login launching the Steam Gamescope
+console as =voyageonwheels=.
+
+* 7. Changing the console UID
+
+NixOS rewrites =/etc/passwd= at activation but never re-owns files that already
+exist on the persistent filesystem, so changing the console account's UID (1002
+today; 1001 until it was moved to avoid clashing with =zainahmed= on =sonic=)
+takes the steps below in a deliberate order: install the new generation without
+activating it, re-own the files under a stopped session, then reboot so the new
+UID and the re-owned files land together. The rebuild runs from the flake
+checkout; the rest run on =ixian= as =masoodahmed=.
+
+Activate with =boot=, not =switch=. A switch installs the new =/etc/passwd=
+while the console is still reachable, and nothing in this configuration keeps it
+down: =display-manager= is =Restart=always=, Jovian autologins with relogin, and
+activation can start an enabled unit that is not running. Steam can therefore
+come back under UID 1002 against a home that is still 0700 and owned by 1001,
+then crash-loop while the =chown= runs underneath it. =boot= points the
+bootloader at the new generation without activating it, so the new UID and the
+re-owned files arrive at the same reboot:
+
+#+begin_src bash
+just preflight
+
+nixos-rebuild boot --no-reexec --flake .#ixian --sudo \
+  --target-host masoodahmed@ixian --build-host masoodahmed@ixian
+#+end_src
+
+That is the =justfile='s remote deploy command with =boot= in place of =switch=;
+run =just preflight= separately because this command skips it.
+
+Stop the console session before touching any files:
+
+#+begin_src bash
+sudo systemctl stop display-manager
+#+end_src
+
+Then stop the console account's user manager, which is where Steam and gamescope
+actually run. =start-gamescope-session= starts them with =systemctl --user=, so
+they live under =user@1001.service= rather than in the SDDM session, and the
+user manager only tears them down once logind sees no sessions left. Skipping
+this leaves Steam able to write into its home while the =chown= walks it:
+
+#+begin_src bash
+sudo systemctl stop user@1001.service
+pgrep -u 1001 || echo "no 1001 processes"
+#+end_src
+
+The =pgrep= has to print =no 1001 processes= before continuing. If the user
+manager already exited, the stop is a harmless no-op. =1001= is deliberate here:
+ixian is still running the previous generation until the reboot below.
+
+Re-own the persisted home directory, which =_config.nix= bind-mounts from
+=/nix/persist/home/voyageonwheels=:
+
+#+begin_src bash
+sudo chown -R 1002:users /nix/persist/home/voyageonwheels
+#+end_src
+
+Then sweep persistent storage for anything else still owned by the old UID and
+re-own those paths the same way:
+
+#+begin_src bash
+sudo find /nix/persist -xdev -uid 1001
+sudo chown -R 1002:users <each path reported above>
+#+end_src
+
+=/var/lib= is not worth searching: it sits on the tmpfs root, and its persisted
+subdirectories are separate bind mounts that =-xdev= would not traverse, so
+anything found there is gone at reboot anyway.
+
+Reboot so the new UID and the re-owned files arrive together, then unlock the
+disks as in section 5:
+
+#+begin_src bash
+sudo systemctl reboot
+#+end_src
+
+After boot, confirm the account carries the new UID, the sweep comes back empty,
+and Steam starts with the library and saves intact:
+
+#+begin_src bash
+id voyageonwheels
+sudo find /nix/persist -xdev -uid 1001
+#+end_src
+
+=/run/user/1001= (the account's transient =systemd --user= runtime directory)
+needs no action: it is a tmpfs directory that is recreated under the new UID.
+
+If a =switch= is unavoidable, repeat both stop commands immediately after it
+returns and before the =chown=, using =user@<uid>.service= for whichever UID is
+live at that point. Activation may already have brought SDDM and the console
+user services back against a home they cannot read, which is why the =boot= route
+above is the cleaner one.

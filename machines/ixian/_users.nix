@@ -18,7 +18,12 @@ in {
       users = {
         ${gamingUser} = {
           isNormalUser = true;
-          uid = 1001;
+          # Human UIDs are unique fleet-wide, like service UIDs: 1001 belongs to
+          # zainahmed on sonic, so this console account takes the next free one
+          # (see docs/service-registry.org). NixOS rewrites /etc/passwd but never
+          # re-owns the already-persisted home directory, so a change here needs
+          # the chown runbook in machines/ixian/install.org.
+          uid = 1002;
           description = gamingUser;
 
           extraGroups = [
