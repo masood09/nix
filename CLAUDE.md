@@ -29,6 +29,26 @@ just sops-update                     # Update sops key files (interactive)
 
 After making config changes, stop at preflight (`just preflight`, or `nix fmt -- --check .` + `statix check .`). Do not run `just deploy`, `darwin-rebuild switch`, or `nixos-rebuild switch` — the user runs activation themselves so they can watch the output and decide when to apply. Only run a deploy command if the user explicitly asks.
 
+## Commit Messages
+
+Conventional Commits: `<type>(<scope>): <summary>` plus a detailed body.
+
+- Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `perf`, `test`.
+- Scope is the product feature: a service (`searxng`, `headscale`), a shared module or helper (`disko`, `stylix`), or a machine (`heartbeat`, `work-okta`) for host-local changes.
+- Imperative summary, 72 chars max, no trailing period. The body explains why the change exists and the constraint behind it, not what the diff shows.
+- One commit per logical change; keep secrets, DNS records, and docs-only policy changes separate from service wiring.
+
+Example:
+
+```
+feat(searxng): split engine lists by egress mode
+
+The shared Proton P2P exit gets most general web engines blocked or
+CAPTCHA'd, so VPN mode now uses its own tested 16-engine list while host
+egress keeps the 36-engine set. Flipping vpn.enable would otherwise leave
+about twenty engines silently failing.
+```
+
 ## Architecture
 
 ### Flake Structure
