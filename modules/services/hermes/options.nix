@@ -1,4 +1,5 @@
-# Options — Hermes Agent (Nous Research) headless gateway: model, sandbox, ZFS.
+# Options — Hermes Agent (Nous Research) headless gateway: model, web search,
+# sandbox, ZFS.
 {
   config,
   lib,
@@ -41,6 +42,33 @@ in {
               type = lib.types.str;
               default = "qwen3.8-flash-next-iq2_xs";
               description = "Model id as reported by the endpoint's /v1/models.";
+            };
+          };
+
+          web = {
+            searchBackend = lib.mkOption {
+              type = lib.types.enum [
+                ""
+                "searxng"
+                "firecrawl"
+                "brave-free"
+                "ddgs"
+                "tavily"
+                "perplexity"
+                "keenable"
+                "exa"
+                "parallel"
+                "xai"
+                "nous"
+              ];
+              default = "";
+              description = "web.search_backend in config.yaml. Empty leaves Hermes' own stored selection and autodetect in charge; the managed key is written either way, so clearing this clears the key too and does not leave a stale backend pointing at an unset URL. SearXNG is search-only, so web_extract resolves its own backend.";
+            };
+
+            searxngUrl = lib.mkOption {
+              type = lib.types.str;
+              default = "";
+              description = "SEARXNG_URL. Empty resolves through the SearXNG module's clientUrl — loopback in host mode, the WireGuard namespace address when SearXNG is confined to the VPN namespace — which the gateway can reach because web_search runs in the gateway process rather than in the sandbox.";
             };
           };
 
