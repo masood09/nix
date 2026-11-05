@@ -34,6 +34,7 @@
     ./podman
     ./postgresql
     ./prometheus
+    ./searxng
     ./smartctl-exporter
     ./ssh
     ./strata
