@@ -56,7 +56,7 @@ Each program module guards itself with its own =homelab.programs.<name>.enable= 
 |------------------+--------------------------------------------------------------------+------------------------------------|
 | _claude-code.nix | claude-code (=llm-agents=)                                         | Anthropic CLI via HM module        |
 | _codex-cli.nix   | codex (=llm-agents=), bubblewrap                                   | OpenAI CLI via HM module           |
-| _opencode.nix    | opencode (=llm-agents=)                                            | opencode via HM module             |
+| _opencode.nix    | OpenCode 2 (=llm-agents= =opencode2=, also linked as =opencode=)   | opencode via HM module             |
 | _qwen-code.nix   | qwen-code (=llm-agents=)                                           | Qwen CLI via =home.packages=       |
 | _emacs.nix       | emacs-pgtk, cmake, gcc, gnumake, libtool, gopls, nil, nodejs,      | Editor with LSP, Go tooling,       |
 |                  | gomodifytags, gore, gotests, html-tidy, jsbeautifier,              | formatters, tree-sitter grammars   |
@@ -389,6 +389,7 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 | Service                   | Module Dir                    | Purpose                                       |
 |---------------------------+-------------------------------+-----------------------------------------------|
 | BabyBuddy                 | babybuddy/                    | Baby tracking app (Podman + PostgreSQL)       |
+| Hermes Agent              | hermes/                       | AI agent gateway (Matrix/Discord/Telegram)    |
 | IT-Tools                  | ittools/                      | Web-based dev utilities (stateless container) |
 | Karakeep                  | karakeep/                     | Bookmark manager with AI (Authentik OIDC)     |
 | JobScraper                | jobscraper/                   | Job board aggregator (Podman container)       |
@@ -507,6 +508,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Caddy                     | Reverse proxy                                     |
 | Dell iDRAC Fan Controller | IPMI fan speed management                         |
 | Grafana                   | ZFS-backed dashboards                             |
+| Hermes Agent              | ZFS, Strata model, rootless-podman sandbox        |
 | Immich                    | ZFS datasets for photos/video                     |
 | IT-Tools                  | Stateless developer utilities                     |
 | JobScraper                | Job aggregator container                          |

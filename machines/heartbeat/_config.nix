@@ -63,6 +63,7 @@
 
           serviceUnits = [
             "home-assistant.service"
+            "hermes-gateway.service"
             "immich-machine-learning.service"
             "immich-server.service"
             "karakeep-browser.service"
@@ -251,6 +252,17 @@
             enable = true;
             adminUsers = ["me@ahmedmasood.com"];
           };
+          zfs = {
+            enable = true;
+            restic = {
+              enable = true;
+            };
+          };
+        };
+
+        hermes = {
+          enable = true;
+
           zfs = {
             enable = true;
             restic = {

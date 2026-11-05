@@ -214,6 +214,15 @@
           restartUnits = ["podman-jobscraper.service"];
         };
 
+        # Hermes Agent gateway env (model key + Matrix/Discord/Telegram bot
+        # credentials and allow-lists; see modules/services/hermes/default.nix).
+        # Root-owned: systemd reads it as EnvironmentFile before dropping to
+        # the hermes user, so the agent itself cannot read it.
+        "hermes/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["hermes-gateway.service"];
+        };
+
         "karakeep/.env" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "karakeep";
