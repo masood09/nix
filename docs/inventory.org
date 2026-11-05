@@ -508,7 +508,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Caddy                     | Reverse proxy                                     |
 | Dell iDRAC Fan Controller | IPMI fan speed management                         |
 | Grafana                   | ZFS-backed dashboards                             |
-| Hermes Agent              | ZFS, Strata model, rootless-podman sandbox        |
+| Hermes Agent              | ZFS, Strata model, sandbox, SearXNG web_search    |
 | Immich                    | ZFS datasets for photos/video                     |
 | IT-Tools                  | Stateless developer utilities                     |
 | JobScraper                | Job aggregator container                          |

@@ -35,16 +35,10 @@
   nsCfg = config.vpnNamespaces.${ns};
   caddyEnabled = config.services.caddy.enable;
 
-  # Where Caddy reaches SearXNG, and the address its connections come from,
-  # which is the only proxy the limiter should trust for X-Forwarded-For.
-  # In VPN mode the netns DNAT rules are PREROUTING-only, so host-local Caddy
-  # can't use 127.0.0.1:<port>; it targets the namespace address directly and
-  # arrives from the host side of the netns bridge.
-  upstreamAddress =
-    if vpnEnabled
-    then nsCfg.namespaceAddress
-    else "127.0.0.1";
-  # ::1 too in host mode, in case Caddy ever reaches loopback over IPv6.
+  # The only proxy the limiter should trust for X-Forwarded-For is the address
+  # Caddy connects from: the host side of the netns bridge in VPN mode, loopback
+  # in host mode (::1 too, in case Caddy ever reaches loopback over IPv6). The
+  # target Caddy connects to is cfg.clientUrl, which the same rule resolves.
   proxyAddresses =
     if vpnEnabled
     then [nsCfg.bridgeAddress]
@@ -187,7 +181,7 @@ in {
             "${cfg.webDomain}" = {
               useACMEHost = config.networking.domain;
               extraConfig = ''
-                reverse_proxy http://${upstreamAddress}:${toString cfg.listenPort}
+                reverse_proxy ${cfg.clientUrl}
               '';
             };
           };

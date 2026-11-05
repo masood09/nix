@@ -263,6 +263,13 @@
         hermes = {
           enable = true;
 
+          web = {
+            # Resolves to this host's loopback SearXNG on its listenPort, which
+            # the gateway process can reach. web_extract still uses its own
+            # backend, since SearXNG cannot fetch pages.
+            searchBackend = "searxng";
+          };
+
           zfs = {
             enable = true;
             restic = {

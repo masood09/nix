@@ -76,6 +76,13 @@
 # while the living-room TV is on, so expect 502/503 (with Retry-After) from
 # the model during those windows — the gateway stays up and retries.
 #
+# Web search: web_search runs in the gateway process, so it reaches this host's
+# loopback SearXNG; sandboxed terminal commands do not (pasta gives them a
+# separate namespace). SearXNG is search-only, so web_extract resolves its own
+# backend. Hermes' SearXNG client sends only `Accept: application/json`, which
+# SearXNG's botdetection filters reject because Accept must contain text/html,
+# so heartbeat runs SearXNG with the limiter off.
+#
 # Secrets: the sops `hermes/.env` file is read by systemd (PID 1) as the
 # unit's EnvironmentFile and stays root-owned, and /run/secrets is
 # inaccessible to the unit, so the agent cannot read any secret *file*. The
@@ -115,14 +122,34 @@
     events_logger = "file"
   '';
 
-  hermesEnv = {
-    HOME = cfg.dataDir;
-    HERMES_HOME = cfg.dataDir;
-    XDG_RUNTIME_DIR = runtimeDir;
-    XDG_DATA_HOME = cacheDir;
-    CONTAINERS_CONF = toString containersConf;
-    HERMES_DOCKER_BINARY = "${pkgs.podman}/bin/podman";
-  };
+  # Hermes' web tools run in the gateway process, not in the sandbox, so this
+  # host's SearXNG is reachable; sandboxed terminal commands get their own
+  # namespace through pasta and cannot reach loopback-only services. The empty
+  # option resolves through the SearXNG module's clientUrl, which is loopback in
+  # host mode and the WireGuard namespace address in VPN mode — a hardcoded
+  # 127.0.0.1 would break as soon as SearXNG's VPN mode is on.
+  searxngUrl =
+    if cfg.web.searxngUrl != ""
+    then cfg.web.searxngUrl
+    else homelabCfg.services.searxng.clientUrl;
+
+  hermesEnv =
+    {
+      HOME = cfg.dataDir;
+      HERMES_HOME = cfg.dataDir;
+      XDG_RUNTIME_DIR = runtimeDir;
+      XDG_DATA_HOME = cacheDir;
+      CONTAINERS_CONF = toString containersConf;
+      HERMES_DOCKER_BINARY = "${pkgs.podman}/bin/podman";
+    }
+    // lib.optionalAttrs (cfg.web.searchBackend == "searxng" || cfg.web.searxngUrl != "") {
+      # Only an instance URL, not a credential, so it stays in the unit rather
+      # than in the sops .env. Hermes resolves it through its config-aware env
+      # layer then process env, so the gateway, hermes-cli and cron all see it.
+      # Emitted for an explicit URL even with no backend pinned, because
+      # SEARXNG_URL is what the autodetect chain reads when no selection exists.
+      SEARXNG_URL = searxngUrl;
+    };
 
   # Managed keys are (re)applied on every start through Hermes' own
   # `config set`, so config.yaml stays writable for everything else Hermes
@@ -190,6 +217,17 @@
         "*wget*|*sh*"
       ];
     }
+    {
+      # A per-capability key, so it wins over whatever `hermes tools` stored as
+      # the shared web selection and does not reroute web_extract. Written even
+      # when empty: writing it only for a non-empty value would leave a stale
+      # `searxng` in config.yaml after the option is cleared, and Hermes would
+      # then fail every search with "SEARXNG_URL is not set" instead of falling
+      # back to its autodetected backend. An empty value reads as unset, so
+      # clearing the option resets the runtime selection too.
+      key = "web.search_backend";
+      value = cfg.web.searchBackend;
+    }
   ];
 
   outputDir = "${cfg.dataDir}/cache/documents";
@@ -242,6 +280,16 @@ in {
   ];
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        # The default URL is this host's loopback instance, so naming SearXNG
+        # only makes sense when the service is enabled here or when an instance
+        # elsewhere is named explicitly.
+        assertion = cfg.web.searchBackend != "searxng" || homelabCfg.services.searxng.enable || cfg.web.searxngUrl != "";
+        message = "homelab.services.hermes.web: searchBackend = \"searxng\" resolves to this host's loopback SearXNG; enable homelab.services.searxng or set web.searxngUrl to an instance elsewhere.";
+      }
+    ];
+
     # Rootless podman needs /etc/containers (policy.json, registries.conf),
     # not the rootful homelab.services.podman module, so don't depend on it.
     virtualisation = {

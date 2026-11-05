@@ -3,7 +3,17 @@
   config,
   lib,
   ...
-}: {
+}: let
+  self = config.homelab.services.searxng;
+
+  # The address a client on this host reaches SearXNG on. In VPN mode the netns
+  # DNAT rules are PREROUTING-only, so loopback does not work there and the
+  # namespace address is the only one a host process can connect to.
+  hostAddress =
+    if self.vpn.enable
+    then config.vpnNamespaces.${self.vpn.namespace}.namespaceAddress
+    else "127.0.0.1";
+in {
   options = {
     homelab = {
       services = {
@@ -20,6 +30,12 @@
             default = 8918;
             type = lib.types.port;
             description = "Port SearXNG listens on (loopback, or inside the VPN namespace in VPN mode).";
+          };
+
+          clientUrl = lib.mkOption {
+            type = lib.types.str;
+            default = "http://${hostAddress}:${toString self.listenPort}";
+            description = "URL a client on this host uses to reach SearXNG — Caddy's upstream target, and Hermes' SEARXNG_URL. Loopback with host egress, the WireGuard namespace address when vpn.enable is set.";
           };
 
           limiter = lib.mkOption {
