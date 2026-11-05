@@ -79,49 +79,46 @@ in {
           #
           # Left out of both: yandex images (upstream parser fails with a JSON
           # error) and deviantart (returns 0 results).
+          #
+          # engines: tested through SearXNG from heartbeat's own IP (2026-11-05),
+          # against a fresh engine state so no engine was skipped as suspended.
+          # Left out because they do not answer from this address: google, brave,
+          # duckduckgo, startpage, qwant and mojeek (rate limit, CAPTCHA, 403 or a
+          # silent zero); google images, brave.images and qwant images (403 or
+          # nothing); duckduckgo images (parser error on its own response);
+          # unsplash (non-JSON response); vimeo (403); google videos, brave.videos
+          # and qwant videos (nothing); wikidata and arch linux wiki (nothing even
+          # on queries that should hit). yahoo and openverse stay because they do
+          # answer, though yahoo disconnects on some queries.
+          #
+          # Hermes queries the general category, so the general-web block is what
+          # its web_search actually gets: bing, yandex, yahoo, wikipedia.
           engines = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             default = [
               # General web
-              "google"
               "bing"
-              "brave"
-              "duckduckgo"
-              "startpage"
-              "qwant"
-              "mojeek"
-              "yahoo"
               "yandex"
+              "yahoo"
               "wikipedia"
-              "wikidata"
 
               # IT and docs
               "github"
               "stackoverflow"
               "arxiv"
-              "arch linux wiki"
               "nixos wiki"
               "mdn"
 
               # Images
-              "google images"
               "bing images"
-              "duckduckgo images"
-              "brave.images"
-              "qwant images"
               "flickr"
               "openverse"
-              "unsplash"
               "wikicommons.images"
 
               # Videos
-              "google videos"
               "youtube"
               "bing videos"
               "duckduckgo videos"
-              "brave.videos"
-              "qwant videos"
-              "vimeo"
               "dailymotion"
               "sepiasearch"
               "wikicommons.videos"
