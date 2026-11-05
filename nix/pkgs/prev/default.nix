@@ -13,7 +13,7 @@
   ...
 }: let
   # renovate: datasource=github-releases depName=scrambletoolsllc/prev versioning=semver
-  version = "2.4.0";
+  version = "2.4.1";
 
   assets = {
     "x86_64-linux" = {
