@@ -428,6 +428,21 @@
         searxng = {
           enable = true;
 
+          # Off because Hermes queries this instance as its web_search backend,
+          # and its SearXNG provider sends only `Accept: application/json`
+          # (plugins/web/searxng/provider.py), which botdetection's http_accept
+          # filter rejects for lacking text/html — every web_search call would
+          # be 429'd. Browser-shaped headers do not help either: the JSON API is
+          # capped at 4 requests per hour per network (ip_limit.API_MAX), which
+          # an agent doing several searches a day exceeds. The narrower fix is
+          # botdetection.ip_lists.pass_ip, checked before both, which would
+          # exempt only the loopback client. Dropping the limiter for everyone is
+          # acceptable because search.mantannest.com is not internet-facing: the
+          # Cloudflare zone has no record for it, so only the UniFi view and the
+          # Headscale DNS record answer it, and the unlimited clients are LAN and
+          # tailnet ones.
+          limiter = false;
+
           # Host egress for now: the shared Proton P2P exit gets most general
           # web engines blocked or CAPTCHA'd. Set true to route all SearXNG
           # traffic through the nixflix WireGuard namespace again.
