@@ -1,4 +1,4 @@
-# Options — SearXNG metasearch engine (domain, port, UID, VPN namespace, engines).
+# Options — SearXNG metasearch engine (domain, port, UID, VPN mode, engines).
 {
   config,
   lib,
@@ -8,7 +8,7 @@
     homelab = {
       services = {
         searxng = {
-          enable = lib.mkEnableOption "Whether to enable SearXNG, confined to the nixflix WireGuard namespace.";
+          enable = lib.mkEnableOption "Whether to enable SearXNG behind Caddy.";
 
           webDomain = lib.mkOption {
             type = lib.types.str;
@@ -19,7 +19,7 @@
           listenPort = lib.mkOption {
             default = 8918;
             type = lib.types.port;
-            description = "Port SearXNG listens on inside the VPN network namespace.";
+            description = "Port SearXNG listens on (loopback, or inside the VPN namespace in VPN mode).";
           };
 
           userId = lib.mkOption {
@@ -35,29 +35,45 @@
           };
 
           vpn = {
+            enable = lib.mkEnableOption ''
+              confining SearXNG to the nixflix WireGuard namespace, so all of its
+              egress leaves through the VPN. Requires nixflix.vpn.enable. Off by
+              default because many engines block shared VPN exits; VPN mode uses
+              the separate `vpnEngines` list'';
+
             namespace = lib.mkOption {
               type = lib.types.str;
               default = config.nixflix.vpn.namespace;
               defaultText = lib.literalExpression "config.nixflix.vpn.namespace";
-              description = "VPN-Confinement network namespace SearXNG is confined to.";
+              description = "VPN-Confinement network namespace SearXNG is confined to when vpn.enable is set.";
             };
           };
 
-          # These are engine `name:` values from upstream searx/settings.yml,
-          # matched exactly by `use_default_settings.engines.keep_only` — not
-          # `!shortcuts`. The exit is a Proton P2P/datacenter IP, so the list
-          # is curated to engines that actually answer it.
+          # Both engine lists hold engine `name:` values from upstream
+          # searx/settings.yml, matched exactly by
+          # `use_default_settings.engines.keep_only` — not `!shortcuts`. Every
+          # listed engine is also force-enabled. Re-check dotted names (e.g.
+          # brave.images) when the searxng package pin moves.
+          #
+          # Left out of both: yandex images (upstream parser fails with a JSON
+          # error) and deviantart (returns 0 results).
           engines = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             default = [
-              # Tested from the Proton exit (2026-11-05): only yandex works as a
-              # general web engine. Left out: brave, duckduckgo and yahoo
-              # (rate-limit, deny or disconnect SearXNG despite answering single
-              # probes), mojeek/google/startpage (CAPTCHAs), qwant (403).
+              # General web
+              "google"
+              "bing"
+              "brave"
+              "duckduckgo"
+              "startpage"
+              "qwant"
+              "mojeek"
+              "yahoo"
               "yandex"
               "wikipedia"
-              # wikidata left out: query.wikidata.org 403s the VPN exit during
-              # engine init, so it never registers.
+              "wikidata"
+
+              # IT and docs
               "github"
               "stackoverflow"
               "arxiv"
@@ -65,24 +81,65 @@
               "nixos wiki"
               "mdn"
 
-              # Images — tested through SearXNG from the Proton exit
-              # (2026-11-05). Left out: google images (block page), openverse
-              # and qwant images (403), unsplash (redirect), pinterest
-              # (unverified), and two upstream parser failures: yandex images
-              # (JSON parse error) and deviantart (responds with 0 results).
+              # Images
+              "google images"
+              "bing images"
+              "duckduckgo images"
+              "brave.images"
+              "qwant images"
+              "flickr"
+              "openverse"
+              "unsplash"
+              "wikicommons.images"
+
+              # Videos
+              "google videos"
+              "youtube"
+              "bing videos"
+              "duckduckgo videos"
+              "brave.videos"
+              "qwant videos"
+              "vimeo"
+              "dailymotion"
+              "sepiasearch"
+              "wikicommons.videos"
+            ];
+            description = "Engines used with host egress (vpn.enable = false): upstream names to keep and force-enable; all other default engines are dropped.";
+          };
+
+          # Tested through SearXNG from the shared Proton P2P exit (2026-11-05).
+          # Left out because they fail there: brave, duckduckgo and yahoo
+          # (rate-limit, deny or disconnect); google, startpage and mojeek
+          # (CAPTCHAs); qwant, openverse and vimeo (403); unsplash (redirect);
+          # wikidata (403 during engine init, so it never registers).
+          vpnEngines = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [
+              # General web
+              "yandex"
+              "wikipedia"
+
+              # IT and docs
+              "github"
+              "stackoverflow"
+              "arxiv"
+              "arch linux wiki"
+              "nixos wiki"
+              "mdn"
+
+              # Images
               "bing images"
               "flickr"
               "wikicommons.images"
 
-              # Videos — same probe. Left out: google videos (block page),
-              # vimeo (403).
+              # Videos
               "youtube"
               "dailymotion"
               "sepiasearch"
               "bing videos"
               "wikicommons.videos"
             ];
-            description = "Upstream engine names to keep and force-enable; all other default engines are dropped.";
+            description = "Engines used when vpn.enable is set; same semantics as `engines`.";
           };
         };
       };

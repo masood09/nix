@@ -47,7 +47,7 @@ Next available human UID: *1003*
 | aurral                        | 3015 | 3015 | Music discovery and playlist manager            |
 | strata                        | 3016 | 3016 | Local LLM inference server (ixian)              |
 | hermes                        | 3017 | 3017 | Hermes Agent gateway (heartbeat)                |
-| searx                         | 3018 | 3018 | SearXNG metasearch (heartbeat, wg netns)        |
+| searx                         | 3018 | 3018 | SearXNG metasearch (heartbeat)                  |
 
 Next available UID/GID: *3019*
 
@@ -112,7 +112,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | Nightscout                           |  8914 |                                   |
 | Strata (LLM API)                     |  8916 | Localhost only (ixian); SSH tunnel |
 | Headscale (pending move)             |  8917 | Reserved — code-review finding 9; still on 8080 |
-| SearXNG                              |  8918 | heartbeat; wg netns, behind Caddy |
+| SearXNG                              |  8918 | heartbeat; behind Caddy (loopback, or wg netns with vpn.enable) |
 | Authentik (HTTP/health)              |  9000 | 127.0.0.1 only; server listener    |
 | Authentik Worker (HTTP)              |  9001 | 127.0.0.1 only; worker listener    |
 | Prometheus                           |  9090 | Upstream default                  |
