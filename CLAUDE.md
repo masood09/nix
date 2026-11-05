@@ -37,6 +37,7 @@ Conventional Commits: `<type>(<scope>): <summary>` plus a detailed body.
 - Scope is the product feature: a service (`searxng`, `headscale`), a shared module or helper (`disko`, `stylix`), or a machine (`heartbeat`, `work-okta`) for host-local changes.
 - Imperative summary, 72 chars max, no trailing period. The body explains why the change exists and the constraint behind it, not what the diff shows.
 - One commit per logical change; keep secrets, DNS records, and docs-only policy changes separate from service wiring.
+- Committing is user-run: make and validate the change, then hand the working tree back. Do not `git add`, `git commit`, or `git push` unless the user asks in that turn — a request to change configuration is not a request to commit it, and a commit instruction from an earlier turn does not carry forward.
 
 Example:
 
