@@ -291,6 +291,12 @@
           sopsFile = ./secrets.sops.yaml;
         };
 
+        # SearXNG server secret_key — generate with `openssl rand -hex 32`.
+        "searxng/secret-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "searx";
+        };
+
         "tailscale/preauth-key" = {
           sopsFile = ./secrets.sops.yaml;
         };

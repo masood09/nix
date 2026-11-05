@@ -425,6 +425,11 @@
           };
         };
 
+        # Egress confined to the nixflix WireGuard namespace (Proton VPN).
+        searxng = {
+          enable = true;
+        };
+
         tailscale = {
           enable = true;
 
