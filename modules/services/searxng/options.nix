@@ -64,6 +64,23 @@
               "arch linux wiki"
               "nixos wiki"
               "mdn"
+
+              # Images — tested through SearXNG from the Proton exit
+              # (2026-11-05). Left out: google images (block page), openverse
+              # and qwant images (403), unsplash (redirect), pinterest
+              # (unverified), and two upstream parser failures: yandex images
+              # (JSON parse error) and deviantart (responds with 0 results).
+              "bing images"
+              "flickr"
+              "wikicommons.images"
+
+              # Videos — same probe. Left out: google videos (block page),
+              # vimeo (403).
+              "youtube"
+              "dailymotion"
+              "sepiasearch"
+              "bing videos"
+              "wikicommons.videos"
             ];
             description = "Upstream engine names to keep and force-enable; all other default engines are dropped.";
           };
