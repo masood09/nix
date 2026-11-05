@@ -82,14 +82,24 @@ in {
           #
           # engines: tested through SearXNG from heartbeat's own IP (2026-11-05),
           # against a fresh engine state so no engine was skipped as suspended.
-          # Left out because they do not answer from this address: google, brave,
-          # duckduckgo, startpage, qwant and mojeek (rate limit, CAPTCHA, 403 or a
-          # silent zero); google images, brave.images and qwant images (403 or
-          # nothing); duckduckgo images (parser error on its own response);
-          # unsplash (non-JSON response); vimeo (403); google videos, brave.videos
-          # and qwant videos (nothing); wikidata and arch linux wiki (nothing even
-          # on queries that should hit). yahoo and openverse stay because they do
-          # answer, though yahoo disconnects on some queries.
+          # Left out because they do not answer from this address:
+          #   - google: served as the JS/bot interstitial ("Please click here if you
+          #     are not redirected"), which a client that cannot run JS parses as
+          #     nothing. detect_google_sorry only recognises the sorry page, a 302
+          #     or a short body, so this reads as a silent zero instead of an engine
+          #     error; the Proton exit gets the CAPTCHA version of the same check.
+          #   - brave: 429 bot rate-limit, and the 200 responses are the JS app
+          #     shell with no `data: [{` block for extract_json_data to read. Only
+          #     the braveapi engine could work here, and it needs an API key.
+          #   - startpage, qwant, mojeek, duckduckgo: CAPTCHA or 403.
+          #   - the rest: google images, brave.images, qwant images, duckduckgo
+          #     images, unsplash, vimeo, google videos, brave.videos, qwant videos,
+          #     wikidata and arch linux wiki — 403, parser errors or nothing, even
+          #     on queries that should hit.
+          # Neither can be fixed from here: settings cannot override the User-Agent
+          # or DNT header the online processor sets per request, and JS engines
+          # (flake_solver) are not supported in this build. yahoo and openverse stay
+          # because they do answer, though yahoo disconnects on some queries.
           #
           # Hermes queries the general category, so the general-web block is what
           # its web_search actually gets: bing, yandex, yahoo, wikipedia.
