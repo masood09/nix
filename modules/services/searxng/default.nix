@@ -95,6 +95,16 @@ in {
             };
           };
 
+          # keep_only only filters; it doesn't re-enable engines upstream ships
+          # with `disabled: true` (mojeek, qwant, nixos wiki). With
+          # use_default_settings, these entries merge into the defaults by name.
+          engines =
+            map (name: {
+              inherit name;
+              disabled = false;
+            })
+            cfg.engines;
+
           server = {
             bind_address = "0.0.0.0";
             port = cfg.listenPort;
