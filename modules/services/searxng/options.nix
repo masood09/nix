@@ -45,16 +45,19 @@
 
           # These are engine `name:` values from upstream searx/settings.yml,
           # matched exactly by `use_default_settings.engines.keep_only` — not
-          # `!shortcuts`. The exit is a Proton P2P/datacenter IP, so the default
-          # leaves out Google/Bing/DDG/Startpage, which tend to 403/CAPTCHA it.
+          # `!shortcuts`. The exit is a Proton P2P/datacenter IP, so the list
+          # is curated to engines that actually answer it.
           engines = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             default = [
-              "brave"
-              "mojeek"
-              "qwant"
+              # Tested from the Proton exit (2026-11-05): only yandex works as a
+              # general web engine. Left out: brave, duckduckgo and yahoo
+              # (rate-limit, deny or disconnect SearXNG despite answering single
+              # probes), mojeek/google/startpage (CAPTCHAs), qwant (403).
+              "yandex"
               "wikipedia"
-              "wikidata"
+              # wikidata left out: query.wikidata.org 403s the VPN exit during
+              # engine init, so it never registers.
               "github"
               "stackoverflow"
               "arxiv"
@@ -62,7 +65,7 @@
               "nixos wiki"
               "mdn"
             ];
-            description = "Upstream engine names to keep enabled; all other default engines are dropped.";
+            description = "Upstream engine names to keep and force-enable; all other default engines are dropped.";
           };
         };
       };
