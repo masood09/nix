@@ -64,6 +64,10 @@ is reverted — not a narration of the diff>
 - The body explains why the change was made and the operational constraint behind it. Single-line commits are acceptable only for trivial edits such as version bumps.
 - One commit per logical change. Keep unrelated changes separate: service wiring, secrets, DNS records, and docs-only policy changes each get their own commit.
 
+### Committing Is Not An Agent Action
+
+Committing and pushing are **user-run actions**. Make the change, validate it, and hand the working tree back: do not `git add`, `git commit`, or `git push` unless the user asks for it in that turn. A request to change configuration is not a request to commit it, and an instruction from an earlier turn does not carry forward.
+
 ## Test Strategy
 
 There is no conventional unit-test suite in this repo. Validation is mostly Nix evaluation, targeted builds, and deployment-safe checks.
@@ -232,6 +236,7 @@ Do not treat normal `flake.lock` pinning, cache-preserving input decisions, or d
 - **Stylix** — one system-level source of truth (`modules/nixos/_stylix.nix`, `modules/macos/_stylix.nix`) propagating to HM. Servers gate GTK/Qt/KDE/GNOME targets off; removing those gates adds ~1 GB to every server closure.
 - **Linux-only HM behavior** — gate `dconf`, fontconfig files, and dbus-dependent activation behind `lib.mkIf pkgs.stdenv.isLinux`.
 - **Research routing** — use local Nix evaluation and authoritative upstream documentation for option schemas and package availability rather than guessing from training data.
+- **Committing** — commits and pushes are user-run; the agent validates a change and hands the working tree back unless the user asks in that turn.
 
 ## Rule Files Checked
 
