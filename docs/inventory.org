@@ -523,7 +523,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Podman                    | ZFS-backed rootless containers                    |
 | PostgreSQL                | ZFS, TCP/IP enabled, backed up                    |
 | Prometheus                | ZFS-backed metrics                                |
-| SearXNG                   | Stateless, behind Caddy; optional VPN egress      |
+| SearXNG                   | Stateless, behind Caddy, limiter off; VPN egress  |
 | Tailscale                 | ZFS state                                         |
 | Vaultwarden               | ZFS, loopback-only behind local Caddy             |
 

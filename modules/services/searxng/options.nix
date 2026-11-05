@@ -22,6 +22,12 @@
             description = "Port SearXNG listens on (loopback, or inside the VPN namespace in VPN mode).";
           };
 
+          limiter = lib.mkOption {
+            type = lib.types.bool;
+            default = true;
+            description = "SearXNG's request limiter (server.limiter). When false no limiter is applied at all, and botdetection's header filters stop rejecting clients that do not look like a browser — which is what a programmatic client such as Hermes' SearXNG provider needs, since it sends only Accept: application/json. The narrower alternative is botdetection.ip_lists.pass_ip, checked before those filters, which exempts one client address rather than every client.";
+          };
+
           userId = lib.mkOption {
             default = 3018;
             type = lib.types.ints.u16;

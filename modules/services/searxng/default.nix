@@ -11,6 +11,16 @@
 # Do NOT point SearXNG at FlareSolverr in VPN mode:
 # homelab.services.arr.flaresolverr runs on the host network, so routing
 # requests through it would leak egress around the VPN.
+#
+# Limiter (homelab.services.searxng.limiter, on by default): its botdetection
+# header filters require browser-shaped requests — Accept must contain text/html
+# and Accept-Language must be present — so a programmatic client sending only
+# Accept: application/json, such as Hermes' SearXNG provider, is 429'd. Even a
+# browser-shaped client is capped on the JSON API: botdetection.ip_limit allows
+# 4 non-html requests per hour per network. The narrower fix is
+# botdetection.ip_lists.pass_ip, which is checked before those filters, so it
+# exempts one client address rather than turning the limiter off for everyone;
+# heartbeat disables the limiter instead.
 {
   config,
   lib,
@@ -147,7 +157,7 @@ in {
               # Substituted by searx-init's envsubst into /run/searx/settings.yml,
               # so the secret never lands in the Nix store.
               secret_key = "$SEARXNG_SECRET";
-              limiter = true;
+              inherit (cfg) limiter;
               image_proxy = true;
               public_instance = false;
             };
@@ -160,7 +170,10 @@ in {
             };
           };
 
-          limiterSettings = {
+          # Gated so nothing is emitted when the limiter is off: upstream only
+          # writes limiter.toml when limiterSettings is non-empty, and the
+          # ExecStartPre link below is guarded on the same condition.
+          limiterSettings = lib.optionalAttrs cfg.limiter {
             botdetection = {
               # Only Caddy's source address. Caddy sends X-Forwarded-For with
               # one trusted hop.
