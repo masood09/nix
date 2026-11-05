@@ -425,9 +425,15 @@
           };
         };
 
-        # Egress confined to the nixflix WireGuard namespace (Proton VPN).
         searxng = {
           enable = true;
+
+          # Host egress for now: the shared Proton P2P exit gets most general
+          # web engines blocked or CAPTCHA'd. Set true to route all SearXNG
+          # traffic through the nixflix WireGuard namespace again.
+          vpn = {
+            enable = false;
+          };
         };
 
         tailscale = {
