@@ -47,7 +47,7 @@ Primary commands live in `justfile`.
 
 `just deploy`, `just machine=<name> deploy`, `darwin-rebuild switch`, and `nixos-rebuild switch` are **user-run commands**. Stop at `just preflight` and hand back. The user runs activation themselves so they can watch the output and choose when to apply. Only run a deploy command if the user explicitly asks for it in that turn.
 
-### Commit Messages
+## Commit Messages
 
 Use Conventional Commits: `<type>(<scope>): <summary>`, a blank line, then a detailed body.
 
