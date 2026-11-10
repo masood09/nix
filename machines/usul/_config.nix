@@ -127,6 +127,10 @@
         gh = {
           enable = true;
         };
+        # Hermes Agent desktop client, from llm-agents (built on nixpkgs-unstable).
+        hermes-desktop = {
+          enable = true;
+        };
         git = {
           enable = true;
         };
