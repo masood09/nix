@@ -103,6 +103,12 @@ in {
             # resulting GPU ring reset killed Strata's engine every few hours.
             manageSession = true;
           };
+
+          # Upstream ships engine releases every few days. 04:30 is when the
+          # TV is reliably off; the update skips itself if it is not.
+          autoUpdate = {
+            enable = true;
+          };
         };
 
         # ai.mantannest.com has no public DNS record; Headscale DNS
