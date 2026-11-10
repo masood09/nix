@@ -13,15 +13,15 @@
   ...
 }: let
   # renovate: datasource=github-releases depName=scrambletoolsllc/prev versioning=semver
-  version = "2.4.0";
+  version = "2.4.1";
 
   assets = {
     "x86_64-linux" = {
-      hash = "sha256-IU6Zh1KUh+2wew5OcwMbt9SHE7Z7ge3zbsOdZXn5N4c=";
+      hash = "sha256-y5BS2jwz9/c8DGL742OmEZ1PEksLRcYIAgtNbY+bfn4=";
       suffix = "x86_64";
     };
     "aarch64-linux" = {
-      hash = "sha256-HKXUw2sgXnR70NTMRIVlBooisohrn4sKIIqw4nsZ0k4=";
+      hash = "sha256-3N52lzInqGNvmovU+A7w1J/tACmPkKwbueGoU0UWnD8=";
       suffix = "aarch64";
     };
   };
