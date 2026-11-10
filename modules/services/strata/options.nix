@@ -125,8 +125,24 @@
             offDelay = lib.mkOption {
               type = lib.types.ints.unsigned;
               default = 30;
-              description = "Seconds the TV must stay off before Strata is started again.";
+              description = ''
+                Seconds the TV must stay off before Strata is started again (and,
+                with manageSession, before the Steam session is stopped).
+              '';
             };
+
+            manageSession = lib.mkEnableOption ''
+              running the Steam/gamescope session of homelab.desktop.gaming.user
+              only while the TV is on. The guard starts display-manager.service
+              when the TV wakes, after stopping Strata. Once the TV has been off
+              for offDelay, it stops display-manager.service and that account's
+              user manager (where Steam and gamescope run), and starts Strata
+              only after both are down. Boot and switch cannot start the
+              session: graphical.target's built-in
+              Wants=display-manager.service is gated by a condition file the
+              guard keeps in /run. A game still running when the TV goes off
+              (or drops off the network) for offDelay is ended.
+            '';
           };
 
           userId = lib.mkOption {

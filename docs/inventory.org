@@ -708,7 +708,10 @@ Defined in =nix/pkgs/= and auto-discovered.
 - *Storage:* LUKS-encrypted ext4 + LVM root (tmpfs impermanence, non-ZFS); independent LUKS ext4 model disk at =/srv/models= unlocked from a root-resident key
 - *GPU:* AMD
 - *Console:* Jovian SDDM auto-login into the =gamescope-wayland= session (Steam
-  Gaming Mode); no general-purpose desktop shell
+  Gaming Mode); no general-purpose desktop shell. The session runs only while
+  the TV is on: the Strata TV guard (=tvGuard.manageSession=) starts it when the
+  TV wakes and stops it, with the console user manager, once the TV has been
+  off for 30 s. Boot and =switch= cannot start it while the TV is off.
 - *Console User:* voyageonwheels (uid 1002) — gaming account, no sudo, no SSH
 - *Admin User:* masoodahmed — wheel (passwordless sudo), SSH-only admin
 - *Tailnet:* Headscale node =100.64.0.2=; Headscale DNS resolves =ai.mantannest.com= to it
@@ -718,7 +721,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Service    | Notes                                                    |
 |------------+----------------------------------------------------------|
 | Caddy      | Serves =ai.mantannest.com= (LAN via UniFi DNS, tailnet via Headscale DNS) |
-| Strata     | Local LLM inference on localhost:8916 behind Caddy       |
+| Strata     | Local LLM inference on localhost:8916 behind Caddy; runs only while the TV is off |
 | Tailscale  | Headscale node =100.64.0.2=                              |
 
 **** Programs

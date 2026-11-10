@@ -20,6 +20,12 @@
 # what a target wants) and a switch (which restarts the active targets and
 # otherwise only touches units that are already active) cannot load the model
 # while the TV is using the GPU. See the guard below.
+#
+# With tvGuard.manageSession, the guard also runs the Steam/gamescope session
+# (display-manager.service) only while the TV is awake, so the two GPU users
+# never overlap. gamescope crashes on the HDMI hotplugs the TV emits in
+# standby, and the ring reset it triggers takes down Strata's engine; with no
+# session running while the TV is off, those hotplugs have nothing to crash.
 {
   config,
   lib,
@@ -161,6 +167,24 @@
   # unreachable means off (or unplugged). adb keeps a dead transport as
   # "already connected" after the TV drops off, so every check reconnects.
   tvGuardStateDir = "/var/lib/strata-tv-guard";
+  manageSession = cfg.tvGuard.enable && cfg.tvGuard.manageSession;
+  # display-manager.service only starts while this exists. It lives in the
+  # guard's RuntimeDirectory, so a reboot always starts without it.
+  sessionMarker = "/run/strata-tv-guard/session-allowed";
+  # Steam and gamescope are user units under the console account's user
+  # manager, not in display-manager.service's cgroup. Stopping SDDM does end
+  # the session, but gamescope exits after that stop returns (0.4 s later on
+  # 2026-11-10) and the user manager 10 s after that (logind's
+  # UserStopDelaySec). Stopping user@<uid> as well makes the stop wait for all
+  # of it, the same recipe as machines/ixian/install.org §7.
+  sessionUser = homelabCfg.desktop.gaming.user;
+  # `or null` so a missing account reaches the assertion below instead of
+  # failing evaluation with an attribute error.
+  sessionUid = config.users.users.${sessionUser}.uid or null;
+  sessionUnits = [
+    "display-manager.service"
+    "user@${toString sessionUid}.service"
+  ];
   tvGuard = pkgs.writeShellApplication {
     name = "strata-tv-guard";
     runtimeInputs = [
@@ -202,10 +226,32 @@
       # - Strata running without a marker (the guard came up after a boot, or
       #   lost its state, and something else started Strata) is adopted, so a
       #   stop of it is treated as a manual one.
+      #
+      # TV off includes unreachable: an ADB failure, a TV reboot, or a revoked
+      # key reads as off. With manageSession that ends a running game after
+      # offDelay and starts the model load.
       marker_tv_on=/run/strata-tv-guard/tv-on
       marker_off=/run/strata-tv-guard/tv-off-since
       marker_started=/run/strata-tv-guard/started-by-guard
       marker_held=/run/strata-tv-guard/held-by-guard
+      # With manageSession, the Steam session follows the TV the other way
+      # round: up while the TV is awake, down once it has been off for
+      # offDelay. The marker is display-manager.service's start condition, so
+      # nothing but the guard can bring the session up while the TV is off.
+      #   session-allowed  - the TV is awake; display-manager may run
+      #
+      # The session is SDDM plus the console account's user manager, where
+      # Steam and gamescope run as user units. Stopping SDDM alone returns
+      # before gamescope has exited, so both are stopped and both count. A
+      # hung or lingering user manager therefore holds Strata off, which is
+      # the safe direction: the GPU stays with the session.
+      #
+      # Unlike Strata, the session has no hold: a manual stop of it while the
+      # TV is awake is undone on the next poll. The session is what the person
+      # in front of the TV is using, so "TV on" always means "session up".
+      manage_session=${lib.optionalString manageSession "1"}
+      marker_session=${lib.escapeShellArg sessionMarker}
+      session_units=(${lib.optionalString manageSession (lib.escapeShellArgs sessionUnits)})
       warned_unauthorized=""
       # Consecutive polls that saw a guard-started Strata not running, which is
       # how a guard stop is told apart from a manual one. See below.
@@ -244,6 +290,17 @@
             echo "TV is on: stopping Strata"
             systemctl stop strata.service || echo "stopping Strata failed" >&2
           fi
+          # After Strata's blocking stop, so the session gets the VRAM. A
+          # session stopped by hand while the TV is awake comes back on the
+          # next poll.
+          if [ -n "$manage_session" ]; then
+            touch "$marker_session"
+            if ! systemctl is-active -q display-manager.service; then
+              echo "TV is on: starting the Steam session"
+              systemctl reset-failed "''${session_units[@]}" || true
+              systemctl start --no-block display-manager.service
+            fi
+          fi
         else
           if [ -e "$marker_tv_on" ]; then
             # on -> off edge: the cycle a hold waits for is over, so a hold from
@@ -260,6 +317,30 @@
 
           now=$(date +%s)
           off_since=$(stat -c %Y "$marker_off")
+          off_long=""
+          if [ $((now - off_since)) -ge ${toString cfg.tvGuard.offDelay} ]; then
+            off_long=1
+          fi
+
+          # Stop the session before Strata may start, so they never share the
+          # GPU. Stopping SDDM and the console user manager together blocks
+          # until Steam and gamescope have exited. The session counts as up
+          # while either unit is active (is-active succeeds if any is).
+          session_up=""
+          if [ -n "$manage_session" ]; then
+            if [ -n "$off_long" ]; then
+              rm -f "$marker_session"
+            fi
+            if systemctl is-active -q "''${session_units[@]}"; then
+              if [ -n "$off_long" ]; then
+                echo "TV off for ${toString cfg.tvGuard.offDelay}s: stopping the Steam session"
+                systemctl stop "''${session_units[@]}" || echo "stopping the Steam session failed" >&2
+              fi
+              if systemctl is-active -q "''${session_units[@]}"; then
+                session_up=1
+              fi
+            fi
+          fi
 
           if [ -e "$marker_started" ]; then
             if [ -n "$running" ]; then
@@ -300,7 +381,7 @@
             echo "Strata is running without the guard having started it: watching it"
             touch "$marker_started"
             misses=0
-          elif [ $((now - off_since)) -ge ${toString cfg.tvGuard.offDelay} ]; then
+          elif [ -n "$off_long" ] && [ -z "$session_up" ]; then
             # reset-failed first: a unit left in `failed` by a start limit
             # refuses `start` until its counters are cleared.
             systemctl reset-failed strata.service || true
@@ -320,6 +401,21 @@ in {
   ];
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = !cfg.tvGuard.manageSession || cfg.tvGuard.enable;
+        message = "homelab.services.strata.tvGuard.manageSession has no effect without homelab.services.strata.tvGuard.enable.";
+      }
+      {
+        assertion = !manageSession || config.services.displayManager.enable;
+        message = "homelab.services.strata.tvGuard.manageSession needs a display manager (services.displayManager.enable).";
+      }
+      {
+        assertion = !manageSession || sessionUid != null;
+        message = "homelab.services.strata.tvGuard.manageSession needs ${sessionUser} (homelab.desktop.gaming.user) to be a declared account with a fixed uid, to stop its user manager.";
+      }
+    ];
+
     users = {
       users = {
         strata = {
@@ -545,6 +641,16 @@ in {
             };
           };
 
+          # graphical.target ships Wants=display-manager.service, so leaving
+          # the session out of boot means a condition, not an empty wantedBy.
+          # Restart=always still relaunches a crashed session while the TV is
+          # awake; once the guard drops the marker, a stop stays stopped.
+          display-manager = lib.mkIf manageSession {
+            unitConfig = {
+              ConditionPathExists = sessionMarker;
+            };
+          };
+
           strata-tv-guard = lib.mkIf cfg.tvGuard.enable {
             description = "Start and stop Strata around the living-room TV";
             # Wanted by multi-user.target on purpose: with wantedBy dropped from
@@ -580,8 +686,11 @@ in {
               RuntimeDirectoryPreserve = "yes";
               Restart = "always";
               RestartSec = 10;
-              # Stopping Strata drains for up to TimeoutStopSec (90 s).
-              TimeoutStopSec = 120;
+              # The guard can be stopped mid-way through its longest blocking
+              # call: Strata's drain (TimeoutStopSec 90 s) or, with
+              # manageSession, the session stop, bounded by user@.service's
+              # 120 s (SDDM's 10 s runs alongside it).
+              TimeoutStopSec = 150;
 
               NoNewPrivileges = true;
               PrivateTmp = true;

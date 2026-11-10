@@ -98,6 +98,10 @@ in {
           tvGuard = {
             enable = true;
             address = "tcltv.iot.homelab.mantannest.com:5555";
+            # Run Steam/gamescope only while the TV is on. With the TV in
+            # standby, its periodic HDMI hotplugs crashed gamescope, and the
+            # resulting GPU ring reset killed Strata's engine every few hours.
+            manageSession = true;
           };
         };
 
