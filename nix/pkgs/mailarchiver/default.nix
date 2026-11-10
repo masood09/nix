@@ -6,7 +6,7 @@
   fetchFromGitHub,
 }: let
   # renovate: datasource=github-releases depName=s1t5/mail-archiver versioning=loose
-  version = "2610.1";
+  version = "2611.1";
 in
   buildDotnetModule {
     pname = "mail-archiver";
@@ -16,7 +16,7 @@ in
       owner = "s1t5";
       repo = "mail-archiver";
       rev = version;
-      sha256 = "18pywyjf54nhyc49sdrn77isms5ivc5ydchv36avjxyqpzsd26rl";
+      sha256 = "0xnci0f16r552sby4gwj2gqfal1mklg80dpfbk2zhndk62fw0dc7";
     };
 
     # Prefer csproj over sln for reliability
