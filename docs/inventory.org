@@ -221,6 +221,7 @@ desktop-specific system module rather than being tied to a single laptop.
 | Prev                     | NixOS desktops     | PDF/image viewer and lightweight editor       |
 | Darktable                | usul                | Photo editing and print preparation           |
 | Simple Scan              | usul                | SANE/eSCL document scanning GUI               |
+| Hermes Desktop           | usul                | Hermes Agent GUI (=llm-agents=)               |
 | Epson Scan 2             | usul                | Epson scanner GUI and vendor scan features    |
 | System Config Printer    | usul                | CUPS printer administration                   |
 
@@ -653,6 +654,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | fastfetch              | System info                                                              |
 | fish                   | Interactive shell                                                        |
 | git                    | Version control                                                          |
+| hermes-desktop         | Hermes Agent desktop app (=llm-agents=, built on nixpkgs-unstable)       |
 | jellyfin-media-player  | Jellyfin desktop client                                                  |
 | kitty                  | Terminal emulator                                                        |
 | neovim                 | Editor                                                                   |

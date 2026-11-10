@@ -267,6 +267,10 @@ in {
           enable = lib.mkEnableOption "Whether to enable Oracle Cloud CLI.";
         };
 
+        hermes-desktop = {
+          enable = lib.mkEnableOption "Whether to enable the Hermes Agent desktop app.";
+        };
+
         opencode = {
           enable = lib.mkEnableOption "Whether to enable opencode.";
         };

@@ -43,6 +43,7 @@
 
     # Desktop Applications
     ./_element-desktop.nix
+    ./_hermes-desktop.nix
     ./_vesktop.nix
     ./zen
 
