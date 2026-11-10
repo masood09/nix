@@ -145,6 +145,32 @@
             '';
           };
 
+          autoUpdate = {
+            enable = lib.mkEnableOption ''
+              a daily check of upstream's signed update feed. When a newer
+              engine or terminal (Control) is offered, Strata is stopped,
+              `strata update` installs it, and Strata is started again if it
+              was running. A new engine is switched to only after a full test
+              start of the model passes, so a failed test leaves the old one in
+              place; a new Control is checked only with `--version`. An update
+              costs three model loads: the test start, the run-config
+              regeneration on the next start, and the serve itself. With
+              tvGuard, a day on which the TV is on at the scheduled time is
+              skipped, not retried. Without tvGuard nothing keeps the test start
+              off a GPU another workload (such as a game session) is using
+            '';
+
+            schedule = lib.mkOption {
+              type = lib.types.str;
+              default = "*-*-* 04:30";
+              description = ''
+                systemd OnCalendar expression for the update check. Missed runs
+                are not caught up at boot, so an update never races the
+                guard's first start after a reboot.
+              '';
+            };
+          };
+
           userId = lib.mkOption {
             type = lib.types.ints.u16;
             default = 3016;
