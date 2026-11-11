@@ -53,6 +53,7 @@
 
           httpTargets = [
             "https://auth.mantannest.com/-/health/live/"
+            "https://budget.mantannest.com/health"
             "https://grafana.mantannest.com/api/health"
             "https://headscale.mantannest.com/health"
             "https://headscale.mantannest.com/admin/healthz"
