@@ -16,6 +16,7 @@
   # here if a service moves hosts or a probe URL changes.
   serviceNames = {
     "https://auth.mantannest.com/-/health/live/" = "Authentik (accesscontrolsystem)";
+    "https://budget.mantannest.com/health" = "Actual Budget (heartbeat)";
     "https://grafana.mantannest.com/api/health" = "Grafana (heartbeat)";
     "https://headscale.mantannest.com/health" = "Headscale (meshcontrol)";
     "https://headscale.mantannest.com/admin/healthz" = "Headplane (meshcontrol)";
