@@ -14,17 +14,28 @@ in {
 
       users.${userName} = {
         xdg = {
+          # Apps that set themselves as default (browsers, file managers,
+          # "Open with… always") replace the managed symlink with a plain
+          # file. HM then backs it up to mimeapps.list.hm-backup, and once
+          # that backup exists every later activation fails on the clobber
+          # check. The declared associations are authoritative, so overwrite.
+          configFile = {
+            "mimeapps.list" = {
+              force = true;
+            };
+          };
+
           mimeApps = {
             enable = true;
             defaultApplications = {
-              "application/pdf" = "io.github.scrambletools.prev.desktop";
-              "image/avif" = "io.github.scrambletools.prev.desktop";
-              "image/bmp" = "io.github.scrambletools.prev.desktop";
-              "image/gif" = "io.github.scrambletools.prev.desktop";
-              "image/jpeg" = "io.github.scrambletools.prev.desktop";
-              "image/png" = "io.github.scrambletools.prev.desktop";
-              "image/tiff" = "io.github.scrambletools.prev.desktop";
-              "image/webp" = "io.github.scrambletools.prev.desktop";
+              "application/pdf" = "run.prev.desktop";
+              "image/avif" = "run.prev.desktop";
+              "image/bmp" = "run.prev.desktop";
+              "image/gif" = "run.prev.desktop";
+              "image/jpeg" = "run.prev.desktop";
+              "image/png" = "run.prev.desktop";
+              "image/tiff" = "run.prev.desktop";
+              "image/webp" = "run.prev.desktop";
               "inode/directory" = "thunar.desktop";
             };
           };
