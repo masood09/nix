@@ -506,7 +506,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Service                   | Notes                                             |
 |---------------------------+---------------------------------------------------|
 | ACME                      | ZFS-backed cert storage                           |
-| Actual Budget             | ZFS + restic, loopback-only behind local Caddy    |
+| Actual Budget             | ZFS + restic, loopback-only, Authentik OIDC       |
 | Backup                    | Orchestrates 17 service units                     |
 | Caddy                     | Reverse proxy                                     |
 | Dell iDRAC Fan Controller | IPMI fan speed management                         |
