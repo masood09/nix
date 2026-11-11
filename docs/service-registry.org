@@ -48,8 +48,9 @@ Next available human UID: *1003*
 | strata                        | 3016 | 3016 | Local LLM inference server (ixian)              |
 | hermes                        | 3017 | 3017 | Hermes Agent gateway (heartbeat)                |
 | searx                         | 3018 | 3018 | SearXNG metasearch (heartbeat)                  |
+| actual                        | 3019 | 3019 | Actual Budget personal finance (heartbeat)      |
 
-Next available UID/GID: *3019*
+Next available UID/GID: *3020*
 
 *Exception:* the arr media stack (Jellyfin/Sonarr/Radarr/Lidarr/Prowlarr/SABnzbd/Seerr/Recyclarr,
 via the =nixflix= flake input — see =modules/services/arr/=, enabled per-machine via
@@ -113,6 +114,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | Strata (LLM API)                     |  8916 | Localhost only (ixian); SSH tunnel |
 | Headscale (pending move)             |  8917 | Reserved — code-review finding 9; still on 8080 |
 | SearXNG                              |  8918 | heartbeat; behind Caddy (loopback, or wg netns with vpn.enable) |
+| Actual Budget                        |  8919 | heartbeat; loopback behind Caddy  |
 | Authentik (HTTP/health)              |  9000 | 127.0.0.1 only; server listener    |
 | Authentik Worker (HTTP)              |  9001 | 127.0.0.1 only; worker listener    |
 | Prometheus                           |  9090 | Upstream default                  |
@@ -134,7 +136,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | MongoDB                              | 27017 | Localhost only (Nightscout)       |
 | LiveKit RTC (UDP range)              | 50100 | 50100–50200                       |
 
-Next available port in 89xx block: *8919*
+Next available port in 89xx block: *8920*
 
 ** Arr Media Stack (heartbeat only)
 Upstream defaults kept as-is (same convention as Immich/Vaultwarden above) — these sit
