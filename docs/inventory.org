@@ -389,6 +389,7 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 
 | Service                   | Module Dir                    | Purpose                                       |
 |---------------------------+-------------------------------+-----------------------------------------------|
+| Actual Budget             | actual/                       | Personal finance / budgeting (upstream module)|
 | BabyBuddy                 | babybuddy/                    | Baby tracking app (Podman + PostgreSQL)       |
 | Hermes Agent              | hermes/                       | AI agent gateway (Matrix/Discord/Telegram)    |
 | IT-Tools                  | ittools/                      | Web-based dev utilities (stateless container) |
@@ -505,7 +506,8 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Service                   | Notes                                             |
 |---------------------------+---------------------------------------------------|
 | ACME                      | ZFS-backed cert storage                           |
-| Backup                    | Orchestrates 13 service units                     |
+| Actual Budget             | ZFS + restic, loopback-only behind local Caddy    |
+| Backup                    | Orchestrates 17 service units                     |
 | Caddy                     | Reverse proxy                                     |
 | Dell iDRAC Fan Controller | IPMI fan speed management                         |
 | Grafana                   | ZFS-backed dashboards                             |
