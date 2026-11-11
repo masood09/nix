@@ -48,24 +48,58 @@ in {
             description = "GID for the Actual service group.";
           };
 
+          sessionLifetime = lib.mkOption {
+            type = lib.types.ints.positive;
+            default = 7 * 24 * 60 * 60;
+            description = ''
+              Lifetime of an Actual login session, in seconds (token_expiration).
+              This bounds how long someone removed from the Authentik
+              application, or disabled upstream, keeps access through an
+              existing session. Disabling the user in Actual's User Directory
+              ends it immediately.
+
+              Upstream reads the same value with different units: OpenID
+              sessions use seconds, but loginWithPassword (accounts/password.js,
+              still in 26.11) multiplies it by 60, i.e. minutes. A password
+              session therefore lives ~60x longer (the 7-day default becomes
+              ~420 days). Applied unconditionally, so it also replaces
+              upstream's "never" on password-only instances.
+            '';
+          };
+
           oidc = {
             enable = lib.mkEnableOption ''
               OpenID-only login for Actual via Authentik (password login is
-              disallowed). Requires an `actual/oidc-client-secret` key in the
-              host's secrets.sops.yaml and a matching entry in its _secrets.nix
-              with `sopsFile = ./secrets.sops.yaml`; this module sets
-              `owner = "actual"` and `restartUnits` on it'';
+              disallowed). Requires an `actualbudget/oidc/client-secret` key in the
+              host's secrets.sops.yaml, declared in its _secrets.nix with
+              `owner = "actual"` (upstream's preStart reads it as that user)
+              and `restartUnits = ["actual.service"]`'';
 
             discoveryUrl = lib.mkOption {
               type = lib.types.str;
-              default = "https://auth.${config.networking.domain}/application/o/actual/";
+              default = "https://auth.${config.networking.domain}/application/o/actualbudget/";
               description = "OpenID provider discovery URL.";
             };
 
             clientId = lib.mkOption {
               type = lib.types.str;
-              default = "actual";
+              default = "actualbudget";
               description = "OpenID client ID for Actual.";
+            };
+
+            userCreationMode = lib.mkOption {
+              type = lib.types.enum ["manual" "login"];
+              default = "manual";
+              description = ''
+                Actual's userCreationMode. "login" creates a BASIC user on first
+                OpenID login, so the Authentik application's bindings decide who
+                can get an account (at login time; see sessionLifetime for
+                existing sessions). "manual" (upstream default) requires an
+                admin to pre-create each user in Actual's User Directory with
+                the username Authentik returns as preferred_username, i.e. the
+                Authentik username, not the email. The first login becomes the
+                owner/admin in both modes.
+              '';
             };
           };
 
