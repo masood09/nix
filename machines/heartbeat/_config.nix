@@ -61,6 +61,13 @@
         actual = {
           enable = true;
 
+          oidc = {
+            enable = true;
+            # The Authentik app is bound to parents, which gates who gets an
+            # account.
+            userCreationMode = "login";
+          };
+
           zfs = {
             enable = true;
             restic = {
