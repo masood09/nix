@@ -3,6 +3,16 @@
   config = {
     sops = {
       secrets = {
+        # Authentik OIDC client secret for Actual Budget, keyed like the
+        # Authentik app (actualbudget). Upstream's preStart reads it as the
+        # actual user while rendering /run/actual/config.json. Rotation
+        # touches both this file and infra-tofu's authentik apps.sops.json.
+        "actualbudget/oidc/client-secret" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "actual";
+          restartUnits = ["actual.service"];
+        };
+
         "alloy/.env" = {
           restartUnits = ["alloy.service"];
         };
