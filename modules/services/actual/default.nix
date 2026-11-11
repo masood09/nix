@@ -9,6 +9,7 @@
 # even though the nixpkgs module's freeformType accepts anything.
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -16,6 +17,14 @@
   homelabCfg = config.homelab;
   cfg = homelabCfg.services.actual;
   caddyEnabled = config.services.caddy.enable;
+
+  # Pinned stable nixpkgs is four releases behind (26.7.0 vs 26.11.0). Same
+  # reason as immich/karakeep/seerr: the API methods an importer needs
+  # (`payeeNameNormalization` on importTransactions, `getScheduleDates`,
+  # `mergeTransactions`, `runBankSync` reporting what it did) landed after
+  # 26.7.0. Budget-scoped API keys are not in any stable release yet — they
+  # are in the nightly only — so this does not enable them.
+  actualPackage = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.actual-server;
 
   persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
@@ -62,6 +71,7 @@ in {
     services = {
       actual = {
         enable = true;
+        package = actualPackage;
         # Static user instead of upstream's DynamicUser so the UID stays
         # stable across ZFS snapshot and restic restores.
         user = "actual";
