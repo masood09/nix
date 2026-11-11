@@ -58,7 +58,14 @@
                   name = "Qwen3.8 Flash Next IQ2_XS";
                   limit = {
                     context = 262144;
-                    output = 4096;
+                    # Qwen3.8 is a thinking model, so reasoning tokens count
+                    # against this cap. At 4096, compacting a ~225K session
+                    # spent the whole budget before finishing the summary
+                    # ("Compaction summary reached the output token limit"),
+                    # leaving the session unable to continue. 32768 is Qwen's
+                    # recommended output length; OpenCode reserves it out of
+                    # the 256K context when deciding when to compact.
+                    output = 32768;
                   };
                 };
               };
