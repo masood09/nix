@@ -58,10 +58,22 @@
           };
         };
 
+        actual = {
+          enable = true;
+
+          zfs = {
+            enable = true;
+            restic = {
+              enable = true;
+            };
+          };
+        };
+
         backup = {
           enable = true;
 
           serviceUnits = [
+            "actual.service"
             "home-assistant.service"
             "hermes-gateway.service"
             "immich-machine-learning.service"
