@@ -4,6 +4,7 @@
 # See docs/service-registry.org for UID/GID/port assignments.
 {
   imports = [
+    ./actual
     ./alloy
     ./arr
     ./aurral
