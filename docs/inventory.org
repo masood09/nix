@@ -474,6 +474,26 @@ Defined in =nix/pkgs/= and auto-discovered.
 |-----------+----------------|
 | fastfetch | no zpools      |
 
+*** mentat
+
+- *Purpose:* Secondary DNS (DNS Filtering) & Hermes Agent
+- *Storage:* Single-disk encrypted ZFS root (=rpool=, impermanence)
+
+**** Services
+
+| Service           | Notes                                        |
+|-------------------+----------------------------------------------|
+| Backup            | Disabled until Hermes lands (no state yet)   |
+| Blocky            | DNS ad/tracker filtering (same as caretaker) |
+| smartctl-exporter | Single NVMe SMART health                     |
+| Tailscale         | ZFS dataset                                  |
+
+**** Programs
+
+| Program   | Notes          |
+|-----------+----------------|
+| fastfetch | rpool          |
+
 *** commrelay
 
 - *Purpose:* Secure federated messaging (Matrix Synapse)

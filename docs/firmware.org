@@ -28,9 +28,11 @@ that meant carrying the cost with none of the benefit:
   =GIO_EXTRA_MODULES=), so the whole chain was wrapper metadata nothing on a
   server ever loads.
 
-Only two servers were ever affected: =heartbeat= and =caretaker=. The other five
+Only two servers were ever affected: =heartbeat= and =caretaker=. Five others
 (=commrelay=, =watchfulsystem=, =trialunit=, =meshcontrol=,
 =accesscontrolsystem=) set =homelab.hardware.isVM = true= and never had it.
+=mentat= is bare metal but was added after fwupd became desktop-only, so it
+never had it either.
 
 Trimming the wrapper via =overrideAttrs= was evaluated and rejected: it recovers
 only ~13 MiB of the ~100 MiB (the rest arrives via =gobject-introspection= →

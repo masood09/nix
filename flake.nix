@@ -284,6 +284,7 @@
 
       caretaker = mkNixOSConfig ./machines/caretaker;
       heartbeat = mkNixOSConfig ./machines/heartbeat;
+      mentat = mkNixOSConfig ./machines/mentat;
       trialunit = mkNixOSConfig ./machines/trialunit;
 
       # Desktops — use mkNixOSDesktopConfig for niri + noctalia modules

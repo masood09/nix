@@ -61,6 +61,7 @@ nix eval --json '.#nixosConfigurations.<host>.config.services.restic.backups.bac
 | watchfulsystem      | Yes    |        1 | (none)        | -           | No        |
 | commrelay           | No     |        0 | -             | -           | No        |
 | caretaker           | No     |        0 | -             | -           | No        |
+| mentat              | No     |        0 | -             | -           | No        |
 
 Three hosts stop nothing at all. =accesscontrolsystem= gained nothing from the stop: its only snapshotted data was the =pg_dump= output (MVCC-consistent already) and its =extraPaths= are read live after services restart, so the window never covered them. =meshcontrol= and =watchfulsystem= keep all state for headscale, headplane and uptime-kuma in a single ZFS dataset each, so one atomic snapshot is crash-consistent — the same guarantee those processes must already survive on power loss. headscale in particular is SQLite with =write_ahead_log = true=, and the db, =-wal= and =-shm= files all live inside =/var/lib/headscale=, which is the dataset mountpoint.
 

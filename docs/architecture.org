@@ -29,6 +29,7 @@ machines/                          Per-machine configurations
   commrelay/                         NixOS server (Matrix, monitoring)
   watchfulsystem/                    NixOS server (monitoring, uptime)
   caretaker/                         NixOS server (DNS, Tailscale)
+  mentat/                            NixOS server (secondary DNS, Hermes agent)
   usul/                              NixOS desktop (primary laptop)
   sonic/                             NixOS desktop (laptop)
   work-okta/                         macOS (work)
@@ -201,9 +202,9 @@ homelab
 
 | Role    | Machines                                                                                     | Characteristics                                |
 |---------+----------------------------------------------------------------------------------------------+------------------------------------------------|
-| server  | heartbeat, trialunit, accesscontrolsystem, meshcontrol, commrelay, watchfulsystem, caretaker | ZFS root, impermanence, headless, backup       |
-| desktop | usul, sonic                                                                                  | Niri compositor, GPU, audio, Bluetooth, Stylix |
-| macOS   | work-okta                                                                                    | nix-darwin, Homebrew, Dock management          |
+| server  | heartbeat, trialunit, accesscontrolsystem, meshcontrol, commrelay, watchfulsystem, caretaker, mentat | ZFS root, impermanence, headless, backup       |
+| desktop | usul, sonic                                                                                          | Niri compositor, GPU, audio, Bluetooth, Stylix |
+| macOS   | work-okta                                                                                            | nix-darwin, Homebrew, Dock management          |
 
 * Secrets Architecture
 
