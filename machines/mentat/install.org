@@ -141,37 +141,21 @@ If the boot stays waiting, answer the pending prompt with
 - =systemctl status blocky unbound tailscaled= are all active.
 - =dig @<MENTAT_LAN_IP> example.com= resolves, and a known ad domain
   returns a blocked answer.
-- The node appears in Headscale; note its tailnet address for the cutover
-  below.
+- The node appears in Headscale.
 
-* Cutover: replacing trialunit as secondary DNS
+* Secondary DNS role
 
-mentat is secondary DNS for both the LAN and the tailnet. It runs on a
-temporary LAN address until trialunit is decommissioned, then takes over
-trialunit's LAN address so the existing UniFi firewall rules and DHCP DNS
-options keep working unchanged.
+mentat is the secondary resolver for both the LAN and the tailnet; caretaker
+is the primary. Its tailnet address is referenced in three places, which
+must change together if it ever changes:
 
-1. Done 2026-11-12: trialunit was shut down and its configuration removed
-   from this repo, so its LAN address is free. Remove its client entry in
-   UniFi, so no DHCP reservation still holds the address.
-2. In this repo, switch mentat to trialunit's old LAN address in both places:
-   - =machines/mentat/_networking.nix= (interface address)
-   - =machines/mentat/hardware-configuration.nix= (initrd =ip== kernel param,
-     used for remote unlock)
-3. Replace trialunit's tailnet address with mentat's:
-   - =modules/services/headscale/default.nix= (=dns.nameservers.global=)
-   - =machines/watchfulsystem/_config.nix= (blackbox =dnsTargets=)
-   - =modules/services/grafana/dashboards/fleet.nix= (label "DNS - Secondary")
-4. Update the live Headscale policy wherever trialunit's tailnet address grants
-   DNS access. =policy.mode= is =database=, so the policy lives in Headscale
-   (edit it with Headplane or the =headscale policy= CLI), not in this repo.
-5. Deploy mentat first (it comes back on the new LAN address, and remote
-   unlock moves with it), then meshcontrol and watchfulsystem, then heartbeat
-   (Grafana).
-6. Refresh the SSH known_hosts entries for that address on port 22222
-   (sshd) and port 2222 (initrd unlock), because the host keys change.
-7. Check that tailnet clients are using the new resolver
-   (=tailscale dns status=). Reconnect any that still list the old one.
+- =modules/services/headscale/default.nix= (=dns.nameservers.global=)
+- =machines/watchfulsystem/_config.nix= (blackbox =dnsTargets=)
+- =modules/services/grafana/dashboards/fleet.nix= (label "DNS - Secondary")
+
+Its LAN address is set in =machines/mentat/_networking.nix= and in the initrd
+=ip== kernel param in =hardware-configuration.nix=. UniFi's DNS redirect rules
+and its =DNS_SERVERS= group refer to the same address.
 
 * SSH access and deploys
 

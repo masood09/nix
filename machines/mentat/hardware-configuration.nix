@@ -29,7 +29,7 @@
 
     # Static IP for initrd SSH (remote ZFS unlock)
     kernelParams = [
-      "ip=10.0.20.5::10.0.20.1:255.255.255.0:${config.homelab.networking.hostName}:enp1s0:none"
+      "ip=10.0.20.4::10.0.20.1:255.255.255.0:${config.homelab.networking.hostName}:enp1s0:none"
     ];
 
     kernelModules = ["kvm-intel"];
