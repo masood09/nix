@@ -32,7 +32,7 @@
     "https://prometheus.mantannest.com/-/healthy" = "Prometheus (heartbeat)";
     "https://passwords.mantannest.com" = "Vaultwarden (heartbeat)";
     "100.64.0.17:53" = "DNS - Primary (caretaker)";
-    "100.64.0.22:53" = "DNS - Secondary (trialunit)";
+    "100.64.0.5:53" = "DNS - Secondary (mentat)";
     "forever.minecraft.mantannest.com:25565" = "Minecraft Forever (heartbeat)";
   };
 
