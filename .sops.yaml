@@ -22,8 +22,6 @@ keys:
     age1qpdxlfwgwwnym09qjzr94chzwjnxj5f449nvvz4sgz8r2qrrn3sqtvvvzx
   - &sonic
     age1nz95puflzkel7f0e9exj9d4pl0y2tu9gfust6nwevd6njtkrg5gq8x6c5q
-  - &trialunit
-    age1pcju0zkh2k3f8m7856k9ftzkjqw538jf255t2azusf9yr6v2nqksfn2pwa
   - &mentat
     age1kcccds4znkeumxnad6qgegyas7gqrhyc9a0xq26x5zez9fltjucqgfrxhe
   # --- Admin key (shared across dev machines: usul, work-okta) ---
@@ -47,16 +45,14 @@ creation_rules:
           - *ixian
           - *heartbeat
           - *sonic
-          - *trialunit
           - *mentat
           - *masoodahmed
 
-  # Scoped secrets — headscale DNS only needs meshcontrol + trialunit
+  # Scoped secrets — headscale DNS only needs meshcontrol
   - path_regex: ^secrets/headscale-dns\.sops\.yaml$
     key_groups:
       - age:
         - *meshcontrol
-        - *trialunit
         - *masoodahmed
 
   # Per-machine secrets — each machine + admin only
@@ -112,12 +108,6 @@ creation_rules:
     key_groups:
       - age:
         - *ixian
-        - *masoodahmed
-
-  - path_regex: ^machines/trialunit/secrets\.sops\.yaml$
-    key_groups:
-      - age:
-        - *trialunit
         - *masoodahmed
 
   - path_regex: ^machines/mentat/secrets\.sops\.yaml$
