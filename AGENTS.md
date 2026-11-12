@@ -109,7 +109,6 @@ NixOS servers (built with `mkNixOSConfig`):
 - `heartbeat` — NAS, primary services
 - `meshcontrol` — Headscale VPN control
 - `mentat` — secondary DNS, Hermes agent (planned)
-- `trialunit` — secondary services
 - `watchfulsystem` — monitoring, uptime
 
 NixOS desktops (built with `mkNixOSDesktopConfig`, which adds niri/noctalia/zen-browser):

@@ -56,8 +56,8 @@ sudo systemctl stop headscale.service
 Take a ZFS snapshot for quick rollback if something goes wrong:
 
 The dataset name is derived from its mountpoint, so this is correct on
-whichever host runs headscale (meshcontrol backs =/var/lib/headscale= with an
-rpool dataset, trialunit with a dpool one):
+whichever host runs headscale and whichever pool backs =/var/lib/headscale=
+(an rpool dataset on meshcontrol):
 
 #+begin_src bash
 ds=$(zfs list -H -o name,mountpoint | awk '{p=$2;sub(/\/+$/,"",p);if(p=="/var/lib/headscale")print $1}')

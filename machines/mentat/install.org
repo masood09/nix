@@ -151,14 +151,9 @@ temporary LAN address until trialunit is decommissioned, then takes over
 trialunit's LAN address so the existing UniFi firewall rules and DHCP DNS
 options keep working unchanged.
 
-1. Power off trialunit and remove it from the network on UniFi, so its LAN
-   address is free. It must stay off. trialunit's config still claims that
-   address in =_networking.nix=, in the initrd =ip== param in
-   =hardware-configuration.nix=, and in =blocky.dnsListen= in =_config.nix=
-   (which also lists its tailnet address). If it boots again, two hosts claim
-   one address, and the weekly auto-upgrade from main will keep applying that
-   config. If trialunit has to stay reachable, give it a new LAN address in
-   all three places, and cut its =dnsListen= down to loopback, before step 2.
+1. Done 2026-11-12: trialunit was shut down and its configuration removed
+   from this repo, so its LAN address is free. Remove its client entry in
+   UniFi, so no DHCP reservation still holds the address.
 2. In this repo, switch mentat to trialunit's old LAN address in both places:
    - =machines/mentat/_networking.nix= (interface address)
    - =machines/mentat/hardware-configuration.nix= (initrd =ip== kernel param,

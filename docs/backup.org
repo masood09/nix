@@ -55,7 +55,6 @@ nix eval --json '.#nixosConfigurations.<host>.config.services.restic.backups.bac
 | Machine             | Backup | Datasets | Units Stopped | Extra Paths | PG Backup |
 |---------------------+--------+----------+---------------+-------------+-----------|
 | heartbeat           | Yes    |       15 | 15            | -           | Yes       |
-| trialunit           | Yes    |       19 | 18            | authentik   | Yes       |
 | accesscontrolsystem | Yes    |        2 | (none)        | authentik   | Yes       |
 | meshcontrol         | Yes    |        1 | (none)        | -           | No        |
 | watchfulsystem      | Yes    |        1 | (none)        | -           | No        |
@@ -165,7 +164,7 @@ mount -t zfs -o ro <dataset>@restic_nightly /mnt/nightly_backup/<name>
 
 This matters for services that own more than one dataset. =opencloud= spans five, and =matrix-synapse= splits its database and media store across two. Under the old loop those were captured up to a second apart, so metadata could reference storage that was not in its own snapshot — the loop only worked because services were stopped for the whole window, which they no longer are.
 
-Atomicity is *per pool*: zfs rejects an invocation naming datasets in different pools. On heartbeat both multi-dataset services straddle =fpool= and =dpool=, so a residual window remains between the two calls — now the gap between two syscalls rather than a second of mounting. trialunit is single-pool, so all 19 of its datasets are captured in one atomic call.
+Atomicity is *per pool*: zfs rejects an invocation naming datasets in different pools. On heartbeat both multi-dataset services straddle =fpool= and =dpool=, so a residual window remains between the two calls — now the gap between two syscalls rather than a second of mounting. Single-pool hosts capture all of their datasets in one atomic call.
 
 The cleanup script reverses this: unmount, rmdir, destroy snapshot. It uses =set +euo pipefail= so cleanup proceeds even if individual steps fail.
 
@@ -257,7 +256,7 @@ Each machine that runs backups has three restic secrets in its =secrets.sops.yam
 
 These are decrypted at runtime by sops-nix and passed to the restic service via =environmentFile=, =repositoryFile=, and =passwordFile=.
 
-Machines with restic secrets: heartbeat, trialunit, accesscontrolsystem, meshcontrol, watchfulsystem. commrelay's declarations were dropped when its pipeline was disabled; the values remain in its =secrets.sops.yaml=.
+Machines with restic secrets: heartbeat, accesscontrolsystem, meshcontrol, watchfulsystem. commrelay's declarations were dropped when its pipeline was disabled; the values remain in its =secrets.sops.yaml=.
 
 * Safety Guarantees
 
