@@ -72,7 +72,7 @@
 
           dnsTargets = [
             "100.64.0.17:53"
-            "100.64.0.22:53"
+            "100.64.0.5:53"
           ];
 
           # Per-world forced-host name, not the bare minecraft.mantannest.com —
