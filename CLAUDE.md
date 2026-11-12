@@ -203,7 +203,7 @@ When the user describes a problem, pick the right tool yourself — they shouldn
 
 ## Machines
 
-**NixOS servers**: accesscontrolsystem, commrelay, meshcontrol, watchfulsystem, caretaker, heartbeat, mentat, trialunit
+**NixOS servers**: accesscontrolsystem, commrelay, meshcontrol, watchfulsystem, caretaker, heartbeat, mentat
 **NixOS desktops**: usul (primary laptop), sonic (laptop)
 **macOS**: work-okta
 **Other**: nixiso (minimal NixOS installer ISO)

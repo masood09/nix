@@ -578,51 +578,6 @@ Defined in =nix/pkgs/= and auto-discovered.
 |-----------+---------------|
 | fastfetch | zpools: rpool |
 
-*** trialunit
-
-- *Purpose:* Test & Integration Environment (mirrors production)
-- *Storage:* ZFS root (encrypted, impermanence), pools: rpool, dpool
-- *Platform:* VM
-- *Domain:* test.mantannest.com
-
-**** Services
-
-| Service                   | Notes                                         |
-|---------------------------+-----------------------------------------------|
-| ACME                      | ZFS-backed cert storage                       |
-| Authentik                 | Test SSO instance                             |
-| BabyBuddy                 | ZFS-backed baby tracking                      |
-| Backup                    | Orchestrates 19 service units                 |
-| Blocky                    | DNS with local domain resolution              |
-| Caddy                     | Reverse proxy                                 |
-| Dell iDRAC Fan Controller | IPMI fan speed management                     |
-| Garage                    | ZFS S3-compatible storage                     |
-| Grafana                   | ZFS-backed dashboards                         |
-| Headscale                 | ZFS, OIDC, Headplane                          |
-| Immich                    | ZFS photo/video management                    |
-| IT-Tools                  | Stateless developer utilities                 |
-| JobScraper                | Job aggregator container                      |
-| Karakeep                  | ZFS bookmark manager                          |
-| Loki                      | ZFS, custom retention (24h/48h/168h)          |
-| MailArchiver              | ZFS email archival                            |
-| Matrix                    | ZFS, Caddy, LiveKit RTC                       |
-| Minecraft                 | ZFS (dpool), Java Edition server, open firewall      |
-| MongoDB                   | ZFS (Nightscout)                              |
-| Nightscout                | CGM dashboard                                 |
-| OpenCloud                 | ZFS, multi-dataset                            |
-| Podman                    | ZFS rootless containers                       |
-| PostgreSQL                | ZFS, TCP/IP, backed up                        |
-| Prometheus                | 2d retention                                  |
-| Tailscale                 | ZFS state                                     |
-| Uptime Kuma               | ZFS health monitoring                         |
-| Vaultwarden               | ZFS password manager                          |
-
-**** Programs
-
-| Program   | Notes                |
-|-----------+----------------------|
-| fastfetch | zpools: rpool, dpool |
-
 *** watchfulsystem
 
 - *Purpose:* Monitoring & Service Health (Uptime Kuma)

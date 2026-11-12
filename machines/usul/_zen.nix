@@ -143,33 +143,19 @@ in {
                     workspace = homelabSpace;
                     position = 4;
                   };
-                  "Uptime Kuma - Test" = {
-                    id = "c9d0e1f2-a3b4-4678-2345-789012345678";
-                    url = "https://uptime.test.mantannest.com";
-                    container = 3;
-                    workspace = homelabSpace;
-                    position = 5;
-                  };
-                  "Grafana - Test" = {
-                    id = "9a1e6c44-2b7f-4d8a-b5c9-1f3e7a2d6b80";
-                    url = "https://grafana.test.mantannest.com";
-                    container = 3;
-                    workspace = homelabSpace;
-                    position = 6;
-                  };
                   "Oracle Cloud" = {
                     id = "e2c1d9e9-fe41-4bae-aca6-5a42b6526138";
                     url = "https://cloud.oracle.com";
                     container = 3;
                     workspace = homelabSpace;
-                    position = 7;
+                    position = 5;
                   };
                   "Backblaze" = {
                     id = "4bff4f82-d95a-4985-984c-0893ea38c9f8";
                     url = "https://secure.backblaze.com/b2_buckets.htm";
                     container = 3;
                     workspace = homelabSpace;
-                    position = 8;
+                    position = 6;
                   };
 
                   # --- Admin space ---
@@ -179,13 +165,6 @@ in {
                     container = 4;
                     workspace = adminSpace;
                     position = 1;
-                  };
-                  "Authentik - Test" = {
-                    id = "e1f2a3b4-c5d6-4890-4567-901234567890";
-                    url = "https://auth.test.mantannest.com";
-                    container = 4;
-                    workspace = adminSpace;
-                    position = 2;
                   };
 
                   # --- Google space ---

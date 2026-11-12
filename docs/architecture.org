@@ -23,7 +23,6 @@ machines/                          Per-machine configurations
   <name>/install.org                 Per-machine install/recovery runbook
 
   heartbeat/                         NixOS server (NAS, primary services)
-  trialunit/                         NixOS server (secondary services)
   accesscontrolsystem/               NixOS server (Authentik SSO)
   meshcontrol/                       NixOS server (Headscale VPN control)
   commrelay/                         NixOS server (Matrix, monitoring)
@@ -202,9 +201,9 @@ homelab
 
 | Role    | Machines                                                                                     | Characteristics                                |
 |---------+----------------------------------------------------------------------------------------------+------------------------------------------------|
-| server  | heartbeat, trialunit, accesscontrolsystem, meshcontrol, commrelay, watchfulsystem, caretaker, mentat | ZFS root, impermanence, headless, backup       |
-| desktop | usul, sonic                                                                                          | Niri compositor, GPU, audio, Bluetooth, Stylix |
-| macOS   | work-okta                                                                                            | nix-darwin, Homebrew, Dock management          |
+| server  | heartbeat, accesscontrolsystem, meshcontrol, commrelay, watchfulsystem, caretaker, mentat | ZFS root, impermanence, headless, backup       |
+| desktop | usul, sonic                                                                               | Niri compositor, GPU, audio, Bluetooth, Stylix |
+| macOS   | work-okta                                                                                 | nix-darwin, Homebrew, Dock management          |
 
 * Secrets Architecture
 
@@ -215,8 +214,7 @@ Three-tier sops-nix structure with age encryption:
 
 secrets/
   secrets.sops.yaml                Global (all NixOS machines + dev keys)
-  headscale-dns.sops.yaml          Scoped (meshcontrol, trialunit)
-  headscale-acl.sops.yaml          Scoped (meshcontrol, trialunit)
+  headscale-dns.sops.yaml          Scoped (meshcontrol)
 
 machines/<name>/
   secrets.sops.yaml                Per-host (that machine + dev keys)
