@@ -1,0 +1,208 @@
+#+TITLE: Installing NixOS on mentat
+#+AUTHOR: Masood Ahmed
+#+OPTIONS: toc:nil num:nil
+
+This document describes the end-to-end process for installing NixOS on the
+=mentat= bare-metal server (Intel N100 mini PC, single 256 GB WD SN730 NVMe)
+using:
+
+- NixOS Live ISO (booted via USB, built with =just build-iso=)
+- =disko= with the shared single-disk encrypted ZFS layout
+  (=modules/nixos/disko/_root-disk-single.nix=)
+- Impermanence (root rolled back to =rpool/root/empty@start= on every boot)
+- Flake-based configuration and sops-nix secrets
+
+* Overview
+
+- Boot the NixOS Live ISO from USB
+- Partition, encrypt, and mount the NVMe with =disko=
+- Generate the initrd SSH host key and the age key
+- Register the age key in the repo and create =secrets.sops.yaml=
+- Install NixOS from the flake
+- Reboot and unlock the pool over SSH (port 2222)
+
+* Prerequisites
+
+- Physical access to the machine, plus the installer USB
+- A Headscale pre-auth key for the new node
+- GitHub repo with NixOS flake (=github:masood09/nix=)
+
+* 1. Boot NixOS Live ISO
+
+Boot from the USB stick. The ISO from =just build-iso= already has the SSH key
+baked in. From your local machine (the installer gets a DHCP address):
+
+#+begin_src bash
+ssh nixos@<DHCP_IP>
+sudo su - root
+#+end_src
+
+Confirm the target disk before wiping it. The USB stick is =sda=; the only
+NVMe is the install target:
+
+#+begin_src bash
+ls -l /dev/disk/by-id/ | grep -v part
+# expect: nvme-WDC_PC_SN730_SDBQNTY-256G-1001_194364802297 -> ../../nvme0n1
+#+end_src
+
+* 2. Partition and Mount Disks Using Disko
+
+This destroys everything on the NVMe. You will be prompted for the ZFS
+encryption passphrase:
+
+#+begin_src bash
+nix --experimental-features "nix-command flakes" \
+  --option tarball-ttl 0 \
+  run --refresh github:nix-community/disko -- \
+  --mode destroy,format,mount \
+  --flake "github:masood09/nix#mentat"
+#+end_src
+
+* 3. Prepare Persistent and Secret Directories
+
+#+begin_src bash
+mkdir -pv /mnt/nix/{secret/{initrd,age},persist/etc/ssh}
+chmod 0700 /mnt/nix/secret
+#+end_src
+
+* 4. Generate SSH and age Keys
+
+#+begin_src bash
+ssh-keygen -t ed25519 -N "" -C "" \
+  -f /mnt/nix/secret/initrd/ssh_host_ed25519_key
+
+ssh-keygen -t ed25519 -N "" -C "" \
+  -f /mnt/nix/secret/age/ssh_ed25519_key
+
+nix-shell --extra-experimental-features flakes \
+  -p ssh-to-age \
+  --run 'cat /mnt/nix/secret/age/ssh_ed25519_key.pub | ssh-to-age'
+#+end_src
+
+* 5. Register mentat in sops (on a dev machine)
+
+Using the age public key from step 4:
+
+1. Add an =&mentat= key to =.sops.yaml=, add it to the
+   =secrets/secrets.sops.yaml= creation rule, and add a per-machine rule for
+   =^machines/mentat/secrets\.sops\.yaml$= (=mentat= + =masoodahmed=).
+2. Re-key the shared file so mentat can read =alloy/.env= and
+   =zed/discord-zfs-webhook=:
+   #+begin_src bash
+   sops updatekeys secrets/secrets.sops.yaml
+   #+end_src
+3. Create the machine file with the Headscale pre-auth key:
+   #+begin_src bash
+   sops machines/mentat/secrets.sops.yaml
+   # tailscale:
+   #   preauth-key: <key>
+   #+end_src
+4. Commit and push, so the install in step 6 sees the secrets.
+
+* 6. Install NixOS
+
+#+begin_src bash
+nixos-install \
+  --no-root-passwd \
+  --root /mnt \
+  --flake github:masood09/nix#mentat \
+  --option tarball-ttl 0
+#+end_src
+
+* 7. Cleanup and Reboot
+
+Remove the USB stick when the machine powers off:
+
+#+begin_src bash
+umount -Rl /mnt
+zpool export -a
+reboot
+#+end_src
+
+* Post-Install Notes
+
+** Remote Unlock After Reboot
+
+The initrd brings up =enp1s0= with mentat's static LAN address (set in
+=machines/mentat/_networking.nix= and the =ip== kernel param in
+=hardware-configuration.nix=) and runs SSH on port 2222:
+
+#+begin_src bash
+ssh boot.mentat   # or: ssh -p 2222 root@<MENTAT_LAN_IP>
+zfs load-key -a
+#+end_src
+
+If the boot stays waiting, answer the pending prompt with
+=systemd-tty-ask-password-agent= (see =modules/nixos/_remote-unlock.nix=).
+
+** Verification
+
+- =zfs list= shows =rpool/root/*= and the tailscale dataset mounted.
+- =systemctl status blocky unbound tailscaled= are all active.
+- =dig @<MENTAT_LAN_IP> example.com= resolves, and a known ad domain
+  returns a blocked answer.
+- The node appears in Headscale; note its tailnet address for the cutover
+  below.
+
+* Cutover: replacing trialunit as secondary DNS
+
+mentat is secondary DNS for both the LAN and the tailnet. It runs on a
+temporary LAN address until trialunit is decommissioned, then takes over
+trialunit's LAN address so the existing UniFi firewall rules and DHCP DNS
+options keep working unchanged.
+
+1. Power off trialunit and remove it from the network on UniFi, so its LAN
+   address is free. It must stay off. trialunit's config still claims that
+   address in =_networking.nix=, in the initrd =ip== param in
+   =hardware-configuration.nix=, and in =blocky.dnsListen= in =_config.nix=
+   (which also lists its tailnet address). If it boots again, two hosts claim
+   one address, and the weekly auto-upgrade from main will keep applying that
+   config. If trialunit has to stay reachable, give it a new LAN address in
+   all three places, and cut its =dnsListen= down to loopback, before step 2.
+2. In this repo, switch mentat to trialunit's old LAN address in both places:
+   - =machines/mentat/_networking.nix= (interface address)
+   - =machines/mentat/hardware-configuration.nix= (initrd =ip== kernel param,
+     used for remote unlock)
+3. Replace trialunit's tailnet address with mentat's:
+   - =modules/services/headscale/default.nix= (=dns.nameservers.global=)
+   - =machines/watchfulsystem/_config.nix= (blackbox =dnsTargets=)
+   - =modules/services/grafana/dashboards/fleet.nix= (label "DNS - Secondary")
+4. Update the live Headscale policy wherever trialunit's tailnet address grants
+   DNS access. =policy.mode= is =database=, so the policy lives in Headscale
+   (edit it with Headplane or the =headscale policy= CLI), not in this repo.
+5. Deploy mentat first (it comes back on the new LAN address, and remote
+   unlock moves with it), then meshcontrol and watchfulsystem, then heartbeat
+   (Grafana).
+6. Refresh the SSH known_hosts entries for that address on port 22222
+   (sshd) and port 2222 (initrd unlock), because the host keys change.
+7. Check that tailnet clients are using the new resolver
+   (=tailscale dns status=). Reconnect any that still list the old one.
+
+* SSH access and deploys
+
+sshd listens on 22222 (=homelab.services.ssh.listenPort=), and port 22 is
+closed. =just machine=mentat deploy= runs =--target-host masoodahmed@mentat=,
+so it relies on =~/.ssh/config= for the port. Add entries that follow the
+existing hosts, and a DNS record for
+=mentat.server.homelab.mantannest.com=:
+
+#+begin_example
+Host mentat
+  HostName mentat.server.homelab.mantannest.com
+  User masoodahmed
+  Port 22222
+
+Host boot.mentat
+  HostName mentat.server.homelab.mantannest.com
+  User root
+  Port 2222
+#+end_example
+
+* DNS behavior notes
+
+Unbound forwards the local zone (=mantannest.com=) to the gateway, the same
+as on caretaker. LAN record answers therefore still come from UniFi, and
+mentat is not authoritative for them. If a local record stops resolving,
+check UniFi first.
+
+mentat doesn't run Headscale, so it needs no =headscale-dns.sops.yaml= rule.
