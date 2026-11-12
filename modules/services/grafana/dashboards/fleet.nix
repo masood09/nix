@@ -78,6 +78,7 @@
     "commrelay"
     "heartbeat"
     "ixian"
+    "mentat"
     "meshcontrol"
     "watchfulsystem"
   ];
