@@ -414,7 +414,6 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 | Blackbox Exporter       | blackbox-exporter/     | HTTP, DNS, and network probe metrics         |
 | IPMI Exporter           | ipmi-exporter/         | BMC and chassis metrics                      |
 | Smartctl Exporter       | smartctl-exporter/     | Disk health metrics                          |
-| Home Assistant          | home-assistant/        | Home automation                              |
 
 The service inventory above covers all 34 directories imported by
 =modules/services/default.nix=. The custom package inventory is:

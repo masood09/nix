@@ -81,7 +81,6 @@
 
           serviceUnits = [
             "actual.service"
-            "home-assistant.service"
             "hermes-gateway.service"
             "immich-machine-learning.service"
             "immich-server.service"
@@ -288,17 +287,6 @@
             # backend, since SearXNG cannot fetch pages.
             searchBackend = "searxng";
           };
-
-          zfs = {
-            enable = true;
-            restic = {
-              enable = true;
-            };
-          };
-        };
-
-        home-assistant = {
-          enable = true;
 
           zfs = {
             enable = true;
