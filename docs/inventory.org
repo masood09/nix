@@ -392,6 +392,7 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 | Actual Budget             | actual/                       | Personal finance / budgeting (upstream module)|
 | BabyBuddy                 | babybuddy/                    | Baby tracking app (Podman + PostgreSQL)       |
 | Hermes Agent              | hermes/                       | AI agent gateway (Matrix/Discord/Telegram)    |
+| Home Assistant            | home-assistant/               | Home automation (Podman, host network)        |
 | IT-Tools                  | ittools/                      | Web-based dev utilities (stateless container) |
 | Karakeep                  | karakeep/                     | Bookmark manager with AI (Authentik OIDC)     |
 | JobScraper                | jobscraper/                   | Job board aggregator (Podman container)       |

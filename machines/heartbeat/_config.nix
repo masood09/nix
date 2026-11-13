@@ -95,6 +95,7 @@
             "nightscout.service"
             "podman-babybuddy.service"
             "podman-compose-opencloud-root.target"
+            "podman-home-assistant.service"
             "vaultwarden.service"
           ];
         };
@@ -287,6 +288,21 @@
             # backend, since SearXNG cannot fetch pages.
             searchBackend = "searxng";
           };
+
+          zfs = {
+            enable = true;
+            restic = {
+              enable = true;
+            };
+          };
+        };
+
+        home-assistant = {
+          enable = true;
+
+          # mDNS/HomeKit discovery on the LAN interface only.
+          openFirewall = true;
+          firewallInterfaces = ["enp1s0f1"];
 
           zfs = {
             enable = true;

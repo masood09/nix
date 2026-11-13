@@ -115,6 +115,9 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | Headscale (pending move)             |  8917 | Reserved — code-review finding 9; still on 8080 |
 | SearXNG                              |  8918 | heartbeat; behind Caddy (loopback, or wg netns with vpn.enable) |
 | Actual Budget                        |  8919 | heartbeat; loopback behind Caddy  |
+| Home Assistant                       |  8920 | heartbeat; Podman, host network, loopback behind Caddy |
+| Home Assistant (mDNS discovery)      |  5353 | UDP; heartbeat LAN interface only (openFirewall) |
+| Home Assistant (HomeKit)             | 21063 | TCP; heartbeat LAN interface only (openFirewall) |
 | Authentik (HTTP/health)              |  9000 | 127.0.0.1 only; server listener    |
 | Authentik Worker (HTTP)              |  9001 | 127.0.0.1 only; worker listener    |
 | Prometheus                           |  9090 | Upstream default                  |
@@ -136,7 +139,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | MongoDB                              | 27017 | Localhost only (Nightscout)       |
 | LiveKit RTC (UDP range)              | 50100 | 50100–50200                       |
 
-Next available port in 89xx block: *8920*
+Next available port in 89xx block: *8921*
 
 ** Arr Media Stack (heartbeat only)
 Upstream defaults kept as-is (same convention as Immich/Vaultwarden above) — these sit
