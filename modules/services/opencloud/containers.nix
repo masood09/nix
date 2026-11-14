@@ -41,7 +41,7 @@ in {
             # failing slightly earlier on each restart. Likely an incompatible
             # on-disk JetStream format from skipping 3 major versions at once.
             # renovate: datasource=docker depName=docker.io/opencloudeu/opencloud
-            image = "docker.io/opencloudeu/opencloud:4.0.9";
+            image = "docker.io/opencloudeu/opencloud:7.2.5";
 
             environment = {
               "COLLABORA_DOMAIN" = collaboraWebDomain;
@@ -123,7 +123,7 @@ in {
             # failing slightly earlier on each restart. Likely an incompatible
             # on-disk JetStream format from skipping 3 major versions at once.
             # renovate: datasource=docker depName=docker.io/opencloudeu/opencloud
-            image = "docker.io/opencloudeu/opencloud:4.0.9";
+            image = "docker.io/opencloudeu/opencloud:7.2.5";
 
             environment = {
               "COLLABORATION_APP_ADDR" = "https://${collaboraWebDomain}";
