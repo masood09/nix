@@ -29,6 +29,9 @@ in {
           extraGroups = [
             "audio"
             "input"
+            # Lets Steam's network settings manage connections through
+            # NetworkManager without a polkit prompt.
+            "networkmanager"
             "video"
           ];
         };

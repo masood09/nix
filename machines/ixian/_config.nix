@@ -58,6 +58,10 @@ in {
 
       networking = {
         hostName = "ixian";
+        # NetworkManager, not WiFi: Steam Gaming Mode's network settings and
+        # its first-run wizard talk to NetworkManager over D-Bus, and without
+        # it the wizard's network step cannot complete.
+        wireless_enable = true;
       };
 
       services = {
