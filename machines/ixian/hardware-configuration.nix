@@ -31,11 +31,6 @@
       "kvm"
     ];
 
-    # DHCP is used by the initrd SSH server for remote LUKS unlocking.
-    kernelParams = [
-      "ip=dhcp"
-    ];
-
     extraModulePackages = [];
   };
 
