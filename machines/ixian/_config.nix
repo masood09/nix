@@ -94,6 +94,18 @@ in {
           context = "256k";
           parallel = 1;
 
+          # Qwen3.8's template thinks at xhigh when a request names no effort,
+          # and OpenCode/Hermes name none. Measured on 2026-11-15 (two short
+          # coding/Nix prompts): xhigh spent 1.4–2.6K tokens thinking, medium
+          # 0.5–0.9K, and an explicit high ran away to 11K tokens (208 s) on a
+          # two-sentence question. Medium is the default for requests that
+          # name none; the budget closes any thinking that still runs long.
+          # A request can still ask for high or set its own budget.
+          settings = {
+            reasoning_effort = "medium";
+            reasoning_budget_tokens = 8192;
+          };
+
           # Free the GPU for gaming: stop Strata while the living-room TCL
           # Google TV is on, start it again once the TV has been off for 30 s,
           # and let the guard be the only thing that starts Strata (it drops the
