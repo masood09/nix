@@ -25,6 +25,7 @@
     ./ittools
     ./jobscraper
     ./karakeep
+    ./llama-cpp
     ./loki
     ./mailarchiver
     ./matrix
