@@ -337,6 +337,10 @@
           };
         };
 
+        llama-cpp = {
+          enable = true;
+        };
+
         loki = {
           enable = true;
 
