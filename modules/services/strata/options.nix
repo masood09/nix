@@ -73,6 +73,19 @@
             description = "Additional `strata launch` arguments used when generating the run config.";
           };
 
+          experimentalSpeedProjection = lib.mkEnableOption ''
+            upstream's experimental speed projection (off by default upstream):
+            a 480 KB control vector, shipped with the terminal, projected out of
+            layers 4-44 of the original Qwen3.8-Flash-Next. Upstream's package
+            describes it as a refusal-direction projection: the model declines
+            far fewer requests, so a safety behavior is removed. It also costs
+            0.2-0.4% per token, and upstream measured perplexity +15% on code,
+            +2.3% on a document and +0.4% on chat (on Q2_0). Once loaded it applies to
+            every request; a request can opt out with
+            `"experimental_speed_projection": false`. Only the qwen and coder
+            families accept it. Toggling restarts Strata (one model load) but
+            does not regenerate the run config'';
+
           settings = lib.mkOption {
             type = lib.types.attrsOf lib.types.anything;
             default = {};

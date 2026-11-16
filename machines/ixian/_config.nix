@@ -106,6 +106,14 @@ in {
             reasoning_budget_tokens = 8192;
           };
 
+          # Upstream's refusal-direction control vector, on by choice: the
+          # model declines far fewer requests, at 0.2-0.4% per token and some
+          # quality (upstream measured perplexity +15% on code, on Q2_0; not
+          # measured on IQ2_XS). It applies to every client of the endpoint,
+          # Hermes and OpenCode included; a request can opt out with
+          # "experimental_speed_projection": false.
+          experimentalSpeedProjection = true;
+
           # Free the GPU for gaming: stop Strata while the living-room TCL
           # Google TV is on, start it again once the TV has been off for 30 s,
           # and let the guard be the only thing that starts Strata (it drops the

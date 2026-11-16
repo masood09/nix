@@ -149,6 +149,41 @@
       'reduce $old[] as $k (.; del(.[$k])) + $new[0]' "$source" > "$tmp"
     mv "$tmp" "$source"
     "$jq" -c keys ${settingsFile} > ${managedKeys}
+
+    # The experimental speed projection (a refusal-direction control vector;
+    # see the experimentalSpeedProjection option). `strata launch` has no flag
+    # for it, and its non-interactive setup always answers "off", so the
+    # engine flags setup.py would write are owned here. They are stripped and
+    # re-added on every start, in "args" (what serve runs) and in
+    # "args_written"/"args_derived". Upstream treats options in "args" that are
+    # missing from those copies as hand edits and carries them into the next
+    # regeneration, so writing all three lets disabling the option really
+    # remove them.
+    esp='[]'
+    ${lib.optionalString cfg.experimentalSpeedProjection ''
+      vector="$("$jq" -r .cwd "$source")/data/experimental-speed-projection/Qwen3.8-Flash-Next-experimental-speed-projection.gguf"
+      if [ ! -f "$vector" ]; then
+        echo "strata: the experimental speed projection's vector is missing: $vector" >&2
+        exit 1
+      fi
+      esp="$("$jq" -cn --arg v "$vector" \
+        '["--control-vector-scaled", "\($v):1.0", "--control-vector-layer-range", "4", "44", "--cvec-mode", "project", "--cvec-dir", "per-layer"]')"
+    ''}
+    tmp="$(mktemp "$source.XXXXXX")"
+    "$jq" --argjson esp "$esp" '
+      def strip:
+        . as $a
+        | reduce range(0; $a | length) as $i ({out: [], skip: 0};
+            if .skip > 0 then .skip -= 1
+            elif $a[$i] == "--control-vector-layer-range" then .skip = 2
+            elif ($a[$i] | IN("--control-vector-scaled", "--cvec-mode", "--cvec-dir")) then .skip = 1
+            else .out += [$a[$i]]
+            end)
+        | .out;
+      reduce ("args", "args_written", "args_derived") as $k (.;
+        if has($k) then .[$k] = ((.[$k] | strip) + $esp) else . end)
+    ' "$source" > "$tmp"
+    mv "$tmp" "$source"
   '';
 
   generate = pkgs.writeShellScript "strata-generate" ''
@@ -515,6 +550,10 @@ in {
 
   config = lib.mkIf cfg.enable {
     assertions = [
+      {
+        assertion = !cfg.experimentalSpeedProjection || lib.elem cfg.family ["qwen" "coder"];
+        message = "homelab.services.strata.experimentalSpeedProjection is made for the original Qwen3.8-Flash-Next: upstream only applies it to the qwen and coder families, not ${cfg.family}.";
+      }
       {
         assertion = !cfg.tvGuard.manageSession || cfg.tvGuard.enable;
         message = "homelab.services.strata.tvGuard.manageSession has no effect without homelab.services.strata.tvGuard.enable.";
