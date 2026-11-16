@@ -395,7 +395,7 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 | Home Assistant            | home-assistant/               | Home automation (Podman, host network)        |
 | IT-Tools                  | ittools/                      | Web-based dev utilities (stateless container) |
 | Karakeep                  | karakeep/                     | Bookmark manager with AI (Authentik OIDC)     |
-| llama.cpp                 | llama-cpp/                    | Gemma 4 E4B local chat LLM (upstream module)  |
+| llama.cpp                 | llama-cpp/                    | Gemma 4 E4B + uncensored variant (router)     |
 | JobScraper                | jobscraper/                   | Job board aggregator (Podman container)       |
 | Nightscout                | nix/services/nightscout.nix   | CGM dashboard (Node.js + MongoDB)             |
 | MailArchiver              | nix/services/mailarchiver.nix | Email archival (.NET service)                 |
@@ -537,7 +537,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | IT-Tools                  | Stateless developer utilities                     |
 | JobScraper                | Job aggregator container                          |
 | Karakeep                  | ZFS, open firewall, Authentik OIDC                |
-| llama.cpp                 | Gemma 4 E4B, 32k ctx, GPU, loopback :8921         |
+| llama.cpp                 | Gemma 4 E4B + uncensored, router, one loaded, :8921 |
 | Loki                      | ZFS-backed log aggregation                        |
 | MailArchiver              | ZFS-backed email archival                         |
 | Matrix                    | ZFS, TCP/IP, MAS with trusted proxies             |

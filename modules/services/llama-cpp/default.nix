@@ -1,42 +1,70 @@
-# llama.cpp — Gemma 4 E4B chat model behind an OpenAI-compatible llama-server
-# API (and llama-server's built-in web UI).
+# llama.cpp — Gemma 4 E4B and its uncensored variant behind one
+# OpenAI-compatible llama-server API (and llama-server's built-in web UI).
 #
 # Wraps the upstream nixpkgs `services.llama-cpp` module (DynamicUser,
-# hardening, PrivateDevices = false for GPU access). The model is a pinned
-# fixed-output derivation in /nix/store, so there is no state to persist and
+# hardening, PrivateDevices = false for GPU access). The models are pinned
+# fixed-output derivations in /nix/store, so there is no state to persist and
 # no dataset or UID to manage.
 #
-# Model choice (benchmarked on heartbeat 2026-11-16, eight models that fit the
-# Quadro P1000's 4 GiB, 13 ChatGPT-style prompts with thinking off): Gemma 4
-# E4B tied Qwen3.5-4B for the best score and made the least serious mistakes.
-# It was the only model to decline a made-up novel instead of inventing its
-# plot, and it got the multi-turn edit right where Qwen3.5-4B rewrote the plan.
-# Gemma 4 E2B ran twice as fast in half the VRAM but hallucinated. Qwen3-4B-2507
-# and Phi-4-mini could not fit a 16k f16 cache next to their weights.
+# Router mode: llama-server starts with no model and a preset INI listing
+# every entry of `models`; each section name is an API model id. A request
+# names its model, and the router starts that model as a child llama-server
+# on an ephemeral loopback port and proxies to it. Requests in router mode must
+# carry "model" ("model name is missing" otherwise); the web UI has a picker.
+# Only one model fits the P1000's 4 GiB, so --models-max 1: a request for the
+# other model queues; the busy one is never interrupted, it is evicted once its
+# last request ends (10 s to stop gracefully; one still loading is killed at
+# once), and then the queued model loads, ~25 s from the page cache. A queued
+# request has no server-side timeout, but a client's own read timeout still
+# applies during a swap. At startup the router also runs one short-lived child
+# per model to measure its memory (log noise, a few seconds).
 #
-# Thinking is off: the model's template thinks when llama.cpp's Jinja path
+# Memory accounting is by count only (no --models-memory-margin), so a model
+# that does not fit is loaded anyway and runs out of memory. The quantizations
+# were chosen by a load test at the pinned context, which goes on the command
+# line: instances inherit the router's flags, and the command line wins over
+# the preset and over --fit's pick of the largest context that fits.
+#
+# Models (benchmarked on heartbeat 2026-11-16, 13 ChatGPT-style prompts with
+# thinking off, scored 0/0.5/1 each):
+#   gemma-4-e4b             Google's QAT Q4_0 (rev 4b4a2c1d). Best of eight
+#                           models that fit the card, 11.5/13: tied Qwen3.5-4B
+#                           with the least serious mistakes, and the only one to
+#                           decline a made-up novel instead of inventing it.
+#                           3419 MiB VRAM at 32k; decode 18 t/s (15.6 at 8k
+#                           deep), prompt eval 239 t/s (89 at 8k).
+#   gemma-4-e4b-uncensored  HauhauCS's "Aggressive" abliteration of
+#                           google/gemma-4-e4b-it (rev 45b6a334), Q4_K_P, the
+#                           largest of its quants that fits. It refuses nothing,
+#                           by choice. 10.5/13: it invented a plot for the
+#                           made-up novel and rewrote a plan it was asked to
+#                           keep. 3618 MiB VRAM and 3.5 GiB host RAM at 32k;
+#                           decode 16.4 t/s (14.5 at 8k), prompt eval 194 t/s.
+#
+# Thinking is off: the models' template thinks when llama.cpp's Jinja path
 # enables it, so `enable_thinking: false` goes to the template, and answers
 # start straight away (one test answer: 84 tokens instead of 351).
 #
 # Memory on the P1000: llama.cpp keeps the input layer, i.e. the large
 # per-layer embedding tables of the E-series, on the CPU, so the GPU holds
-# ~3.3 GiB of the 5.15 GB file. Most layers use a 512-token sliding window,
-# so the f16 cache stays small: measured 3422 MiB in use at 32k. With that
-# held, a concurrent Jellyfin NVENC transcode may fail to allocate. Accepted:
-# transcoding on heartbeat is rare.
-#
-# Measured speed: decode 18 t/s (15.6 at 8k deep), prompt eval 239 t/s on a
-# short prompt and 89 t/s at 8k deep. Cross-turn prefix reuse is automatic, so
-# a follow-up turn pays only for its new tokens.
+# about 3.3-3.5 GiB of each ~5.2 GB file. Most layers use a 512-token sliding
+# window, so the f16 cache stays small. With a model loaded, a concurrent
+# Jellyfin NVENC transcode may fail to allocate. Accepted: transcoding on
+# heartbeat is rare.
 #
 # Package: llama-cpp-vulkan from nixpkgs-unstable (0.9.0), substituted from
-# cache.nixos.org; that is the build the model was tested on. Stable's 9190
+# cache.nixos.org; that is the build the models were tested on. Stable's 9190
 # could not load the previous model (MiniCPM5) and is untested with Gemma 4.
+#
+# Upstream module API: this uses `modelsPreset` and `extraFlags` from the
+# pinned nixos-26.05 module. The newer module (nixpkgs-unstable) replaced both
+# with freeform `settings` (where `models-preset` is a path), so a nixpkgs bump
+# that brings it in means porting both.
 #
 # Backend: Vulkan. The legacy_580 NVIDIA ICD reports Vulkan 1.4 on Pascal,
 # above llama.cpp's 1.2 floor. Vulkan also enumerates heartbeat's Intel UHD
 # 630 iGPU first (Vulkan0, reporting host RAM as its memory), so --device
-# pins the server to the P1000 (Vulkan1). A CUDA build is the fallback if
+# pins the models to the P1000 (Vulkan1). A CUDA build is the fallback if
 # Vulkan regresses: nixpkgs' cudaPackages is 12.9, which still targets sm_61.
 # cudaCapabilities is a nixpkgs config setting, not a llama-cpp override
 # argument, so take llama-cpp from a nixpkgs instance with
@@ -61,28 +89,41 @@
 
   llamaPackage = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.llama-cpp-vulkan;
 
-  # Google's QAT Q4_0 build, pinned to the repo commit that was benchmarked.
-  model = pkgs.fetchurl {
-    name = "gemma-4-E4B_q4_0-it.gguf";
-    url = "https://huggingface.co/google/gemma-4-E4B-it-qat-q4_0-gguf/resolve/4b4a2c1d584be7264f87aac328a1bc739ce81b6c/gemma-4-E4B_q4_0-it.gguf";
-    hash = "sha256-Z2w1Bw222+Uvk+nIZO4Puk7d6pS5yHXZyxDa/0U/uu4=";
-  };
+  # One preset section per model; the section name is the API model id.
+  modelsPreset =
+    lib.mapAttrs (id: m: {
+      model = "${pkgs.fetchurl {inherit (m) name url hash;}}";
+      load-on-startup = lib.boolToString (id == cfg.defaultModel);
+    })
+    cfg.models;
 in {
   imports = [
     ./options.nix
   ];
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = cfg.models ? ${cfg.defaultModel};
+        message = "homelab.services.llama-cpp.defaultModel (${cfg.defaultModel}) must be one of homelab.services.llama-cpp.models: ${lib.concatStringsSep ", " (lib.attrNames cfg.models)}.";
+      }
+    ];
+
     services = {
       llama-cpp = {
         enable = true;
         package = llamaPackage;
-        inherit model;
+        inherit modelsPreset;
         host = cfg.listenAddress;
         port = cfg.listenPort;
 
+        # Model instances inherit these flags from the router.
         extraFlags =
           [
+            # One model resident at a time: two do not fit the 4 GiB card.
+            "--models-max"
+            "1"
+
             # One slot, so the whole context belongs to one request.
             "--ctx-size"
             (toString cfg.contextSize)
@@ -104,8 +145,6 @@ in {
             "--jinja"
             "--chat-template-kwargs"
             (builtins.toJSON {enable_thinking = false;})
-            "--alias"
-            "gemma-4-e4b"
 
             # Google's recommended sampling for Gemma 4.
             "--temp"
