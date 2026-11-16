@@ -120,11 +120,14 @@
     HOME = cfg.stateDir;
   };
 
+  # Nix-owned top-level run-config keys, and the list of keys the last merge
+  # wrote, so a key dropped from cfg.settings is also dropped from the file.
+  settingsFile = pkgs.writeText "strata-settings.json" (builtins.toJSON cfg.settings);
+  managedKeys = "${cfg.stateDir}/run-config.managed-keys.json";
+
   configure = pkgs.writeShellScript "strata-configure" ''
     set -euo pipefail
-    strata() {
-      ${strataFhs}/bin/strata-fhs ${strataBin} "$@"
-    }
+    jq=${pkgs.jq}/bin/jq
 
     # Regenerate when the launch options, the terminal, or the engine set
     # change: the run config names version-specific terminal/engine paths.
@@ -132,9 +135,27 @@
     engines="$(ls ${cfg.stateDir}/.local/share/strata/components/engine 2>/dev/null || true)"
     want="$(printf '%s\n' ${lib.escapeShellArg launchArgsStr} "$terminal" "$engines" | ${pkgs.coreutils}/bin/sha256sum)"
 
-    if [ -e ${runConfig} ] && [ "$(cat ${configStamp} 2>/dev/null)" = "$want" ]; then
-      exit 0
+    if [ ! -e ${runConfig} ] || [ "$(cat ${configStamp} 2>/dev/null)" != "$want" ]; then
+      ${generate}
     fi
+
+    # Every start, after any regeneration (which rewrites the file): drop the
+    # keys the previous merge wrote, then add the current ones. The stamp
+    # leaves these out, so a settings change costs no extra model load.
+    source="$(readlink -f ${runConfig})"
+    old="$(cat ${managedKeys} 2>/dev/null || echo '[]')"
+    tmp="$(mktemp "$source.XXXXXX")"
+    "$jq" --argjson old "$old" --slurpfile new ${settingsFile} \
+      'reduce $old[] as $k (.; del(.[$k])) + $new[0]' "$source" > "$tmp"
+    mv "$tmp" "$source"
+    "$jq" -c keys ${settingsFile} > ${managedKeys}
+  '';
+
+  generate = pkgs.writeShellScript "strata-generate" ''
+    set -euo pipefail
+    strata() {
+      ${strataFhs}/bin/strata-fhs ${strataBin} "$@"
+    }
 
     echo "strata: generating run config: strata launch ${launchArgsStr}"
     profile="$(strata launch ${launchArgsStr} --plan --output json | ${pkgs.jq}/bin/jq -r .plan.profile)"

@@ -73,6 +73,26 @@
             description = "Additional `strata launch` arguments used when generating the run config.";
           };
 
+          settings = lib.mkOption {
+            type = lib.types.attrsOf lib.types.anything;
+            default = {};
+            example = {
+              reasoning_effort = "medium";
+              reasoning_budget_tokens = 8192;
+            };
+            description = ''
+              Top-level keys merged into upstream's run config before every
+              start (upstream's `GET /config` lists the editable ones, e.g.
+              `reasoning_effort`, `reasoning_budget_tokens`, `sampling`,
+              `idle_unload_s`). `strata launch` has no flag for these, and
+              `--set` only reaches engine flags and STRATA_* variables. A key
+              removed here is removed from the run config on the next start.
+              Changing these restarts Strata but does not regenerate the run
+              config, so it costs one model load, not two. Upstream validates
+              the values at start and refuses to serve on a bad one.
+            '';
+          };
+
           listenAddress = lib.mkOption {
             type = lib.types.str;
             default = "127.0.0.1";
