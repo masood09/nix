@@ -13,6 +13,14 @@
           restartUnits = ["acme-setup.service"];
         };
 
+        # Shared backend key (secrets/secrets.sops.yaml) that LiteLLM on
+        # mentat sends; model-router refuses requests without it. One line, at
+        # least 16 characters. Rotating it touches all three hosts.
+        "llm/backend-key" = {
+          owner = "model-router";
+          restartUnits = ["model-router.service"];
+        };
+
         "tailscale/preauth-key" = {
           sopsFile = ./secrets.sops.yaml;
         };
