@@ -71,17 +71,30 @@ in {
           enable = true;
         };
 
-        # Qwen3.8-Flash-Next IQ2_XS (served as qwen3.8-flash-next-iq2_xs), 256K
-        # context (the model's trained length, no rope scaling), one request at
-        # a time, CPU picture reader, on 127.0.0.1:8916. Conversation memory is
-        # upstream's default int8 (~13.7 KB/token, ~3.6 GB at 256K); only the
-        # newest 32K is kept on the card (--kv-resident), the rest in RAM.
+        # Qwen3.8-Flash-Next IQ3_S (served as qwen3.8-flash-next-iq3_s), 256K
+        # context (the model's trained length, no rope scaling), one request
+        # at a time, CPU picture reader, on 127.0.0.1:8916. Conversation
+        # memory is upstream's default int8 (~13.7 KB/token, ~3.6 GB at 256K);
+        # only the newest 32K is kept on the card (--kv-resident), the rest in
+        # RAM. Strata answers any model name, so clients still asking for
+        # qwen3.8-flash-next-iq2_xs keep working.
         #
-        # Model choice (2026-11-04): IQ3_XXS wants ~60 GB of RAM on this 62 GB
-        # box and swapped ~29 GB at 128K; IQ2_XS wants ~48 GB. Qwen3.6-35B-A3B
-        # was tried and dropped: its engine keeps conversation memory in fp32
-        # on the card (~45 KB/token, no --kv), so 256K ran the 16 GB RX 9070
-        # out of memory at load.
+        # Model choice, from benchmarks on 2026-11-16 (low effort; 13-prompt
+        # chat set; prompts up to 200K tokens): IQ2_XS, IQ3_XXS and IQ3_S ran
+        # at 32K-256K without swapping or low-RAM mode, and all scored 13/13
+        # with and without the speed projection, so the set could not tell
+        # them apart. IQ3_S is upstream's best-rated size ("matches the full
+        # model on the published tests"). At 256K with a 200K-token prompt it
+        # left 8.1 GB of RAM free (IQ3_XXS: 9.3 GB), read prompts at
+        # ~1,800 tok/s like every size, and replied at 44 tok/s on short
+        # answers and ~58 on long ones (IQ3_XXS: 54 and ~60). With the file
+        # cache down to ~9 GB, its first long prompt stalled ~40 s on disk
+        # reads once; later ones read at full speed. Keep other memory-hungry
+        # work off ixian while long conversations run. (The 2026-11-04 note
+        # that IQ3_XXS swapped ~29 GB at 128K did not reproduce.)
+        # Qwen3.6-35B-A3B was tried and dropped: its engine keeps conversation
+        # memory in fp32 on the card (~45 KB/token, no --kv), so 256K ran the
+        # 16 GB RX 9070 out of memory at load.
         #
         # parallel stays 1: DFlash2 drafting (upstream's auto choice, not
         # pinned) only runs with one request at a time. Caddy serves the API
@@ -90,7 +103,7 @@ in {
         strata = {
           enable = true;
           family = "qwen";
-          model = "iq2_xs";
+          model = "iq3_s";
           context = "256k";
           parallel = 1;
 
@@ -98,19 +111,24 @@ in {
           # and OpenCode/Hermes name none. Measured on 2026-11-15 (two short
           # coding/Nix prompts): xhigh spent 1.4–2.6K tokens thinking, medium
           # 0.5–0.9K, and an explicit high ran away to 11K tokens (208 s) on a
-          # two-sentence question. Medium is the default for requests that
-          # name none; the budget closes any thinking that still runs long.
-          # A request can still ask for high or set its own budget.
+          # two-sentence question. Low is the default for requests that name
+          # none (the 2026-11-16 benchmark scored 13/13 at low on every size;
+          # low caps thinking at 256 tokens of a 512 max_tokens, which was too
+          # little to count records in a long document); the budget closes any
+          # thinking that still runs long. A request can still ask for medium
+          # or high, or set its own budget.
           settings = {
-            reasoning_effort = "medium";
+            reasoning_effort = "low";
             reasoning_budget_tokens = 8192;
           };
 
           # Upstream's refusal-direction control vector, on by choice: the
           # model declines far fewer requests, at 0.2-0.4% per token and some
-          # quality (upstream measured perplexity +15% on code, on Q2_0; not
-          # measured on IQ2_XS). It applies to every client of the endpoint,
-          # Hermes and OpenCode included; a request can opt out with
+          # quality (upstream measured perplexity +15% on code, on Q2_0; no
+          # difference showed on the 13-prompt set on 2026-11-16, IQ2_XS to
+          # IQ3_S, but it still refused some requests). It applies to every
+          # client of the endpoint, Hermes and OpenCode included; a request
+          # can opt out with
           # "experimental_speed_projection": false.
           experimentalSpeedProjection = true;
 
