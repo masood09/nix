@@ -478,15 +478,19 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 *** mentat
 
-- *Purpose:* Secondary DNS (DNS Filtering) & Hermes Agent
+- *Purpose:* Secondary DNS (DNS Filtering), LiteLLM gateway & Hermes Agent
 - *Storage:* Single-disk encrypted ZFS root (=rpool=, impermanence)
 
 **** Services
 
 | Service           | Notes                                        |
 |-------------------+----------------------------------------------|
-| Backup            | Disabled until Hermes lands (no state yet)   |
+| ACME              | Wildcard cert on a ZFS dataset; fixed DNS propagation wait (VLAN DNS redirect) |
+| Backup            | Disabled until Hermes lands (LiteLLM's state is in heartbeat's Postgres) |
 | Blocky            | DNS ad/tracker filtering (same as caretaker) |
+| Caddy             | Serves =llm.mantannest.com= (tailnet + LAN DNS only) |
+| LiteLLM           | Gateway on 127.0.0.1:8923 (Podman, upstream non-root image pinned by digest); routes to ixian (heavy) and heartbeat (light) over the tailnet with the backend key; heavy falls back to light while ixian games; virtual keys per client; UI login via Authentik |
+| Podman            | Image store on a ZFS dataset              |
 | smartctl-exporter | Single NVMe SMART health                     |
 | Tailscale         | ZFS dataset                                  |
 
