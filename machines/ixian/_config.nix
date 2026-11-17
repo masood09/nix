@@ -105,8 +105,8 @@ in {
           family = "qwen";
           model = "iq3_s";
           # Sizes model-router may switch to (each benchmarked at 256K on
-          # 2026-11-16 without swapping). strata-pregenerate keeps every one's
-          # run config current, so a switch is one model load.
+          # 2026-11-16 without swapping). Each start regenerates whichever
+          # sizes are stale, so a switch is one model load.
           models = ["iq2_xs" "iq3_xxs" "iq3_s"];
           context = "256k";
           parallel = 1;
@@ -124,16 +124,26 @@ in {
           settings = {
             reasoning_effort = "low";
             reasoning_budget_tokens = 8192;
+            # Stock by default: the projection vector stays loaded (below),
+            # but only a request that asks for it gets it, e.g. model-router's
+            # -uncensored names or "experimental_speed_projection": true. No
+            # generated run config has a sampling block of its own, so this
+            # top-level key replaces nothing.
+            sampling = {
+              experimental_speed_projection = false;
+            };
           };
 
-          # Upstream's refusal-direction control vector, on by choice: the
-          # model declines far fewer requests, at 0.2-0.4% per token and some
-          # quality (upstream measured perplexity +15% on code, on Q2_0; no
-          # difference showed on the 13-prompt set on 2026-11-16, IQ2_XS to
-          # IQ3_S, but it still refused some requests). It applies to every
-          # client of the endpoint, Hermes and OpenCode included; a request
-          # can opt out with
-          # "experimental_speed_projection": false.
+          # Upstream's refusal-direction control vector, loaded so it can be
+          # used on demand: the model declines far fewer requests, at
+          # 0.2-0.4% per token and some quality (upstream measured perplexity
+          # +15% on code, on Q2_0; no difference showed on the 13-prompt set
+          # on 2026-11-16, IQ2_XS to IQ3_S, but it still refused some
+          # requests). settings.sampling above makes stock the default, so it
+          # applies only to requests that set
+          # "experimental_speed_projection": true (model-router's -uncensored
+          # names do). Strata's web UI sends true unless its per-chat switch
+          # is turned off.
           experimentalSpeedProjection = true;
 
           # Free the GPU for gaming: stop Strata while the living-room TCL
