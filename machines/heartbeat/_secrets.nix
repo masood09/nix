@@ -17,6 +17,22 @@
           restartUnits = ["alloy.service"];
         };
 
+        # Shared backend key (secrets/secrets.sops.yaml): LiteLLM on mentat
+        # sends it to llama.cpp here and to model-router on ixian. One line,
+        # at least 16 characters. Rotating it touches all three hosts.
+        "llm/backend-key" = {
+          owner = "llama-cpp";
+          restartUnits = ["llama-cpp.service"];
+        };
+
+        # Shared with mentat (secrets/secrets.sops.yaml), whose LiteLLM puts
+        # it in DATABASE_URL, so keep it URL-safe (letters and digits).
+        # postgresql-litellm-password sets it on the litellm role.
+        "litellm/db-password" = {
+          owner = "postgres";
+          restartUnits = ["postgresql-litellm-password.service"];
+        };
+
         # Arr media stack (nixflix) — see modules/services/arr/. API keys can be
         # generated with `uuidgen | base64`; web-UI passwords are your choice.
         "arr/jellyfin/api-key" = {
