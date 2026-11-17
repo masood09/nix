@@ -586,11 +586,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794889583,
-        "narHash": "sha256-4HjascnimpL5jkBRmrwV7c3FFrgUPqvSWRED77/RDNM=",
+        "lastModified": 1794890085,
+        "narHash": "sha256-PcIKBGHPBQj7cCNAMjdbn8QMGCLKj93p1ZLpovYTbdg=",
         "owner": "masood09",
         "repo": "model-router",
-        "rev": "bd8a80b2b6151e99695e7e686f6c5c1b42cec105",
+        "rev": "5f146f659af0b6c692f19534808e020285e7e952",
         "type": "github"
       },
       "original": {
