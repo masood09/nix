@@ -161,8 +161,15 @@ in {
         # <size>-uncensored for the speed projection). Loopback only until
         # LiteLLM is wired to it; ai.mantannest.com still goes straight to
         # Strata. See modules/services/model-router.
+        # Reached by LiteLLM on mentat over the tailnet: the port is open on
+        # tailscale0 only (the Headscale ACL limits it to mentat), and
+        # requests need the shared backend key. Strata stays on loopback.
         model-router = {
           enable = true;
+          listenAddress = "0.0.0.0";
+          clientTokensFile = config.sops.secrets."llm/backend-key".path;
+          openFirewall = true;
+          firewallInterfaces = ["tailscale0"];
         };
 
         # Gaming vs inference, following binary_sensor.ixian_gaming in Home
