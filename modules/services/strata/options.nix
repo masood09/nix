@@ -48,9 +48,10 @@
             description = ''
               Additional sizes Strata may be switched to at runtime (the
               default `model` is always included). Each size keeps its own
-              generated run config, so switching back to a size costs one model
-              load. With more than one size, `strata-pregenerate` generates
-              every stale size's run config at deploy and after updates.
+              generated run config, so switching to a generated size costs one
+              model load. Every start regenerates whichever sizes are stale
+              (after a deploy that changes launch options, or an update), one
+              extra model load per stale size, so later switches stay one load.
             '';
           };
 
