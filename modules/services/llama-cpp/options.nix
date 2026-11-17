@@ -29,13 +29,52 @@ in {
           listenAddress = lib.mkOption {
             type = lib.types.str;
             default = "127.0.0.1";
-            description = "Address llama-server listens on. Loopback by default; there is no auth on the API.";
+            description = ''
+              Address llama-server listens on. Loopback by default. Any other
+              address requires apiKeyFile, since the API is otherwise open.
+            '';
           };
 
           listenPort = lib.mkOption {
             type = lib.types.port;
             default = 8921;
             description = "Port llama-server listens on (see docs/service-registry.org).";
+          };
+
+          apiKeyFile = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            example = lib.literalExpression ''config.sops.secrets."llm/backend-key".path'';
+            description = ''
+              File of API keys, one per line (llama-server --api-key-file).
+              Requests must then send one as a Bearer token; /health stays
+              open. It must be readable by the llama-cpp user.
+            '';
+          };
+
+          openFirewall = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Whether to open listenPort in the firewall.";
+          };
+
+          firewallInterfaces = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [];
+            example = ["tailscale0"];
+            description = "Interfaces to open listenPort on. Empty means every interface.";
+          };
+
+          userId = lib.mkOption {
+            type = lib.types.ints.u16;
+            default = 3022;
+            description = "UID of the llama-cpp service user (see docs/service-registry.org).";
+          };
+
+          groupId = lib.mkOption {
+            type = lib.types.ints.u16;
+            default = 3022;
+            description = "GID of the llama-cpp service group.";
           };
 
           models = lib.mkOption {
