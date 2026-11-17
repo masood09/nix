@@ -1,9 +1,13 @@
-# Homelab options — secondary DNS (Blocky + Unbound). Hermes agent is a later
-# phase; phase 1 is just a booting ZFS host serving DNS.
+# Homelab options — secondary DNS (Blocky + Unbound) and the LiteLLM gateway.
+# Hermes agent is a later phase.
 {
+  config,
+  lib,
+  ...
+}: {
   config = {
     homelab = {
-      purpose = "Secondary DNS (DNS Filtering) & Hermes Agent";
+      purpose = "Secondary DNS (DNS Filtering), LiteLLM gateway & Hermes Agent";
       isRootZFS = true;
       isEncryptedRoot = true;
       impermanence = true;
@@ -19,9 +23,17 @@
       };
 
       services = {
-        # Disabled for phase 1: Blocky's config is fully declarative and
-        # tailscale's node state is re-creatable, so there is nothing worth
-        # backing up yet. Enable (with restic secrets) when Hermes lands.
+        # The wildcard certificate Caddy serves llm.mantannest.com with.
+        acme = {
+          zfs = {
+            enable = true;
+          };
+        };
+
+        # Disabled: Blocky's config is fully declarative, tailscale's node
+        # state is re-creatable, and LiteLLM's state lives in heartbeat's
+        # Postgres (backed up there). Enable (with restic secrets) when Hermes
+        # lands.
         backup = {
           enable = false;
         };
@@ -29,6 +41,62 @@
         # Same setup as caretaker (primary): listen on :53, Unbound upstream.
         blocky = {
           enable = true;
+        };
+
+        caddy = {
+          enable = true;
+        };
+
+        # Gateway for ixian (heavy) and heartbeat (light, 24/7), reached over
+        # the tailnet with the shared backend key. heavy falls back to light
+        # while ixian is gaming (model-router then answers 503 at once). See
+        # modules/services/litellm.
+        litellm = {
+          enable = true;
+          environmentFile = config.sops.templates."litellm.env".path;
+          backends = {
+            ixian = {
+              apiBase = "http://ixian.dns.headscale.mantannest.com:8922/v1";
+              models = lib.concatMap (size: [
+                "qwen3.8-flash-next-${size}"
+                "qwen3.8-flash-next-${size}-uncensored"
+              ]) ["iq2_xs" "iq3_xxs" "iq3_s"];
+            };
+            heartbeat = {
+              apiBase = "http://heartbeat.dns.headscale.mantannest.com:8921/v1";
+              models = [
+                "gemma-4-e4b"
+                "gemma-4-e4b-uncensored"
+              ];
+            };
+          };
+          aliases = {
+            heavy = "qwen3.8-flash-next-iq3_s";
+            heavy-uncensored = "qwen3.8-flash-next-iq3_s-uncensored";
+            light = "gemma-4-e4b";
+            light-uncensored = "gemma-4-e4b-uncensored";
+          };
+          fallbacks = {
+            heavy = ["light"];
+            heavy-uncensored = ["light-uncensored"];
+          };
+          # Authentik app litellm (infra-tofu), limited to homelab-admins, who
+          # are LiteLLM's proxy_admins. Clients use keys, not the UI.
+          authentik = {
+            enable = true;
+            adminGroup = "homelab-admins";
+          };
+        };
+
+        # The image store is on ZFS, so a reboot (root rollback) does not pull
+        # the LiteLLM image again. mentat has only rpool.
+        podman = {
+          enable = true;
+
+          zfs = {
+            enable = true;
+            dataset = "rpool/root/var/lib/containers";
+          };
         };
 
         # Bare-metal host with a single NVMe: per-disk SMART health. No BMC, so
@@ -42,6 +110,23 @@
 
           zfs = {
             enable = true;
+          };
+        };
+      };
+    };
+
+    security = {
+      acme = {
+        certs = {
+          # mentat sits on the VLAN whose port-53 traffic the LAN firewall
+          # redirects to the internal resolvers (it is one of them), so lego's
+          # direct check against Cloudflare's nameservers cannot be trusted
+          # from here. Wait a fixed time instead, as ixian does; Let's Encrypt
+          # validates from the public internet.
+          ${config.networking.domain} = {
+            extraLegoFlags = [
+              "--dns.propagation-wait=60s"
+            ];
           };
         };
       };
