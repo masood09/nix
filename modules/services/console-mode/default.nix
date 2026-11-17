@@ -7,7 +7,10 @@
 # One marker file is the mode: /run/console-mode/gaming exists = gaming. The
 # units enforce it themselves, so nothing else has to cooperate:
 #   - strata.service and strata-update skip while it exists (Strata's
-#     holdFile ExecCondition), whoever starts them
+#     holdFile ExecCondition), whoever starts them; apply_gaming also stops a
+#     strata-update already running, because the hold only blocks later
+#     starts, and the update's test start would load the model beside the
+#     session
 #   - model-router refuses Strata requests with 503 backend_held while it
 #     exists (its hold follows Strata's holdFile)
 #   - display-manager.service only starts while it exists
@@ -19,7 +22,7 @@
 # The controller polls the entity. "on" applies gaming at once; "off" applies
 # inference once it has held for inferenceDelay; anything else (unavailable,
 # unknown, HTTP or network failure) changes nothing. It runs as its own user,
-# with a polkit rule for start/stop on exactly the three units it manages.
+# with a polkit rule for start/stop on exactly the units it manages.
 {
   config,
   lib,
@@ -41,7 +44,12 @@
     "display-manager.service"
     "user@${toString sessionUid}.service"
   ];
-  managedUnits = ["strata.service"] ++ sessionUnits;
+  # Only when the timer unit exists: a stop of a unit with no unit file
+  # fails, and apply_gaming would retry it forever.
+  updateUnits = lib.optionals strataCfg.autoUpdate.enable [
+    "strata-update.service"
+  ];
+  managedUnits = ["strata.service"] ++ updateUnits ++ sessionUnits;
 
   controller = pkgs.writeShellApplication {
     name = "console-mode";
@@ -57,6 +65,7 @@
       marker=${lib.escapeShellArg marker}
       delay=${toString cfg.inferenceDelay}
       session_units=(${lib.escapeShellArgs sessionUnits})
+      update_units=(${lib.escapeShellArgs updateUnits})
 
       # Only changes are logged, so a long Home Assistant outage is one line.
       last_note=""
@@ -92,6 +101,15 @@
         # Marker first: it holds Strata and model-router, and
         # display-manager's start condition needs it.
         touch "$marker"
+        # An update already running would test-start the new engine on the
+        # GPU beside the session: the hold only blocks later starts, so stop
+        # it here. Its ExecStopPost (root) tries to restore Strata, which the
+        # hold skips. Upstream stages a new engine and switches to it only
+        # after a passing test start, so a stop mid-run leaves the old engine.
+        local unit
+        for unit in "''${update_units[@]}"; do
+          systemctl stop "$unit" || { echo "stopping $unit failed" >&2; ok=fail; }
+        done
         systemctl stop strata.service || { echo "stopping Strata failed" >&2; ok=fail; }
         systemctl start display-manager.service || { echo "starting the Steam session failed" >&2; ok=fail; }
         applied "$ok"
@@ -230,9 +248,10 @@ in {
       };
     };
 
-    # Only start/stop, only these three units, only for this user. The third
-    # unit is another account's user manager (the gaming user's), which this
-    # user stops to end the Steam session; it is named concretely.
+    # Only start/stop, only these units, only for this user. One entry is
+    # another account's user manager (the gaming user's), which this user
+    # stops to end the Steam session; it is named concretely. strata-update
+    # joins the list only when its timer unit exists.
     security = {
       polkit = {
         enable = true;
