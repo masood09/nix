@@ -35,7 +35,34 @@
           model = lib.mkOption {
             type = lib.types.str;
             default = "iq3_xxs";
-            description = "Model size passed to `strata launch --model`.";
+            description = ''
+              Model size passed to `strata launch --model`: the size served
+              when nothing else is selected.
+            '';
+          };
+
+          models = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [];
+            example = ["iq2_xs" "iq3_xxs" "iq3_s"];
+            description = ''
+              Additional sizes Strata may be switched to at runtime (the
+              default `model` is always included). Each size keeps its own
+              generated run config, so switching back to a size costs one model
+              load. With more than one size, `strata-pregenerate` generates
+              every stale size's run config at deploy and after updates.
+            '';
+          };
+
+          selectionFile = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            example = "/var/lib/model-router/strata-variant";
+            description = ''
+              File naming the size to serve, read at every start (written by a
+              model switcher such as model-router). A missing file, or a size
+              not in `model`/`models`, falls back to `model`.
+            '';
           };
 
           context = lib.mkOption {
