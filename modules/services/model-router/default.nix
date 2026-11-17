@@ -14,8 +14,11 @@
 # Strata's configure reads the file at start. Names outside the catalog are
 # served by whatever is loaded and never switch.
 #
-# Exposure is loopback only; Caddy's ai.<domain> still points straight at
-# Strata.
+# Exposure: loopback by default. A host that lets LiteLLM reach it over the
+# tailnet listens on 0.0.0.0 with the port open on tailscale0 only, and sets
+# clientTokensFile so the router refuses requests without the backend key
+# (the Headscale ACL is the other gate). Caddy's ai.<domain> still points
+# straight at Strata until the clients move to LiteLLM.
 {
   config,
   lib,
@@ -65,7 +68,25 @@ in {
         assertion = strataCfg.experimentalSpeedProjection;
         message = "model-router's -uncensored names need homelab.services.strata.experimentalSpeedProjection.";
       }
+      {
+        assertion = lib.elem cfg.listenAddress ["127.0.0.1" "::1" "localhost"] || cfg.clientTokensFile != null;
+        message = "homelab.services.model-router listens on ${cfg.listenAddress}: set clientTokensFile, or anyone on that network can switch Strata.";
+      }
     ];
+
+    networking = {
+      firewall = lib.mkIf cfg.openFirewall (
+        if cfg.firewallInterfaces == []
+        then {
+          allowedTCPPorts = [cfg.listenPort];
+        }
+        else {
+          interfaces = lib.genAttrs cfg.firewallInterfaces (_: {
+            allowedTCPPorts = [cfg.listenPort];
+          });
+        }
+      );
+    };
 
     homelab = {
       services = {
@@ -103,6 +124,10 @@ in {
           passthrough = "default";
           log = {
             level = "info";
+          };
+          auth = lib.mkIf (cfg.clientTokensFile != null) {
+            inherit (cfg) clientTokensFile;
+            adminTokensFile = cfg.clientTokensFile;
           };
           groups = {
             gpu0 = {

@@ -83,6 +83,31 @@ in {
             defaultText = lib.literalExpression "Strata's model plus models";
             description = "Strata sizes the catalog offers.";
           };
+
+          clientTokensFile = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            example = lib.literalExpression ''config.sops.secrets."llm/backend-key".path'';
+            description = ''
+              File of bearer tokens (one per line, at least 16 characters)
+              that clients must send. It also guards the router's metrics and
+              state endpoints. Required unless listenAddress is loopback.
+              Readable by the model-router user.
+            '';
+          };
+
+          openFirewall = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Whether to open listenPort in the firewall.";
+          };
+
+          firewallInterfaces = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [];
+            example = ["tailscale0"];
+            description = "Interfaces to open listenPort on. Empty means every interface.";
+          };
         };
       };
     };
