@@ -50,8 +50,9 @@ Next available human UID: *1003*
 | searx                         | 3018 | 3018 | SearXNG metasearch (heartbeat)                  |
 | actual                        | 3019 | 3019 | Actual Budget personal finance (heartbeat)      |
 | model-router                  | 3020 | 3020 | Strata model-switching proxy (ixian)            |
+| console-mode                  | 3021 | 3021 | Gaming/inference mode controller (ixian)        |
 
-Next available UID/GID: *3021*
+Next available UID/GID: *3022*
 
 *Exception:* the arr media stack (Jellyfin/Sonarr/Radarr/Lidarr/Prowlarr/SABnzbd/Seerr/Recyclarr,
 via the =nixflix= flake input — see =modules/services/arr/=, enabled per-machine via

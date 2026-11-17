@@ -14,6 +14,7 @@
     ./blackbox-exporter
     ./blocky
     ./caddy
+    ./console-mode
     ./dell-idrac-fan-controller
     ./garage
     ./grafana
