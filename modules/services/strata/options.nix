@@ -66,6 +66,20 @@
             '';
           };
 
+          holdFile = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            example = "/run/console-mode/gaming";
+            description = ''
+              While this file exists, nothing starts Strata: strata.service and
+              the update (whose test start needs the GPU) skip through an
+              ExecCondition, whoever asks: boot, a switch, a manual start, a
+              model switcher, or the update's own restore. Whatever creates the
+              file owns the GPU meanwhile and stops Strata itself. model-router
+              holds its Strata backend on the same file.
+            '';
+          };
+
           context = lib.mkOption {
             type = lib.types.str;
             default = "128k";
