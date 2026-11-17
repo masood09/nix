@@ -49,8 +49,9 @@ Next available human UID: *1003*
 | hermes                        | 3017 | 3017 | Hermes Agent gateway (heartbeat)                |
 | searx                         | 3018 | 3018 | SearXNG metasearch (heartbeat)                  |
 | actual                        | 3019 | 3019 | Actual Budget personal finance (heartbeat)      |
+| model-router                  | 3020 | 3020 | Strata model-switching proxy (ixian)            |
 
-Next available UID/GID: *3020*
+Next available UID/GID: *3021*
 
 *Exception:* the arr media stack (Jellyfin/Sonarr/Radarr/Lidarr/Prowlarr/SABnzbd/Seerr/Recyclarr,
 via the =nixflix= flake input — see =modules/services/arr/=, enabled per-machine via
@@ -117,6 +118,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | Actual Budget                        |  8919 | heartbeat; loopback behind Caddy  |
 | Home Assistant                       |  8920 | heartbeat; Podman, host network, loopback behind Caddy |
 | llama.cpp (Gemma 4 E4B router)       |  8921 | heartbeat; loopback only; DynamicUser (no UID); model children on ephemeral loopback ports |
+| model-router (Strata switcher)       |  8922 | ixian; loopback only; restarts strata.service via polkit |
 | Home Assistant (mDNS discovery)      |  5353 | UDP; heartbeat LAN interface only (openFirewall) |
 | Home Assistant (HomeKit)             | 21063 | TCP; heartbeat LAN interface only (openFirewall) |
 | Authentik (HTTP/health)              |  9000 | 127.0.0.1 only; server listener    |
@@ -140,7 +142,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | MongoDB                              | 27017 | Localhost only (Nightscout)       |
 | LiveKit RTC (UDP range)              | 50100 | 50100–50200                       |
 
-Next available port in 89xx block: *8922*
+Next available port in 89xx block: *8923*
 
 ** Arr Media Stack (heartbeat only)
 Upstream defaults kept as-is (same convention as Immich/Vaultwarden above) — these sit

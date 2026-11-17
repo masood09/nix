@@ -79,6 +79,13 @@
       url = "github:tale/headplane/v0.8.2";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # OpenAI-compatible proxy that switches Strata model sizes on demand.
+    # No binary cache, so following nixpkgs costs nothing; its NixOS module
+    # (services.model-router) is inert unless enabled.
+    model-router = {
+      url = "github:masood09/model-router";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Applications
     # AI coding CLIs (Claude Code, Codex, opencode, Qwen Code). Updated daily
@@ -166,6 +173,7 @@
       # module declares services.headplane.
       {disabledModules = ["services/networking/headplane.nix"];}
       inputs.headplane.nixosModules.headplane
+      inputs.model-router.nixosModules.default
       inputs.stylix.nixosModules.stylix
 
       (import ./nix/services/default.nix)
