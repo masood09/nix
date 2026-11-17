@@ -129,6 +129,14 @@ in {
                 interval = "3s";
                 timeout = cfg.switchTimeout;
               };
+              # Follows Strata's own hold: while the file exists, Strata
+              # cannot start, so the router refuses at once (503
+              # backend_held) instead of restarting it and waiting out
+              # switchTimeout.
+              hold = lib.mkIf (strataCfg.holdFile != null) {
+                file = strataCfg.holdFile;
+                retryAfter = "60s";
+              };
             };
           };
           models = lib.mergeAttrsList (map modelsFor cfg.sizes);
