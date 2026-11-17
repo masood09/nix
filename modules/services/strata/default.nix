@@ -278,6 +278,7 @@
   # Daily update. Upstream's `strata update` refuses to replace an engine that
   # is serving (exit 7; --yes alone never stops a model), so the unit stops
   # strata.service around it:
+  #   ExecCondition    skip while holdFile exists (the test start needs the GPU)
   #   ExecCondition    skip unless the feed offers a newer engine or Control
   #   ExecStartPre=+   remember whether Strata was running, then stop it
   #   ExecStart        `strata update`: a new engine is staged and switched to
@@ -299,6 +300,15 @@
   # root (+) scripts do not depend on $RUNTIME_DIRECTORY being set for them.
   updateRunDirName = "strata-update";
   updateWasRunning = "/run/${updateRunDirName}/was-running";
+
+  # ExecCondition for holdFile: exit 1 skips the start cleanly (a skip is not a
+  # failure, so Restart= does not retry it). Empty without a hold.
+  holdCheck = lib.optional (cfg.holdFile != null) (pkgs.writeShellScript "strata-hold-check" ''
+    if [ -e ${lib.escapeShellArg cfg.holdFile} ]; then
+      echo "Strata is held (${cfg.holdFile} exists): not starting"
+      exit 1
+    fi
+  '');
 
   updateCheck = pkgs.writeShellScript "strata-update-check" ''
     set -euo pipefail
@@ -551,6 +561,7 @@ in {
               WorkingDirectory = cfg.stateDir;
               RuntimeDirectory = "strata";
 
+              ExecCondition = holdCheck;
               ExecStartPre = configure;
               ExecStart = lib.concatStringsSep " " [
                 "${strataFhs}/bin/strata-fhs"
@@ -614,7 +625,8 @@ in {
               WorkingDirectory = cfg.stateDir;
               RuntimeDirectory = updateRunDirName;
 
-              ExecCondition = updateCheck;
+              # The hold check runs first, so a held day never reads the feed.
+              ExecCondition = holdCheck ++ [updateCheck];
               ExecStartPre = "+${updatePrepare}";
               ExecStart = "${strataFhs}/bin/strata-fhs ${strataBin} update --yes --model-config ${runConfig}";
               ExecStopPost = "+${updateRestore}";
