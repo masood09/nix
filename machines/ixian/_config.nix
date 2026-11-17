@@ -146,13 +146,11 @@ in {
           # is turned off.
           experimentalSpeedProjection = true;
 
-          # Strata runs at all times and shares the GPU (~15 GB of VRAM) and
-          # RAM with the Steam session and games; nothing coordinates the two.
-          # A GPU reset (for example from a gamescope crash) takes Strata's
-          # engine down too, and Strata restarts itself after RestartSec plus
-          # a model load.
+          # Strata and the Steam session never share the GPU (~15 GB of VRAM):
+          # console-mode below holds Strata while gaming.
 
-          # Upstream ships engine releases every few days, at 04:30.
+          # Upstream ships engine releases every few days, at 04:30; a held
+          # Strata skips that day's update.
           autoUpdate = {
             enable = true;
           };
@@ -165,6 +163,20 @@ in {
         # Strata. See modules/services/model-router.
         model-router = {
           enable = true;
+        };
+
+        # Gaming vs inference, following binary_sensor.ixian_gaming in Home
+        # Assistant (a template helper defined in its UI: the TV on its HDMI
+        # input, with the FancyLED sync box on HDMI 3, which is ixian).
+        # Gaming holds and stops Strata and runs the Steam session; inference
+        # (after 2 min off) stops the session and starts Strata. If Home
+        # Assistant cannot be read, the mode stays as it is. See
+        # modules/services/console-mode.
+        console-mode = {
+          enable = true;
+          homeAssistant = {
+            headerFile = config.sops.templates."console-mode-ha.header".path;
+          };
         };
 
         # ai.mantannest.com has no public DNS record; Headscale DNS
