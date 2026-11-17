@@ -78,6 +78,12 @@
 #
 # GPU access needs no unit override: heartbeat exposes no /dev/dri render
 # node, and NVIDIA's /dev/nvidia* nodes are 0666.
+#
+# The unit runs as a static llama-cpp user instead of upstream's DynamicUser,
+# only so it can own apiKeyFile: a dynamic UID cannot be the owner of a sops
+# secret. Everything else in upstream's sandbox is kept. systemd moves the
+# State/CacheDirectory out of /var/lib/private on its own when DynamicUser
+# goes off.
 {
   config,
   inputs,
@@ -107,7 +113,41 @@ in {
         assertion = cfg.models ? ${cfg.defaultModel};
         message = "homelab.services.llama-cpp.defaultModel (${cfg.defaultModel}) must be one of homelab.services.llama-cpp.models: ${lib.concatStringsSep ", " (lib.attrNames cfg.models)}.";
       }
+      {
+        assertion = lib.elem cfg.listenAddress ["127.0.0.1" "::1" "localhost"] || cfg.apiKeyFile != null;
+        message = "homelab.services.llama-cpp listens on ${cfg.listenAddress}: set apiKeyFile, or the API is open to that network.";
+      }
     ];
+
+    users = {
+      users = {
+        llama-cpp = {
+          isSystemUser = true;
+          group = "llama-cpp";
+          uid = cfg.userId;
+        };
+      };
+
+      groups = {
+        llama-cpp = {
+          gid = cfg.groupId;
+        };
+      };
+    };
+
+    networking = {
+      firewall = lib.mkIf cfg.openFirewall (
+        if cfg.firewallInterfaces == []
+        then {
+          allowedTCPPorts = [cfg.listenPort];
+        }
+        else {
+          interfaces = lib.genAttrs cfg.firewallInterfaces (_: {
+            allowedTCPPorts = [cfg.listenPort];
+          });
+        }
+      );
+    };
 
     services = {
       llama-cpp = {
@@ -154,6 +194,10 @@ in {
             "--top-k"
             "64"
           ]
+          ++ lib.optionals (cfg.apiKeyFile != null) [
+            "--api-key-file"
+            cfg.apiKeyFile
+          ]
           ++ cfg.extraFlags;
       };
     };
@@ -161,8 +205,8 @@ in {
     systemd = {
       services = {
         llama-cpp = {
-          # DynamicUser has HOME=/, so the NVIDIA driver's shader cache would
-          # land on the read-only root and be disabled.
+          # The system user's HOME is /var/empty, so the NVIDIA driver's shader
+          # cache would land on a read-only path and be disabled.
           environment = {
             XDG_CACHE_HOME = "/var/cache/llama-cpp";
           };
@@ -170,6 +214,11 @@ in {
           serviceConfig = {
             # Needs the W^X exception: see the shader-JIT note in the header.
             MemoryDenyWriteExecute = lib.mkForce false;
+
+            # Static user, so apiKeyFile can be owned by it (see header).
+            DynamicUser = lib.mkForce false;
+            User = "llama-cpp";
+            Group = "llama-cpp";
           };
         };
       };
