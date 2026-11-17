@@ -14,11 +14,8 @@
 # Strata's configure reads the file at start. Names outside the catalog are
 # served by whatever is loaded and never switch.
 #
-# Not handled here: the TV guard. It still stops Strata while the TV is on,
-# so a switch then loads a model the guard stops again, and the waiting
-# requests fail with a 503 after switchTimeout. Accepted until the guard is
-# replaced. Exposure is loopback only; Caddy's ai.<domain> still points
-# straight at Strata.
+# Exposure is loopback only; Caddy's ai.<domain> still points straight at
+# Strata.
 {
   config,
   lib,
