@@ -396,6 +396,7 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 | IT-Tools                  | ittools/                      | Web-based dev utilities (stateless container) |
 | Karakeep                  | karakeep/                     | Bookmark manager with AI (Authentik OIDC)     |
 | llama.cpp                 | llama-cpp/                    | Gemma 4 E4B + uncensored variant (router)     |
+| model-router              | model-router/                 | Strata size switcher (masood09/model-router)  |
 | JobScraper                | jobscraper/                   | Job board aggregator (Podman container)       |
 | Nightscout                | nix/services/nightscout.nix   | CGM dashboard (Node.js + MongoDB)             |
 | MailArchiver              | nix/services/mailarchiver.nix | Email archival (.NET service)                 |
@@ -702,6 +703,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Service    | Notes                                                    |
 |------------+----------------------------------------------------------|
 | Caddy      | Serves =ai.mantannest.com= (LAN via UniFi DNS, tailnet via Headscale DNS) |
+| model-router | Switches Strata between IQ2_XS, IQ3_XXS and IQ3_S per request; localhost:8922 |
 | Strata     | Local LLM inference on localhost:8916 behind Caddy; runs only while the TV is off |
 | Tailscale  | Headscale node =100.64.0.2=                              |
 

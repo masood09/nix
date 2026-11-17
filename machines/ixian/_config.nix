@@ -104,6 +104,10 @@ in {
           enable = true;
           family = "qwen";
           model = "iq3_s";
+          # Sizes model-router may switch to (each benchmarked at 256K on
+          # 2026-11-16 without swapping). strata-pregenerate keeps every one's
+          # run config current, so a switch is one model load.
+          models = ["iq2_xs" "iq3_xxs" "iq3_s"];
           context = "256k";
           parallel = 1;
 
@@ -151,6 +155,15 @@ in {
           autoUpdate = {
             enable = true;
           };
+        };
+
+        # OpenAI-compatible proxy on 127.0.0.1:8922 that switches Strata's
+        # size from each request's model name (qwen3.8-flash-next-<size>, and
+        # <size>-uncensored for the speed projection). Loopback only until
+        # LiteLLM is wired to it; ai.mantannest.com still goes straight to
+        # Strata. See modules/services/model-router.
+        model-router = {
+          enable = true;
         };
 
         # ai.mantannest.com has no public DNS record; Headscale DNS

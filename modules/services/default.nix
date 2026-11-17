@@ -30,6 +30,7 @@
     ./mailarchiver
     ./matrix
     ./minecraft
+    ./model-router
     ./mongodb
     ./nightscout
     ./opencloud
