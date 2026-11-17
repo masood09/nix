@@ -155,57 +155,6 @@
             '';
           };
 
-          tvGuard = {
-            enable = lib.mkEnableOption ''
-              stopping Strata while an Android TV is on, freeing VRAM and RAM
-              for games. Enabling it also makes the guard the only thing that
-              starts Strata: strata.service is left out of multi-user.target, so
-              neither boot nor a switch loads the model while the TV has the
-              GPU. The TV is polled over network ADB, and Strata starts once the
-              TV has been off (unreachable) for offDelay seconds, including the
-              first time after boot. A manual `systemctl stop strata` is
-              respected until the next TV on -> off cycle, or until a manual
-              `systemctl start strata`.
-            '';
-
-            address = lib.mkOption {
-              type = lib.types.str;
-              example = "tv.example.lan:5555";
-              description = ''
-                host:port of the TV's network ADB. The TV must allow this host's
-                ADB key once (an "Allow USB debugging?" prompt on screen).
-              '';
-            };
-
-            interval = lib.mkOption {
-              type = lib.types.ints.positive;
-              default = 10;
-              description = "Seconds between TV power checks.";
-            };
-
-            offDelay = lib.mkOption {
-              type = lib.types.ints.unsigned;
-              default = 30;
-              description = ''
-                Seconds the TV must stay off before Strata is started again (and,
-                with manageSession, before the Steam session is stopped).
-              '';
-            };
-
-            manageSession = lib.mkEnableOption ''
-              running the Steam/gamescope session of homelab.desktop.gaming.user
-              only while the TV is on. The guard starts display-manager.service
-              when the TV wakes, after stopping Strata. Once the TV has been off
-              for offDelay, it stops display-manager.service and that account's
-              user manager (where Steam and gamescope run), and starts Strata
-              only after both are down. Boot and switch cannot start the
-              session: graphical.target's built-in
-              Wants=display-manager.service is gated by a condition file the
-              guard keeps in /run. A game still running when the TV goes off
-              (or drops off the network) for offDelay is ended.
-            '';
-          };
-
           autoUpdate = {
             enable = lib.mkEnableOption ''
               a daily check of upstream's signed update feed. When a newer
@@ -214,11 +163,10 @@
               was running. A new engine is switched to only after a full test
               start of the model passes, so a failed test leaves the old one in
               place; a new Control is checked only with `--version`. An update
-              costs three model loads: the test start, the run-config
-              regeneration on the next start, and the serve itself. With
-              tvGuard, a day on which the TV is on at the scheduled time is
-              skipped, not retried. Without tvGuard nothing keeps the test start
-              off a GPU another workload (such as a game session) is using
+              costs the test start, one run-config regeneration per configured
+              size on the next start, and the serve itself. Nothing keeps the
+              test start off a GPU another workload (such as a game session) is
+              using, so schedule it for a quiet time
             '';
 
             schedule = lib.mkOption {
@@ -226,8 +174,8 @@
               default = "*-*-* 04:30";
               description = ''
                 systemd OnCalendar expression for the update check. Missed runs
-                are not caught up at boot, so an update never races the
-                guard's first start after a reboot.
+                are not caught up at boot, so an update never stops Strata
+                right after boot started it.
               '';
             };
           };

@@ -72,9 +72,9 @@
 # inside the sandbox; Hermes already passes --shm-size 1g for them. Point
 # sandbox.image at a slimmer image if those tools are never wanted.
 #
-# Model: Strata on ixian via its Caddy endpoint. Strata's tvGuard stops it
-# while the living-room TV is on, so expect 502/503 (with Retry-After) from
-# the model during those windows — the gateway stays up and retries.
+# Model: Strata on ixian via its Caddy endpoint. While Strata restarts or
+# loads a model, expect 502/503 (with Retry-After) from it — the gateway stays
+# up and retries.
 #
 # Web search: web_search runs in the gateway process, so it reaches this host's
 # loopback SearXNG; sandboxed terminal commands do not (pasta gives them a

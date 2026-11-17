@@ -146,22 +146,13 @@ in {
           # is turned off.
           experimentalSpeedProjection = true;
 
-          # Free the GPU for gaming: stop Strata while the living-room TCL
-          # Google TV is on, start it again once the TV has been off for 30 s,
-          # and let the guard be the only thing that starts Strata (it drops the
-          # unit from multi-user.target, so boot and switch cannot load the
-          # model over a running game).
-          tvGuard = {
-            enable = true;
-            address = "tcltv.iot.homelab.mantannest.com:5555";
-            # Run Steam/gamescope only while the TV is on. With the TV in
-            # standby, its periodic HDMI hotplugs crashed gamescope, and the
-            # resulting GPU ring reset killed Strata's engine every few hours.
-            manageSession = true;
-          };
+          # Strata runs at all times and shares the GPU (~15 GB of VRAM) and
+          # RAM with the Steam session and games; nothing coordinates the two.
+          # A GPU reset (for example from a gamescope crash) takes Strata's
+          # engine down too, and Strata restarts itself after RestartSec plus
+          # a model load.
 
-          # Upstream ships engine releases every few days. 04:30 is when the
-          # TV is reliably off; the update skips itself if it is not.
+          # Upstream ships engine releases every few days, at 04:30.
           autoUpdate = {
             enable = true;
           };
