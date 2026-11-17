@@ -690,8 +690,11 @@ Defined in =nix/pkgs/= and auto-discovered.
 - *Storage:* LUKS-encrypted ext4 + LVM root (tmpfs impermanence, non-ZFS); independent LUKS ext4 model disk at =/srv/models= unlocked from a root-resident key
 - *GPU:* AMD
 - *Console:* Jovian SDDM auto-login into the =gamescope-wayland= session (Steam
-  Gaming Mode); no general-purpose desktop shell. The session runs at all
-  times, alongside Strata.
+  Gaming Mode); no general-purpose desktop shell. console-mode switches the
+  host between gaming (session up, Strata stopped and held) and inference
+  (session down, Strata up), following =binary_sensor.ixian_gaming= in Home
+  Assistant on heartbeat. Gaming applies at once, inference after 2 min off;
+  if Home Assistant cannot be read, the mode stays. Boot starts in inference.
 - *Console User:* voyageonwheels (uid 1002) — gaming account, no sudo, no SSH
 - *Admin User:* masoodahmed — wheel (passwordless sudo), SSH-only admin
 - *Tailnet:* Headscale node =100.64.0.2=; Headscale DNS resolves =ai.mantannest.com= to it
@@ -701,8 +704,9 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Service    | Notes                                                    |
 |------------+----------------------------------------------------------|
 | Caddy      | Serves =ai.mantannest.com= (LAN via UniFi DNS, tailnet via Headscale DNS) |
-| model-router | Switches Strata between IQ2_XS, IQ3_XXS and IQ3_S per request; localhost:8922 |
-| Strata     | Local LLM inference on localhost:8916 behind Caddy; always on   |
+| console-mode | Gaming/inference controller; polls Home Assistant, holds Strata via =/run/console-mode/gaming= |
+| model-router | Switches Strata between IQ2_XS, IQ3_XXS and IQ3_S per request; localhost:8922; 503 =backend_held= while gaming |
+| Strata     | Local LLM inference on localhost:8916 behind Caddy; inference mode only |
 | Tailscale  | Headscale node =100.64.0.2=                              |
 
 **** Programs
