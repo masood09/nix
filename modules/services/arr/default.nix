@@ -967,15 +967,6 @@ in {
     };
 
     services = {
-      # Lidarr's library (artists, albums, history) lives only in Postgres, so
-      # it gets the same nightly pg_dump as the other services' databases.
-      postgresqlBackup = lib.mkIf cfg.lidarr.enable {
-        databases = [
-          "lidarr"
-          "lidarr-logs"
-        ];
-      };
-
       restic = lib.mkIf resticEnabled {
         backups = {
           backup = {

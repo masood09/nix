@@ -29,23 +29,20 @@ in {
             mountpoint = postgresqlCfg.dataDir;
             requiredBy = ["postgresql.service"];
 
-            # The live data directory is backed up as well as the pg_dump
-            # output, giving two artifacts with different jobs.
+            # The live data directory is the PostgreSQL backup: every database
+            # on the host, snapshotted in the same atomic call as every other
+            # service dataset, so it is consistent with the blobs those
+            # services reference. Restoring it is equivalent to recovering
+            # from a power cut, which is exactly what pg_basebackup and PITR
+            # already rely on — pg_wal lives inside $PGDATA, and $PGDATA is
+            # this dataset's mountpoint, so the WAL is inside the same
+            # snapshot.
             #
-            # This one is *physical*: a snapshot of the datadir is captured in
-            # the same atomic call as every other service dataset, so it is
-            # consistent with the blobs those services reference. Restoring it
-            # is equivalent to recovering from a power cut, which is exactly
-            # what pg_basebackup and PITR already rely on — pg_wal lives inside
-            # $PGDATA, and $PGDATA is this dataset's mountpoint, so the WAL is
-            # inside the same snapshot.
-            #
-            # The pg_dump output (postgresql-backup, below) stays *logical*: it
-            # runs after the snapshot with services live, so it does not line up
-            # with the blob datasets, but it is portable across PostgreSQL major
-            # versions — which is precisely when a physical restore cannot help.
-            #
-            # Cost is small: 4.39G of datadir against a 639GiB repository.
+            # Nightly pg_dump (backup.enable, below) is off fleet-wide: the
+            # dump's one advantage, portability across PostgreSQL major
+            # versions or rolling back a single database, is needed only
+            # before a planned upgrade, so take a dump by hand then. See
+            # docs/backup.org.
             restic = {
               enable = true;
             };

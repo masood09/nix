@@ -429,14 +429,6 @@
           zfs = {
             enable = true;
           };
-
-          backup = {
-            enable = true;
-
-            zfs = {
-              enable = true;
-            };
-          };
         };
 
         prometheus = {

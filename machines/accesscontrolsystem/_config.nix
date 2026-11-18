@@ -92,15 +92,6 @@
             enable = true;
             dataset = "rpool/root/var/lib/postgresql/17";
           };
-
-          backup = {
-            enable = true;
-
-            zfs = {
-              enable = true;
-              dataset = "rpool/root/var/backup/postgresql";
-            };
-          };
         };
 
         tailscale = {
