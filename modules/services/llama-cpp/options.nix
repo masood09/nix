@@ -1,5 +1,6 @@
-# Options — llama.cpp router serving Gemma 4 E4B and its uncensored variant
-# (listen address, models, vision projectors, context, KV cache).
+# Options — llama.cpp router serving Gemma 4 E4B, its uncensored variant, and
+# LFM3-1.7B (listen address, models with per-model context and KV cache,
+# vision projectors).
 {lib, ...}: let
   fileOptions = {
     name = lib.mkOption {
@@ -31,6 +32,33 @@
             Vision projector (mmproj GGUF) matching this model, from the same
             repository revision. With it the model accepts images; without it
             it is text-only.
+          '';
+        };
+
+        contextSize = lib.mkOption {
+          type = lib.types.nullOr lib.types.ints.positive;
+          default = null;
+          description = ''
+            Context length for this model, written as its preset section's
+            ctx-size key. Null means homelab.services.llama-cpp.contextSize.
+            The router's own command line overrides every section, so models
+            that share the card at different contexts each pin their own in
+            their section (never in extraFlags).
+          '';
+        };
+
+        cacheType = lib.mkOption {
+          type = lib.types.nullOr (lib.types.enum [
+            "f16"
+            "q8_0"
+            "q4_0"
+          ]);
+          default = null;
+          description = ''
+            KV cache type (K and V) for this model, as the section's
+            cache-type-k and cache-type-v keys. Null means the global
+            cacheType. Quantized types need flash attention, which the module
+            already enables.
           '';
         };
       };
@@ -116,6 +144,22 @@ in {
                   hash = "sha256-3rrTmrnBFSq2dpWmdPs16DdbIyDFe/1QdYNdPMsWx9s=";
                 };
               };
+              # Liquid AI's tri-hybrid agentic model, post-trained for agent
+              # harnesses (their own benchmark suite: tool use at Q4_K_M
+              # quality equal to Q8_0, 42-46 t/s decode and 288-317 t/s
+              # prefill on heartbeat's P1000, 2.3x Gemma). Benchmarked on
+              # heartbeat 2026-11-18; see the header of default.nix for what
+              # it does and does not win at. contextSize 65536 and q8_0 KV
+              # measured at ~2.2 GiB VRAM on this card; its native 256K fits
+              # (probe 2026-11-18) but prefill at depth runs ~138 t/s, which
+              # is a minute-per-10K-tokens stall on the P1000.
+              lfm3-1-7b = {
+                name = "LFM3-1.7B-Q4_K_M.gguf";
+                url = "https://huggingface.co/LiquidAI/LFM3-1.7B-GGUF/resolve/b3f2ae5d73cd3c91bf40e8ba752c648aa05dffdf/LFM3-1.7B-Q4_K_M.gguf";
+                hash = "sha256-N5Ph5uImaRnW4BUociG0EQAXWpjt2rqS4RGu07Bck8Q=";
+                contextSize = 65536;
+                cacheType = "q8_0";
+              };
             };
             description = ''
               Models the router offers, keyed by API model id (the `model` a
@@ -134,14 +178,16 @@ in {
             type = lib.types.ints.positive;
             default = 16384;
             description = ''
-              Context length in tokens, shared by every model and pinned on the
-              command line (it wins over the preset and over --fit); the
-              models' native maximum is 131072. Measured on the P1000 with the
-              vision projector on the CPU (2026-11-17, gemma-4-e4b): at 16384,
-              3149 MiB idle, a 1773-token prompt read at 196 tok/s and a
-              photo in 10.2 s; at 32768, 3422 MiB, 127 tok/s and 12.2 s.
-              Generation was ~17 tok/s in both. The clients (Karakeep, heavy's
-              fallback) send ~2K-token prompts, so 16384 is enough and faster.
+              Default context length in tokens, written as each preset
+              section's ctx-size for models that leave their contextSize
+              null. A model's native maximum may be larger (the Gemmas' is
+              131072, LFM3's is 262144). Measured on the P1000 with the
+              vision projector on the CPU (2026-11-17, gemma-4-e4b): at
+              16384, 3149 MiB idle, a 1773-token prompt read at 196 tok/s
+              and a photo in 10.2 s; at 32768, 3422 MiB, 127 tok/s and
+              12.2 s. Generation was ~17 tok/s in both. The clients
+              (Karakeep, heavy's fallback) send ~2K-token prompts, so
+              16384 is enough and faster.
             '';
           };
 
@@ -170,8 +216,10 @@ in {
             type = lib.types.enum ["f16" "q8_0" "q4_0"];
             default = "f16";
             description = ''
-              KV cache type for both K and V. f16 fits at the default 32k context;
-              quantized types need flash attention, which the module enables.
+              KV cache type for both K and V, written as each preset section's
+              cache-type-k and cache-type-v for models that leave their
+              cacheType null. f16 fits at 16384 on the P1000; quantized types
+              need flash attention, which the module enables.
             '';
           };
 
