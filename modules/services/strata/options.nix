@@ -161,11 +161,13 @@
           };
 
           webDomain = lib.mkOption {
-            type = lib.types.str;
-            default = "ai.${config.networking.domain}";
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            example = "ai.example.com";
             description = ''
-              Hostname Caddy serves the API on. Backend-neutral so clients keep
-              the same endpoint if the inference server changes.
+              Hostname Caddy serves Strata's API and web UI on, with no API key.
+              Null (the default) serves no vhost: clients reach Strata through
+              model-router and the LiteLLM gateway instead.
             '';
           };
 
