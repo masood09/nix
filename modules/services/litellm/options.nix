@@ -16,6 +16,16 @@
         type = lib.types.listOf lib.types.str;
         description = "Model names this engine serves; each is offered under the same name.";
       };
+
+      contextLength = lib.mkOption {
+        type = lib.types.ints.positive;
+        description = "Context window of the engine's models in tokens (what it is started with).";
+      };
+
+      maxOutputTokens = lib.mkOption {
+        type = lib.types.ints.positive;
+        description = "Largest completion a client should request from these models.";
+      };
     };
   };
 in {
