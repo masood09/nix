@@ -72,7 +72,7 @@
                 "gemma-4-e4b-uncensored"
               ];
               # llama.cpp's --ctx-size on heartbeat (homelab.services.llama-cpp).
-              contextLength = 32768;
+              contextLength = 16384;
               maxOutputTokens = 8192;
             };
           };
