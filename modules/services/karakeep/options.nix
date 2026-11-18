@@ -51,17 +51,40 @@ in {
           inference = {
             baseUrl = lib.mkOption {
               type = lib.types.str;
-              default = "https://ai.${config.networking.domain}/v1";
-              description = "OpenAI-compatible endpoint for tagging and summaries (Strata on ixian by default).";
+              default = "https://llm.${config.networking.domain}/v1";
+              description = ''
+                OpenAI-compatible endpoint for tagging and summaries: the
+                LiteLLM gateway on mentat. OPENAI_API_KEY in the sops .env is
+                Karakeep's own LiteLLM virtual key.
+              '';
             };
 
             model = lib.mkOption {
               type = lib.types.str;
-              default = "qwen3.8-flash-next-iq2_xs";
+              default = "light";
               description = ''
-                Model id as reported by the endpoint's /v1/models, used for both
-                text and image inference (Strata's model reads pictures).
+                Model used for both text and image inference. light is
+                heartbeat's Gemma 4 E4B, which reads pictures (its vision
+                projector runs on the CPU, ~10-15 s a photo); it runs 24/7 on
+                the same host, so tagging never depends on ixian.
               '';
+            };
+
+            contextLength = lib.mkOption {
+              type = lib.types.ints.positive;
+              default = 8192;
+              description = ''
+                Tokens of page content Karakeep sends (INFERENCE_CONTEXT_LENGTH).
+                With maxOutputTokens it must stay inside the model's context
+                (light: 16384). On heartbeat's P1000 an 8K prompt reads in
+                ~45-60 s.
+              '';
+            };
+
+            maxOutputTokens = lib.mkOption {
+              type = lib.types.ints.positive;
+              default = 2048;
+              description = "Largest completion Karakeep asks for (INFERENCE_MAX_OUTPUT_TOKENS); tags and summaries are short.";
             };
 
             jobTimeoutSec = lib.mkOption {
@@ -69,7 +92,8 @@ in {
               default = 600;
               description = ''
                 Seconds an inference job may run. Karakeep's default of 30 is
-                too short for a local model that thinks before answering.
+                too short for a long article on heartbeat's GPU (prompts read at
+                ~150-200 tok/s) or a photo encoded on the CPU.
               '';
             };
           };
