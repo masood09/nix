@@ -1,10 +1,10 @@
 # llama.cpp — Gemma 4 E4B and its uncensored variant behind one
 # OpenAI-compatible llama-server API (and llama-server's built-in web UI).
 #
-# Wraps the upstream nixpkgs `services.llama-cpp` module (DynamicUser,
-# hardening, PrivateDevices = false for GPU access). The models are pinned
-# fixed-output derivations in /nix/store, so there is no state to persist and
-# no dataset or UID to manage.
+# Wraps the upstream nixpkgs `services.llama-cpp` module (hardening,
+# PrivateDevices = false for GPU access), with a static user instead of its
+# DynamicUser (see below). The models and projectors are pinned fixed-output
+# derivations in /nix/store, so there is no state to persist and no dataset.
 #
 # Router mode: llama-server starts with no model and a preset INI listing
 # every entry of `models`; each section name is an API model id. A request
@@ -44,6 +44,12 @@
 # Thinking is off: the models' template thinks when llama.cpp's Jinja path
 # enables it, so `enable_thinking: false` goes to the template, and answers
 # start straight away (one test answer: 84 tokens instead of 351).
+#
+# Vision: both models carry their own projector (mmproj, ~945 MB f16, same
+# repository revision), so requests may include images. The projector runs on
+# the CPU (--no-mmproj-offload): its 593 MiB buffer does not fit on the P1000
+# next to the model even at 16K context. Measured 2026-11-17 on a 1280 px
+# photo: ~10 s to encode and read it, then ~17 tok/s, with sensible tags.
 #
 # Memory on the P1000: llama.cpp keeps the input layer, i.e. the large
 # per-layer embedding tables of the E-series, on the CPU, so the GPU holds
@@ -95,13 +101,22 @@
 
   llamaPackage = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.llama-cpp-vulkan;
 
-  # One preset section per model; the section name is the API model id.
-  modelsPreset =
-    lib.mapAttrs (id: m: {
-      model = "${pkgs.fetchurl {inherit (m) name url hash;}}";
+  fetchGguf = f: "${pkgs.fetchurl {inherit (f) name url hash;}}";
+
+  # One preset section per model; the section name is the API model id. Preset
+  # keys are llama-server arguments without dashes, so a model with a vision
+  # projector gets its own `mmproj` here.
+  modelsPreset = lib.mapAttrs (id: m:
+    {
+      model = fetchGguf m;
       load-on-startup = lib.boolToString (id == cfg.defaultModel);
+    }
+    // lib.optionalAttrs (m.mmproj != null) {
+      mmproj = fetchGguf m.mmproj;
     })
-    cfg.models;
+  cfg.models;
+
+  hasVision = lib.any (m: m.mmproj != null) (lib.attrValues cfg.models);
 in {
   imports = [
     ./options.nix
@@ -197,6 +212,11 @@ in {
           ++ lib.optionals (cfg.apiKeyFile != null) [
             "--api-key-file"
             cfg.apiKeyFile
+          ]
+          # The projector does not fit on the P1000 next to the model (see
+          # mmprojOffload), so image encoding runs on the CPU.
+          ++ lib.optionals (hasVision && !cfg.mmprojOffload) [
+            "--no-mmproj-offload"
           ]
           ++ cfg.extraFlags;
       };
