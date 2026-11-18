@@ -46,7 +46,7 @@ Next available human UID: *1003*
 | minecraft                     | 3014 | 3014 | Minecraft servers and Velocity proxy            |
 | aurral                        | 3015 | 3015 | Music discovery and playlist manager            |
 | strata                        | 3016 | 3016 | Local LLM inference server (ixian)              |
-| hermes                        | 3017 | 3017 | Hermes Agent gateway (heartbeat)                |
+| (retired: hermes)             | 3017 | 3017 | Hermes Agent gateway, removed 2026-11-17; do not reuse |
 | searx                         | 3018 | 3018 | SearXNG metasearch (heartbeat)                  |
 | actual                        | 3019 | 3019 | Actual Budget personal finance (heartbeat)      |
 | model-router                  | 3020 | 3020 | Strata model-switching proxy (ixian)            |

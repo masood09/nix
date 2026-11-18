@@ -108,7 +108,7 @@ NixOS servers (built with `mkNixOSConfig`):
 - `commrelay` — Matrix, monitoring
 - `heartbeat` — NAS, primary services
 - `meshcontrol` — Headscale VPN control
-- `mentat` — secondary DNS, Hermes agent (planned)
+- `mentat` — secondary DNS, LiteLLM gateway
 - `watchfulsystem` — monitoring, uptime
 
 NixOS desktops (built with `mkNixOSDesktopConfig`, which adds niri/noctalia/zen-browser):

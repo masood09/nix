@@ -1,4 +1,4 @@
-# mentat — secondary DNS (Blocky) and, in a later phase, the Hermes agent.
+# mentat — secondary DNS (Blocky) and the LiteLLM gateway.
 # Bare-metal Intel N100 mini PC with a single NVMe: encrypted single-disk
 # ZFS root with impermanence.
 {

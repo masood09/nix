@@ -391,7 +391,6 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 |---------------------------+-------------------------------+-----------------------------------------------|
 | Actual Budget             | actual/                       | Personal finance / budgeting (upstream module)|
 | BabyBuddy                 | babybuddy/                    | Baby tracking app (Podman + PostgreSQL)       |
-| Hermes Agent              | hermes/                       | AI agent gateway (Matrix/Discord/Telegram)    |
 | Home Assistant            | home-assistant/               | Home automation (Podman, host network)        |
 | IT-Tools                  | ittools/                      | Web-based dev utilities (stateless container) |
 | Karakeep                  | karakeep/                     | Bookmark manager with AI (Authentik OIDC)     |
@@ -478,7 +477,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 
 *** mentat
 
-- *Purpose:* Secondary DNS (DNS Filtering), LiteLLM gateway & Hermes Agent
+- *Purpose:* Secondary DNS (DNS Filtering) & LiteLLM gateway
 - *Storage:* Single-disk encrypted ZFS root (=rpool=, impermanence)
 
 **** Services
@@ -486,7 +485,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Service           | Notes                                        |
 |-------------------+----------------------------------------------|
 | ACME              | Wildcard cert on a ZFS dataset; fixed DNS propagation wait (VLAN DNS redirect) |
-| Backup            | Disabled until Hermes lands (LiteLLM's state is in heartbeat's Postgres) |
+| Backup            | Disabled (no local state; LiteLLM's state is in heartbeat's Postgres) |
 | Blocky            | DNS ad/tracker filtering (same as caretaker) |
 | Caddy             | Serves =llm.mantannest.com= (tailnet + LAN DNS only) |
 | LiteLLM           | Gateway on 127.0.0.1:8923 (Podman, upstream non-root image pinned by digest); routes to ixian (heavy) and heartbeat (light) over the tailnet with the backend key; heavy falls back to light while ixian games; virtual keys per client; UI login via Authentik |
@@ -537,7 +536,6 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Caddy                     | Reverse proxy                                     |
 | Dell iDRAC Fan Controller | IPMI fan speed management                         |
 | Grafana                   | ZFS-backed dashboards                             |
-| Hermes Agent              | ZFS, Strata model, sandbox, SearXNG web_search    |
 | Immich                    | ZFS datasets for photos/video                     |
 | IT-Tools                  | Stateless developer utilities                     |
 | JobScraper                | Job aggregator container                          |

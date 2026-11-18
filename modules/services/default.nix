@@ -19,7 +19,6 @@
     ./garage
     ./grafana
     ./headscale
-    ./hermes
     ./home-assistant
     ./immich
     ./ipmi-exporter
