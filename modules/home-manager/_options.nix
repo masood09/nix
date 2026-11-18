@@ -273,6 +273,40 @@ in {
 
         opencode = {
           enable = lib.mkEnableOption "Whether to enable opencode.";
+
+          litellm = {
+            host = lib.mkOption {
+              type = lib.types.str;
+              default = "mentat";
+              description = ''
+                NixOS configuration running the LiteLLM gateway. OpenCode's
+                model list is generated from its homelab.services.litellm
+                catalog, so it never needs editing here.
+              '';
+            };
+
+            minContextLength = lib.mkOption {
+              type = lib.types.ints.positive;
+              default = 65536;
+              description = ''
+                Only models whose backend has at least this context are listed.
+                OpenCode's agent prompt alone is ~12K tokens and sessions grow
+                far past that, so short-context engines (heartbeat's 32K Gemma,
+                which also needs ~2 minutes for that prompt) are left out.
+              '';
+            };
+
+            apiKeyFile = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              example = lib.literalExpression ''config.sops.secrets."litellm/opencode-key".path'';
+              description = ''
+                File holding OpenCode's LiteLLM virtual key, readable by the
+                user. OpenCode reads it at start ({file:} substitution), so the
+                key never enters the Nix store. Null leaves the gateway out.
+              '';
+            };
+          };
         };
 
         opentofu = {

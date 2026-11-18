@@ -1,13 +1,56 @@
 # opencode — AI coding assistant managed through Home Manager's native module
 # (package from numtide/llm-agents.nix)
+#
+# Models come from the LiteLLM gateway (modules/services/litellm). OpenCode
+# cannot list a custom OpenAI-compatible provider's models itself (its
+# discovery only covers vLLM, LM Studio and Ollama), so the list is generated
+# from the gateway host's catalog: every model and alias LiteLLM serves, with
+# the context and output limits of the engine behind it. Adding a model to
+# LiteLLM adds it here on the next deploy. Engines with less context than
+# litellm.minContextLength are left out: heartbeat's 32K Gemma needs ~2
+# minutes just for OpenCode's ~12K-token agent prompt. The opencode virtual
+# key in LiteLLM must allow the listed models, and should not allow the
+# short-context ones either, or heavy's fallback to light would still send
+# OpenCode there while ixian is gaming instead of failing fast.
 {
   homelabCfg,
   inputs,
   lib,
+  outputs,
   pkgs,
   ...
-}: {
-  config = lib.mkIf homelabCfg.programs.opencode.enable {
+}: let
+  cfg = homelabCfg.programs.opencode;
+  gateway = outputs.nixosConfigurations.${cfg.litellm.host}.config.homelab.services.litellm;
+
+  # Model name -> the backend serving it, for backends with enough context
+  # for an OpenCode session (see litellm.minContextLength).
+  backendOf = lib.listToAttrs (lib.concatLists (lib.mapAttrsToList (
+      _: b: map (m: lib.nameValuePair m b) b.models
+    )
+    (lib.filterAttrs (_: b: b.contextLength >= cfg.litellm.minContextLength) gateway.backends)));
+
+  # Aliases whose target survived the filter.
+  aliases = lib.filterAttrs (_: target: backendOf ? ${target}) gateway.aliases;
+
+  entry = label: backend: {
+    name = label;
+    limit = {
+      context = backend.contextLength;
+      output = backend.maxOutputTokens;
+    };
+  };
+
+  models =
+    lib.mapAttrs (name: backend: entry name backend) backendOf
+    // lib.mapAttrs (alias: target: entry "${alias} (${target})" backendOf.${target}) aliases;
+
+  defaultModel =
+    if models ? heavy
+    then "heavy"
+    else lib.head (lib.attrNames models);
+in {
+  config = lib.mkIf cfg.enable {
     programs = {
       opencode = {
         enable = true;
@@ -41,37 +84,30 @@
               };
           };
 
-        settings = {
-          "$schema" = "https://opencode.ai/config.json";
-          model = "ixian-strata/qwen3.8-flash-next-iq2_xs";
+        # The output limits come from the gateway's backends. For Qwen it is
+        # 32768: it thinks, so reasoning counts against the cap, and at 4096
+        # compacting a ~225K session spent the budget before finishing the
+        # summary. OpenCode reserves the output limit out of the context when
+        # deciding when to compact.
+        settings =
+          {
+            "$schema" = "https://opencode.ai/config.json";
+          }
+          // lib.optionalAttrs (cfg.litellm.apiKeyFile != null) {
+            model = "litellm/${defaultModel}";
 
-          provider = {
-            ixian-strata = {
-              npm = "@ai-sdk/openai-compatible";
-              name = "Ixian Strata";
-              options = {
-                # Caddy on ixian (LAN-only DNS); see modules/services/strata.
-                baseURL = "https://ai.mantannest.com/v1";
-              };
-              models = {
-                "qwen3.8-flash-next-iq2_xs" = {
-                  name = "Qwen3.8 Flash Next IQ2_XS";
-                  limit = {
-                    context = 262144;
-                    # Qwen3.8 is a thinking model, so reasoning tokens count
-                    # against this cap. At 4096, compacting a ~225K session
-                    # spent the whole budget before finishing the summary
-                    # ("Compaction summary reached the output token limit"),
-                    # leaving the session unable to continue. 32768 is Qwen's
-                    # recommended output length; OpenCode reserves it out of
-                    # the 256K context when deciding when to compact.
-                    output = 32768;
-                  };
+            provider = {
+              litellm = {
+                npm = "@ai-sdk/openai-compatible";
+                name = "LiteLLM";
+                options = {
+                  baseURL = "https://${gateway.webDomain}/v1";
+                  apiKey = "{file:${cfg.litellm.apiKeyFile}}";
                 };
+                inherit models;
               };
             };
           };
-        };
       };
     };
   };
