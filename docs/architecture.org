@@ -231,7 +231,7 @@ Boot:     /boot (mirrored ESP on multi-disk machines)
 Root:     rpool/root (rolled back to blank snapshot on every boot)
 Persist:  /nix/persist (bind-mounted via impermanence)
 Services: rpool/root/var/lib/<service> (dedicated datasets per service)
-Backup:   rpool/root/var/backup/postgresql (pg_dump target)
+Backup:   the PostgreSQL data directory dataset, snapshotted nightly (no pg_dump)
 #+end_example
 
 Non-ZFS machines (usul, sonic, caretaker) use LUKS-encrypted ext4 with tmpfs root:

@@ -321,7 +321,7 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 | Caddy      | caddy/      | Reverse proxy with automatic HTTPS (Cloudflare DNS)             |
 | PostgreSQL | postgresql/ | Shared database with peer auth and Prometheus exporter          |
 | MongoDB    | mongodb/    | Document database (localhost-only, used by Nightscout)          |
-| Backup     | backup/     | Nightly orchestration: stop services, pg_dump, ZFS snap, restic |
+| Backup     | backup/     | Nightly orchestration: stop services, ZFS snap, restic         |
 | fstrim     | (always on) | Periodic SSD TRIM                                               |
 
 ** Identity & Access Control

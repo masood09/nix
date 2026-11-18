@@ -20,7 +20,12 @@ in {
           };
 
           backup = {
-            enable = lib.mkEnableOption "Whether to enable Postgresql backup.";
+            enable = lib.mkEnableOption ''
+              nightly pg_dump of the databases services register in
+              services.postgresqlBackup, to its own restic-backed dataset.
+              Off on every host: the data directory's nightly snapshot already
+              backs up every database; dump by hand before a planned upgrade
+              instead (docs/backup.org)'';
 
             dataDir = lib.mkOption {
               type = lib.types.path;

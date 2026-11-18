@@ -5,13 +5,13 @@
 
 * Overview
 
-Nightly backup pipeline that runs on every NixOS server at 2:00 AM via a systemd timer. The pipeline orchestrates PostgreSQL dumps, ZFS snapshots, restic backup to S3, and reports on itself via Prometheus.
+Nightly backup pipeline that runs on every NixOS server at 2:00 AM via a systemd timer. The pipeline orchestrates ZFS snapshots, restic backup to S3, optional PostgreSQL dumps (off on every host since 2026-11-17, see [[*PostgreSQL: the data directory is the backup]]), and reports on itself via Prometheus.
 
 #+begin_example
   02:00 AM
      |
      v
-  PostgreSQL dumps (pg_dump per database)   <-- services LIVE
+  PostgreSQL dumps, only if postgresqlBackup is enabled (off fleet-wide)
      |
      v
   Stop services (serviceUnits)   ~~~~~~~~~~~~~~ stop window opens
@@ -41,7 +41,7 @@ Two design decisions carry most of the weight here.
 
 *Services resume before the upload.* Restic reads immutable snapshot mounts, so the (slow) upload runs with everything back online.
 
-Note the consequence for PostgreSQL: the dumps are captured by a snapshot taken ~10 minutes after they were written, so they do not line up with the blob datasets of the services whose rows they contain. That is deliberate, and safe, because the live data directory is *also* backed up — see [[*PostgreSQL: two artifacts]].
+PostgreSQL itself is backed up by snapshotting its live data directory in that same atomic call, not by dumps — see [[*PostgreSQL: the data directory is the backup]].
 
 * Machines
 
@@ -54,15 +54,15 @@ nix eval --json '.#nixosConfigurations.<host>.config.services.restic.backups.bac
 
 | Machine             | Backup | Datasets | Units Stopped | Extra Paths | PG Backup |
 |---------------------+--------+----------+---------------+-------------+-----------|
-| heartbeat           | Yes    |       15 | 15            | -           | Yes       |
-| accesscontrolsystem | Yes    |        2 | (none)        | authentik   | Yes       |
+| heartbeat           | Yes    |       18 | 24            | -           | No        |
+| accesscontrolsystem | Yes    |        1 | (none)        | authentik   | No        |
 | meshcontrol         | Yes    |        1 | (none)        | -           | No        |
 | watchfulsystem      | Yes    |        1 | (none)        | -           | No        |
 | commrelay           | No     |        0 | -             | -           | No        |
 | caretaker           | No     |        0 | -             | -           | No        |
 | mentat              | No     |        0 | -             | -           | No        |
 
-Three hosts stop nothing at all. =accesscontrolsystem= gained nothing from the stop: its only snapshotted data was the =pg_dump= output (MVCC-consistent already) and its =extraPaths= are read live after services restart, so the window never covered them. =meshcontrol= and =watchfulsystem= keep all state for headscale, headplane and uptime-kuma in a single ZFS dataset each, so one atomic snapshot is crash-consistent — the same guarantee those processes must already survive on power loss. headscale in particular is SQLite with =write_ahead_log = true=, and the db, =-wal= and =-shm= files all live inside =/var/lib/headscale=, which is the dataset mountpoint.
+Three hosts stop nothing at all. =accesscontrolsystem= gains nothing from a stop: its only snapshotted dataset is the PostgreSQL data directory, whose single atomic snapshot is crash-consistent on its own, and its =extraPaths= are read live after services restart, so the window never covered them. =meshcontrol= and =watchfulsystem= keep all state for headscale, headplane and uptime-kuma in a single ZFS dataset each, so one atomic snapshot is crash-consistent — the same guarantee those processes must already survive on power loss. headscale in particular is SQLite with =write_ahead_log = true=, and the db, =-wal= and =-shm= files all live inside =/var/lib/headscale=, which is the dataset mountpoint.
 
 That last change also removed a cross-host outage. headscale sets =only_start_if_oidc_is_available= and exits fatally when its OIDC issuer is unreachable at startup; because every host fired its backup at 02:00:00, meshcontrol restarted headscale in the same minute accesscontrolsystem stopped authentik. On 2026-07-22 that crash-looped headscale eight times and dropped all 13 tailnet nodes for ~50s.
 
@@ -140,11 +140,7 @@ An EXIT trap guarantees services are restarted even if the script fails at any p
 
 ** PostgreSQL Dumps
 
-If =services.postgresql= and =services.postgresqlBackup= are enabled, the pipeline triggers each =postgresqlBackup-<db>.service= unit. These are standard NixOS =pg_dump= oneshots that write SQL dumps to the configured backup directory.
-
-The dump directory is typically on its own ZFS dataset (with =restic.enable=), so the dumps are captured in the subsequent ZFS snapshot and uploaded by restic.
-
-Individual database backup failures are logged but do not abort the pipeline.
+Off on every host since 2026-11-17 (=homelab.services.postgresql.backup.enable= is unset); see [[*PostgreSQL: the data directory is the backup]]. The pipeline still supports them: if =services.postgresql= and =services.postgresqlBackup= are enabled, it triggers each =postgresqlBackup-<db>.service= unit, standard NixOS =pg_dump= oneshots that write SQL dumps to the backup directory, which sits on its own ZFS dataset with =restic.enable=. Individual dump failures are logged but do not abort the pipeline.
 
 ** ZFS Snapshots
 
@@ -168,20 +164,27 @@ Atomicity is *per pool*: zfs rejects an invocation naming datasets in different 
 
 The cleanup script reverses this: unmount, rmdir, destroy snapshot. It uses =set +euo pipefail= so cleanup proceeds even if individual steps fail.
 
-** PostgreSQL: two artifacts
+** PostgreSQL: the data directory is the backup
 
-Both the live data directory and the =pg_dump= output are backed up, and they do different jobs:
+The live data directory (the =postgresql= dataset) is the only nightly PostgreSQL backup, and it covers every database on the host. It is snapshotted in the same atomic per-pool call as every other service dataset, so it lines up exactly with the blobs those services reference (Immich's rows with its photos, Synapse's with its media). Restoring it is equivalent to recovering from a power cut, which is what =pg_basebackup= and PITR already rely on: =pg_wal= lives inside =$PGDATA=, =$PGDATA= is the dataset mountpoint, and there are no tablespaces outside it, so the WAL is inside the same snapshot (checked on heartbeat on 2026-11-17).
 
-| Artifact                     | Consistent with blobs? | Portable across PG majors? |
-|------------------------------+------------------------+----------------------------|
-| datadir (=postgresql= dataset) | Yes                    | No                         |
-| dumps (=postgresql-backup=)    | No                     | Yes                        |
+Nightly =pg_dump= was turned off on 2026-11-17. The dumps dated from before the snapshot existed, covered only the databases whose modules had added themselves (newer ones such as the *arr, Seerr, Lidarr and LiteLLM databases were silently left out), could not line up with the blob datasets, and cost a 5.2G dump directory plus ~13 minutes a night. What a dump offers that the snapshot does not:
 
-The *physical* copy is snapshotted in the same atomic per-pool call as every other service dataset, so it lines up exactly with the blobs those services reference. Restoring it is equivalent to recovering from a power cut, which is what =pg_basebackup= and PITR already rely on: =pg_wal= lives inside =$PGDATA=, and =$PGDATA= is the dataset mountpoint, so the WAL is inside the same snapshot. This is the primary restore path.
+| Need                                         | Snapshot | One-off =pg_dump= |
+|----------------------------------------------+----------+-------------------|
+| Restore the whole host after losing it        | Yes      | Yes               |
+| Roll back one database (a bad app migration)  | Restore the cluster elsewhere, copy one DB out | Yes |
+| Move to a different PostgreSQL major version  | No       | Yes               |
 
-The *logical* dumps run before the stop window with services live, so they are minutes older than the snapshot that captures them and do not agree with the blob datasets. That is fine — they exist for the one case a physical restore cannot serve, which is restoring onto a different PostgreSQL major version.
+Both of the last two are planned events, so take a dump *then*, by hand, rather than every night:
 
-Cost of carrying both, measured on heartbeat: 4.39G of datadir against a 639GiB repository, so +0.7%. The dump directory is already larger at 5.94G because =postgresqlBackup= keeps a =.prev= copy of every database.
+#+begin_src bash
+# Before an app upgrade that migrates its database one way, or a PG major upgrade
+sudo install -d -o postgres -g postgres -m 0700 /var/lib/postgresql/pre-<what>-$(date +%Y%m%d)
+sudo -u postgres pg_dump -Fc -d <db> -f /var/lib/postgresql/pre-<what>-<date>/<db>.dump
+#+end_src
+
+The dump is for an immediate rollback; delete it once the upgrade has proved itself. =/var/lib/postgresql= (the parent of the =17= data directory) is on the ephemeral root, so the dump does not survive a reboot: if the rollback window may span one, write it to a persistent dataset with room instead. Never write it inside the data directory itself. To restore a single database from the nightly snapshot instead, restore the =postgresql= dataset from restic to a scratch directory, start a temporary =postgres= on it with a different port, and =pg_dump= the one database out.
 
 ** Restic Backup
 
@@ -364,16 +367,17 @@ Before anything else: if the host has no dataset opting into restic and no Postg
    #+begin_src nix
    homelab = {
      services = {
-       postgresql = {
+       home-assistant = {
          enable = true;
-         backup = {
+         zfs = {
            enable = true;
-           zfs = {
+           restic = {
              enable = true;
-             dataset = "rpool/root/var/backup/postgresql";
            };
          };
        };
      };
    };
+
+   PostgreSQL's data directory needs nothing here: the postgresql module enables restic on its dataset itself.
    #+end_src
