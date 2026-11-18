@@ -28,7 +28,7 @@ machines/                          Per-machine configurations
   commrelay/                         NixOS server (Matrix, monitoring)
   watchfulsystem/                    NixOS server (monitoring, uptime)
   caretaker/                         NixOS server (DNS, Tailscale)
-  mentat/                            NixOS server (secondary DNS, Hermes agent)
+  mentat/                            NixOS server (secondary DNS, LiteLLM gateway)
   usul/                              NixOS desktop (primary laptop)
   sonic/                             NixOS desktop (laptop)
   work-okta/                         macOS (work)

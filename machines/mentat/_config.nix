@@ -1,5 +1,4 @@
 # Homelab options — secondary DNS (Blocky + Unbound) and the LiteLLM gateway.
-# Hermes agent is a later phase.
 {
   config,
   lib,
@@ -7,7 +6,7 @@
 }: {
   config = {
     homelab = {
-      purpose = "Secondary DNS (DNS Filtering), LiteLLM gateway & Hermes Agent";
+      purpose = "Secondary DNS (DNS Filtering) & LiteLLM gateway";
       isRootZFS = true;
       isEncryptedRoot = true;
       impermanence = true;
@@ -32,8 +31,8 @@
 
         # Disabled: Blocky's config is fully declarative, tailscale's node
         # state is re-creatable, and LiteLLM's state lives in heartbeat's
-        # Postgres (backed up there). Enable (with restic secrets) when Hermes
-        # lands.
+        # Postgres (backed up there). Enable (with restic secrets) if mentat
+        # ever holds state of its own.
         backup = {
           enable = false;
         };

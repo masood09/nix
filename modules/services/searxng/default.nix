@@ -15,12 +15,11 @@
 # Limiter (homelab.services.searxng.limiter, on by default): its botdetection
 # header filters require browser-shaped requests — Accept must contain text/html
 # and Accept-Language must be present — so a programmatic client sending only
-# Accept: application/json, such as Hermes' SearXNG provider, is 429'd. Even a
-# browser-shaped client is capped on the JSON API: botdetection.ip_limit allows
-# 4 non-html requests per hour per network. The narrower fix is
-# botdetection.ip_lists.pass_ip, which is checked before those filters, so it
-# exempts one client address rather than turning the limiter off for everyone;
-# heartbeat disables the limiter instead.
+# Accept: application/json is 429'd. Even a browser-shaped client is capped on
+# the JSON API: botdetection.ip_limit allows 4 non-html requests per hour per
+# network. To let one programmatic client through, prefer
+# botdetection.ip_lists.pass_ip, which is checked before those filters and
+# exempts one client address, over turning the limiter off for everyone.
 {
   config,
   lib,

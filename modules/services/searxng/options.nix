@@ -35,13 +35,13 @@ in {
           clientUrl = lib.mkOption {
             type = lib.types.str;
             default = "http://${hostAddress}:${toString self.listenPort}";
-            description = "URL a client on this host uses to reach SearXNG — Caddy's upstream target, and Hermes' SEARXNG_URL. Loopback with host egress, the WireGuard namespace address when vpn.enable is set.";
+            description = "URL a client on this host uses to reach SearXNG (Caddy's upstream target). Loopback with host egress, the WireGuard namespace address when vpn.enable is set.";
           };
 
           limiter = lib.mkOption {
             type = lib.types.bool;
             default = true;
-            description = "SearXNG's request limiter (server.limiter). When false no limiter is applied at all, and botdetection's header filters stop rejecting clients that do not look like a browser — which is what a programmatic client such as Hermes' SearXNG provider needs, since it sends only Accept: application/json. The narrower alternative is botdetection.ip_lists.pass_ip, checked before those filters, which exempts one client address rather than every client.";
+            description = "SearXNG's request limiter (server.limiter). When false no limiter is applied at all, and botdetection's header filters stop rejecting clients that do not look like a browser, such as a programmatic client sending only Accept: application/json. The narrower alternative is botdetection.ip_lists.pass_ip, checked before those filters, which exempts one client address rather than every client.";
           };
 
           userId = lib.mkOption {
@@ -100,9 +100,6 @@ in {
           # or DNT header the online processor sets per request, and JS engines
           # (flake_solver) are not supported in this build. yahoo and openverse stay
           # because they do answer, though yahoo disconnects on some queries.
-          #
-          # Hermes queries the general category, so the general-web block is what
-          # its web_search actually gets: bing, yandex, yahoo, wikipedia.
           engines = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             default = [
