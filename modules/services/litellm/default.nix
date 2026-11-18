@@ -42,10 +42,15 @@
       api_base = backend.apiBase;
       api_key = "os.environ/BACKEND_KEY";
     };
-    model_info = {
-      max_input_tokens = backend.contextLength;
-      max_output_tokens = backend.maxOutputTokens;
-    };
+    model_info =
+      {
+        max_input_tokens = backend.contextLength;
+        max_output_tokens = backend.maxOutputTokens;
+      }
+      // lib.optionalAttrs (backend.pricing != null) {
+        input_cost_per_token = backend.pricing.inputCostPerToken;
+        output_cost_per_token = backend.pricing.outputCostPerToken;
+      };
   };
 
   # Model name -> its backend, to resolve aliases.
