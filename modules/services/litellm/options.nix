@@ -26,6 +26,31 @@
         type = lib.types.ints.positive;
         description = "Largest completion a client should request from these models.";
       };
+
+      # Local inference has no API price, so this carries the list price of the
+      # public API serving the same model; the spend dashboard then shows what
+      # a request would have cost in the cloud. Values are USD per token, and
+      # LiteLLM warns (missing_pricing_key) and logs $0 spend for deployments
+      # that have none. Caveat checked on v1.108.9: a rate that YAML renders
+      # dotless (2e-08) loads as a string in PyYAML, but the router parses
+      # model_info with pydantic float fields and coerces it back; the current
+      # pkgs.formats.yaml happens to keep the dot (2.0e-08) anyway.
+      pricing = lib.mkOption {
+        type = lib.types.nullOr (lib.types.submodule {
+          options = {
+            inputCostPerToken = lib.mkOption {
+              type = lib.types.numbers.nonnegative;
+              description = "Written to model_info.input_cost_per_token.";
+            };
+            outputCostPerToken = lib.mkOption {
+              type = lib.types.numbers.nonnegative;
+              description = "Written to model_info.output_cost_per_token.";
+            };
+          };
+        });
+        default = null;
+        description = "Reference pricing for virtual-key spend tracking, or null to leave the backend unpriced.";
+      };
     };
   };
 in {

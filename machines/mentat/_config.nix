@@ -64,6 +64,14 @@
               # counts against output; 32K is Qwen's recommended length.
               contextLength = 262144;
               maxOutputTokens = 32768;
+              # Shadow pricing: the local quants are based on Qwen3.8 Flash
+              # Next, and Alibaba's first-party API lists it at $0.15/M input,
+              # $0.47/M output (LiteLLM's dashscope/qwen3.8-flash entry,
+              # checked 2026-11). The spend dashboard compares against this.
+              pricing = {
+                inputCostPerToken = 1.5e-7;
+                outputCostPerToken = 4.7e-7;
+              };
             };
             heartbeat = {
               apiBase = "http://heartbeat.dns.headscale.mantannest.com:8921/v1";
@@ -74,6 +82,13 @@
               # llama.cpp's --ctx-size on heartbeat (homelab.services.llama-cpp).
               contextLength = 16384;
               maxOutputTokens = 8192;
+              # Shadow pricing: Google's API serves Gemma 4 free of charge, so
+              # price against the hosted rate LiteLLM tracks (DeepInfra's
+              # gemma-4-E4B-it: $0.02/M input, $0.10/M output, checked 2026-11).
+              pricing = {
+                inputCostPerToken = 2.0e-8;
+                outputCostPerToken = 1.0e-7;
+              };
             };
           };
           aliases = {
