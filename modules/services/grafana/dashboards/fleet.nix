@@ -27,6 +27,7 @@
     "https://loki.mantannest.com/ready" = "Loki (heartbeat)";
     "https://chat.mantannest.com/-/health" = "Matrix - Synapse (heartbeat)";
     "https://mas.chat.mantannest.com/-/health" = "Matrix - Auth Server (heartbeat)";
+    "https://llmchat.mantannest.com/health" = "Open WebUI (heartbeat)";
     "https://cloud.mantannest.com/-/health" = "OpenCloud (heartbeat)";
     "https://collabora.cloud.mantannest.com/hosting/discovery" = "OpenCloud - Collabora (heartbeat)";
     "https://prometheus.mantannest.com/-/healthy" = "Prometheus (heartbeat)";

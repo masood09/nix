@@ -64,6 +64,7 @@
             "https://loki.mantannest.com/ready"
             "https://chat.mantannest.com/-/health"
             "https://mas.chat.mantannest.com/-/health"
+            "https://llmchat.mantannest.com/health"
             "https://cloud.mantannest.com/-/health"
             "https://collabora.cloud.mantannest.com/hosting/discovery"
             "https://prometheus.mantannest.com/-/healthy"
