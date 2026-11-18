@@ -79,7 +79,8 @@
                 "gemma-4-e4b"
                 "gemma-4-e4b-uncensored"
               ];
-              # llama.cpp's --ctx-size on heartbeat (homelab.services.llama-cpp).
+              # The ctx-size each model section pins on heartbeat
+              # (homelab.services.llama-cpp.contextSize).
               contextLength = 16384;
               maxOutputTokens = 8192;
               # Shadow pricing: Google's API serves Gemma 4 free of charge, so
@@ -90,12 +91,38 @@
                 outputCostPerToken = 1.0e-7;
               };
             };
+            # A second entry for the same llama.cpp router on heartbeat, so
+            # the agent model's 64K per-section ctx-size (modules/services/
+            # llama-cpp) is what clients see; LiteLLM tracks context per
+            # backend, not per model.
+            heartbeat-agent = {
+              apiBase = "http://heartbeat.dns.headscale.mantannest.com:8921/v1";
+              models = ["lfm3-1-7b"];
+              contextLength = 65536;
+              maxOutputTokens = 32768;
+              # Shadow pricing: OpenRouter's hosted listing of the same
+              # checkpoint (liquid/lfm-3-1-7b: $0.08/M input, $0.20/M output,
+              # checked 2026-11-18; LiteLLM's own table still only carries
+              # the LFM2-era entries). OpenRouter also has a :free tier, but
+              # a shadow rate wants the paid one.
+              pricing = {
+                inputCostPerToken = 8.0e-8;
+                outputCostPerToken = 2.0e-7;
+              };
+            };
           };
           aliases = {
             heavy = "qwen3.8-flash-next-iq3_s";
             heavy-uncensored = "qwen3.8-flash-next-iq3_s-uncensored";
             light = "gemma-4-e4b";
             light-uncensored = "gemma-4-e4b-uncensored";
+            # Agentic model for harnesses (Hermes): tool calls measured
+            # flawless on heartbeat and 64K context at 2-3x light's speed,
+            # but it supplements light rather than replacing it (it invents
+            # knowledge; see modules/services/llama-cpp). Deliberately no
+            # fallback entry: an automatic agent -> heavy would defeat
+            # reserving ixian for work the harness itself judges complex.
+            agent = "lfm3-1-7b";
           };
           fallbacks = {
             heavy = ["light"];
