@@ -240,6 +240,14 @@
           restartUnits = ["podman-jobscraper.service"];
         };
 
+        # WEBUI_SECRET_KEY, OPENAI_API_KEY (Open WebUI's LiteLLM virtual key)
+        # and OAUTH_CLIENT_SECRET (Authentik provider "openwebui").
+        "open-webui/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "open-webui";
+          restartUnits = ["open-webui.service"];
+        };
+
         "karakeep/.env" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "karakeep";
