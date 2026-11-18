@@ -12,6 +12,12 @@
   resticEnabled = config.homelab.services.restic.enable;
   domain = config.networking.domain;
   seerrPackage = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.seerr;
+  # Lidarr 3.1.6 changed the delay-profile API from enableUsenet/usenetDelay
+  # fields to a per-protocol `items` list, and nixflix writes the new shape.
+  # Stable nixpkgs ships 3.1.0, which rejects it ("Either Usenet or Torrent
+  # should be enabled"), so lidarr-delayprofiles failed on every deploy. Take
+  # Lidarr from unstable until stable reaches 3.1.6.
+  lidarrPackage = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.lidarr;
 
   # Nixflix exposes Lidarr's host, media-management, metadata, and quality
   # endpoints declaratively, but it has no Lidarr config/naming option. Keep
@@ -561,6 +567,7 @@ in {
 
       lidarr = lib.mkIf cfg.lidarr.enable {
         enable = true;
+        package = lidarrPackage;
 
         mediaDirs = ["${cfg.mediaDir}/music"];
 
