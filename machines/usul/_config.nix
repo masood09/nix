@@ -1,5 +1,5 @@
 # Homelab options — ThinkPad T14 Gen 3 laptop with Niri desktop, bluetooth, gaming.
-{
+{config, ...}: {
   config = {
     # thinkpad_acpi ships with the volume/mute/brightness/kbd-backlight hotkey
     # bits (20-22, 15-17) disabled by default, so Fn+F1-F4 never reach evdev
@@ -101,6 +101,13 @@
             "opencode"
             "qwen-code"
           ];
+        };
+        # OpenCode talks to the LiteLLM gateway with its own virtual key; its
+        # model list is generated from the gateway's catalog.
+        opencode = {
+          litellm = {
+            apiKeyFile = config.sops.secrets."litellm/opencode-key".path;
+          };
         };
         # Bitwarden system-auth unlock: install the polkit action and grant it
         # silently for the active session so the vault auto-unlocks at launch.
