@@ -698,16 +698,15 @@ Defined in =nix/pkgs/= and auto-discovered.
   if Home Assistant cannot be read, the mode stays. Boot starts in inference.
 - *Console User:* voyageonwheels (uid 1002) — gaming account, no sudo, no SSH
 - *Admin User:* masoodahmed — wheel (passwordless sudo), SSH-only admin
-- *Tailnet:* Headscale node =100.64.0.2=; Headscale DNS resolves =ai.mantannest.com= to it
+- *Tailnet:* Headscale node =100.64.0.2=; LiteLLM on mentat reaches model-router over it
 
 **** Services
 
 | Service    | Notes                                                    |
 |------------+----------------------------------------------------------|
-| Caddy      | Serves =ai.mantannest.com= (LAN via UniFi DNS, tailnet via Headscale DNS) |
 | console-mode | Gaming/inference controller; polls Home Assistant, holds Strata via =/run/console-mode/gaming= |
-| model-router | Switches Strata between IQ2_XS, IQ3_XXS and IQ3_S per request; localhost:8922; 503 =backend_held= while gaming |
-| Strata     | Local LLM inference on localhost:8916 behind Caddy; inference mode only |
+| model-router | Switches Strata between IQ2_XS, IQ3_XXS and IQ3_S per request; :8922 on tailscale0 with the backend key (LiteLLM); 503 =backend_held= while gaming |
+| Strata     | Local LLM inference on localhost:8916, behind model-router; inference mode only |
 | Tailscale  | Headscale node =100.64.0.2=                              |
 
 **** Programs

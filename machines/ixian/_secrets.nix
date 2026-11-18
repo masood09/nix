@@ -7,12 +7,6 @@
           restartUnits = ["alloy.service"];
         };
 
-        # Shared Cloudflare DNS token for the wildcard ACME certificate Caddy
-        # serves ai.mantannest.com with.
-        "cloudflare/api-key" = {
-          restartUnits = ["acme-setup.service"];
-        };
-
         # Shared backend key (secrets/secrets.sops.yaml) that LiteLLM on
         # mentat sends; model-router refuses requests without it. One line, at
         # least 16 characters. Rotating it touches all three hosts.

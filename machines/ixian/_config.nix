@@ -97,9 +97,9 @@ in {
         # 16 GB RX 9070 out of memory at load.
         #
         # parallel stays 1: DFlash2 drafting (upstream's auto choice, not
-        # pinned) only runs with one request at a time. Caddy serves the API
-        # to the LAN and the tailnet as ai.mantannest.com, with no API key, by
-        # choice.
+        # pinned) only runs with one request at a time. Strata stays on
+        # loopback with no vhost: clients reach it through model-router and
+        # the LiteLLM gateway on mentat.
         strata = {
           enable = true;
           family = "qwen";
@@ -156,14 +156,12 @@ in {
           };
         };
 
-        # OpenAI-compatible proxy on 127.0.0.1:8922 that switches Strata's
-        # size from each request's model name (qwen3.8-flash-next-<size>, and
-        # <size>-uncensored for the speed projection). Loopback only until
-        # LiteLLM is wired to it; ai.mantannest.com still goes straight to
-        # Strata. See modules/services/model-router.
-        # Reached by LiteLLM on mentat over the tailnet: the port is open on
-        # tailscale0 only (the Headscale ACL limits it to mentat), and
-        # requests need the shared backend key. Strata stays on loopback.
+        # OpenAI-compatible proxy on :8922 that switches Strata's size from
+        # each request's model name (qwen3.8-flash-next-<size>, and
+        # <size>-uncensored for the speed projection). See
+        # modules/services/model-router. Reached by LiteLLM on mentat over the
+        # tailnet: the port is open on tailscale0 only (the Headscale ACL
+        # limits it to mentat), and requests need the shared backend key.
         model-router = {
           enable = true;
           listenAddress = "0.0.0.0";
@@ -184,13 +182,6 @@ in {
           homeAssistant = {
             headerFile = config.sops.templates."console-mode-ha.header".path;
           };
-        };
-
-        # ai.mantannest.com has no public DNS record; Headscale DNS
-        # resolves it to ixian's tailnet IP (100.64.0.2) and UniFi local
-        # DNS resolves it on the LAN.
-        caddy = {
-          enable = true;
         };
 
         # ixian sits inside 10.0.30.0/24, which jumpbox-home advertises as a
@@ -307,21 +298,6 @@ in {
     };
 
     security = {
-      acme = {
-        certs = {
-          # The LAN firewall redirects all port-53 traffic on ixian's VLAN to
-          # the internal resolvers, which answer NXDOMAIN for the ACME TXT
-          # record, so lego's propagation check (direct queries to
-          # Cloudflare's nameservers) can never pass from here. Wait a fixed
-          # time instead; Let's Encrypt validates from the public internet.
-          ${config.networking.domain} = {
-            extraLegoFlags = [
-              "--dns.propagation-wait=60s"
-            ];
-          };
-        };
-      };
-
       rtkit = {
         enable = true;
       };
