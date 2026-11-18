@@ -50,8 +50,9 @@ Next available human UID: *1003*
 | model-router                  | 3020 | 3020 | Strata model-switching proxy (ixian)            |
 | console-mode                  | 3021 | 3021 | Gaming/inference mode controller (ixian)        |
 | llama-cpp                     | 3022 | 3022 | llama.cpp router (heartbeat)                    |
+| open-webui                    | 3023 | 3023 | Open WebUI chat front end (heartbeat)           |
 
-Next available UID/GID: *3023*
+Next available UID/GID: *3024*
 
 *Exception:* the arr media stack (Jellyfin/Sonarr/Radarr/Lidarr/Prowlarr/SABnzbd/Seerr/Recyclarr,
 via the =nixflix= flake input — see =modules/services/arr/=, enabled per-machine via
@@ -119,6 +120,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | llama.cpp (Gemma 4 E4B + LFM3-1.7B router) |  8921 | heartbeat; 0.0.0.0, open on tailscale0 only, backend key required; uid 3022; model children on ephemeral loopback ports |
 | model-router (Strata switcher)       |  8922 | ixian; 0.0.0.0, open on tailscale0 only, backend key required; restarts strata.service via polkit |
 | LiteLLM (gateway)                    |  8923 | mentat; 127.0.0.1 only, behind Caddy (llm.<domain>) |
+| Open WebUI                           |  8924 | heartbeat; loopback behind Caddy (llmchat.<domain>) |
 | Home Assistant (mDNS discovery)      |  5353 | UDP; heartbeat LAN interface only (openFirewall) |
 | Home Assistant (HomeKit)             | 21063 | TCP; heartbeat LAN interface only (openFirewall) |
 | Authentik (HTTP/health)              |  9000 | 127.0.0.1 only; server listener    |
@@ -142,7 +144,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | MongoDB                              | 27017 | Localhost only (Nightscout)       |
 | LiveKit RTC (UDP range)              | 50100 | 50100–50200                       |
 
-Next available port in 89xx block: *8924*
+Next available port in 89xx block: *8925*
 
 ** Arr Media Stack (heartbeat only)
 Upstream defaults kept as-is (same convention as Immich/Vaultwarden above) — these sit

@@ -398,6 +398,7 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 | model-router              | model-router/                 | Strata size switcher (masood09/model-router)  |
 | JobScraper                | jobscraper/                   | Job board aggregator (Podman container)       |
 | Nightscout                | nix/services/nightscout.nix   | CGM dashboard (Node.js + MongoDB)             |
+| Open WebUI                | open-webui/                   | LLM chat front end (LiteLLM, Authentik OIDC)  |
 | MailArchiver              | nix/services/mailarchiver.nix | Email archival (.NET service)                 |
 | Dell iDRAC Fan Controller | dell-idrac-fan-controller/    | Fan speed control via IPMI                    |
 
@@ -547,6 +548,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Minecraft                 | ZFS (dpool), Java Edition servers, open firewall  |
 | MongoDB                   | ZFS-backed (Nightscout)                           |
 | Nightscout                | CGM dashboard, LAN and Tailscale only             |
+| Open WebUI                | ZFS, LiteLLM backend, Authentik OIDC only         |
 | OpenCloud                 | ZFS-backed file sync                              |
 | Podman                    | ZFS-backed rootless containers                    |
 | PostgreSQL                | ZFS, TCP/IP enabled, backed up                    |

@@ -92,6 +92,7 @@
             "minecraft-server-forever.service"
             "minecraft-server-velocity.service"
             "nightscout.service"
+            "open-webui.service"
             "podman-babybuddy.service"
             "podman-compose-opencloud-root.target"
             "podman-home-assistant.service"
@@ -404,6 +405,19 @@
           enable = true;
           listenAddress = "127.0.0.1";
           openFirewall = false;
+        };
+
+        # Chat front end on llmchat.<domain>; models come from LiteLLM on
+        # mentat, login from Authentik.
+        open-webui = {
+          enable = true;
+
+          zfs = {
+            enable = true;
+            restic = {
+              enable = true;
+            };
+          };
         };
 
         opencloud = {

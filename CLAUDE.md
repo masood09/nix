@@ -60,7 +60,7 @@ size means that size, and a silent downgrade would hide the switch.
   - `modules/nixos/` - NixOS system config (boot, networking, users, impermanence, zfs)
   - `modules/macos/` - nix-darwin system config
   - `modules/shared/` - Cross-platform option schemas imported by both NixOS and Darwin (role, purpose, primaryUser, networking)
-- `modules/services/` - 40 declarative service modules (each in its own directory)
+- `modules/services/` - 41 declarative service modules (each in its own directory)
 - `lib/` - Shared helper libraries:
   - `persistence-helpers.nix` - Impermanence bind-mount guard (three-part condition: `impermanence && !isRootZFS && !zfsEnable`)
   - `systemd-helpers.nix` - Permission-fixing oneshot service generator (`mkPermissionService`)
@@ -153,7 +153,7 @@ Long-term direction on `work-okta` (the sole macOS machine) is to phase out Home
 - Collabora is pinned to 26.04.2.1.1 because the custom container entrypoint requires `/bin/bash`, which newer images removed. Replace the shell-dependent wrapper before upgrading.
 - The Arr module carries temporary nixflix compatibility workarounds for Prowlarr host validation/readiness and Seerr Jellyfin URL configuration. Remove them when upstream nixflix supports the current APIs.
 - nixflix notification provisioning can fail when Sonarr/Radarr/Lidarr reject an existing notification update with HTTP 400. Preserve the existing notification-reset workaround until the updater reports API response bodies and handles schema changes.
-- Actual Budget, Immich, Karakeep, Lidarr, Seerr, and llama.cpp currently use packages from `nixpkgs-unstable` because the stable channel is behind or incompatible. Lidarr needs 3.1.6+ for nixflix's delay-profile API (stable has 3.1.0). Re-test and remove each override when stable catches up.
+- Actual Budget, Immich, Karakeep, Lidarr, Open WebUI, Seerr, and llama.cpp currently use packages from `nixpkgs-unstable` because the stable channel is behind or incompatible. Open WebUI is written against 0.13.x (stable has 0.12.5) and is nixpkgs' first non-free package in a service closure (builds via `allowUnfree`). Lidarr needs 3.1.6+ for nixflix's delay-profile API (stable has 3.1.0). Re-test and remove each override when stable catches up.
 - `work-okta` cannot use several third-party Homebrew taps because of corporate Artifactory restrictions. Treat those casks/brews as blocked fallbacks and periodically re-check nixpkgs/HM and Artifactory availability.
 - Fingerprint login does not unlock GNOME Keyring; password login remains the workaround on affected desktops.
 - Zen uses `MOZ_LEGACY_PROFILES=1` as an upstream profile-pinning workaround. Re-evaluate after upstream fixes the profile behavior.
@@ -187,7 +187,7 @@ When the user describes a problem, pick the right tool yourself — they shouldn
 ## Key Dependencies
 
 - nixpkgs: `nixos-26.05`
-- nixpkgs-unstable: `nixos-unstable` (followed by jovian, used to build ixian via `mkNixOSUnstableConfig`, and the source of the `actual-server`/`immich`/`karakeep`/`lidarr`/`seerr`/`llama-cpp-vulkan` packages that stable nixpkgs is behind on)
+- nixpkgs-unstable: `nixos-unstable` (followed by jovian, used to build ixian via `mkNixOSUnstableConfig`, and the source of the `actual-server`/`immich`/`karakeep`/`lidarr`/`open-webui`/`seerr`/`llama-cpp-vulkan` packages that stable nixpkgs is behind on)
 - home-manager: `release-26.05`
 - nix-darwin: `nix-darwin-26.05`
 - stylix: `release-26.05`

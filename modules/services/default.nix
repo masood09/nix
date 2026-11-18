@@ -34,6 +34,7 @@
     ./model-router
     ./mongodb
     ./nightscout
+    ./open-webui
     ./opencloud
     ./podman
     ./postgresql
