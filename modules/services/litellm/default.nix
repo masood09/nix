@@ -35,24 +35,28 @@
 
   yaml = pkgs.formats.yaml {};
 
-  deployment = name: apiBase: model: {
+  deployment = name: backend: model: {
     model_name = name;
     litellm_params = {
       model = "openai/${model}";
-      api_base = apiBase;
+      api_base = backend.apiBase;
       api_key = "os.environ/BACKEND_KEY";
+    };
+    model_info = {
+      max_input_tokens = backend.contextLength;
+      max_output_tokens = backend.maxOutputTokens;
     };
   };
 
-  # Model name -> its backend's apiBase, to resolve aliases.
-  apiBaseOf = lib.listToAttrs (lib.concatLists (lib.mapAttrsToList (
-      _: b: map (m: lib.nameValuePair m b.apiBase) b.models
+  # Model name -> its backend, to resolve aliases.
+  backendOf = lib.listToAttrs (lib.concatLists (lib.mapAttrsToList (
+      _: b: map (m: lib.nameValuePair m b) b.models
     )
     cfg.backends));
 
   modelList =
-    lib.concatLists (lib.mapAttrsToList (_: b: map (m: deployment m b.apiBase m) b.models) cfg.backends)
-    ++ lib.mapAttrsToList (alias: target: deployment alias apiBaseOf.${target} target) cfg.aliases;
+    lib.concatLists (lib.mapAttrsToList (_: b: map (m: deployment m b m) b.models) cfg.backends)
+    ++ lib.mapAttrsToList (alias: target: deployment alias backendOf.${target} target) cfg.aliases;
 
   configFile = yaml.generate "litellm-config.yaml" {
     model_list = modelList;
@@ -115,11 +119,11 @@ in {
         message = "LiteLLM runs as a Podman container: enable homelab.services.podman.";
       }
       {
-        assertion = lib.all (t: apiBaseOf ? ${t}) (lib.attrValues cfg.aliases);
+        assertion = lib.all (t: backendOf ? ${t}) (lib.attrValues cfg.aliases);
         message = "homelab.services.litellm.aliases must point at models some backend serves.";
       }
       {
-        assertion = lib.all (n: apiBaseOf ? ${n} || cfg.aliases ? ${n}) (lib.attrNames cfg.fallbacks ++ lib.concatLists (lib.attrValues cfg.fallbacks));
+        assertion = lib.all (n: backendOf ? ${n} || cfg.aliases ? ${n}) (lib.attrNames cfg.fallbacks ++ lib.concatLists (lib.attrValues cfg.fallbacks));
         message = "homelab.services.litellm.fallbacks may only name served models or aliases.";
       }
     ];

@@ -61,6 +61,10 @@
                 "qwen3.8-flash-next-${size}"
                 "qwen3.8-flash-next-${size}-uncensored"
               ]) ["iq2_xs" "iq3_xxs" "iq3_s"];
+              # Strata runs every size at 256K. Qwen thinks, so reasoning
+              # counts against output; 32K is Qwen's recommended length.
+              contextLength = 262144;
+              maxOutputTokens = 32768;
             };
             heartbeat = {
               apiBase = "http://heartbeat.dns.headscale.mantannest.com:8921/v1";
@@ -68,6 +72,9 @@
                 "gemma-4-e4b"
                 "gemma-4-e4b-uncensored"
               ];
+              # llama.cpp's --ctx-size on heartbeat (homelab.services.llama-cpp).
+              contextLength = 32768;
+              maxOutputTokens = 8192;
             };
           };
           aliases = {
