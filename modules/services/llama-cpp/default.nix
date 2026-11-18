@@ -1,5 +1,5 @@
-# llama.cpp — Gemma 4 E4B and its uncensored variant behind one
-# OpenAI-compatible llama-server API (and llama-server's built-in web UI).
+# llama.cpp — Gemma 4 E4B (and its uncensored variant) and LFM3-1.7B behind
+# one OpenAI-compatible llama-server API (and llama-server's built-in web UI).
 #
 # Wraps the upstream nixpkgs `services.llama-cpp` module (hardening,
 # PrivateDevices = false for GPU access), with a static user instead of its
@@ -21,9 +21,10 @@
 #
 # Memory accounting is by count only (no --models-memory-margin), so a model
 # that does not fit is loaded anyway and runs out of memory. The quantizations
-# were chosen by a load test at the pinned context, which goes on the command
-# line: instances inherit the router's flags, and the command line wins over
-# the preset and over --fit's pick of the largest context that fits.
+# were chosen by a load test at the pinned context. The context and KV type
+# are per-model preset section keys, not router command-line arguments: the
+# command line would override every section (checked on b12110: a section's
+# ctx-size starts its child at that n_ctx_slot with the router passing none).
 #
 # Models (benchmarked on heartbeat 2026-11-16, 13 ChatGPT-style prompts with
 # thinking off, scored 0/0.5/1 each):
@@ -40,10 +41,29 @@
 #                           made-up novel and rewrote a plan it was asked to
 #                           keep. 3618 MiB VRAM and 3.5 GiB host RAM at 32k;
 #                           decode 16.4 t/s (14.5 at 8k), prompt eval 194 t/s.
+#   lfm3-1-7b               Liquid AI's tri-hybrid agent model (rev b3f2ae5d),
+#                           Q4_K_M: their suite has it beating 4B-class models
+#                           at tool use; so did ours (2026-11-18 suite: perfect
+#                           single, two-step and schema-required tool calls,
+#                           strict JSON, needle exact-quoted at 25K — but it
+#                           invented the made-up novel the Gemma QAT declines,
+#                           which is why it supplements and defaultModel stays
+#                           Gemma).
+#                           Decode 42-46 t/s, prefill 288-317 t/s (218 at 32K,
+#                           138 at 100K deep); ~1.6 GiB VRAM at 64K ctx with
+#                           q8_0 KV. Q8_0 measured identical quality but
+#                           OOMed at 128K; keep Q4_K_M.
 #
-# Thinking is off: the models' template thinks when llama.cpp's Jinja path
-# enables it, so `enable_thinking: false` goes to the template, and answers
-# start straight away (one test answer: 84 tokens instead of 351).
+# Thinking: the Gemmas' template thinks when llama.cpp's Jinja path enables
+# it, so `enable_thinking: false` goes to the template, and answers start
+# straight away (one test answer: 84 tokens instead of 351). LFM3's template
+# thinks on by default instead, and llama.cpp splits that into
+# `reasoning_content`, so answers arrive even with no flag set — but an
+# unlimited thinking budget can exhaust a small max_tokens before any visible
+# answer is written (checked 2026-11-18: 512-token requests came back with
+# content empty and all tokens spent on thinking). Clients that want LFM3 to
+# think need max_tokens >= 2048; llama.cpp's --reasoning-budget could cap
+# this server-wide if that ever bites.
 #
 # Vision: both models carry their own projector (mmproj, ~945 MB f16, same
 # repository revision), so requests may include images. The projector runs on
@@ -104,12 +124,33 @@
   fetchGguf = f: "${pkgs.fetchurl {inherit (f) name url hash;}}";
 
   # One preset section per model; the section name is the API model id. Preset
-  # keys are llama-server arguments without dashes, so a model with a vision
-  # projector gets its own `mmproj` here.
+  # keys are llama-server arguments without their leading dashes, so a model
+  # with a vision projector gets its own `mmproj` here. Context and KV type
+  # ride in the section (verified on b12110: a section's ctx-size starts its
+  # child at that n_ctx_slot): the router's command line overrides every
+  # section, so per-model values have no other carrier and the router itself
+  # must not pass those arguments.
   modelsPreset = lib.mapAttrs (id: m:
     {
       model = fetchGguf m;
       load-on-startup = lib.boolToString (id == cfg.defaultModel);
+      # `or` does not substitute here: the submodule always carries these
+      # keys, defaulted to null. Check for null explicitly (b12110 bit us:
+      # a section with ctx-size = null spawns its child with an empty
+      # --ctx-size and the load fails).
+      ctx-size = toString (
+        if m.contextSize == null
+        then cfg.contextSize
+        else m.contextSize
+      );
+      cache-type-k =
+        if m.cacheType == null
+        then cfg.cacheType
+        else m.cacheType;
+      cache-type-v =
+        if m.cacheType == null
+        then cfg.cacheType
+        else m.cacheType;
     }
     // lib.optionalAttrs (m.mmproj != null) {
       mmproj = fetchGguf m.mmproj;
@@ -180,8 +221,9 @@ in {
             "1"
 
             # One slot, so the whole context belongs to one request.
-            "--ctx-size"
-            (toString cfg.contextSize)
+            # (--ctx-size and --cache-type-k/v must NOT be added here: the
+            # router's command line would override every preset section's
+            # per-model values. They live in modelsPreset.)
             "--parallel"
             "1"
 
@@ -192,10 +234,6 @@ in {
             "99"
             "--flash-attn"
             "on"
-            "--cache-type-k"
-            cfg.cacheType
-            "--cache-type-v"
-            cfg.cacheType
 
             "--jinja"
             "--chat-template-kwargs"

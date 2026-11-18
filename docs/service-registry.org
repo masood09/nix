@@ -116,7 +116,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | Headscale (pending move)             |  8917 | Reserved — code-review finding 9; still on 8080 |
 | Actual Budget                        |  8919 | heartbeat; loopback behind Caddy  |
 | Home Assistant                       |  8920 | heartbeat; Podman, host network, loopback behind Caddy |
-| llama.cpp (Gemma 4 E4B router)       |  8921 | heartbeat; 0.0.0.0, open on tailscale0 only, backend key required; uid 3022; model children on ephemeral loopback ports |
+| llama.cpp (Gemma 4 E4B + LFM3-1.7B router) |  8921 | heartbeat; 0.0.0.0, open on tailscale0 only, backend key required; uid 3022; model children on ephemeral loopback ports |
 | model-router (Strata switcher)       |  8922 | ixian; 0.0.0.0, open on tailscale0 only, backend key required; restarts strata.service via polkit |
 | LiteLLM (gateway)                    |  8923 | mentat; 127.0.0.1 only, behind Caddy (llm.<domain>) |
 | Home Assistant (mDNS discovery)      |  5353 | UDP; heartbeat LAN interface only (openFirewall) |
