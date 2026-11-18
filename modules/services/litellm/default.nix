@@ -77,6 +77,17 @@
         trusted_proxy_ranges = [
           "127.0.0.1/32"
         ];
+        # Open WebUI sends one virtual key for all its users and names the
+        # person in this header; mapping it to the customer role records them
+        # as the request's end user, for per-person spend and budgets.
+        # Attribution only: the key still gates access, and clients without
+        # the header (Karakeep, agents) are unaffected.
+        user_header_mappings = [
+          {
+            header_name = "X-OpenWebUI-User-Email";
+            litellm_user_role = "customer";
+          }
+        ];
       }
       // lib.optionalAttrs cfg.authentik.enable {
         # The master key stays an API credential only: with SSO, it no longer
