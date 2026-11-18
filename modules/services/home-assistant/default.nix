@@ -112,7 +112,7 @@ in {
         containers = {
           home-assistant = {
             # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant
-            image = "ghcr.io/home-assistant/home-assistant:2026.11.1";
+            image = "ghcr.io/home-assistant/home-assistant:2026.11.2";
             autoStart = true;
 
             volumes = [
