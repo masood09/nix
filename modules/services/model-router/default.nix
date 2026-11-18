@@ -17,8 +17,7 @@
 # Exposure: loopback by default. A host that lets LiteLLM reach it over the
 # tailnet listens on 0.0.0.0 with the port open on tailscale0 only, and sets
 # clientTokensFile so the router refuses requests without the backend key
-# (the Headscale ACL is the other gate). Caddy's ai.<domain> still points
-# straight at Strata until the clients move to LiteLLM.
+# (the Headscale ACL is the other gate).
 {
   config,
   lib,
