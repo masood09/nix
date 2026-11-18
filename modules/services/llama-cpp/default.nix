@@ -51,8 +51,12 @@
 #                           Gemma).
 #                           Decode 42-46 t/s, prefill 288-317 t/s (218 at 32K,
 #                           138 at 100K deep); ~1.6 GiB VRAM at 64K ctx with
-#                           q8_0 KV. Q8_0 measured identical quality but
-#                           OOMed at 128K; keep Q4_K_M.
+#                           q8_0 KV. Q8_0 measured identical suite quality but
+#                           decodes at 29-31 t/s, so Q4_K_M stays for speed,
+#                           not fit: Q8_0 OOMed at 128K only with f16 KV; a
+#                           2026-11-18 probe loaded 256K of it (Q4_K_M too,
+#                           all three at q8_0 KV) with the run peaking at
+#                           3731 MiB.
 #
 # Thinking: the Gemmas' template thinks when llama.cpp's Jinja path enables
 # it, so `enable_thinking: false` goes to the template, and answers start
