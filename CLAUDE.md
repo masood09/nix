@@ -34,7 +34,7 @@ After making config changes, stop at preflight (`just preflight`, or `nix fmt --
 Conventional Commits: `<type>(<scope>): <summary>` plus a detailed body.
 
 - Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `perf`, `test`.
-- Scope is the product feature: a service (`searxng`, `headscale`), a shared module or helper (`disko`, `stylix`), or a machine (`heartbeat`, `work-okta`) for host-local changes.
+- Scope is the product feature: a service (`litellm`, `headscale`), a shared module or helper (`disko`, `stylix`), or a machine (`heartbeat`, `work-okta`) for host-local changes.
 - Imperative summary, 72 chars max, no trailing period. The body explains why the change exists and the constraint behind it, not what the diff shows.
 - One commit per logical change; keep secrets, DNS records, and docs-only policy changes separate from service wiring.
 - Committing is user-run: make and validate the change, then hand the working tree back. Do not `git add`, `git commit`, or `git push` unless the user asks in that turn — a request to change configuration is not a request to commit it, and a commit instruction from an earlier turn does not carry forward.
@@ -42,12 +42,12 @@ Conventional Commits: `<type>(<scope>): <summary>` plus a detailed body.
 Example:
 
 ```
-feat(searxng): split engine lists by egress mode
+feat(litellm): fall back from heavy to light while ixian is gaming
 
-The shared Proton P2P exit gets most general web engines blocked or
-CAPTCHA'd, so VPN mode now uses its own tested 16-engine list while host
-egress keeps the 36-engine set. Flipping vpn.enable would otherwise leave
-about twenty engines silently failing.
+model-router answers 503 at once while console-mode holds Strata, so
+heavy now falls back to heartbeat's Gemma instead of failing for the
+whole gaming session. Named Qwen sizes keep no fallback: asking for a
+size means that size, and a silent downgrade would hide the switch.
 ```
 
 ## Architecture
@@ -60,7 +60,7 @@ about twenty engines silently failing.
   - `modules/nixos/` - NixOS system config (boot, networking, users, impermanence, zfs)
   - `modules/macos/` - nix-darwin system config
   - `modules/shared/` - Cross-platform option schemas imported by both NixOS and Darwin (role, purpose, primaryUser, networking)
-- `modules/services/` - 41 declarative service modules (each in its own directory)
+- `modules/services/` - 40 declarative service modules (each in its own directory)
 - `lib/` - Shared helper libraries:
   - `persistence-helpers.nix` - Impermanence bind-mount guard (three-part condition: `impermanence && !isRootZFS && !zfsEnable`)
   - `systemd-helpers.nix` - Permission-fixing oneshot service generator (`mkPermissionService`)

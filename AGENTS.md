@@ -52,14 +52,14 @@ Primary commands live in `justfile`.
 Use Conventional Commits: `<type>(<scope>): <summary>`, a blank line, then a detailed body.
 
 ```
-feat(searxng): split engine lists by egress mode
+feat(litellm): fall back from heavy to light while ixian is gaming
 
 <why the change exists, the constraint that drove it, and what breaks if it
 is reverted — not a narration of the diff>
 ```
 
 - Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `perf`, `test`. Use `fix` when the change corrects behavior, `feat` when it adds capability.
-- Scope is the product feature the change belongs to: the service (`searxng`, `headscale`, `authentik`), the shared module or helper (`disko`, `stylix`, `persistence-helpers`), or the machine (`heartbeat`, `work-okta`) when the change is host-local.
+- Scope is the product feature the change belongs to: the service (`litellm`, `headscale`, `authentik`), the shared module or helper (`disko`, `stylix`, `persistence-helpers`), or the machine (`heartbeat`, `work-okta`) when the change is host-local.
 - Summary is imperative mood, lowercase after the type prefix, no trailing period, 72 characters or fewer.
 - The body explains why the change was made and the operational constraint behind it. Single-line commits are acceptable only for trivial edits such as version bumps.
 - One commit per logical change. Keep unrelated changes separate: service wiring, secrets, DNS records, and docs-only policy changes each get their own commit.
