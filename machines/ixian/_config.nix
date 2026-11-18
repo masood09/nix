@@ -301,13 +301,6 @@ in {
       rtkit = {
         enable = true;
       };
-
-      sudo = {
-        # ixian is a trusted single-admin console; the gaming console account
-        # (gamingUser) is not in wheel, so passwordless sudo reaches every wheel
-        # member, which today means only the admin account (homelab.primaryUser).
-        wheelNeedsPassword = lib.mkForce false;
-      };
     };
 
     xdg = {

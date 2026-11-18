@@ -699,7 +699,7 @@ Defined in =nix/pkgs/= and auto-discovered.
   Assistant on heartbeat. Gaming applies at once, inference after 2 min off;
   if Home Assistant cannot be read, the mode stays. Boot starts in inference.
 - *Console User:* voyageonwheels (uid 1002) — gaming account, no sudo, no SSH
-- *Admin User:* masoodahmed — wheel (passwordless sudo), SSH-only admin
+- *Admin User:* masoodahmed — wheel (sudo needs the ixian-specific password), SSH-only admin
 - *Tailnet:* Headscale node =100.64.0.2=; LiteLLM on mentat reaches model-router over it
 
 **** Services
