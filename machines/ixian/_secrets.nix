@@ -3,6 +3,14 @@
   config = {
     sops = {
       secrets = {
+        # Machine-specific login/sudo password for the admin account
+        # (homelab.primaryUser), overriding the fleet-wide hash in
+        # secrets/secrets.sops.yaml. A crypt hash (mkpasswd -m yescrypt).
+        "user/password" = {
+          sopsFile = ./secrets.sops.yaml;
+          neededForUsers = true;
+        };
+
         "alloy/.env" = {
           restartUnits = ["alloy.service"];
         };

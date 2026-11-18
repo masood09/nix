@@ -4,6 +4,9 @@ default:
 user := 'masoodahmed'
 # Override on CLI to deploy remotely: just machine=heartbeat deploy
 machine := ''
+# Remote hosts whose sudo needs a password (htpc/desktop role without a
+# passwordless override): nixos-rebuild prompts once for it up front.
+askSudo := if machine == "ixian" { "--ask-sudo-password" } else { "" }
 # Wrapper that enables experimental features regardless of system nix.conf
 # (some Determinate-based Darwin installs don't have them on by default)
 nix := "nix --extra-experimental-features 'nix-command flakes'"
@@ -17,7 +20,7 @@ deploy: preflight
     elif [ -z "{{ machine }}" ]; then \
       nixos-rebuild switch --sudo --flake .; \
     else \
-      nixos-rebuild switch --no-reexec --flake ".#{{ machine }}" --sudo --target-host "{{ user }}@{{ machine }}" --build-host "{{ user }}@{{ machine }}"; \
+      nixos-rebuild switch --no-reexec --flake ".#{{ machine }}" --sudo {{ askSudo }} --target-host "{{ user }}@{{ machine }}" --build-host "{{ user }}@{{ machine }}"; \
     fi
 
 # Pre-flight checks — run before deploy to catch formatting and lint errors early
