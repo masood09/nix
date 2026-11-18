@@ -46,8 +46,6 @@ Next available human UID: *1003*
 | minecraft                     | 3014 | 3014 | Minecraft servers and Velocity proxy            |
 | aurral                        | 3015 | 3015 | Music discovery and playlist manager            |
 | strata                        | 3016 | 3016 | Local LLM inference server (ixian)              |
-| (retired: hermes)             | 3017 | 3017 | Hermes Agent gateway, removed 2026-11-17; do not reuse |
-| searx                         | 3018 | 3018 | SearXNG metasearch (heartbeat)                  |
 | actual                        | 3019 | 3019 | Actual Budget personal finance (heartbeat)      |
 | model-router                  | 3020 | 3020 | Strata model-switching proxy (ixian)            |
 | console-mode                  | 3021 | 3021 | Gaming/inference mode controller (ixian)        |
@@ -116,7 +114,6 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | Nightscout                           |  8914 |                                   |
 | Strata (LLM API)                     |  8916 | Localhost only (ixian); SSH tunnel |
 | Headscale (pending move)             |  8917 | Reserved — code-review finding 9; still on 8080 |
-| SearXNG                              |  8918 | heartbeat; behind Caddy (loopback, or wg netns with vpn.enable) |
 | Actual Budget                        |  8919 | heartbeat; loopback behind Caddy  |
 | Home Assistant                       |  8920 | heartbeat; Podman, host network, loopback behind Caddy |
 | llama.cpp (Gemma 4 E4B router)       |  8921 | heartbeat; 0.0.0.0, open on tailscale0 only, backend key required; uid 3022; model children on ephemeral loopback ports |

@@ -32,8 +32,8 @@
         };
       };
 
-      # The repo's other templates live with their service (searxng) or in
-      # _config.nix (navidrome). This one sits beside its secret because it
+      # Some of the repo's other templates live in _config.nix (navidrome) or
+      # with their service. This one sits beside its secret because it
       # only wraps it in the header line curl reads with -H @file; the bare
       # token would not be a valid header.
       templates = {
