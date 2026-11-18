@@ -426,7 +426,7 @@ in {
     ];
 
     services = {
-      caddy = lib.mkIf caddyEnabled {
+      caddy = lib.mkIf (caddyEnabled && cfg.webDomain != null) {
         virtualHosts = {
           "${cfg.webDomain}" = {
             useACMEHost = config.networking.domain;
