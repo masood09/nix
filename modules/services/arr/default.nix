@@ -428,6 +428,15 @@ in {
 
           settings = {
             misc = {
+              # Authentik's outpost reaches this backend over the tailnet, so it
+              # must not bind to loopback. nixflix 3357d87 dropped the old
+              # 0.0.0.0 default (for setups without nixflix.reverseProxy) in favor
+              # of always binding 127.0.0.1, which 502s the outpost's proxying
+              # (connection refused). Bind explicitly like Sonarr/Radarr's
+              # hostConfig.bindAddress above; exposure stays scoped to
+              # tailscale0 by the firewall block below.
+              host = "0.0.0.0";
+
               api_key = {
                 _secret = config.sops.secrets."arr/sabnzbd/api-key".path;
               };
