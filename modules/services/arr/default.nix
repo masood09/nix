@@ -109,6 +109,48 @@
     exit 1
   '';
 
+  # qBittorrent paths. Torrents land under downloadsDir (same dataset as
+  # mediaDir) so the arrs can hardlink completed downloads into the library.
+  # profileDir lives in the arr ZFS dataset; nixpkgs' default
+  # (/var/lib/qBittorrent) would not survive the impermanence rollback.
+  qbtDownloadsDir = "${cfg.downloadsDir}/torrent";
+  qbtProfileDir = "${cfg.stateDir}/qbittorrent";
+  qbtConfFile = "${qbtProfileDir}/qBittorrent/config/qBittorrent.conf";
+
+  # The host side of the VPN namespace's veth bridge. Everything reaching the
+  # WebUI from heartbeat itself arrives from here, and so does the Authentik
+  # outpost: Tailscale masquerades forwarded tailnet traffic (ts-postrouting)
+  # before the host DNATs it into the namespace, so the outpost's tailnet
+  # address never reaches qBittorrent (confirmed with tcpdump on veth-wg).
+  qbtBridgeAddress = "${config.vpnNamespaces.${config.nixflix.vpn.namespace}.bridgeAddress}/32";
+
+  # Puts the WebUI password hash into qBittorrent.conf without putting it in
+  # the Nix store. nixpkgs reinstalls the generated conf from ExecStartPre on
+  # every start, so this has to run after that step (mkAfter below); a
+  # preStart would run first and be overwritten. Runs as root ("+") to read
+  # the root-only secret.
+  #
+  # The generated file has INI sections ([BitTorrent], [Preferences]) with
+  # backslash-joined keys inside them, so the line goes right after the
+  # [Preferences] header; appending at the end would land in whichever
+  # section happens to be last. `cat tmp > conf` rewrites the file in place,
+  # keeping the qbittorrent owner and 0600 mode nixpkgs' install step set.
+  qbtPasswordScript = pkgs.writeShellScript "qbittorrent-webui-password" ''
+    set -euo pipefail
+
+    hash="$(${pkgs.coreutils}/bin/tr -d '\n' < ${lib.escapeShellArg config.sops.secrets."arr/qbittorrent/password-pbkdf2".path})"
+    tmp="$(${pkgs.coreutils}/bin/mktemp)"
+    trap '${pkgs.coreutils}/bin/rm -f "$tmp"' EXIT
+
+    HASH_LINE="WebUI\\Password_PBKDF2=$hash" ${pkgs.gawk}/bin/awk '
+      { print }
+      $0 == "[Preferences]" { print ENVIRON["HASH_LINE"]; found = 1 }
+      END { if (!found) exit 1 }
+    ' ${lib.escapeShellArg qbtConfFile} > "$tmp"
+
+    ${pkgs.coreutils}/bin/cat "$tmp" > ${lib.escapeShellArg qbtConfFile}
+  '';
+
   ldapCfg = cfg.jellyfin.ldap;
   ldapGroupDn = group: "cn=${group},ou=groups,${ldapCfg.baseDn}";
   ldapSearchFilter = "(|${lib.concatMapStringsSep "" (g: "(memberOf=${ldapGroupDn g})") ldapCfg.accessGroups})";
@@ -487,6 +529,116 @@ in {
             };
 
             servers = cfg.usenetProviders;
+          };
+        };
+      };
+
+      torrentClients = {
+        qbittorrent = lib.mkIf cfg.qbittorrent.enable {
+          enable = true;
+
+          # Confined to the WireGuard namespace: the netns drops INPUT/FORWARD
+          # by default, routes only via wg0, and allows DNS only to the VPN's
+          # resolver. If the tunnel drops, qBittorrent has no route out at all
+          # rather than falling back to the host's connection. Set explicitly
+          # rather than relying on nixflix's default (nixflix.vpn.enable), so
+          # turning the VPN off fails the assertion below instead of quietly
+          # moving torrents onto the host network.
+          vpn = {
+            enable = true;
+          };
+
+          profileDir = qbtProfileDir;
+          downloadsDir = qbtDownloadsDir;
+
+          # For the arrs' download-client integration (downloadarr), not
+          # qBittorrent's own login. That hash is injected at start; see
+          # qbtPasswordScript.
+          password = {
+            _secret = config.sops.secrets."arr/qbittorrent/password".path;
+          };
+
+          # Defining this replaces nixflix's default map rather than merging
+          # with it (same trap as Seerr's radarr/sonarr instances below), so
+          # the per-app categories are restated here. sonarr-anime is left
+          # out: it is disabled, and nixflix's default leaves it empty and
+          # filters it out anyway.
+          categories =
+            lib.optionalAttrs cfg.radarr.enable {
+              radarr = "${qbtDownloadsDir}/radarr";
+            }
+            // lib.optionalAttrs cfg.sonarr.enable {
+              sonarr = "${qbtDownloadsDir}/sonarr";
+            }
+            // lib.optionalAttrs cfg.lidarr.enable {
+              lidarr = "${qbtDownloadsDir}/lidarr";
+            }
+            // lib.optionalAttrs cfg.prowlarr.enable {
+              prowlarr = "${qbtDownloadsDir}/prowlarr";
+            }
+            // lib.optionalAttrs config.homelab.services.questarr.enable {
+              questarr = "${qbtDownloadsDir}/questarr";
+            };
+
+          serverConfig = {
+            BitTorrent = {
+              Session = {
+                # Belt and braces on top of the netns: libtorrent binds only
+                # to the tunnel interface (VPN-Confinement names it
+                # <namespace>0).
+                Interface = "${config.nixflix.vpn.namespace}0";
+                InterfaceName = "${config.nixflix.vpn.namespace}0";
+                AnonymousModeEnabled = true;
+
+                # Automatic torrent management: category save paths decide
+                # where each download lands (matches nixflix's default).
+                DisableAutoTMMByDefault = false;
+                DefaultSavePath = "${qbtDownloadsDir}/default";
+                TempPathEnabled = true;
+                TempPath = "${qbtDownloadsDir}/temp";
+              };
+            };
+
+            Preferences = {
+              WebUI = {
+                Username = "admin";
+
+                # No second login behind Authentik: callers arriving via the
+                # namespace bridge skip qBittorrent's auth. That is heartbeat's
+                # own services plus tailnet traffic, which Tailscale SNATs to
+                # this address; Headscale's ACL limits tailnet access to
+                # heartbeat:8282 to the Authentik outpost and admins. This is
+                # the same trust model as SABnzbd (no login, ACL + Authentik in
+                # front). LAN clients keep their real address and still log in.
+                # This flat-key line holds a single subnet; do not comma-join
+                # more into it.
+                #
+                # Do not turn on ReverseProxySupportEnabled /
+                # TrustedReverseProxiesList: with them on, qBittorrent replaces
+                # the client address with X-Forwarded-For before checking this
+                # whitelist. Authentik sends XFF, so the bridge address would
+                # become the browser's, the whitelist would never match, and
+                # the second login would come back.
+                AuthSubnetWhitelistEnabled = true;
+                AuthSubnetWhitelist = qbtBridgeAddress;
+
+                # Mirrors SABnzbd's host_whitelist: the public vhost plus the
+                # tailnet hostname the outpost connects through. qBittorrent
+                # always accepts its own listen address too, which is how the
+                # arrs get in. Opening heartbeat:8282 directly from the LAN
+                # gets "Invalid Host header", not the login page.
+                #
+                # Quoted on purpose: in QSettings' INI format an unquoted ";"
+                # starts a comment, so without quotes qBittorrent keeps only
+                # the first domain (seen live: the tailnet name was dropped).
+                HostHeaderValidation = true;
+                ServerDomains = ''"qbittorrent.${domain};heartbeat.dns.headscale.${domain}"'';
+
+                # The outpost rewrites Host/Origin, and Authentik gates
+                # access, the same reasoning as SABnzbd's verify_xff_header.
+                CSRFProtection = false;
+              };
+            };
           };
         };
       };
@@ -890,6 +1042,26 @@ in {
             UMask = "0007";
           };
         };
+
+        qbittorrent = lib.mkIf cfg.qbittorrent.enable {
+          serviceConfig = {
+            ExecStartPre = lib.mkAfter ["+${qbtPasswordScript}"];
+          };
+        };
+      };
+
+      # nixflix creates the category dirs and DefaultSavePath but not TempPath.
+      tmpfiles = lib.mkIf cfg.qbittorrent.enable {
+        settings = {
+          "10-qbittorrent-temp" = {
+            "${qbtDownloadsDir}/temp" = {
+              d = {
+                inherit (config.services.qbittorrent) user group;
+                mode = "0775";
+              };
+            };
+          };
+        };
       };
     };
 
@@ -917,6 +1089,11 @@ in {
       {
         assertion = !cfg.flaresolverr.enable || cfg.prowlarr.enable;
         message = "homelab.services.arr.flaresolverr.enable requires homelab.services.arr.prowlarr.enable; FlareSolverr only serves Prowlarr's indexer proxy.";
+      }
+      {
+        # nixflix has its own version of this; kept for the clearer message.
+        assertion = !cfg.qbittorrent.enable || config.nixflix.vpn.enable;
+        message = "homelab.services.arr.qbittorrent.enable requires nixflix.vpn.enable; qBittorrent must never run outside the WireGuard namespace.";
       }
       {
         assertion = !cfg.navidrome.enable || cfg.lidarr.enable;
@@ -951,7 +1128,8 @@ in {
               ++ lib.optional cfg.seerr.enable "seerr.service"
               ++ lib.optional cfg.lidarr.enable "lidarr.service"
               ++ lib.optional cfg.navidrome.enable "navidrome.service"
-              ++ lib.optional cfg.slskd.enable "slskd.service";
+              ++ lib.optional cfg.slskd.enable "slskd.service"
+              ++ lib.optional cfg.qbittorrent.enable "qbittorrent.service";
 
             restic = {
               enable = true;
@@ -970,7 +1148,8 @@ in {
             ++ lib.optional cfg.sabnzbd.enable "sabnzbd.service"
             ++ lib.optional cfg.seerr.enable "seerr.service"
             ++ lib.optional cfg.lidarr.enable "lidarr.service"
-            ++ lib.optional cfg.navidrome.enable "navidrome.service";
+            ++ lib.optional cfg.navidrome.enable "navidrome.service"
+            ++ lib.optional cfg.qbittorrent.enable "qbittorrent.service";
         };
       };
     };
@@ -1082,6 +1261,22 @@ in {
               useACMEHost = domain;
               extraConfig = ''
                 reverse_proxy http://127.0.0.1:${toString config.nixflix.navidrome.settings.Port}
+              '';
+            };
+          })
+          (lib.mkIf cfg.qbittorrent.enable {
+            "qbittorrent.${domain}" = {
+              useACMEHost = domain;
+              # SSO via Authentik's embedded outpost — see the matching comment on
+              # sabnzbd's vhost above. The outpost's internal_host is heartbeat's
+              # tailnet name on the WebUI port. Tailscale SNATs that to the
+              # namespace bridge address and the host DNATs it into the VPN
+              # namespace, so replies route back over the bridge and the
+              # bridge-address whitelist skips qBittorrent's login.
+              extraConfig = ''
+                reverse_proxy https://auth.${domain} {
+                  header_up Host {http.request.host}
+                }
               '';
             };
           })

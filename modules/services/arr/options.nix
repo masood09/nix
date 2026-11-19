@@ -6,7 +6,7 @@
     homelab = {
       services = {
         arr = {
-          enable = lib.mkEnableOption "Arr media stack (Jellyfin/Sonarr/Radarr/Prowlarr/SABnzbd/Seerr/Recyclarr)";
+          enable = lib.mkEnableOption "Arr media stack (Jellyfin/Sonarr/Radarr/Prowlarr/SABnzbd/qBittorrent/Seerr/Recyclarr)";
 
           mediaDir = lib.mkOption {
             type = lib.types.path;
@@ -101,6 +101,10 @@
 
           slskd = {
             enable = lib.mkEnableOption "slskd Soulseek client";
+          };
+
+          qbittorrent = {
+            enable = lib.mkEnableOption "qBittorrent torrent client, confined to the nixflix WireGuard namespace";
           };
 
           recyclarr = {

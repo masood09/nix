@@ -160,6 +160,10 @@
             enable = true;
           };
 
+          qbittorrent = {
+            enable = true;
+          };
+
           recyclarr = {
             enable = true;
           };
