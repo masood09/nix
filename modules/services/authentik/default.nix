@@ -50,10 +50,19 @@ in {
           # Shared verbatim with forwardAuthHosts below — the embedded outpost dispatches
           # by Host header internally, so every SSO-fronted app domain needs the exact
           # same proxy target, not just webDomain.
+          #
+          # header_up Host {host}: for HTTPS upstreams Caddy rewrites Host to the
+          # upstream address (127.0.0.1:9443) and moves the real name to
+          # X-Forwarded-Host. The embedded outpost still picks the right provider,
+          # but it passes the inbound Host on to the backend, so proxy-mode apps saw
+          # "Host: 127.0.0.1:9443" (qBittorrent's Host validation rejected it with a
+          # 401 after login). Keep the original Host, as authentik's own
+          # reverse-proxy examples do.
           vhost = {
             useACMEHost = config.networking.domain;
             extraConfig = ''
               reverse_proxy https://127.0.0.1:9443 {
+                header_up Host {host}
                 transport http {
                   tls_insecure_skip_verify
                 }
