@@ -51,8 +51,9 @@ Next available human UID: *1003*
 | console-mode                  | 3021 | 3021 | Gaming/inference mode controller (ixian)        |
 | llama-cpp                     | 3022 | 3022 | llama.cpp router (heartbeat)                    |
 | open-webui                    | 3023 | 3023 | Open WebUI chat front end (heartbeat)           |
+| questarr                      | 3024 | 3024 | Video game manager (heartbeat, Podman)          |
 
-Next available UID/GID: *3024*
+Next available UID/GID: *3025*
 
 *Exception:* the arr media stack (Jellyfin/Sonarr/Radarr/Lidarr/Prowlarr/SABnzbd/Seerr/Recyclarr,
 via the =nixflix= flake input — see =modules/services/arr/=, enabled per-machine via
@@ -121,6 +122,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | model-router (Strata switcher)       |  8922 | ixian; 0.0.0.0, open on tailscale0 only, backend key required; restarts strata.service via polkit |
 | LiteLLM (gateway)                    |  8923 | mentat; 127.0.0.1 only, behind Caddy (llm.<domain>) |
 | Open WebUI                           |  8924 | heartbeat; loopback behind Caddy (llmchat.<domain>) |
+| Questarr                             |  8925 | heartbeat; Podman, host network, loopback behind Caddy (questarr.<domain>) |
 | Home Assistant (mDNS discovery)      |  5353 | UDP; heartbeat LAN interface only (openFirewall) |
 | Home Assistant (HomeKit)             | 21063 | TCP; heartbeat LAN interface only (openFirewall) |
 | Authentik (HTTP/health)              |  9000 | 127.0.0.1 only; server listener    |
@@ -144,7 +146,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | MongoDB                              | 27017 | Localhost only (Nightscout)       |
 | LiveKit RTC (UDP range)              | 50100 | 50100–50200                       |
 
-Next available port in 89xx block: *8925*
+Next available port in 89xx block: *8926*
 
 ** Arr Media Stack (heartbeat only)
 Upstream defaults kept as-is (same convention as Immich/Vaultwarden above) — these sit
@@ -161,6 +163,7 @@ this repo's own custom apps.
 | Navidrome  | 4533 | Music server; reads Lidarr's music library |
 | Aurral     | 8915 | Music discovery and playlist manager       |
 | slskd      | 5030 | Soulseek web interface; upstream default   |
+| qBittorrent | 8282 | nixflix default; WebUI in the WireGuard netns, host DNATs to it; Authentik outpost in front. UID is dynamic (990 on heartbeat): nixflix means to pin 70 but its `mkForce {...} // {uid}` drops it |
 Recyclarr has no listening port (nixflix runs it as a scheduled sync, not a service).
 
 

@@ -406,9 +406,11 @@ Services defined in =modules/services/= and enabled per-machine via =homelab.ser
 
 | Service   | Module Dir | Purpose                                                       |
 |-----------+------------+---------------------------------------------------------------|
-| Arr stack | arr/       | Jellyfin, Sonarr, Radarr, Lidarr, Prowlarr, SABnzbd, Seerr,  |
-|           |            | Recyclarr, Navidrome, and slskd integration on heartbeat      |
+| Arr stack | arr/       | Jellyfin, Sonarr, Radarr, Lidarr, Prowlarr, SABnzbd,          |
+|           |            | qBittorrent (VPN-confined), Seerr, Recyclarr, Navidrome, and  |
+|           |            | slskd integration on heartbeat                                |
 | Aurral    | aurral/    | Music discovery and playlist management                       |
+| Questarr  | questarr/  | Video game manager (Podman container)                         |
 
 ** Exporters and Hardware Services
 
@@ -552,6 +554,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | OpenCloud                 | ZFS-backed file sync                              |
 | Podman                    | ZFS-backed rootless containers                    |
 | PostgreSQL                | ZFS, TCP/IP enabled, backed up                    |
+| Questarr                  | ZFS + restic, Podman, loopback behind Caddy, :8925 |
 | Prometheus                | ZFS-backed metrics                                |
 | Tailscale                 | ZFS state                                         |
 | Vaultwarden               | ZFS, loopback-only behind local Caddy             |
