@@ -17,6 +17,17 @@
           mode = "0400";
           restartUnits = ["navidrome.service"];
         };
+
+        "questarr.env" = {
+          content = ''
+            JWT_SECRET=${config.sops.placeholder."arr/questarr/jwt-secret"}
+            CREDENTIALS_ENCRYPTION_KEY=${config.sops.placeholder."arr/questarr/credentials-encryption-key"}
+            IGDB_CLIENT_ID=${config.sops.placeholder."arr/questarr/igdb-client-id"}
+            IGDB_CLIENT_SECRET=${config.sops.placeholder."arr/questarr/igdb-client-secret"}
+          '';
+          mode = "0400";
+          restartUnits = ["podman-questarr.service"];
+        };
       };
     };
 
@@ -433,6 +444,18 @@
 
           zfs = {
             enable = true;
+          };
+        };
+
+        questarr = {
+          enable = true;
+          environmentFile = config.sops.templates."questarr.env".path;
+
+          zfs = {
+            enable = true;
+            restic = {
+              enable = true;
+            };
           };
         };
 
