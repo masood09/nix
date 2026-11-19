@@ -135,6 +135,51 @@
           sopsFile = ./secrets.sops.yaml;
         };
 
+        # Plaintext WebUI password the arrs' download-client units send to
+        # qBittorrent's API. Must match password-pbkdf2 below.
+        "arr/qbittorrent/password" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = "qbittorrent";
+          restartUnits = [
+            "sonarr-downloadclients.service"
+            "radarr-downloadclients.service"
+            "lidarr-downloadclients.service"
+            "prowlarr-downloadclients.service"
+          ];
+        };
+
+        # qBittorrent's own WebUI hash, as "@ByteArray(...)" from
+        # `nix run git+https://codeberg.org/feathecutie/qbittorrent_password -- --password '<pw>'`.
+        # Root-only: a root ExecStartPre puts it into qBittorrent.conf at start
+        # (modules/services/arr), which keeps it out of the Nix store.
+        "arr/qbittorrent/password-pbkdf2" = {
+          sopsFile = ./secrets.sops.yaml;
+          mode = "0400";
+          restartUnits = ["qbittorrent.service"];
+        };
+
+        "arr/questarr/jwt-secret" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["podman-questarr.service"];
+        };
+
+        # 64 hex characters: `openssl rand -hex 32`.
+        "arr/questarr/credentials-encryption-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["podman-questarr.service"];
+        };
+
+        # Twitch developer app credentials (IGDB uses Twitch OAuth).
+        "arr/questarr/igdb-client-id" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["podman-questarr.service"];
+        };
+
+        "arr/questarr/igdb-client-secret" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["podman-questarr.service"];
+        };
+
         "arr/prowlarr/api-key" = {
           sopsFile = ./secrets.sops.yaml;
           owner = "prowlarr";
