@@ -77,6 +77,18 @@ in {
             '';
           };
 
+          startupGrace = lib.mkOption {
+            type = lib.types.str;
+            default = "5m";
+            description = ''
+              How long model-router waits for Strata when strata.service is up
+              but no model is loaded, before it restarts Strata. That state is
+              either a load in progress (a cold 256K load takes about 3.5 min)
+              or an engine that stopped and only reloads on a request, which
+              model-router never sends while waiting. At most switchTimeout.
+            '';
+          };
+
           sizes = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             default = lib.unique ([strataCfg.model] ++ strataCfg.models);

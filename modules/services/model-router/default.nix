@@ -152,6 +152,7 @@ in {
                 bodyContains = ''"loaded"'';
                 interval = "3s";
                 timeout = cfg.switchTimeout;
+                inherit (cfg) startupGrace;
               };
               # Follows Strata's own hold: while the file exists, Strata
               # cannot start, so the router refuses at once (503
