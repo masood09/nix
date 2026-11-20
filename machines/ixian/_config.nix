@@ -262,6 +262,18 @@ in {
           # is turned off.
           experimentalSpeedProjection = true;
 
+          # The engine's hung-request watchdog (STRATA_WATCHDOG_S, code
+          # default 60 s) kills the engine when a request makes no progress
+          # for that long. A cold prefill of a long prompt trips it: on
+          # 2026-11-19 a 146K-token prompt right after a gaming session (no
+          # prompt cache) went silent for over 60 s and the engine shot
+          # itself, then the client retried into the same wall. 300 s still
+          # catches a real GPU hang, just later.
+          extraLaunchArgs = [
+            "--set"
+            "STRATA_WATCHDOG_S=300"
+          ];
+
           # Strata and the Steam session never share the GPU (~15 GB of VRAM):
           # console-mode below holds Strata while gaming.
 
