@@ -45,9 +45,17 @@ Design, continued from the version that first made tiles appear:
     evicting a game's files never takes a prefix or its saves with it.
   * Entries this tool owns carry the tag "gamectl"; other shortcuts are
     left alone.
-  * Per-title fixes go in the *installed* title's .gamectl marker as
-    exe=<path under game/>; the library itself is read-only NFS and
-    cannot hold overrides. Tile names follow the library directory.
+  * The library's packages are self-describing: each ships its own
+    start.<mode>.sh defining GAMEROOT (the directory to run from,
+    relative to files/game-root), and CMD=("<wine>" "<game.exe>"
+    <args> "$@"). launch uses that declared invocation - entry, cwd
+    and args together - rather than guessing from the tree, and
+    ignores the bundled wine and the script's own runtime setup; the
+    GE-Proton path is our equivalent. A per-title override lives as
+    exe=<path under game/> in the .gamectl marker of the *installed*
+    title (it outranks the declaration); the library itself is
+    read-only NFS and cannot hold overrides. Tile names follow the
+    library directory.
 """
 
 import argparse
@@ -55,6 +63,8 @@ import fcntl
 import json
 import os
 import pwd
+import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -294,6 +304,46 @@ def find_exe(root):
     return None, "no executable found; set exe=<path under game/> in .gamectl"
 
 
+def script_declared_exe(tdir):
+    """The launch entry declared by a package's own start scripts.
+
+    Returns (path relative to game-root, args), or (None, []) when the
+    package declares none. The observed form across this library is
+    uniform: GAMEROOT="$PWD/files/game-root[<subdir>]" plus
+    CMD=("$SYSWINE" "<game.exe>" <args> "$@") with $SYSWINE a
+    packaged wine binary. The args are passed through unchanged (they
+    are part of the declared entry: a cracked launcher shim invoked
+    without its declared arguments opens a menu no one can see), with
+    only "$@" dropped. cmd_launch expands $USER.
+    """
+    try:
+        names = sorted(os.listdir(tdir))
+    except OSError:
+        return None, []
+    for name in names:
+        if not (name.startswith("start.") and name.endswith(".sh")):
+            continue
+        try:
+            with open(os.path.join(tdir, name), encoding="utf-8") as f:
+                text = f.read()
+        except OSError:
+            continue
+        cmd = re.search(r'^CMD=\((.*)\)$', text, re.MULTILINE)
+        if not cmd:
+            continue
+        try:
+            toks = [t for t in shlex.split(cmd.group(1)) if t != "$@"]
+        except ValueError:
+            continue
+        if len(toks) < 2 or "SYSWINE" not in toks[0]:
+            continue
+        gr = re.search(r'GAMEROOT="\$PWD/files/game-root(/[^\"]*)?"', text)
+        sub = gr.group(1) if gr else ""
+        rel = sub.lstrip("/") + "/" + toks[1] if sub else toks[1]
+        return rel, toks[2:]
+    return None, []
+
+
 def short_id(exe, name):
     return zlib.crc32((exe + name).encode("utf-8")) | 0x80000000
 
@@ -474,16 +524,28 @@ def cmd_launch(title, args):
     dest = ensure_installed(title, args)
     gdir = os.path.join(dest, "game")
     marker = read_marker(dest)
+    game_args = []
     if marker.get("exe"):
         exe = os.path.join(gdir, marker["exe"])
         if not os.path.isfile(exe):
             log(f'launch: exe={marker["exe"]} does not exist')
             return 1
     else:
-        exe, why = find_exe(gdir)
-        if why:
-            log(f"launch: {why}")
-            return 1
+        exe = None
+        rel, declared = script_declared_exe(os.path.join(args.library,
+                                                         title))
+        if rel and os.path.isfile(os.path.join(gdir, rel)):
+            exe = os.path.join(gdir, rel)
+            # $USER in a declared arg is the packager's stand-in for a
+            # per-user path (a save location); expand it to the
+            # account that will actually run the game. Everything else
+            # stays exactly as declared.
+            game_args = [a.replace("$USER", args.user) for a in declared]
+        if exe is None:
+            exe, why = find_exe(gdir)
+            if why:
+                log(f"launch: {why}")
+                return 1
 
     # One line per Play: the LRU step reads this ledger (the library
     # mount and the game files are mounted noatime, so file access
@@ -492,14 +554,16 @@ def cmd_launch(title, args):
     sid = short_id(f'"{args.wrapper}"', title)
     with open(os.path.join(args.games, ".gamectl-launch.log"), "a") as ledger:
         ledger.write(f"{stamp} {title} {exe}\n")
-    log(f"launch {title}: appid {sid} exe {exe}")
+    log(f"launch {title}: appid {sid} exe {exe} args {game_args}")
 
     if not exe.lower().endswith(".exe"):
-        # Launch from the game's own directory: titles resolve data
-        # paths relative to the cwd, and whatever we were invoked from
-        # (a shell's home over SSH) is no sane default for them.
-        os.chdir(gdir)
-        os.execv(exe, [exe])
+        # Run from the directory the entry was declared in: the
+        # package's own start script cds to GAMEROOT, which is always
+        # its exe's directory, and titles resolve data paths relative
+        # to the cwd. Whatever we were invoked from (a shell's home
+        # over SSH) is no sane default for them.
+        os.chdir(os.path.dirname(exe))
+        os.execv(exe, [exe] + game_args)
 
     # Steam must not map a compat tool onto these tiles (it would run
     # the gamectl wrapper under Proton instead of the game), so we run
@@ -513,11 +577,12 @@ def cmd_launch(title, args):
     steam = os.path.expanduser("~/.local/share/Steam")
     pfx = os.path.join(steam, "steamapps", "compatdata", str(sid))
     os.makedirs(pfx, exist_ok=True)
+    # Run from the entry's directory like the native branch; and
     # bwrap insists on entering the caller's cwd, which it cannot do
     # when invoked from a directory this account cannot traverse
     # (proven over SSH: "bwrap: Can't chdir to ... Permission
     # denied"), so never inherit wherever we were invoked from.
-    os.chdir(gdir)
+    os.chdir(os.path.dirname(exe))
     env = dict(os.environ)
     env["STEAM_COMPAT_DATA_PATH"] = pfx
     env["STEAM_COMPAT_CLIENT_INSTALL_PATH"] = steam
