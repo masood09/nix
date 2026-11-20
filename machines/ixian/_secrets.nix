@@ -23,6 +23,14 @@
           restartUnits = ["model-router.service"];
         };
 
+        # SteamGridDB API key (one line, from steamgriddb.com > Preferences
+        # > API) that `gamectl art` uses to fetch tile art. Owned by the
+        # console account, because gamectl re-execs as it before running.
+        "gamectl/steamgriddb-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = config.homelab.desktop.gaming.user;
+        };
+
         "tailscale/preauth-key" = {
           sopsFile = ./secrets.sops.yaml;
         };
