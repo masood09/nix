@@ -9,6 +9,7 @@
     ./disko
     ./hardware-configuration.nix
     ./_config.nix
+    ./_gamectl.nix
     ./_networking.nix
     ./_secrets.nix
     ./_users.nix
