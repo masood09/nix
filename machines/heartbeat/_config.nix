@@ -561,6 +561,21 @@
     };
 
     services = {
+      # NFS export of the Questarr game library for ixian (console-side
+      # mount lives in machines/ixian; stage-and-unpack flow). Access
+      # control is the export line itself: read-only, pinned to ixian's
+      # LAN address, which is a DHCP lease — reserve it on the router or
+      # update it here. NFSv4-only clients need TCP 2049 alone; rpcbind,
+      # mountd, and statd traffic is v3-era and never crosses the LAN.
+      nfs = {
+        server = {
+          enable = true;
+          exports = ''
+            /mnt/tank/media/library/games 10.0.30.5/32(ro,no_subtree_check)
+          '';
+        };
+      };
+
       prometheus = {
         exporters = {
           ipmi = {

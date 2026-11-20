@@ -4,6 +4,12 @@
     # Loose reverse-path filtering required for Tailscale
     firewall = {
       checkReversePath = "loose";
+
+      # NFS server for the ixian games-library export (services.nfs.server
+      # in _config.nix). That module opens no firewall of its own; NFSv4
+      # clients only use TCP 2049 — no rpcbind/mountd/statd ports. Which
+      # clients may connect is enforced by the export line, not here.
+      allowedTCPPorts = [2049];
     };
 
     useDHCP = false;
