@@ -1,5 +1,6 @@
-# gamectl — stages titles from heartbeat's game library over NFS and
-# unpacks them onto the model disk as plain files.
+# gamectl — stages titles from heartbeat's game library over NFS, unpacks
+# them onto the model disk as plain files, and registers them as Steam
+# shortcuts so they show up in Gaming Mode.
 {
   config,
   pkgs,
@@ -25,6 +26,22 @@
       ++ ["-DWITH_TESTS=OFF"];
   });
 
+  # Registers every installed title as a Steam non-Steam shortcut
+  # (shortcuts.vdf, grid art, and a Proton mapping for .exe titles). The
+  # header of _gamectl-steam.py has the format, the id scheme, and why it
+  # only writes while Steam is stopped.
+  gamectlSteam =
+    pkgs.writers.writePython3 "gamectl-steam" {
+      libraries = [pkgs.python3Packages.vdf];
+      flakeIgnore = ["E501"];
+    }
+    (builtins.readFile ./_gamectl-steam.py);
+
+  # GE-Proton is the Steam tool name of _gaming.nix's Proton-GE: nixpkgs'
+  # proton-ge-bin rewrites its compatibilitytool.vdf to this fixed name, so
+  # it stays valid across Proton-GE bumps.
+  steamSync = "${gamectlSteam} --games /srv/models/games --tool GE-Proton --user ${gamingUser}";
+
   # Stage-and-unpack engine for the Questarr library (step 1 of the
   # catalog-on-the-couch flow). Library packages ship one DwarFS image
   # (files/game-root.dwarfs); the extra "dwarfs-binary"/"dwarfs-tree"
@@ -41,13 +58,16 @@
     GAMES="/srv/models/games"
 
     usage() {
-      echo "usage: gamectl list | gamectl install <Title>..."
+      echo "usage: gamectl list | gamectl install <Title>... | gamectl steam [--dry-run]"
     }
 
     cmd=''${1:-}
     shift || true
 
     case "$cmd" in
+      steam)
+        exec ${steamSync} "$@"
+        ;;
       list)
         for d in "$LIB"/*/; do
           title=$(basename "$d")
@@ -92,6 +112,7 @@
           printf 'installed-at=%s\n' "$(date -Is)" > "$dest/.gamectl"
           echo "installed: $title"
         done
+        ${steamSync}
         ;;
       *)
         usage
@@ -134,10 +155,36 @@ in {
       tmpfiles = {
         rules = [
           # gamectl's install root on the model disk. Owned by the console user
-          # because the Steam-side launcher (a later step) runs in its session,
-          # not as root.
+          # because Steam launches the installed titles in its session, not
+          # as root, and the shortcut sync keeps its lock file here.
           "d /srv/models/games 0775 ${gamingUser} users"
         ];
+      };
+
+      user = {
+        services = {
+          # Syncs the Steam shortcuts at the one moment it is safe: each
+          # Steam session start, before the client reads its config (a sync
+          # while Steam runs is skipped, since Steam would overwrite it on
+          # exit). Wanted, not required, by steam-launcher, so a failed sync
+          # never keeps Steam from starting.
+          gamectl-steam-sync = {
+            description = "Register gamectl titles as Steam shortcuts";
+            before = [
+              "steam-launcher.service"
+            ];
+            wantedBy = [
+              "steam-launcher.service"
+            ];
+            unitConfig = {
+              ConditionUser = gamingUser;
+            };
+            serviceConfig = {
+              Type = "oneshot";
+              ExecStart = steamSync;
+            };
+          };
+        };
       };
     };
   };
