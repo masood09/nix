@@ -23,7 +23,10 @@ Design, continued from the version that first made tiles appear:
     install, eviction and re-install — carrying its play time, art and
     prefix with it.
   * Grid art: grid/<id>p (portrait), <id> (landscape), <id>_hero,
-    <id>_logo, <id>_icon, picked up from <title>/art/ in the library.
+    <id>_logo, <id>_icon, picked up from <title>/art/ in the library,
+    else from gamectl's cache <games>/.art/<title>/, which `art` fills
+    from SteamGridDB (or by hand). Kinds with neither are left as they
+    are, so art set in Steam itself survives a sync.
   * Steam keeps shortcuts.vdf in memory and writes it back on exit, so
     a sync under a running client is skipped instead of lost; the
     gamectl-steam-sync user unit runs it again before the next session
@@ -49,12 +52,16 @@ Design, continued from the version that first made tiles appear:
 
 import argparse
 import fcntl
+import json
 import os
 import pwd
 import shutil
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.parse
+import urllib.request
 import zlib
 
 import vdf
@@ -63,14 +70,152 @@ TAG = "gamectl"
 # Substrings of executables that are never the game itself.
 SKIP = ("unins", "setup", "crash", "redist", "vcredist", "dxwebsetup",
         "dotnet", "physx", "oalinst", "prereq", "install")
-# art/<name>.<ext> in a title dir -> grid/<id><suffix>.<ext>
+# <art dir>/<kind>.<ext> -> grid/<id><suffix>.<ext>
 ART = {"portrait": "p", "landscape": "", "hero": "_hero",
        "logo": "_logo", "icon": "_icon"}
 ART_EXT = ("png", "jpg")
 
+# SteamGridDB, the art source steam-rom-manager and the Deck's SGDB
+# plugin use. kind -> (endpoint, extra query, accepted mimes). Logos
+# and icons are composited over other art, so only png (alpha) works.
+SGDB = "https://www.steamgriddb.com/api/v2"
+SGDB_KINDS = {
+    "portrait": ("grids", {"dimensions": "600x900"}, ("image/png", "image/jpeg")),
+    "landscape": ("grids", {"dimensions": "920x430,460x215"}, ("image/png", "image/jpeg")),
+    "hero": ("heroes", {}, ("image/png", "image/jpeg")),
+    "logo": ("logos", {}, ("image/png",)),
+    "icon": ("icons", {}, ("image/png",)),
+}
+MIME_EXT = {"image/png": "png", "image/jpeg": "jpg"}
+
 
 def log(msg):
     print(msg, flush=True)
+
+
+def art_cache(args, title):
+    """gamectl's own art store: the library is read-only NFS, so fetched
+    (or hand-placed) art lives on the model disk, one dir per title."""
+    return os.path.join(args.games, ".art", title)
+
+
+def find_art(dirs, kind):
+    for d in dirs:
+        for ext in ART_EXT:
+            src = os.path.join(d, f"{kind}.{ext}")
+            if os.path.isfile(src):
+                return src, ext
+    return None
+
+
+def sgdb_get(path, key, query=None):
+    url = f"{SGDB}/{path}"
+    if query:
+        url += "?" + urllib.parse.urlencode(query)
+    req = urllib.request.Request(url, headers={
+        "Authorization": f"Bearer {key}", "User-Agent": "gamectl"})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        body = json.load(r)
+    if not body.get("success"):
+        raise RuntimeError(f"{path}: {body.get('errors')}")
+    return body.get("data") or []
+
+
+def search_term(title):
+    # Library directory names stand in "_" for the ":" a filename cannot
+    # hold ("Doom_ The Dark Ages"); SGDB's search wants the real name.
+    return title.replace("_ ", ": ").replace("_", " ")
+
+
+def resolve_game(adir, title, key):
+    """SGDB game id for a title, remembered in <art dir>/sgdb-id.
+
+    The first line is the id; edit it to pin a different game when the
+    search picked the wrong one (a remake versus the original, say)."""
+    idf = os.path.join(adir, "sgdb-id")
+    try:
+        with open(idf, encoding="utf-8") as f:
+            first = f.readline().strip()
+        if first.isdigit():
+            return int(first)
+    except FileNotFoundError:
+        pass
+    term = search_term(title)
+    hits = sgdb_get("search/autocomplete/" + urllib.parse.quote(term, safe=""), key)
+    if not hits:
+        return None
+    hit = hits[0]
+    with open(idf, "w", encoding="utf-8") as f:
+        f.write(f"{hit['id']}\n# {hit.get('name', '')} - searched for {term!r};"
+                " replace the id above to pin another game, then gamectl art --refresh\n")
+    log(f"  matched SteamGridDB {hit['id']} {hit.get('name', '')!r}")
+    return hit["id"]
+
+
+def fetch_art(adir, gid, kind, key):
+    endpoint, query, mimes = SGDB_KINDS[kind]
+    q = dict(query, types="static", mimes=",".join(mimes))
+    items = sgdb_get(f"{endpoint}/game/{gid}", key, q)
+    item = next((i for i in items if i.get("mime") in mimes), None)
+    if not item:
+        return False
+    ext = MIME_EXT[item["mime"]]
+    req = urllib.request.Request(item["url"], headers={"User-Agent": "gamectl"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        data = r.read()
+    dst = os.path.join(adir, f"{kind}.{ext}")
+    with open(dst + ".tmp", "wb") as f:
+        f.write(data)
+    os.replace(dst + ".tmp", dst)
+    for other in ART_EXT:
+        if other != ext and os.path.exists(os.path.join(adir, f"{kind}.{other}")):
+            os.remove(os.path.join(adir, f"{kind}.{other}"))
+    return True
+
+
+def cmd_art(args):
+    """Fill the art cache from SteamGridDB; the next sync puts it on the
+    tiles. Only kinds not cached yet are fetched unless --refresh, so a
+    hand-placed <art dir>/<kind>.png is never overwritten."""
+    if not args.sgdb_key_file:
+        log("art: no --sgdb-key-file configured")
+        return 1
+    with open(args.sgdb_key_file, encoding="utf-8") as f:
+        key = f.read().strip()
+    titles = desired_titles(args)
+    if titles is None:
+        return 1
+    if args.titles:
+        titles = [t for t in titles if t["title"] in args.titles]
+    failed = 0
+    for t in titles:
+        title = t["title"]
+        adir = art_cache(args, title)
+        os.makedirs(adir, exist_ok=True)
+        log(f"art {title}:")
+        try:
+            if args.refresh:
+                for kind in ART:
+                    for ext in ART_EXT:
+                        p = os.path.join(adir, f"{kind}.{ext}")
+                        if os.path.exists(p):
+                            os.remove(p)
+            gid = resolve_game(adir, title, key)
+            if gid is None:
+                log(f"  no SteamGridDB match for {search_term(title)!r};"
+                    f" put an id in {adir}/sgdb-id")
+                failed += 1
+                continue
+            for kind in SGDB_KINDS:
+                if find_art([adir], kind):
+                    continue
+                log(f"  {kind}: {'fetched' if fetch_art(adir, gid, kind, key) else 'none on SteamGridDB'}")
+        except (urllib.error.URLError, OSError, RuntimeError, ValueError) as e:
+            log(f"  failed: {e}")
+            failed += 1
+    log(f"art: {len(titles) - failed} of {len(titles)} titles done; tiles pick"
+        " it up at the next sync (gamectl steam, or the next Steam start)")
+    return 1 if failed else 0
 
 
 def become(user):
@@ -214,13 +359,12 @@ def desired_titles(args):
             log(f'skip {title}: name contains ", rename it in Questarr')
             continue
         sid = short_id(quoted, title)
+        # A library-supplied art/ wins over gamectl's cache.
         art = {}
         for kind in ART:
-            for ext in ART_EXT:
-                src = os.path.join(tdir, "art", f"{kind}.{ext}")
-                if os.path.isfile(src):
-                    art[kind] = (src, ext)
-                    break
+            found = find_art([os.path.join(tdir, "art"), art_cache(args, title)], kind)
+            if found:
+                art[kind] = found
         titles.append({
             "title": title, "sid": sid, "quoted": quoted,
             "startdir": startdir, "art": art,
@@ -285,17 +429,22 @@ def sync_user(udir, titles, args):
     write_if_changed(path, vdf.binary_dumps(out), args.dry_run)
 
     # Grid art: copy (not symlink; Steam may run inside a container),
-    # and drop files for ids we no longer own.
+    # and drop files for ids we no longer own. A kind with no source is
+    # left alone: Steam's own "Set custom artwork" writes these same
+    # names, and a sync must not wipe that. Where a source exists it
+    # wins, and its other-format twin goes so the two cannot compete.
     want = {t["sid"] for t in titles}
     stale = set(managed_old) - want
     if not args.dry_run:
         os.makedirs(grid, exist_ok=True)
     for t in titles:
         for kind, suffix in ART.items():
+            src = t["art"].get(kind)
+            if not src:
+                continue
             for ext in ART_EXT:
                 dst = os.path.join(grid, f"{t['sid']}{suffix}.{ext}")
-                src = t["art"].get(kind)
-                if src and src[1] == ext:
+                if ext == src[1]:
                     with open(src[0], "rb") as f:
                         write_if_changed(dst, f.read(), args.dry_run)
                 elif os.path.exists(dst) and not args.dry_run:
@@ -407,12 +556,20 @@ def main():
     s.add_argument("--dry-run", action="store_true")
     launchp = sub.add_parser("launch", help="install if needed, then run a title")
     launchp.add_argument("title")
+    p.add_argument("--sgdb-key-file", help="file holding a SteamGridDB API key")
+    artp = sub.add_parser("art", help="cache tile art from SteamGridDB")
+    artp.add_argument("--refresh", action="store_true", help="re-fetch art already cached")
+    artp.add_argument("titles", nargs="*", help="only these titles (default: all)")
     args = p.parse_args()
 
     become(args.user)
 
     if args.cmd == "launch":
         sys.exit(cmd_launch(args.title, args))
+    if args.cmd == "art":
+        # Writes only gamectl's own cache, never Steam's files, so it
+        # needs neither the sync lock nor a stopped Steam.
+        sys.exit(cmd_art(args))
 
     # Serializes concurrent syncs (the boot-time user unit and manual
     # runs). launch and install deliberately skip the lock: neither

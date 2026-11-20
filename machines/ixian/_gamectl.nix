@@ -62,7 +62,7 @@
   # every rebuild and Steam would drop each tile's play time, art and
   # prefix. /run/current-system/sw/bin/gamectl resolves to whatever
   # version this same config just activated.
-  gamectlBase = "${gamectlSteam} --library /srv/media-games/Linux --games /srv/models/games --user ${gamingUser} --wrapper /run/current-system/sw/bin/gamectl --proton ${protonGe}/proton --runtime ${steamRun}/bin/steam-run";
+  gamectlBase = "${gamectlSteam} --library /srv/media-games/Linux --games /srv/models/games --user ${gamingUser} --wrapper /run/current-system/sw/bin/gamectl --proton ${protonGe}/proton --runtime ${steamRun}/bin/steam-run --sgdb-key-file ${config.sops.secrets."gamectl/steamgriddb-key".path}";
   steamSync = "${gamectlBase} steam";
 
   # Stage-and-unpack engine for the Questarr library (step 1 of the
@@ -81,7 +81,7 @@
     GAMES="/srv/models/games"
 
     usage() {
-      echo "usage: gamectl list | gamectl install <Title>... | gamectl launch <Title> | gamectl steam [--dry-run]"
+      echo "usage: gamectl list | gamectl install <Title>... | gamectl launch <Title> | gamectl steam [--dry-run] | gamectl art [--refresh] [<Title>...]"
     }
 
     cmd=''${1:-}
@@ -90,6 +90,9 @@
     case "$cmd" in
       steam)
         exec ${steamSync} "$@"
+        ;;
+      art)
+        exec ${gamectlBase} art "$@"
         ;;
       launch)
         if [[ $# -ne 1 ]]; then
