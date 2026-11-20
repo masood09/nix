@@ -366,6 +366,17 @@ in {
         # No desktop session on this console: "Switch to Desktop" relaunches
         # Gaming Mode.
         desktopSession = "gamescope-wayland";
+
+        # programs.steam only hands extraCompatPackages (Proton-GE, from
+        # _gaming.nix) to Steam through its own package's wrapper, but
+        # Jovian's steam-launcher runs a different steam build, so Gaming
+        # Mode never saw Proton-GE: its compat log registered no such
+        # tool, and a shortcut mapped to GE-Proton started the .exe with no
+        # Proton at all. This file is the launcher's EnvironmentFile.
+        environment = {
+          STEAM_EXTRA_COMPAT_TOOLS_PATHS =
+            lib.makeSearchPathOutput "steamcompattool" "" config.programs.steam.extraCompatPackages;
+        };
       };
 
       hardware = {
