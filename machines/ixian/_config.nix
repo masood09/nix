@@ -124,6 +124,11 @@ in {
           settings = {
             reasoning_effort = "low";
             reasoning_budget_tokens = 8192;
+            # The server's own limit on engine silence during a request
+            # (default 300 s), separate from the engine watchdog in
+            # extraLaunchArgs below. Matched to it so a long cold prefill is
+            # not cut off by whichever limit is shorter.
+            engine_silence_s = 900;
             # Stock by default: the projection vector stays loaded (below),
             # but only a request that asks for it gets it, e.g. model-router's
             # -uncensored names or "experimental_speed_projection": true. No
@@ -151,11 +156,14 @@ in {
           # for that long. A cold prefill of a long prompt trips it: on
           # 2026-11-19 a 146K-token prompt right after a gaming session (no
           # prompt cache) went silent for over 60 s and the engine shot
-          # itself, then the client retried into the same wall. 300 s still
-          # catches a real GPU hang, just later.
+          # itself, then the client retried into the same wall. 300 s was
+          # still too short: a 181K-token cold prefill ran at ~70 tok/s and
+          # one chunk sat silent for over 140 s. Console-mode is not
+          # debounced, so every TV-on blip forces such a cold start; 900 s
+          # lets it finish while a real GPU hang is still caught.
           extraLaunchArgs = [
             "--set"
-            "STRATA_WATCHDOG_S=300"
+            "STRATA_WATCHDOG_S=900"
           ];
 
           # Strata and the Steam session never share the GPU (~15 GB of VRAM):
