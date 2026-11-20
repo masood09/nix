@@ -1,6 +1,7 @@
-# gamectl — stages titles from heartbeat's game library over NFS, unpacks
-# them onto the model disk as plain files, and registers them as Steam
-# shortcuts so they show up in Gaming Mode.
+# gamectl — shows heartbeat's Questarr game library as Gaming Mode grid
+# tiles: every library title is registered as a Steam shortcut, and a
+# tile's Play stages its DwarFS image over NFS, unpacks it onto the
+# model disk, and runs it (through GE-Proton for .exe titles).
 {
   config,
   pkgs,
@@ -26,10 +27,10 @@
       ++ ["-DWITH_TESTS=OFF"];
   });
 
-  # Registers every installed title as a Steam non-Steam shortcut
-  # (shortcuts.vdf, grid art, and a Proton mapping for .exe titles). The
-  # header of _gamectl-steam.py has the format, the id scheme, and why it
-  # only writes while Steam is stopped.
+  # Registers every *library* title as a Steam grid tile and implements
+  # the tiles' launch command (install-if-needed, then run through
+  # GE-Proton). The header of _gamectl-steam.py has the format, the id
+  # scheme, and why it only writes while Steam is stopped.
   gamectlSteam =
     pkgs.writers.writePython3 "gamectl-steam" {
       libraries = [pkgs.python3Packages.vdf];
@@ -37,10 +38,32 @@
     }
     (builtins.readFile ./_gamectl-steam.py);
 
-  # GE-Proton is the Steam tool name of _gaming.nix's Proton-GE: nixpkgs'
-  # proton-ge-bin rewrites its compatibilitytool.vdf to this fixed name, so
-  # it stays valid across Proton-GE bumps.
-  steamSync = "${gamectlSteam} --games /srv/models/games --tool GE-Proton --user ${gamingUser}";
+  # The same Proton-GE _gaming.nix hands Steam as extraCompatPackages.
+  # A tile's Exe is a native launcher, and a compat tool set on such a
+  # tile would run that launcher under Proton instead of the game, so
+  # the launch path invokes GE's launcher itself. That lives in the
+  # steamcompattool output — proton-ge-bin's default output is a
+  # placeholder telling environments not to install it.
+  protonGe = pkgs.proton-ge-bin.steamcompattool;
+
+  # GE's launcher cannot be exec'd directly: its shebang wants a
+  # containerized python and FHS paths (proven live: a bare exec dies
+  # on "env: python3: Permission denied"). Steam actually runs Proton
+  # inside its Steam Linux Runtime container; steam-run is NixOS's
+  # general-purpose equivalent. Bind it to the steam this machine
+  # configures — its runtime carries the library and font additions
+  # programs.steam declares — because pkgs.steam-run is the stock
+  # build and would add a second, unconfigured runtime to the
+  # closure (their FHS rootfs differ).
+  steamRun = config.programs.steam.package.run;
+
+  # --wrapper is a fixed path rather than ${gamectl}: a tile's appid is
+  # crc32(Exe + AppName), so a store path would renumber every tile on
+  # every rebuild and Steam would drop each tile's play time, art and
+  # prefix. /run/current-system/sw/bin/gamectl resolves to whatever
+  # version this same config just activated.
+  gamectlBase = "${gamectlSteam} --library /srv/media-games/Linux --games /srv/models/games --user ${gamingUser} --wrapper /run/current-system/sw/bin/gamectl --proton ${protonGe}/proton --runtime ${steamRun}/bin/steam-run";
+  steamSync = "${gamectlBase} steam";
 
   # Stage-and-unpack engine for the Questarr library (step 1 of the
   # catalog-on-the-couch flow). Library packages ship one DwarFS image
@@ -58,7 +81,7 @@
     GAMES="/srv/models/games"
 
     usage() {
-      echo "usage: gamectl list | gamectl install <Title>... | gamectl steam [--dry-run]"
+      echo "usage: gamectl list | gamectl install <Title>... | gamectl launch <Title> | gamectl steam [--dry-run]"
     }
 
     cmd=''${1:-}
@@ -67,6 +90,13 @@
     case "$cmd" in
       steam)
         exec ${steamSync} "$@"
+        ;;
+      launch)
+        if [[ $# -ne 1 ]]; then
+          usage
+          exit 2
+        fi
+        exec ${gamectlBase} launch "$1"
         ;;
       list)
         for d in "$LIB"/*/; do
@@ -112,7 +142,9 @@
           printf 'installed-at=%s\n' "$(date -Is)" > "$dest/.gamectl"
           echo "installed: $title"
         done
-        ${steamSync}
+        # No shortcuts sync here: tiles enumerate the library, so an
+        # install changes nothing about the grid — only which games are
+        # playable without waiting.
         ;;
       *)
         usage
