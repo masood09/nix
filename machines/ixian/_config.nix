@@ -49,6 +49,27 @@ in {
       };
     };
 
+    # Read-only NFS view of heartbeat's Questarr game library (server side:
+    # services.nfs.server in machines/heartbeat). This is staging for the
+    # pull-and-unpack flow — playable copies live on /srv/models, and
+    # nothing ever writes here. The device is heartbeat's LAN address
+    # rather than its headscale name on purpose: the name resolves to the
+    # tailnet, where this path is currently DERP-relayed. _netdev plus
+    # automount keep a down heartbeat from ever blocking the console boot.
+    fileSystems = {
+      "/srv/media-games" = {
+        device = "10.0.20.3:/mnt/tank/media/library/games";
+        mountPoint = "/srv/media-games";
+        fsType = "nfs";
+        options = [
+          "ro"
+          "noatime"
+          "_netdev"
+          "x-systemd.automount"
+        ];
+      };
+    };
+
     homelab = {
       role = "htpc";
       purpose = "Gamescope Steam Gaming and AI Inference PC";
