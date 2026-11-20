@@ -135,6 +135,14 @@
           sopsFile = ./secrets.sops.yaml;
         };
 
+        # NordLynx (paid plan) replaced the Proton free-tier exit, which
+        # crawled at ~0.2 MB/s on an oversubscribed LA free server. The
+        # proton config above stays as a fallback: repoint nixflix.vpn's
+        # wgConfFile in _config.nix to use it again.
+        "arr/vpn/nord-wireguard-config" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
+
         # Plaintext WebUI password the arrs' download-client units send to
         # qBittorrent's API. Must match password-pbkdf2 below.
         "arr/qbittorrent/password" = {

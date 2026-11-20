@@ -501,7 +501,7 @@
     nixflix = {
       vpn = {
         enable = true;
-        wgConfFile = config.sops.secrets."arr/vpn/proton-wireguard-config".path;
+        wgConfFile = config.sops.secrets."arr/vpn/nord-wireguard-config".path;
         accessibleFrom = [
           "10.0.20.0/24"
         ];
