@@ -275,6 +275,15 @@ in {
         environment = {
           STEAM_EXTRA_COMPAT_TOOLS_PATHS =
             lib.makeSearchPathOutput "steamcompattool" "" config.programs.steam.extraCompatPackages;
+
+          # GE-Proton only (Valve's Proton ignores it): upgrades a game's FSR
+          # 3.1 to FSR 4, the RDNA 4 machine-learning upscaler this GPU has.
+          # Session-wide because gamectl's tiles launch through GE without
+          # Steam's per-game launch options. GE does not ship AMD's
+          # amdxcffx64.dll: at each launch it reads a manifest from
+          # loathingkernel.github.io/proton-upscalers and downloads the DLL
+          # into the prefix, so a first launch offline falls back to FSR 3.1.
+          PROTON_FSR4_UPGRADE = "1";
         };
       };
 
