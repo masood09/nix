@@ -171,8 +171,15 @@ in {
 
           # Upstream ships engine releases every few days, at 04:30; a held
           # Strata skips that day's update.
+          #
+          # TECH DEBT: off since 2026-11-23. Control 0.1.66 answers 404 to any
+          # model name but the loaded one, and model-router forwards its
+          # -uncensored names to Strata unchanged, so heavy-uncensored broke
+          # the morning it auto-updated. The engine and Control are pinned
+          # back at 0.1.64 by hand on ixian. Re-enable once model-router
+          # rewrites "model" to the name Strata serves.
           autoUpdate = {
-            enable = true;
+            enable = false;
           };
         };
 
