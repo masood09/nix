@@ -13,6 +13,7 @@
     ./_gamectl.nix
     ./_networking.nix
     ./_secrets.nix
+    ./_suspend.nix
     ./_users.nix
 
     ./../../modules/nixos
