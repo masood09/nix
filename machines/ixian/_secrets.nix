@@ -31,6 +31,14 @@
           owner = config.homelab.desktop.gaming.user;
         };
 
+        # Full URL of the Home Assistant webhook that controller-wake POSTs
+        # to on the controller gesture (connect, Start, Home), on one line:
+        # https://home.<domain>/api/webhook/<id>. Root-only; the unit reads
+        # it through LoadCredential. See _controller-wake.nix.
+        "controller-wake/webhook-url" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
+
         "tailscale/preauth-key" = {
           sopsFile = ./secrets.sops.yaml;
         };
