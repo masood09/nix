@@ -973,6 +973,9 @@ in {
           hostname = "jellyfin.${domain}";
           port = 443;
           useSsl = true;
+          # Seerr rejects an empty external hostname (HTTP 503 INVALID_URL), and
+          # nixflix only derives one when its own reverse proxy is enabled.
+          externalHostname = "https://jellyfin.${domain}";
         };
 
         # nixflix's per-app default instance (hostname/port/apiKey/directory/etc.) lives
@@ -1294,66 +1297,13 @@ in {
       };
     };
 
-    # Prowlarr 2.6 rejects the host-config payload from nixflix because it does
-    # not yet include the new required AllowedHosts field. Keep the rest of
-    # nixflix's declarative payload intact and add the explicit host allow-list
-    # until the upstream module grows support for it.
+    # Prowlarr keeps an explicit AllowedHosts list, and nixflix's readiness
+    # probe (mkWaitForApiScript) still asks http://0.0.0.0:<port> although
+    # nixflix computes connectionAddress = 127.0.0.1. With the list in place
+    # that probe is rejected, so prowlarr's ExecStartPost and prowlarr-config
+    # probe loopback instead. Recheck when nixflix's probe uses
+    # connectionAddress: then both overrides can go.
     systemd.services = {
-      # Seerr rejects an empty externalHostname on its current API (HTTP 503
-      # INVALID_URL). Keep the generated service dependencies and credentials,
-      # but submit a valid external Jellyfin URL explicitly.
-      seerr-jellyfin = lib.mkIf cfg.seerr.enable {
-        path = [pkgs.coreutils];
-        serviceConfig = {
-          # nixflix's `script` convenience option has already generated an
-          # ExecStart by the time this module is merged. Override ExecStart
-          # directly so the valid externalHostname workaround is effective.
-          ExecStart = lib.mkForce (pkgs.writeShellScript "seerr-jellyfin-configure" ''
-            set -euo pipefail
-
-            BASE_URL="http://127.0.0.1:${toString config.nixflix.seerr.port}"
-            # Read the key straight from its sops secret, the way nixflix's own
-            # units do. Nothing creates a /run/seerr header file any more.
-            API_KEY_FILE=${lib.escapeShellArg config.sops.secrets."arr/seerr/api-key".path}
-            if [ ! -r "$API_KEY_FILE" ]; then
-              echo "Seerr API key secret is missing" >&2
-              exit 1
-            fi
-
-            PAYLOAD='${builtins.toJSON {
-              ip = config.nixflix.seerr.jellyfin.hostname;
-              port = config.nixflix.seerr.jellyfin.port;
-              useSsl = config.nixflix.seerr.jellyfin.useSsl;
-              urlBase = "";
-              externalHostname = "https://${config.nixflix.seerr.jellyfin.hostname}";
-            }}'
-
-            for attempt in $(seq 1 90); do
-              RESPONSE=$(${pkgs.curl}/bin/curl -s -X POST \
-                --variable apiKey@"$API_KEY_FILE" \
-                --expand-header "X-Api-Key: {{apiKey:trim}}" \
-                -H "Content-Type: application/json" \
-                -d "$PAYLOAD" \
-                -w "\n%{http_code}" \
-                "$BASE_URL/api/v1/settings/jellyfin" || true)
-
-              HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-              if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ] || [ "$HTTP_CODE" = "204" ]; then
-                echo "Jellyfin settings configured successfully"
-                exit 0
-              fi
-
-              echo "Waiting for Seerr Jellyfin settings API (HTTP $HTTP_CODE, $attempt/90)..." >&2
-              sleep 1
-            done
-
-            echo "Failed to configure Jellyfin settings after 90 seconds (HTTP $HTTP_CODE)" >&2
-            echo "$RESPONSE" | head -n-1 >&2
-            exit 1
-          '');
-        };
-      };
-
       # nixflix's generated readiness hook probes bindAddress (0.0.0.0), which
       # Prowlarr's host filter rejects. Probe the loopback address instead.
       prowlarr = lib.mkIf cfg.prowlarr.enable {
