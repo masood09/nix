@@ -39,6 +39,9 @@ EV_KEY = 1
 BTN_START = 315
 BTN_MODE = 316  # Home
 EVENT = struct.Struct("llHHi")
+ATTEMPT_TIMEOUT = 3.0  # seconds per webhook attempt
+RETRY_PAUSE = 1.0  # seconds between attempts
+RETRY_FOR = 60.0  # give up on the webhook after this long
 
 
 def log(message):
@@ -52,19 +55,32 @@ def node_id(path):
 
 
 def send_webhook():
+    """POST to the webhook, retrying with short attempts for up to RETRY_FOR s.
+
+    After a wake from suspend, the gesture can come before the network is
+    usable (on 2026-11-25 it matched in the second the link came up). A long
+    per-attempt timeout then waits out a request that could never succeed,
+    so each attempt is short and the next one follows quickly.
+    """
     directory = os.environ.get("CREDENTIALS_DIRECTORY", "")
     with open(os.path.join(directory, "webhook-url")) as f:
         url = f.read().strip()
-    for attempt in range(1, 4):
+    deadline = time.monotonic() + RETRY_FOR
+    attempt = 0
+    while True:
+        attempt += 1
         try:
             request = urllib.request.Request(url, data=b"", method="POST")
-            with urllib.request.urlopen(request, timeout=10) as response:
-                log(f"webhook sent (HTTP {response.status})")
+            with urllib.request.urlopen(request, timeout=ATTEMPT_TIMEOUT) as response:
+                log(f"webhook sent (HTTP {response.status}, attempt {attempt})")
                 return
         except Exception as exc:  # network, DNS, HTTP errors alike
-            log(f"webhook attempt {attempt}/3 failed: {exc}")
-            time.sleep(2)
-    log("webhook not sent; switch the controller off and on to try again")
+            if time.monotonic() + RETRY_PAUSE >= deadline:
+                log(f"webhook not sent after {attempt} attempts ({exc}); switch the controller off and on to try again")
+                return
+            if attempt == 1 or attempt % 5 == 0:
+                log(f"webhook attempt {attempt} failed ({exc}); retrying for up to {RETRY_FOR:.0f}s")
+            time.sleep(RETRY_PAUSE)
 
 
 class Controller:
