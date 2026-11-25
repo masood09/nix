@@ -1312,9 +1312,11 @@ in {
             set -euo pipefail
 
             BASE_URL="http://127.0.0.1:${toString config.nixflix.seerr.port}"
-            API_KEY_HEADER="/run/seerr/api-key-header"
-            if [ ! -r "$API_KEY_HEADER" ]; then
-              echo "Seerr API key header is missing" >&2
+            # Read the key straight from its sops secret, the way nixflix's own
+            # units do. Nothing creates a /run/seerr header file any more.
+            API_KEY_FILE=${lib.escapeShellArg config.sops.secrets."arr/seerr/api-key".path}
+            if [ ! -r "$API_KEY_FILE" ]; then
+              echo "Seerr API key secret is missing" >&2
               exit 1
             fi
 
@@ -1328,7 +1330,8 @@ in {
 
             for attempt in $(seq 1 90); do
               RESPONSE=$(${pkgs.curl}/bin/curl -s -X POST \
-                --header @"$API_KEY_HEADER" \
+                --variable apiKey@"$API_KEY_FILE" \
+                --expand-header "X-Api-Key: {{apiKey:trim}}" \
                 -H "Content-Type: application/json" \
                 -d "$PAYLOAD" \
                 -w "\n%{http_code}" \
@@ -1386,6 +1389,8 @@ in {
           HOST_CONFIG=$(${pkgs.curl}/bin/curl -fsS -H "X-Api-Key: $API_KEY" "$BASE_URL/config/host")
           CONFIG_ID=$(echo "$HOST_CONFIG" | ${pkgs.jq}/bin/jq -r '.id')
 
+          # allowedHosts has no 0.0.0.0: Prowlarr 2.7 rejects it as "not a host
+          # name", and the readiness probe above already asks over 127.0.0.1.
           echo "Building configuration..."
           NEW_CONFIG=$(echo "$HOST_CONFIG" | ${pkgs.jq}/bin/jq \
             --arg apiKey "$API_KEY" \
@@ -1393,7 +1398,7 @@ in {
             --arg authenticationMethod ${lib.escapeShellArg config.nixflix.prowlarr.config.hostConfig.authenticationMethod} \
             --arg authenticationRequired ${lib.escapeShellArg config.nixflix.prowlarr.config.hostConfig.authenticationRequired} \
             --arg applicationUrl ${lib.escapeShellArg config.nixflix.prowlarr.config.hostConfig.applicationUrl} \
-            --arg allowedHosts ${lib.escapeShellArg "prowlarr.${domain},heartbeat.dns.headscale.${domain},localhost,127.0.0.1,0.0.0.0"} \
+            --arg allowedHosts ${lib.escapeShellArg "prowlarr.${domain},heartbeat.dns.headscale.${domain},localhost,127.0.0.1"} \
             '. + {
               bindAddress: $bindAddress,
               port: ${toString config.nixflix.prowlarr.config.hostConfig.port},
