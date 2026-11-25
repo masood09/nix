@@ -38,6 +38,8 @@ jobs:
           "$RUNNER_TEMP/update-mailarchiver-deps.sh"
 
       - name: Commit updated dependencies
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           if git diff --quiet -- nix/pkgs/mailarchiver/default.nix nix/pkgs/mailarchiver/deps.json; then
             echo "MailArchiver dependencies are already current."
@@ -48,4 +50,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add nix/pkgs/mailarchiver/default.nix nix/pkgs/mailarchiver/deps.json
           git commit -m "chore(deps): update MailArchiver dependencies"
-          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
+          git push origin "HEAD:$HEAD_REF"
