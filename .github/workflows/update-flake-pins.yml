@@ -1,0 +1,53 @@
+name: Re-lock pinned flake inputs
+
+# Renovate bumps a release tag in a flake input's URL (see the flake.nix
+# custom manager in renovate.json) but cannot run Nix, so flake.lock still
+# points at the old tag. This re-locks only that input on the PR branch.
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  contents: write
+
+jobs:
+  relock:
+    if: >-
+      github.event.pull_request.user.login == 'renovate[bot]' &&
+      startsWith(github.event.pull_request.head.ref, 'renovate/tale-headplane-') &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Renovate branch
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v32
+
+      - name: Re-lock headplane
+        run: nix flake update headplane
+
+      - name: Commit updated flake.lock
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if git diff --quiet -- flake.lock; then
+            echo "flake.lock already matches flake.nix."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add flake.lock
+          git commit -m "chore(deps): re-lock headplane"
+          git push origin "HEAD:$HEAD_REF"

@@ -22,6 +22,15 @@
       "matchStrings": [
         "# renovate: datasource=(?<datasource>[^\\s]+)(?: depName=(?<depName>[^\\s]+))?(?: versioning=(?<versioning>[^\\s]+))?\\s*\\n\\s*(?:rev|version)\\s*=\\s*\"(?<currentValue>[^\"]+)\";"
       ]
+    },
+    {
+      "customType": "regex",
+      "description": "Flake inputs pinned to a GitHub release tag (today only headplane). update-flake-pins.yml re-locks flake.lock on the PR branch.",
+      "managerFilePatterns": ["/(^|/)flake\\.nix$/"],
+      "matchStrings": [
+        "url\\s*=\\s*\"github:(?<depName>[^/\"]+/[^/\"]+)/(?<currentValue>v\\d+\\.\\d+\\.\\d+)\";"
+      ],
+      "datasourceTemplate": "github-releases"
     }
   ]
 }
