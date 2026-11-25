@@ -21,6 +21,11 @@
 #     that port change wakes ixian if wakeup is enabled on the receiver's hub
 #     and on the root hub above it. The idle receiver itself can't send a
 #     remote wakeup. The xHCI controller's own wakeup flag is on by default.
+#
+# When ixian suspends: idle-suspend.service (_idle-suspend.py, whose header
+# has the rules) after 20 min without an LLM request, 5 min after game mode
+# ends, or 10 min after a wake that didn't lead anywhere. It unloads Strata
+# first, and sets the RTC alarm so the weekly upgrade and nix-gc run awake.
 {
   config,
   lib,
@@ -28,9 +33,55 @@
   ...
 }: let
   consoleUser = config.homelab.desktop.gaming.user;
+  strataCfg = config.homelab.services.strata;
+
+  idleSuspend =
+    pkgs.writers.writePython3 "idle-suspend" {
+      flakeIgnore = ["E501"];
+    }
+    (builtins.readFile ./_idle-suspend.py);
 in {
   config = {
     systemd = {
+      services = {
+        idle-suspend = {
+          description = "Suspend ixian when idle, and set up its wake";
+          wantedBy = ["multi-user.target"];
+          after = ["console-mode.service" "strata.service"];
+          path = [pkgs.iproute2 config.systemd.package];
+
+          serviceConfig = {
+            ExecStart = lib.escapeShellArgs [
+              (toString idleSuspend)
+              "--idle"
+              "1200"
+              "--after-gaming"
+              "300"
+              "--after-wake"
+              "600"
+              "--controller-grace"
+              "60"
+              "--marker"
+              strataCfg.holdFile
+              "--strata-url"
+              "http://${strataCfg.listenAddress}:${toString strataCfg.listenPort}"
+              "--ssh-port"
+              (toString (lib.head config.services.openssh.ports))
+              "--busy-unit"
+              "nixos-upgrade.service"
+              "--busy-unit"
+              "nix-gc.service"
+              "--wake-for"
+              "nixos-upgrade.timer"
+              "--wake-for"
+              "nix-gc.timer"
+            ];
+            Restart = "always";
+            RestartSec = 10;
+          };
+        };
+      };
+
       sleep = {
         settings = {
           Sleep = {
