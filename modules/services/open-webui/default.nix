@@ -36,6 +36,34 @@
       };
     }).open-webui;
 
+  # LiteLLM's MCP gateway as one tool connection. No access_grants, which
+  # Open WebUI treats as admin-only; the key's LiteLLM grants decide which
+  # servers (Grafana, GitHub, Home Assistant read-only, NixOS, web search)
+  # it carries.
+  openWebuiWithMcp = pkgs.writeShellApplication {
+    name = "open-webui-with-mcp";
+    runtimeInputs = [pkgs.jq];
+    text = ''
+      TOOL_SERVER_CONNECTIONS="$(jq -cn \
+        --arg url ${lib.escapeShellArg cfg.inference.mcpUrl} \
+        --arg key "''${OPENAI_API_KEY:?OPENAI_API_KEY must be set in the sops .env}" \
+        '[{
+          type: "mcp",
+          url: $url,
+          path: "",
+          auth_type: "bearer",
+          key: $key,
+          config: {enable: true},
+          info: {
+            id: "litellm",
+            name: "LiteLLM",
+            description: "Homelab tools through LiteLLM: Grafana, GitHub, Home Assistant (read-only), NixOS, web search"
+          }
+        }]')"
+      export TOOL_SERVER_CONNECTIONS
+      exec ${openWebuiPackage}/bin/open-webui "$@"
+    '';
+  };
   persistenceHelpers = import ../../../lib/persistence-helpers.nix {inherit lib;};
   systemdHelpers = import ../../../lib/systemd-helpers.nix {inherit lib pkgs;};
   permSvc = systemdHelpers.mkPermissionService {
@@ -181,6 +209,19 @@ in {
           };
         };
       }
+      (lib.mkIf (cfg.inference.mcpUrl != null) {
+        services = {
+          open-webui = {
+            # TOOL_SERVER_CONNECTIONS is JSON that carries the key, so it is
+            # built at start from the OPENAI_API_KEY the sops .env already
+            # loads: the connection stays declared here, the key is not
+            # stored twice, and nothing secret enters the store.
+            serviceConfig = {
+              ExecStart = lib.mkForce "${lib.getExe openWebuiWithMcp} serve --host ${lib.escapeShellArg cfg.listenAddress} --port ${toString cfg.listenPort}";
+            };
+          };
+        };
+      })
     ];
 
     environment = persistenceHelpers.mkPersistenceDirs {

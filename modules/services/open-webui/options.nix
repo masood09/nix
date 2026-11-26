@@ -63,6 +63,18 @@ in {
                 virtual key.
               '';
             };
+
+            mcpUrl = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = "https://llm.${config.networking.domain}/mcp";
+              defaultText = lib.literalExpression ''"https://llm.''${config.networking.domain}/mcp"'';
+              description = ''
+                LiteLLM's MCP gateway, added as one tool connection for Open
+                WebUI admins only (no access grants). It authenticates with the
+                same OPENAI_API_KEY, whose LiteLLM grants decide the servers.
+                Null leaves it out.
+              '';
+            };
           };
 
           oidc = {
