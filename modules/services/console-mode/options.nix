@@ -58,8 +58,20 @@
             default = 120;
             description = ''
               Seconds the entity must stay off before inference mode is
-              applied. Gaming mode is applied at once; the delay keeps quick
-              input flips from costing a model load each.
+              applied; the delay keeps quick input flips from costing a model
+              load each.
+            '';
+          };
+
+          gamingDelay = lib.mkOption {
+            type = lib.types.ints.unsigned;
+            default = 10;
+            description = ''
+              Seconds the entity must stay on before gaming mode is applied.
+              A brief "on" (the sync box jumping to ixian's input while ixian
+              wakes, until Home Assistant puts it back) would otherwise stop
+              Strata mid-request. Polls are `interval` apart, so the real wait
+              is up to one interval longer. 0 applies gaming mode at once.
             '';
           };
 

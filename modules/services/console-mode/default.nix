@@ -19,9 +19,10 @@
 # Boot wipes /run, so a host always boots into inference; the controller then
 # applies whatever Home Assistant says.
 #
-# The controller polls the entity. "on" applies gaming at once; "off" applies
-# inference once it has held for inferenceDelay; anything else (unavailable,
-# unknown, HTTP or network failure) changes nothing. It runs as its own user,
+# The controller polls the entity. "on" applies gaming once it has held for
+# gamingDelay, and "off" applies inference once it has held for
+# inferenceDelay; anything else (unavailable, unknown, HTTP or network
+# failure) changes nothing and restarts the wait for "on". It runs as its own user,
 # with a polkit rule for start/stop on exactly the units it manages.
 {
   config,
@@ -64,6 +65,7 @@
       header=${lib.escapeShellArg cfg.homeAssistant.headerFile}
       marker=${lib.escapeShellArg marker}
       delay=${toString cfg.inferenceDelay}
+      gaming_delay=${toString cfg.gamingDelay}
       session_units=(${lib.escapeShellArgs sessionUnits})
       update_units=(${lib.escapeShellArgs updateUnits})
 
@@ -160,6 +162,7 @@
       asserted=""
 
       off_since=""
+      on_since=""
       while :; do
         if body="$(curl -fsS -m 5 -H @"$header" "$url" 2>&1)"; then
           state="$(jq -r '.state // empty' <<<"$body" 2>/dev/null || true)"
@@ -172,14 +175,22 @@
             note "entity on"
             off_since=""
             if [ "$mode" != gaming ]; then
-              mode=gaming
-              apply_gaming
+              # Only an "on" that holds counts: a brief one (the sync box
+              # jumping inputs while ixian wakes) must not stop Strata.
+              now="$(date +%s)"
+              on_since="''${on_since:-$now}"
+              if [ $((now - on_since)) -ge "$gaming_delay" ]; then
+                mode=gaming
+                on_since=""
+                apply_gaming
+              fi
             elif due; then
               apply_gaming
             fi
             ;;
           off)
             note "entity off"
+            on_since=""
             if [ "$mode" = gaming ]; then
               # The delay applies to a restart in gaming mode too, so a quick
               # flip during a deploy does not reload Strata.
@@ -197,6 +208,7 @@
           "") ;;
           *)
             note "entity is $state, keeping $mode mode"
+            on_since=""
             ;;
         esac
         sleep ${toString cfg.interval}
