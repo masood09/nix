@@ -153,7 +153,7 @@ Long-term direction on `work-okta` (the sole macOS machine) is to phase out Home
 - Collabora is pinned to 26.04.2.1.1 because the custom container entrypoint requires `/bin/bash`, which newer images removed. Replace the shell-dependent wrapper before upgrading.
 - The Arr module carries temporary nixflix compatibility workarounds for Prowlarr host validation/readiness and Seerr Jellyfin URL configuration. Remove them when upstream nixflix supports the current APIs.
 - nixflix notification provisioning can fail when Sonarr/Radarr/Lidarr reject an existing notification update with HTTP 400. Preserve the existing notification-reset workaround until the updater reports API response bodies and handles schema changes.
-- Actual Budget, Immich, Karakeep, Lidarr, Open WebUI, Seerr, llama.cpp, and mcp-grafana currently use packages from `nixpkgs-unstable` because the stable channel is behind or incompatible. Open WebUI is written against 0.13.x (stable has 0.12.5) and is nixpkgs' first non-free package in a service closure (builds via `allowUnfree`). Lidarr needs 3.1.6+ for nixflix's delay-profile API (stable has 3.1.0). mcp-grafana (the read-only Grafana MCP server on mentat, behind LiteLLM) needs 2.x for reading its token from a file and for the query guardrails (stable has 0.14.0). Re-test and remove each override when stable catches up.
+- Actual Budget, Immich, Karakeep, Lidarr, Open WebUI, Seerr, llama.cpp, SearXNG, and the MCP servers mcp-grafana, ha-mcp and mcp-searxng currently use packages from `nixpkgs-unstable` because the stable channel is behind or incompatible. Open WebUI is written against 0.13.x (stable has 0.12.5) and is nixpkgs' first non-free package in a service closure (builds via `allowUnfree`). Lidarr needs 3.1.6+ for nixflix's delay-profile API (stable has 3.1.0). mcp-grafana (the read-only Grafana MCP server on mentat, behind LiteLLM) needs 2.x for reading its token from a file and for the query guardrails (stable has 0.14.0). ha-mcp needs 9.x for its `/readonly` endpoint (stable has 7.x), and stable has no mcp-searxng. SearXNG scrapes engines that keep changing and blocking it, and stable's May 2026 snapshot met CAPTCHAs on its first searches. Re-test and remove each override when stable catches up.
 - `work-okta` cannot use several third-party Homebrew taps because of corporate Artifactory restrictions. Treat those casks/brews as blocked fallbacks and periodically re-check nixpkgs/HM and Artifactory availability.
 - Fingerprint login does not unlock GNOME Keyring; password login remains the workaround on affected desktops.
 - Zen uses `MOZ_LEGACY_PROFILES=1` as an upstream profile-pinning workaround. Re-evaluate after upstream fixes the profile behavior.
@@ -183,6 +183,9 @@ MCP servers come from LiteLLM's MCP gateway on mentat (`machines/mentat/_mcp.nix
 - **Option schema / type / default, and which version a channel carries now** → the `nixos-nix` tool (mcp-nixos): `action: "search"` with `type: "options"` or `"packages"`, `source` (`nixos`, `home-manager`, `darwin`, …) and `channel`. It queries search.nixos.org and the Home Manager and nix-darwin docs directly. For this flake's exact revisions, `nix eval` against the locked input stays authoritative.
 - **Package version history / the nixpkgs commit that had a version** → `nixos-nix_versions`. It comes from NixHub, which lags: it can miss the newest versions a channel already has, so confirm a "latest" with `nixos-nix` search.
 - **Fleet health, logs, metrics, alert state** → the `grafana-*` tools (read-only: Loki, Prometheus, alert rules, dashboards) instead of SSH. They don't wake ixian; SSH does.
+- **Home Assistant states, history, logs, automation traces and config** → the `homeassistant-*` tools (read-only) instead of SSH and `podman exec` on heartbeat. Changing automations still goes through `automations.yaml` with a backup, as before; `homeassistant_admin` is not granted to Claude Code.
+- **GitHub repos, issues, PRs and Actions runs** → the `github-*` tools (read-only, public repositories) or `gh`.
+- **Web search and reading a page** → `searxng-searxng_web_search` and `searxng-web_url_read` (the home SearXNG on heartbeat). URL reading refuses internal addresses by design.
 - **Idiomatic example, manual prose, third-party flake usage patterns** → the upstream repo or docs (context7 is not set up).
 - **Anything in this repo** → local file inspection tools.
 - **Fast-moving flake inputs** (niri, noctalia, llm-agents, zen-browser, betterfox) → fetch the upstream repo, since cached documentation may lag the flake input.
@@ -190,7 +193,7 @@ MCP servers come from LiteLLM's MCP gateway on mentat (`machines/mentat/_mcp.nix
 ## Key Dependencies
 
 - nixpkgs: `nixos-26.05`
-- nixpkgs-unstable: `nixos-unstable` (followed by jovian, used to build ixian via `mkNixOSUnstableConfig`, and the source of the `actual-server`/`immich`/`karakeep`/`lidarr`/`open-webui`/`seerr`/`llama-cpp-vulkan` packages that stable nixpkgs is behind on)
+- nixpkgs-unstable: `nixos-unstable` (followed by jovian, used to build ixian via `mkNixOSUnstableConfig`, and the source of the `actual-server`/`immich`/`karakeep`/`lidarr`/`open-webui`/`seerr`/`llama-cpp-vulkan`/`searxng`/`mcp-grafana`/`ha-mcp`/`mcp-searxng` packages that stable nixpkgs is behind on)
 - home-manager: `release-26.05`
 - nix-darwin: `nix-darwin-26.05`
 - stylix: `release-26.05`
