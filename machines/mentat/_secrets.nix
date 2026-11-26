@@ -57,6 +57,12 @@ in {
           sopsFile = ./secrets.sops.yaml;
         };
 
+        # Fine-grained GitHub token with read-only permissions, which LiteLLM
+        # sends to GitHub's hosted MCP server (the github server, _mcp.nix).
+        "github/mcp-token" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
+
         "tailscale/preauth-key" = {
           sopsFile = ./secrets.sops.yaml;
         };
@@ -73,6 +79,7 @@ in {
             DATABASE_URL=postgresql://litellm:${ph."litellm/db-password"}@heartbeat.dns.headscale.mantannest.com:5432/litellm
             BACKEND_KEY=${ph."llm/backend-key"}
             GENERIC_CLIENT_SECRET=${ph."litellm/authentik-client-secret"}
+            GITHUB_MCP_TOKEN=${ph."github/mcp-token"}
           '';
           restartUnits = ["podman-litellm.service"];
         };
