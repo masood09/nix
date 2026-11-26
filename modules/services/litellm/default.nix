@@ -150,6 +150,13 @@ in {
         message = "LiteLLM runs as a Podman container: enable homelab.services.podman.";
       }
       {
+        # LiteLLM prefixes each tool with its server's name and "-", and
+        # refuses to start (taking every model down with it) on a name that
+        # contains one.
+        assertion = lib.all (n: !lib.hasInfix "-" n) (lib.attrNames cfg.mcpServers);
+        message = "homelab.services.litellm.mcpServers names may not contain '-' (LiteLLM's tool-prefix separator); use '_'.";
+      }
+      {
         assertion = lib.all (t: backendOf ? ${t}) (lib.attrValues cfg.aliases);
         message = "homelab.services.litellm.aliases must point at models some backend serves.";
       }
