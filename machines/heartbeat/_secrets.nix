@@ -369,6 +369,12 @@
           sopsFile = ./secrets.sops.yaml;
         };
 
+        # SEARX_SECRET_KEY=<random>, SearXNG's secret for cookies and tokens.
+        "searxng/.env" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["searx.service"];
+        };
+
         "tailscale/preauth-key" = {
           sopsFile = ./secrets.sops.yaml;
         };
