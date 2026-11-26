@@ -108,6 +108,14 @@ in {
             permission = {
               task = "deny";
             };
+            # Compact only when it is due, as a step in the session. By default
+            # opencode also summarizes the whole session in the background as
+            # it nears the limit (session/compaction.ts, v2.4.1), a hidden job
+            # of up to ~96K tokens that holds Strata's single slot while the
+            # next turn waits behind it. Automatic compaction stays on.
+            compaction = {
+              background = false;
+            };
 
             agent = {
               explore = {
