@@ -120,7 +120,14 @@ in {
           }
           // lib.optionalAttrs (cfg.litellm.apiKeyFile != null) {
             model = "litellm/${defaultModel}";
-
+          }
+          # Session titles are a short prompt and a few words back, so they go
+          # to heartbeat's small agent model instead of heavy: no waiting on
+          # ixian's single slot, and no waking it from suspend for a title.
+          // lib.optionalAttrs (cfg.litellm.apiKeyFile != null && models ? agent) {
+            small_model = "litellm/agent";
+          }
+          // lib.optionalAttrs (cfg.litellm.apiKeyFile != null) {
             provider = {
               litellm = {
                 npm = "@ai-sdk/openai-compatible";
