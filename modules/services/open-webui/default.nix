@@ -36,10 +36,17 @@
       };
     }).open-webui;
 
-  # LiteLLM's MCP gateway as one tool connection. No access_grants, which
-  # Open WebUI treats as admin-only; the key's LiteLLM grants decide which
-  # servers (Grafana, GitHub, Home Assistant read-only, NixOS, web search)
-  # it carries.
+  # One tool connection per mcpConnections entry, all to LiteLLM's /mcp,
+  # each narrowed to its servers by x-mcp-servers. Group grants open a
+  # connection to those Open WebUI groups; with none, Open WebUI keeps it
+  # admin-only. Non-secret parts come from Nix as JSON, the key from the
+  # environment.
+  mcpSpec = builtins.toJSON (lib.mapAttrsToList (id: c: {
+      inherit id;
+      inherit (c) name description servers groups;
+    })
+    cfg.inference.mcpConnections);
+
   openWebuiWithMcp = pkgs.writeShellApplication {
     name = "open-webui-with-mcp";
     runtimeInputs = [pkgs.jq];
@@ -47,18 +54,19 @@
       TOOL_SERVER_CONNECTIONS="$(jq -cn \
         --arg url ${lib.escapeShellArg cfg.inference.mcpUrl} \
         --arg key "''${OPENAI_API_KEY:?OPENAI_API_KEY must be set in the sops .env}" \
-        '[{
+        --argjson spec ${lib.escapeShellArg mcpSpec} \
+        '[$spec[] | {
           type: "mcp",
           url: $url,
           path: "",
           auth_type: "bearer",
           key: $key,
-          config: {enable: true},
-          info: {
-            id: "litellm",
-            name: "LiteLLM",
-            description: "Homelab tools through LiteLLM: Grafana, GitHub, Home Assistant (read-only), NixOS, web search"
-          }
+          headers: {"x-mcp-servers": (.servers | join(","))},
+          config: {
+            enable: true,
+            access_grants: [.groups[] | {principal_type: "group", principal_id: ., permission: "read"}]
+          },
+          info: {id: .id, name: .name, description: .description}
         }]')"
       export TOOL_SERVER_CONNECTIONS
       exec ${openWebuiPackage}/bin/open-webui "$@"
@@ -209,7 +217,7 @@ in {
           };
         };
       }
-      (lib.mkIf (cfg.inference.mcpUrl != null) {
+      (lib.mkIf (cfg.inference.mcpUrl != null && cfg.inference.mcpConnections != {}) {
         services = {
           open-webui = {
             # TOOL_SERVER_CONNECTIONS is JSON that carries the key, so it is

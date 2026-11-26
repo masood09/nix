@@ -447,6 +447,44 @@
               enable = true;
             };
           };
+
+          # MCP tool connections through LiteLLM. Admins see all of them;
+          # parentsGroup opens the rest to the parents group (its Open WebUI
+          # ID, from the group Authentik's groups claim created).
+          inference = {
+            mcpConnections = let
+              parentsGroup = "d26a7316-df0b-4946-8680-602a24cd467f";
+            in {
+              search = {
+                name = "Search";
+                description = "Web search and page reading (home SearXNG), and public GitHub repositories, read-only.";
+                servers = ["searxng" "github"];
+                groups = [parentsGroup];
+              };
+              homeassistant = {
+                name = "Home Assistant";
+                description = "Home Assistant, read-only: states, history, logs and automations.";
+                servers = ["homeassistant"];
+                groups = [parentsGroup];
+              };
+              homeassistant_admin = {
+                name = "Home Assistant (admin)";
+                description = "Home Assistant with write access: changes automations, scripts, dashboards and helpers.";
+                servers = ["homeassistant_admin"];
+              };
+              development = {
+                name = "Development";
+                description = "NixOS, Home Manager and nix-darwin options and packages.";
+                servers = ["nixos"];
+                groups = [parentsGroup];
+              };
+              fleet = {
+                name = "Fleet";
+                description = "Homelab logs, metrics and alert rules from Grafana, read-only.";
+                servers = ["grafana"];
+              };
+            };
+          };
         };
 
         opencloud = {

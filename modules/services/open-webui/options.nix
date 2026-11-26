@@ -69,10 +69,52 @@ in {
               default = "https://llm.${config.networking.domain}/mcp";
               defaultText = lib.literalExpression ''"https://llm.''${config.networking.domain}/mcp"'';
               description = ''
-                LiteLLM's MCP gateway, added as one tool connection for Open
-                WebUI admins only (no access grants). It authenticates with the
-                same OPENAI_API_KEY, whose LiteLLM grants decide the servers.
-                Null leaves it out.
+                LiteLLM's MCP gateway, which every entry of mcpConnections
+                connects to. They authenticate with the same OPENAI_API_KEY,
+                whose LiteLLM grants cap the servers. Null leaves them out.
+              '';
+            };
+
+            mcpConnections = lib.mkOption {
+              type = lib.types.attrsOf (lib.types.submodule {
+                options = {
+                  name = lib.mkOption {
+                    type = lib.types.str;
+                    description = "Name shown in Open WebUI's tool list.";
+                  };
+
+                  description = lib.mkOption {
+                    type = lib.types.str;
+                    default = "";
+                    description = "What the connection is for.";
+                  };
+
+                  servers = lib.mkOption {
+                    type = lib.types.nonEmptyListOf lib.types.str;
+                    example = ["searxng" "github"];
+                    description = ''
+                      LiteLLM MCP server names the connection carries, sent as
+                      x-mcp-servers. The key must be granted each of them in
+                      LiteLLM.
+                    '';
+                  };
+
+                  groups = lib.mkOption {
+                    type = lib.types.listOf lib.types.str;
+                    default = [];
+                    description = ''
+                      Open WebUI group IDs that may use the connection (Admin
+                      panel → Users → Groups; groups come from Authentik).
+                      Empty means admins only; admins see every connection.
+                    '';
+                  };
+                };
+              });
+              default = {};
+              description = ''
+                Tool connections to LiteLLM's MCP gateway, keyed by an ID, each
+                carrying only some servers. Smaller tool lists fit smaller
+                models and keep a chat to the tools it needs.
               '';
             };
           };
