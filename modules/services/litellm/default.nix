@@ -63,52 +63,67 @@
     lib.concatLists (lib.mapAttrsToList (_: b: map (m: deployment m b m) b.models) cfg.backends)
     ++ lib.mapAttrsToList (alias: target: deployment alias backendOf.${target} target) cfg.aliases;
 
-  configFile = yaml.generate "litellm-config.yaml" {
-    model_list = modelList;
+  # allow_all_keys and available_on_public_internet are LiteLLM's defaults
+  # spelled out: no key reaches a server unless granted it, and the key is the
+  # gate rather than the client's address.
+  mcpServers =
+    lib.mapAttrs (_: s: {
+      inherit (s) url description;
+      transport = "http";
+      allow_all_keys = false;
+      available_on_public_internet = true;
+    })
+    cfg.mcpServers;
 
-    general_settings =
-      {
-        master_key = "os.environ/LITELLM_MASTER_KEY";
-        database_url = "os.environ/DATABASE_URL";
-        # Caddy on loopback is the only proxy: its X-Forwarded-For then
-        # attributes failed UI sign-ins to the real client, which turns on
-        # the per-address limit. No header-based auth mode is enabled, so it
-        # trusts nothing else.
-        trusted_proxy_ranges = [
-          "127.0.0.1/32"
-        ];
-        # Open WebUI sends one virtual key for all its users and names the
-        # person in this header; mapping it to the customer role records them
-        # as the request's end user, for per-person spend and budgets.
-        # Attribution only: the key still gates access, and clients without
-        # the header (Karakeep, agents) are unaffected.
-        user_header_mappings = [
-          {
-            header_name = "X-OpenWebUI-User-Email";
-            litellm_user_role = "customer";
-          }
-        ];
-      }
-      // lib.optionalAttrs cfg.authentik.enable {
-        # The master key stays an API credential only: with SSO, it no longer
-        # signs in to the UI as proxy admin, so UI access always goes through
-        # Authentik (and its MFA).
-        disable_env_credential_login = true;
+  configFile = yaml.generate "litellm-config.yaml" ({
+      model_list = modelList;
+
+      general_settings =
+        {
+          master_key = "os.environ/LITELLM_MASTER_KEY";
+          database_url = "os.environ/DATABASE_URL";
+          # Caddy on loopback is the only proxy: its X-Forwarded-For then
+          # attributes failed UI sign-ins to the real client, which turns on
+          # the per-address limit. No header-based auth mode is enabled, so it
+          # trusts nothing else.
+          trusted_proxy_ranges = [
+            "127.0.0.1/32"
+          ];
+          # Open WebUI sends one virtual key for all its users and names the
+          # person in this header; mapping it to the customer role records them
+          # as the request's end user, for per-person spend and budgets.
+          # Attribution only: the key still gates access, and clients without
+          # the header (Karakeep, agents) are unaffected.
+          user_header_mappings = [
+            {
+              header_name = "X-OpenWebUI-User-Email";
+              litellm_user_role = "customer";
+            }
+          ];
+        }
+        // lib.optionalAttrs cfg.authentik.enable {
+          # The master key stays an API credential only: with SSO, it no longer
+          # signs in to the UI as proxy admin, so UI access always goes through
+          # Authentik (and its MFA).
+          disable_env_credential_login = true;
+        };
+
+      litellm_settings = {
+        request_timeout = cfg.requestTimeout;
       };
 
-    litellm_settings = {
-      request_timeout = cfg.requestTimeout;
-    };
-
-    router_settings = {
-      num_retries = 0;
-      fallbacks = lib.mapAttrsToList (model: to: {${model} = to;}) cfg.fallbacks;
-      # A held ixian answers at once, so one failure is enough to stop
-      # sending to it for a while, and the fallback serves meanwhile.
-      allowed_fails = 1;
-      cooldown_time = 30;
-    };
-  };
+      router_settings = {
+        num_retries = 0;
+        fallbacks = lib.mapAttrsToList (model: to: {${model} = to;}) cfg.fallbacks;
+        # A held ixian answers at once, so one failure is enough to stop
+        # sending to it for a while, and the fallback serves meanwhile.
+        allowed_fails = 1;
+        cooldown_time = 30;
+      };
+    }
+    // lib.optionalAttrs (cfg.mcpServers != {}) {
+      mcp_servers = mcpServers;
+    });
 
   authentikEnv = lib.optionalAttrs cfg.authentik.enable {
     PROXY_BASE_URL = "https://${cfg.webDomain}";

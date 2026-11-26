@@ -125,6 +125,31 @@ in {
             '';
           };
 
+          mcpServers = lib.mkOption {
+            type = lib.types.attrsOf (lib.types.submodule {
+              options = {
+                url = lib.mkOption {
+                  type = lib.types.str;
+                  example = "http://127.0.0.1:8927/mcp";
+                  description = "Streamable HTTP endpoint of the MCP server.";
+                };
+
+                description = lib.mkOption {
+                  type = lib.types.str;
+                  default = "";
+                  description = "What the server is for, shown to clients and in the UI.";
+                };
+              };
+            });
+            default = {};
+            description = ''
+              MCP servers LiteLLM offers to clients at https://<webDomain>/mcp,
+              keyed by name. A server is closed to every key until the key (or
+              its team) is granted it in the UI or API, so adding one gives no
+              existing key access.
+            '';
+          };
+
           requestTimeout = lib.mkOption {
             type = lib.types.ints.positive;
             default = 1800;
