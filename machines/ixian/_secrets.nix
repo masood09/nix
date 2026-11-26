@@ -39,6 +39,15 @@
           sopsFile = ./secrets.sops.yaml;
         };
 
+        # Full URL of the Home Assistant webhook that game-state POSTs the
+        # game being played to (sensor.ixian_game), on one line:
+        # https://home.<domain>/api/webhook/<id>. Root-only; the unit reads
+        # it through LoadCredential. See _game-state.nix.
+        "game-state/webhook-url" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["game-state.service"];
+        };
+
         "tailscale/preauth-key" = {
           sopsFile = ./secrets.sops.yaml;
         };
