@@ -49,6 +49,14 @@ in {
           sopsFile = ./secrets.sops.yaml;
         };
 
+        # Long-lived access token of the Home Assistant user ha-mcp acts as
+        # (_mcp.nix). Admin, since the homeassistant_admin server writes;
+        # the homeassistant server is read-only by ha-mcp's /readonly mode.
+        # Reaches the service only through the env file below.
+        "homeassistant/mcp-token" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
+
         "tailscale/preauth-key" = {
           sopsFile = ./secrets.sops.yaml;
         };
@@ -67,6 +75,15 @@ in {
             GENERIC_CLIENT_SECRET=${ph."litellm/authentik-client-secret"}
           '';
           restartUnits = ["podman-litellm.service"];
+        };
+
+        # Read by systemd (root) as ha-mcp's EnvironmentFile; ha-mcp takes
+        # the token only from the environment.
+        "ha-mcp.env" = {
+          content = ''
+            HOMEASSISTANT_TOKEN=${ph."homeassistant/mcp-token"}
+          '';
+          restartUnits = ["mcp-homeassistant.service"];
         };
       };
     };
