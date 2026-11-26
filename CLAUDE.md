@@ -178,9 +178,12 @@ Before adding services, check `docs/service-registry.org` for:
 
 When the user describes a problem, pick the right tool yourself — they shouldn't have to name it. Rough routing for Nix work in this repo:
 
-- **Option schema / type / default / which channel** → `mcp__nixos__*` (`darwin_search`, `home_manager_options_by_prefix`, `nixos_info`, etc.). Authoritative for the channels pinned in this flake.
-- **Package version availability / nixpkgs commit lookup** → `mcp__nixos__nixhub_package_versions` / `nixhub_find_version`.
-- **Idiomatic example, manual prose, third-party flake usage patterns** → `context7` (`resolve-library-id` then `get-library-docs` with a `topic` filter — never call `get-library-docs` without a topic).
+MCP servers come from LiteLLM's MCP gateway on mentat (`machines/mentat/_mcp.nix`), so in Claude Code their tools are named `mcp__plugin_claude-code-home-manager_litellm__<server>-<tool>`.
+
+- **Option schema / type / default, and which version a channel carries now** → the `nixos-nix` tool (mcp-nixos): `action: "search"` with `type: "options"` or `"packages"`, `source` (`nixos`, `home-manager`, `darwin`, …) and `channel`. It queries search.nixos.org and the Home Manager and nix-darwin docs directly. For this flake's exact revisions, `nix eval` against the locked input stays authoritative.
+- **Package version history / the nixpkgs commit that had a version** → `nixos-nix_versions`. It comes from NixHub, which lags: it can miss the newest versions a channel already has, so confirm a "latest" with `nixos-nix` search.
+- **Fleet health, logs, metrics, alert state** → the `grafana-*` tools (read-only: Loki, Prometheus, alert rules, dashboards) instead of SSH. They don't wake ixian; SSH does.
+- **Idiomatic example, manual prose, third-party flake usage patterns** → the upstream repo or docs (context7 is not set up).
 - **Anything in this repo** → local file inspection tools.
 - **Fast-moving flake inputs** (niri, noctalia, llm-agents, zen-browser, betterfox) → fetch the upstream repo, since cached documentation may lag the flake input.
 
@@ -196,6 +199,7 @@ When the user describes a problem, pick the right tool yourself — they shouldn
 - zen-browser: `0xc000022070/zen-browser-flake` (Zen Browser HM module; included in `desktopNixOSModules` via `home-manager.sharedModules` for NixOS desktops and in `mkDarwinConfig` for macOS, not in shared `home.nix`, because the flake wrapper unconditionally pulls heavyweight browser/Qt packages into every closure even when the program is never enabled)
 - llm-agents (`numtide/llm-agents.nix`): the AI coding CLIs (`claude-code`, `codex`, `opencode`, `qwen-code`), updated daily and shipped with prebuilt packages in their own binary cache (`https://cache.numtide.com`). No nixpkgs `follows` — upstream only builds and tests against its own pinned `nixpkgs-unstable` and warns that following a stable branch **will** break eventually. Consumed via `inputs.llm-agents.packages.<system>.<name>` — **not** `overlays.shared-nixpkgs`, which builds against our nixpkgs and only hits their cache when our revision matches theirs. Enabled per tool through `homelab.programs.ai_tools` (usul only today)
 - headplane: pinned to `v0.8.2`; nixos-26.05's native `services.headplane` module is `disabledModules`-ed in `flake.nix` so only the flake module declares the option
+- mcp-nixos (`utensils/mcp-nixos`): the NixOS MCP server on mentat behind LiteLLM. Taken from upstream's flake (default branch, pinned only by `flake.lock`) because nixpkgs lags upstream; no binary cache, so it follows `nixpkgs-unstable`, which upstream builds against
 - model-router (`masood09/model-router`): the OpenAI-compatible proxy that switches Strata sizes per request (`modules/services/model-router`). Follows nixpkgs (no binary cache); its NixOS module is in `sharedNixOSModules` and inert unless enabled. The package builds with Go 1.27 because the stable channel's default Go lacks a net/http fix
 - LiteLLM (`modules/services/litellm`, on mentat): the upstream `ghcr.io/berriai/litellm-non_root` image under Podman, pinned by tag **and digest**, not the nixpkgs module, whose Prisma has no query engine wired (the DB features would download one at first start). Upstream cosign-signs every image and rotated the signing key on 2026-10-23 after the October GHCR supply-chain incident, so verify a new digest against the key from upstream commit `e82a3c6` before changing the pin (the command is in the `image` option's description). Track the LTS line (`v1.108.x` at the time of writing)
 - authentik-nix: deliberately no nixpkgs `follows` (upstream doesn't support it; overriding causes a cache miss that OOMs the aarch64 SSO box)
