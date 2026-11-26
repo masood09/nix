@@ -98,6 +98,25 @@ in {
         settings =
           {
             "$schema" = "https://opencode.ai/config.json";
+
+            # No subagents. Strata serves one request at a time, so a
+            # subagent never runs alongside the main agent; it only waits its
+            # turn, reads its own ~12K-token prompt from scratch, and evicts
+            # the main session's cache on the way. Denying the task tool stops
+            # the main agent from starting any, including ones added later;
+            # the built-in explore and general are disabled outright.
+            permission = {
+              task = "deny";
+            };
+
+            agent = {
+              explore = {
+                disable = true;
+              };
+              general = {
+                disable = true;
+              };
+            };
           }
           // lib.optionalAttrs (cfg.litellm.apiKeyFile != null) {
             model = "litellm/${defaultModel}";
