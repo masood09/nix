@@ -8,6 +8,7 @@
     ./_config.nix
     ./_networking.nix
     ./_secrets.nix
+    ./_wol.nix
 
     ./../../modules/nixos
     ./../../modules/home-manager
