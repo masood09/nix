@@ -340,6 +340,26 @@
     "hash": "sha256-UvOeFFxUZ/bddmDs6IamiYGDIfgxybE/CSpPyy5DMxI="
   },
   {
+    "pname": "SkiaSharp",
+    "version": "4.157.0",
+    "hash": "sha256-79FtP4/5ZfbN0fZvvUIrmYW3iyLaOrXRDF6rO0DPMyc="
+  },
+  {
+    "pname": "SkiaSharp.NativeAssets.Linux.NoDependencies",
+    "version": "4.157.0",
+    "hash": "sha256-mzHCNQr95zVS3TkIkaILt5D5WAuYkO9Arq8n7ljobC8="
+  },
+  {
+    "pname": "SkiaSharp.NativeAssets.macOS",
+    "version": "4.157.0",
+    "hash": "sha256-3nguQMsn0RgF2aTEYe5UCr3knFXdZ1OZgVrhcjPROLk="
+  },
+  {
+    "pname": "SkiaSharp.NativeAssets.Win32",
+    "version": "4.157.0",
+    "hash": "sha256-8LX0jWOxVN3dBtSrjrVVL5t5IhTMFpGsU0RfLTJPGg0="
+  },
+  {
     "pname": "Std.UriTemplate",
     "version": "2.0.8",
     "hash": "sha256-0f3ydgUE2KDzzHmN4FREzXLDrPJgLZemx917muHX90k="
@@ -411,8 +431,8 @@
   },
   {
     "pname": "System.Security.Cryptography.Pkcs",
-    "version": "10.0.0",
-    "hash": "sha256-d3sLG+LZ3+N/h/6gdJcVKOgbBO6wYb66NfXalAEDqnE="
+    "version": "10.0.13",
+    "hash": "sha256-VO0kV46tNLW1DSWQhCQ0MvEXM+J1S4sZbnmdNBjTBKc="
   },
   {
     "pname": "System.Security.Cryptography.ProtectedData",
