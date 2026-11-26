@@ -16,6 +16,13 @@
           owner = config.homelab.primaryUser.userName;
         };
 
+        # Token of Grafana's read-only (Viewer) service account for AI
+        # agents; mcp-grafana reads it as the user (grafana-mcp).
+        "grafana/mcp-token" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = config.homelab.primaryUser.userName;
+        };
+
         "zed/discord-zfs-webhook" = {};
       };
     };
