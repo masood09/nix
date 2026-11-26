@@ -86,6 +86,16 @@
       url = "github:masood09/model-router";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # NixOS/Home Manager/nix-darwin option and package lookup for AI agents,
+    # served on mentat behind LiteLLM's MCP gateway (machines/mentat/_mcp.nix).
+    # From upstream's flake rather than nixpkgs, which lags (unstable 3.0.2,
+    # stable 2.4); flake.lock pins it and the weekly lock update moves it.
+    # No binary cache, and upstream builds against nixos-unstable, so it
+    # follows ours rather than pulling a third nixpkgs.
+    mcp-nixos = {
+      url = "github:utensils/mcp-nixos";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
 
     # Applications
     # AI coding CLIs (Claude Code, Codex, opencode, Qwen Code). Updated daily

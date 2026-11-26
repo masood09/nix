@@ -17,6 +17,13 @@
 #     The package comes from nixpkgs-unstable: nixos-26.05 has 0.14.0, which
 #     can't read the token from a file and has no guardrails.
 #
+#   nixos: NixOS, Home Manager and nix-darwin option and package lookup,
+#     package version history (mcp-nixos). It holds no credentials; it
+#     queries public sources (search.nixos.org, the Home Manager and
+#     nix-darwin option docs, NixHub, FlakeHub), so search terms leave the
+#     network, nothing else. From its own flake (the mcp-nixos input), which
+#     is ahead of nixpkgs.
+#
 # Loopback has no other gate: anything on mentat could call a server
 # directly, which is acceptable while mentat runs only DNS, LiteLLM and the
 # wake proxy.
@@ -31,6 +38,28 @@
   cfg = config.homelab.mcp;
   grafana = outputs.nixosConfigurations.heartbeat.config.homelab.services.grafana;
   mcpGrafana = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.mcp-grafana;
+  mcpNixos = inputs.mcp-nixos.packages.${pkgs.stdenv.hostPlatform.system}.mcp-nixos;
+
+  # Shared lockdown for the servers: no privileges, read-only system, network
+  # only.
+  hardening = {
+    DynamicUser = true;
+    CapabilityBoundingSet = [""];
+    RestrictAddressFamilies = ["AF_INET" "AF_INET6" "AF_UNIX"];
+    NoNewPrivileges = true;
+    PrivateDevices = true;
+    PrivateTmp = true;
+    ProtectHome = true;
+    ProtectSystem = "strict";
+    ProtectKernelTunables = true;
+    ProtectKernelModules = true;
+    ProtectControlGroups = true;
+    LockPersonality = true;
+    MemoryDenyWriteExecute = true;
+    RestrictNamespaces = true;
+    RestrictRealtime = true;
+    SystemCallArchitectures = "native";
+  };
 in {
   options = {
     homelab = {
@@ -40,6 +69,14 @@ in {
             type = lib.types.port;
             default = 8927;
             description = "Loopback port of the Grafana MCP server (docs/service-registry.org).";
+          };
+        };
+
+        nixos = {
+          port = lib.mkOption {
+            type = lib.types.port;
+            default = 8928;
+            description = "Loopback port of the NixOS MCP server (docs/service-registry.org).";
           };
         };
       };
@@ -54,6 +91,10 @@ in {
             grafana = {
               url = "http://127.0.0.1:${toString cfg.grafana.port}/mcp";
               description = "Read-only logs (Loki), metrics (Prometheus), alert rules and dashboards of the homelab fleet, from Grafana.";
+            };
+            nixos = {
+              url = "http://127.0.0.1:${toString cfg.nixos.port}/mcp";
+              description = "NixOS, Home Manager and nix-darwin options, nixpkgs packages and their version history.";
             };
           };
         };
@@ -74,55 +115,67 @@ in {
             GRAFANA_SERVICE_ACCOUNT_TOKEN_FILE = "%d/grafana-token";
           };
 
-          serviceConfig = {
-            ExecStart = lib.escapeShellArgs [
-              (lib.getExe mcpGrafana)
-              "-t"
-              "streamable-http"
-              "--address"
-              "127.0.0.1:${toString cfg.grafana.port}"
-              "--enabled-tools"
-              (lib.concatStringsSep "," [
-                "search"
-                "datasource"
-                "prometheus"
-                "loki"
-                "alerting"
-                "dashboard"
-                "folder"
-                "annotations"
-                "navigation"
-              ])
-              "--disable-write"
-              "--disable-api"
-              "--loki-guardrail-mode"
-              "enforce"
-              "--prometheus-guardrail-mode"
-              "enforce"
-              "--usage-stats"
-              "disabled"
-            ];
-            LoadCredential = ["grafana-token:${config.sops.secrets."grafana/mcp-token".path}"];
-            Restart = "always";
-            RestartSec = 5;
+          serviceConfig =
+            hardening
+            // {
+              ExecStart = lib.escapeShellArgs [
+                (lib.getExe mcpGrafana)
+                "-t"
+                "streamable-http"
+                "--address"
+                "127.0.0.1:${toString cfg.grafana.port}"
+                "--enabled-tools"
+                (lib.concatStringsSep "," [
+                  "search"
+                  "datasource"
+                  "prometheus"
+                  "loki"
+                  "alerting"
+                  "dashboard"
+                  "folder"
+                  "annotations"
+                  "navigation"
+                ])
+                "--disable-write"
+                "--disable-api"
+                "--loki-guardrail-mode"
+                "enforce"
+                "--prometheus-guardrail-mode"
+                "enforce"
+                "--usage-stats"
+                "disabled"
+              ];
+              LoadCredential = ["grafana-token:${config.sops.secrets."grafana/mcp-token".path}"];
+              Restart = "always";
+              RestartSec = 5;
+            };
+        };
 
-            DynamicUser = true;
-            CapabilityBoundingSet = [""];
-            RestrictAddressFamilies = ["AF_INET" "AF_INET6" "AF_UNIX"];
-            NoNewPrivileges = true;
-            PrivateDevices = true;
-            PrivateTmp = true;
-            ProtectHome = true;
-            ProtectSystem = "strict";
-            ProtectKernelTunables = true;
-            ProtectKernelModules = true;
-            ProtectControlGroups = true;
-            LockPersonality = true;
-            MemoryDenyWriteExecute = true;
-            RestrictNamespaces = true;
-            RestrictRealtime = true;
-            SystemCallArchitectures = "native";
+        mcp-nixos = {
+          description = "NixOS MCP server (option and package lookup) for LiteLLM's MCP gateway";
+          wantedBy = ["multi-user.target"];
+          after = ["network-online.target"];
+          wants = ["network-online.target"];
+
+          environment = {
+            MCP_NIXOS_TRANSPORT = "http";
+            MCP_NIXOS_HOST = "127.0.0.1";
+            MCP_NIXOS_PORT = toString cfg.nixos.port;
+            # LiteLLM keeps no MCP session between requests.
+            MCP_NIXOS_STATELESS_HTTP = "1";
+            # Lookup caches, in the service's own cache directory.
+            HOME = "/var/cache/mcp-nixos";
+            XDG_CACHE_HOME = "/var/cache/mcp-nixos";
           };
+
+          serviceConfig =
+            hardening
+            // {
+              ExecStart = lib.getExe mcpNixos;
+              CacheDirectory = "mcp-nixos";
+              Restart = "always";
+              RestartSec = 5;
+            };
         };
       };
     };
