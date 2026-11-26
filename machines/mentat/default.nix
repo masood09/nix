@@ -9,6 +9,7 @@
     ./_networking.nix
     ./_secrets.nix
     ./_wol.nix
+    ./_mcp.nix
 
     ./../../modules/nixos
     ./../../modules/home-manager
