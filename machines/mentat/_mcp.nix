@@ -44,6 +44,15 @@
 #     from users without push access, which narrows prompt injection through
 #     the public repo. The token is LiteLLM's GITHUB_MCP_TOKEN, from sops.
 #
+#   searxng: web search and URL reading (mcp-searxng) through heartbeat's
+#     SearXNG (modules/services/searxng), which Caddy serves to the server
+#     VLAN, home and the tailnet only. URL reading fetches pages from here,
+#     so internal destinations are refused twice: mcp-searxng blocks
+#     loopback, private, tailnet and link-local addresses (and redirects to
+#     them) itself, and systemd drops the service's traffic to every private
+#     network except heartbeat, which it searches through. From
+#     nixpkgs-unstable (stable lacks it).
+#
 # Loopback has no other gate: anything on mentat could call a server
 # directly, which is acceptable while mentat runs only DNS, LiteLLM and the
 # wake proxy. That matters most for homeassistant_admin, whose endpoint has
@@ -61,6 +70,18 @@
   mcpGrafana = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.mcp-grafana;
   mcpNixos = inputs.mcp-nixos.packages.${pkgs.stdenv.hostPlatform.system}.mcp-nixos;
   haMcp = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.ha-mcp;
+  mcpSearxng = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.mcp-searxng;
+  heartbeat = outputs.nixosConfigurations.heartbeat.config;
+  searxng = heartbeat.homelab.services.searxng;
+  # heartbeat's address on mentat's own subnet (the server VLAN): the only
+  # private destination mcp-searxng may reach. MagicDNS would resolve
+  # SearXNG's domain to heartbeat's tailnet address, which stays blocked, so
+  # mentat pins the domain to this one (networking.hosts below).
+  subnetOf = address: lib.concatStringsSep "." (lib.take 3 (lib.splitString "." address));
+  mentatSubnets = lib.concatMap (i: map (a: subnetOf a.address) i.ipv4.addresses) (lib.attrValues config.networking.interfaces);
+  heartbeatLan = lib.head (lib.filter (a: lib.elem (subnetOf a) mentatSubnets) (
+    lib.concatMap (i: map (a: a.address) i.ipv4.addresses) (lib.attrValues heartbeat.networking.interfaces)
+  ));
   homeAssistant = outputs.nixosConfigurations.heartbeat.config.homelab.services.home-assistant;
   haEndpoint = "http://127.0.0.1:${toString cfg.homeassistant.port}/mcp";
 
@@ -111,11 +132,27 @@ in {
             description = "Loopback port of the Home Assistant MCP server (docs/service-registry.org).";
           };
         };
+
+        searxng = {
+          port = lib.mkOption {
+            type = lib.types.port;
+            default = 8931;
+            description = "Loopback port of the SearXNG MCP server (docs/service-registry.org).";
+          };
+        };
       };
     };
   };
 
   config = {
+    # mcp-searxng reaches SearXNG over the server VLAN, the one private
+    # destination its IPAddressAllow keeps open (see heartbeatLan).
+    networking = {
+      hosts = {
+        ${heartbeatLan} = [searxng.webDomain];
+      };
+    };
+
     homelab = {
       services = {
         litellm = {
@@ -131,6 +168,10 @@ in {
             homeassistant = {
               url = "${haEndpoint}/readonly";
               description = "Home Assistant, read-only: entity states, history, logs, automation traces and configuration.";
+            };
+            searxng = {
+              url = "http://127.0.0.1:${toString cfg.searxng.port}/mcp";
+              description = "Web search through the home SearXNG, and reading a web page as text or Markdown.";
             };
             github = {
               url = "https://api.githubcopilot.com/mcp/readonly";
@@ -253,6 +294,50 @@ in {
               ExecStart = lib.getExe' haMcp "ha-mcp-web";
               EnvironmentFile = config.sops.templates."ha-mcp.env".path;
               StateDirectory = "mcp-homeassistant";
+              Restart = "always";
+              RestartSec = 5;
+            };
+        };
+
+        mcp-searxng = {
+          description = "SearXNG MCP server (web search, URL reading) for LiteLLM's MCP gateway";
+          wantedBy = ["multi-user.target"];
+          after = ["network-online.target"];
+          wants = ["network-online.target"];
+
+          environment = {
+            SEARXNG_URL = "https://${searxng.webDomain}";
+            MCP_HTTP_HOST = "127.0.0.1";
+            MCP_HTTP_PORT = toString cfg.searxng.port;
+            # LiteLLM keeps no MCP session between requests.
+            MCP_HTTP_STATELESS = "true";
+            HOME = "/var/cache/mcp-searxng";
+          };
+
+          serviceConfig =
+            hardening
+            // {
+              ExecStart = lib.getExe mcpSearxng;
+              CacheDirectory = "mcp-searxng";
+              # Node's JIT needs writable executable memory.
+              MemoryDenyWriteExecute = false;
+              # Second barrier behind mcp-searxng's own: no private
+              # destination but loopback (LiteLLM's connections in) and
+              # heartbeat (SearXNG), so a URL read can't reach the LAN, the
+              # tailnet or link-local metadata services.
+              IPAddressDeny = [
+                "10.0.0.0/8"
+                "172.16.0.0/12"
+                "192.168.0.0/16"
+                "100.64.0.0/10"
+                "169.254.0.0/16"
+                "fc00::/7"
+                "fe80::/10"
+              ];
+              IPAddressAllow = [
+                "localhost"
+                "${heartbeatLan}/32"
+              ];
               Restart = "always";
               RestartSec = 5;
             };

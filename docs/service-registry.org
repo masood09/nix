@@ -127,6 +127,8 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | Grafana MCP server                   |  8927 | mentat; 127.0.0.1 only; behind LiteLLM's MCP gateway, read-only (machines/mentat/_mcp.nix) |
 | NixOS MCP server                     |  8928 | mentat; 127.0.0.1 only; behind LiteLLM's MCP gateway, option and package lookup (machines/mentat/_mcp.nix) |
 | Home Assistant MCP server            |  8929 | mentat; 127.0.0.1 only; behind LiteLLM's MCP gateway as homeassistant (read-only) and homeassistant_admin (machines/mentat/_mcp.nix) |
+| SearXNG                              |  8930 | heartbeat; 127.0.0.1 only; behind Caddy, served to the server and home VLANs and the tailnet only (modules/services/searxng)  |
+| SearXNG MCP server                   |  8931 | mentat; 127.0.0.1 only; behind LiteLLM's MCP gateway, web search and URL reading (machines/mentat/_mcp.nix) |
 | Home Assistant (mDNS discovery)      |  5353 | UDP; heartbeat LAN interface only (openFirewall) |
 | Home Assistant (HomeKit)             | 21063 | TCP; heartbeat LAN interface only (openFirewall) |
 | Authentik (HTTP/health)              |  9000 | 127.0.0.1 only; server listener    |
@@ -150,7 +152,7 @@ note, same as disko's sole exemption from the nested-attrs code style rule.
 | MongoDB                              | 27017 | Localhost only (Nightscout)       |
 | LiveKit RTC (UDP range)              | 50100 | 50100–50200                       |
 
-Next available port in 89xx block: *8930*
+Next available port in 89xx block: *8932*
 
 ** Arr Media Stack (heartbeat only)
 Upstream defaults kept as-is (same convention as Immich/Vaultwarden above) — these sit
