@@ -24,9 +24,21 @@
 #     network, nothing else. From its own flake (the mcp-nixos input), which
 #     is ahead of nixpkgs.
 #
+#   homeassistant / homeassistant_admin: Home Assistant (ha-mcp), one
+#     service registered twice. homeassistant is ha-mcp's /readonly endpoint,
+#     which hides and blocks every write tool on that connection: states,
+#     history, logs, automation traces and configs. homeassistant_admin is the
+#     full endpoint, which can also create and change automations, scripts,
+#     dashboards and helpers and restore backups; grant it only to the keys
+#     that should change Home Assistant. Both act as one admin HA user, whose
+#     token reaches the service through an env file (ha-mcp reads it only from
+#     the environment). The settings web UI is off. From nixpkgs-unstable
+#     (stable lags at 7.x).
+#
 # Loopback has no other gate: anything on mentat could call a server
 # directly, which is acceptable while mentat runs only DNS, LiteLLM and the
-# wake proxy.
+# wake proxy. That matters most for homeassistant_admin, whose endpoint has
+# no gate but the LiteLLM grant.
 {
   config,
   inputs,
@@ -39,6 +51,9 @@
   grafana = outputs.nixosConfigurations.heartbeat.config.homelab.services.grafana;
   mcpGrafana = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.mcp-grafana;
   mcpNixos = inputs.mcp-nixos.packages.${pkgs.stdenv.hostPlatform.system}.mcp-nixos;
+  haMcp = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.ha-mcp;
+  homeAssistant = outputs.nixosConfigurations.heartbeat.config.homelab.services.home-assistant;
+  haEndpoint = "http://127.0.0.1:${toString cfg.homeassistant.port}/mcp";
 
   # Shared lockdown for the servers: no privileges, read-only system, network
   # only.
@@ -79,6 +94,14 @@ in {
             description = "Loopback port of the NixOS MCP server (docs/service-registry.org).";
           };
         };
+
+        homeassistant = {
+          port = lib.mkOption {
+            type = lib.types.port;
+            default = 8929;
+            description = "Loopback port of the Home Assistant MCP server (docs/service-registry.org).";
+          };
+        };
       };
     };
   };
@@ -95,6 +118,14 @@ in {
             nixos = {
               url = "http://127.0.0.1:${toString cfg.nixos.port}/mcp";
               description = "NixOS, Home Manager and nix-darwin options, nixpkgs packages and their version history.";
+            };
+            homeassistant = {
+              url = "${haEndpoint}/readonly";
+              description = "Home Assistant, read-only: entity states, history, logs, automation traces and configuration.";
+            };
+            homeassistant_admin = {
+              url = haEndpoint;
+              description = "Home Assistant with write access: also creates and changes automations, scripts, dashboards and helpers, and restores backups.";
             };
           };
         };
@@ -173,6 +204,36 @@ in {
             // {
               ExecStart = lib.getExe mcpNixos;
               CacheDirectory = "mcp-nixos";
+              Restart = "always";
+              RestartSec = 5;
+            };
+        };
+
+        mcp-homeassistant = {
+          description = "Home Assistant MCP server (ha-mcp) for LiteLLM's MCP gateway";
+          wantedBy = ["multi-user.target"];
+          after = ["network-online.target"];
+          wants = ["network-online.target"];
+
+          environment = {
+            HOMEASSISTANT_URL = "https://${homeAssistant.webDomain}";
+            MCP_HOST = "127.0.0.1";
+            MCP_PORT = toString cfg.homeassistant.port;
+            MCP_SECRET_PATH = "/mcp";
+            HA_MCP_DISABLE_SETTINGS_UI = "1";
+            # Edit backups and settings, in the service's own state directory.
+            HOME = "/var/lib/mcp-homeassistant";
+            XDG_DATA_HOME = "/var/lib/mcp-homeassistant";
+            XDG_CONFIG_HOME = "/var/lib/mcp-homeassistant";
+            XDG_CACHE_HOME = "/var/lib/mcp-homeassistant/cache";
+          };
+
+          serviceConfig =
+            hardening
+            // {
+              ExecStart = lib.getExe' haMcp "ha-mcp-web";
+              EnvironmentFile = config.sops.templates."ha-mcp.env".path;
+              StateDirectory = "mcp-homeassistant";
               Restart = "always";
               RestartSec = 5;
             };
