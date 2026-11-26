@@ -296,6 +296,19 @@ in {
               '';
             };
 
+            maxContextLength = lib.mkOption {
+              type = lib.types.nullOr lib.types.ints.positive;
+              default = null;
+              example = 131072;
+              description = ''
+                Upper bound on the context OpenCode is told each model has; a
+                model lists the smaller of this and its backend's context. It
+                only changes when OpenCode compacts a session (the backend
+                still serves its full context), so long sessions stay faster
+                and cheaper to prefill. Null uses the backend's context.
+              '';
+            };
+
             apiKeyFile = lib.mkOption {
               type = lib.types.nullOr lib.types.str;
               default = null;

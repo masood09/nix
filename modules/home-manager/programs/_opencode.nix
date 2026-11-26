@@ -9,9 +9,8 @@
 # LiteLLM adds it here on the next deploy. Engines with less context than
 # litellm.minContextLength are left out: heartbeat's 32K Gemma needs ~2
 # minutes just for OpenCode's ~12K-token agent prompt. The opencode virtual
-# key in LiteLLM must allow the listed models, and should not allow the
-# short-context ones either, or heavy's fallback to light would still send
-# OpenCode there while ixian is gaming instead of failing fast.
+# key in LiteLLM must allow the listed models. litellm.maxContextLength can
+# cap the context OpenCode sees below the engine's.
 {
   homelabCfg,
   inputs,
@@ -33,10 +32,17 @@
   # Aliases whose target survived the filter.
   aliases = lib.filterAttrs (_: target: backendOf ? ${target}) gateway.aliases;
 
+  # litellm.maxContextLength caps what OpenCode is told, not what the engine
+  # serves: OpenCode compacts against this limit.
+  contextOf = backend:
+    if cfg.litellm.maxContextLength == null
+    then backend.contextLength
+    else lib.min backend.contextLength cfg.litellm.maxContextLength;
+
   entry = label: backend: {
     name = label;
     limit = {
-      context = backend.contextLength;
+      context = contextOf backend;
       output = backend.maxOutputTokens;
     };
   };

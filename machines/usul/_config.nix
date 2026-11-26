@@ -107,6 +107,9 @@
         opencode = {
           litellm = {
             apiKeyFile = config.sops.secrets."litellm/opencode-key".path;
+            # 128K: Strata serves 256K, but on ixian a long session's prefill
+            # gets slow well before that, so OpenCode compacts at 128K.
+            maxContextLength = 131072;
           };
         };
         # Bitwarden system-auth unlock: install the polkit action and grant it
