@@ -75,6 +75,10 @@ in {
               "nixos-upgrade.timer"
               "--wake-for"
               "nix-gc.timer"
+              # Planned-suspend report for Grafana's ixian alerts (see
+              # modules/services/grafana/alerting-rules.nix).
+              "--status-file"
+              "${toString config.homelab.services.alloy.textfileDir}/idle-suspend.prom"
             ];
             Restart = "always";
             RestartSec = 10;

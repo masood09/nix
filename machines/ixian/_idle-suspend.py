@@ -160,15 +160,56 @@ class Idle:
         except OSError as exc:
             log(f"could not set the RTC alarm: {exc}")
 
+    def write_status(self, suspended, expected_wake=0):
+        """Tell monitoring (Alloy's textfile collector) that the suspend is planned.
+
+        Grafana mutes the "ixian silent" alert while the last report says
+        suspended, and alerts if a planned wake is overdue.
+        """
+        if not self.a.status_file:
+            return
+        text = (
+            "# HELP node_suspended 1 while idle-suspend has put this host to sleep on purpose.\n"
+            "# TYPE node_suspended gauge\n"
+            f"node_suspended {1 if suspended else 0}\n"
+            "# HELP node_suspend_expected_wake_timestamp_seconds RTC wake set for the current suspend, 0 if none.\n"
+            "# TYPE node_suspend_expected_wake_timestamp_seconds gauge\n"
+            f"node_suspend_expected_wake_timestamp_seconds {int(expected_wake)}\n"
+        )
+        tmp = self.a.status_file + ".tmp"
+        try:
+            with open(tmp, "w") as f:
+                f.write(text)
+            os.chmod(tmp, 0o644)
+            os.replace(tmp, self.a.status_file)
+        except OSError as exc:
+            log(f"could not write the monitoring status: {exc}")
+
     def suspend(self, idle_for):
         log(f"idle {idle_for:.0f}s ({self.context}, threshold {self.threshold()}s): stopping Strata and suspending")
         if self.a.dry_run:
             log("dry run: not suspending")
             self.idle_since = time.time()
             return
+        # Report the planned suspend first and give Alloy time to ship it
+        # (10 s scrape plus remote write), still serving and still watching:
+        # anything that starts in the meantime cancels the suspend.
+        due = self.next_scheduled()
+        expected = int(max(due - self.a.wake_early, time.time() + 60)) if due is not None else 0
+        self.write_status(True, expected)
+        deadline = time.monotonic() + self.a.report_wait
+        while time.monotonic() < deadline:
+            time.sleep(min(5, max(0.0, deadline - time.monotonic())))
+            reasons = self.busy_reasons()
+            if reasons or self.idle_since > time.time() - 60:
+                log("suspend cancelled: " + (", ".join(reasons) or "LLM request"))
+                self.write_status(False)
+                self.idle_since = max(self.idle_since, time.time())
+                return
         stop = run("systemctl", "stop", "strata.service", "model-router.service")
         if stop.returncode != 0:
             log(f"stopping Strata failed ({stop.stderr.strip()}); not suspending")
+            self.write_status(False)
             self.idle_since = time.time()
             return
         self.set_alarm()
@@ -177,12 +218,20 @@ class Idle:
         result = run("systemctl", "suspend")
         if result.returncode != 0:
             log(f"suspend refused: {result.stderr.strip()}")
+            self.write_status(False)
             self.start_strata("suspend failed")
             self.idle_since = time.time()
             return
         deadline = time.monotonic() + 60
         while suspended_seconds() - before < 1 and time.monotonic() < deadline:
             time.sleep(0.5)
+        if suspended_seconds() - before < 1:
+            # The request went through but the machine never slept: don't
+            # leave monitoring believing it did.
+            log("suspend requested but ixian didn't sleep within 60s")
+            self.write_status(False)
+            self.start_strata("suspend didn't happen")
+            self.idle_since = time.time()
 
     def start_strata(self, why):
         if self.gaming():
@@ -192,6 +241,7 @@ class Idle:
 
     def resumed(self, slept_for):
         woke = time.time()
+        self.write_status(False)
         log(f"resumed after {slept_for:.0f}s asleep")
         if self.alarm_at is not None and abs(woke - self.alarm_at) < 180:
             self.context, self.idle_since = "after-wake", woke
@@ -276,10 +326,13 @@ def main():
     p.add_argument("--busy-unit", action="append", default=[])
     p.add_argument("--wake-for", action="append", default=[], help="timer whose next run gets an RTC wake")
     p.add_argument("--wake-early", type=int, default=300, help="seconds before the timer to wake")
+    p.add_argument("--status-file", help="textfile-collector .prom file to report a planned suspend in")
+    p.add_argument("--report-wait", type=float, default=30.0, help="seconds between reporting a suspend and doing it")
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args()
 
     idle = Idle(args)
+    idle.write_status(False)
     mode = " (dry run)" if args.dry_run else ""
     log(
         f"idle suspend: {args.idle}s idle, {args.after_gaming}s after game mode, "
