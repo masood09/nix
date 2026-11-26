@@ -112,11 +112,12 @@
             maxContextLength = 131072;
           };
         };
-        # Read-only fleet logs, metrics and alerts for Claude Code and
-        # OpenCode, through Grafana instead of SSH.
-        grafana-mcp = {
+        # Claude Code and OpenCode use the MCP servers behind LiteLLM (read-only
+        # fleet logs, metrics and alerts from Grafana, so far), each with its
+        # own LiteLLM key.
+        litellm-mcp = {
           enable = true;
-          tokenFile = config.sops.secrets."grafana/mcp-token".path;
+          claudeCodeKeyFile = config.sops.secrets."litellm/claude-code-key".path;
         };
         # Bitwarden system-auth unlock: install the polkit action and grant it
         # silently for the active session so the vault auto-unlocks at launch.
