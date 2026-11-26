@@ -321,6 +321,20 @@
           enable = true;
         };
 
+        # Search page for home and the tailnet, and web search for AI agents
+        # (the searxng MCP server on mentat). No login, so Caddy serves only
+        # these networks: servers (mentat's MCP server), home, and the tailnet.
+        searxng = {
+          enable = true;
+          environmentFile = config.sops.secrets."searxng/.env".path;
+          allowedNetworks = [
+            "10.0.20.0/24"
+            "10.0.30.0/24"
+            "100.64.0.0/10"
+            "fd7a:115c:a1e0::/48"
+          ];
+        };
+
         jobscraper = {
           enable = true;
         };

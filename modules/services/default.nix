@@ -40,6 +40,7 @@
     ./postgresql
     ./prometheus
     ./questarr
+    ./searxng
     ./smartctl-exporter
     ./ssh
     ./strata
