@@ -139,6 +139,28 @@ in {
                   default = "";
                   description = "What the server is for, shown to clients and in the UI.";
                 };
+
+                bearerTokenEnv = lib.mkOption {
+                  type = lib.types.nullOr lib.types.str;
+                  default = null;
+                  example = "GITHUB_MCP_TOKEN";
+                  description = ''
+                    Environment variable of the LiteLLM container (set through
+                    environmentFile) holding the token LiteLLM sends to the
+                    server as "Authorization: Bearer". For remote servers that
+                    authenticate each request; the token stays out of the
+                    store. Null sends none.
+                  '';
+                };
+
+                headers = lib.mkOption {
+                  type = lib.types.attrsOf lib.types.str;
+                  default = {};
+                  example = {
+                    X-MCP-Readonly = "true";
+                  };
+                  description = "Fixed, non-secret headers LiteLLM sends with every request to the server.";
+                };
               };
             });
             default = {};

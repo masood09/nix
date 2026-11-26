@@ -66,14 +66,22 @@
   # allow_all_keys and available_on_public_internet are LiteLLM's defaults
   # spelled out: no key reaches a server unless granted it, and the key is the
   # gate rather than the client's address.
-  mcpServers =
-    lib.mapAttrs (_: s: {
+  mcpServers = lib.mapAttrs (_: s:
+    {
       inherit (s) url description;
       transport = "http";
       allow_all_keys = false;
       available_on_public_internet = true;
+    }
+    // lib.optionalAttrs (s.bearerTokenEnv != null) {
+      # LiteLLM resolves os.environ/ references across its config.
+      auth_type = "bearer_token";
+      authentication_token = "os.environ/${s.bearerTokenEnv}";
+    }
+    // lib.optionalAttrs (s.headers != {}) {
+      static_headers = s.headers;
     })
-    cfg.mcpServers;
+  cfg.mcpServers;
 
   configFile = yaml.generate "litellm-config.yaml" ({
       model_list = modelList;
