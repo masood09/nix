@@ -16,7 +16,7 @@ in
       owner = "s1t5";
       repo = "mail-archiver";
       rev = version;
-      sha256 = "160lx2xw9s50nphk6q3f0y39lhahhb5ksbh4f55r2n9m3mdf04vj";
+      sha256 = "1dfi474sk4xinzgpfccb631n5z7p9vmr0ch6jwz58xi44djm1l47";
     };
 
     # Prefer csproj over sln for reliability
