@@ -12,6 +12,14 @@ in {
           sopsFile = ./secrets.sops.yaml;
         };
 
+        # Token of Grafana's read-only (Viewer) service account, for the
+        # Grafana MCP server behind LiteLLM (_mcp.nix). Root-only, read
+        # through LoadCredential.
+        "grafana/mcp-token" = {
+          sopsFile = ./secrets.sops.yaml;
+          restartUnits = ["mcp-grafana.service"];
+        };
+
         "alloy/.env" = {
           restartUnits = ["alloy.service"];
         };
