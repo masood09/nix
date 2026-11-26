@@ -118,12 +118,16 @@ in {
           # two-sentence question. Low is the default for requests that name
           # none (the 2026-11-16 benchmark scored 13/13 at low on every size;
           # low caps thinking at 256 tokens of a 512 max_tokens, which was too
-          # little to count records in a long document); the budget closes any
-          # thinking that still runs long. A request can still ask for medium
-          # or high, or set its own budget.
+          # little to count records in a long document). Low is only an
+          # instruction in the prompt ("keep your thinking brief"), not a
+          # limit; the budget is the hard cap, at which Strata closes the
+          # thinking and the model answers. 1024 covers low and medium (0.5–0.9K
+          # measured) and stops a runaway in under a minute at ixian's ~20
+          # tokens/s; 8192 let one think for about 7 minutes. A request can
+          # still ask for medium or high, or set its own budget, which wins.
           settings = {
             reasoning_effort = "low";
-            reasoning_budget_tokens = 8192;
+            reasoning_budget_tokens = 1024;
             # The server's own limit on engine silence during a request
             # (default 300 s), separate from the engine watchdog in
             # extraLaunchArgs below. Matched to it so a long cold prefill is
