@@ -16,9 +16,10 @@
           owner = config.homelab.primaryUser.userName;
         };
 
-        # Token of Grafana's read-only (Viewer) service account for AI
-        # agents; mcp-grafana reads it as the user (grafana-mcp).
-        "grafana/mcp-token" = {
+        # Claude Code's LiteLLM virtual key, for the MCP servers behind
+        # LiteLLM (litellm-mcp). Granted those servers and only the harmless
+        # agent model. Claude Code reads it as the user when it connects.
+        "litellm/claude-code-key" = {
           sopsFile = ./secrets.sops.yaml;
           owner = config.homelab.primaryUser.userName;
         };
