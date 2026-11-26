@@ -35,6 +35,15 @@
 #     the environment). The settings web UI is off. From nixpkgs-unstable
 #     (stable lags at 7.x).
 #
+#   github: GitHub, read-only (GitHub's hosted MCP server, not a service
+#     here). Its HTTP mode takes the token on every request, so it would pass
+#     through LiteLLM either way, and the hosted one is always the latest
+#     (nixpkgs lags at 1.14). Read-only three times over: the /readonly
+#     endpoint, a fixed list of toolsets, and a fine-grained token with only
+#     read permissions. Lockdown mode hides public issue and comment content
+#     from users without push access, which narrows prompt injection through
+#     the public repo. The token is LiteLLM's GITHUB_MCP_TOKEN, from sops.
+#
 # Loopback has no other gate: anything on mentat could call a server
 # directly, which is acceptable while mentat runs only DNS, LiteLLM and the
 # wake proxy. That matters most for homeassistant_admin, whose endpoint has
@@ -122,6 +131,16 @@ in {
             homeassistant = {
               url = "${haEndpoint}/readonly";
               description = "Home Assistant, read-only: entity states, history, logs, automation traces and configuration.";
+            };
+            github = {
+              url = "https://api.githubcopilot.com/mcp/readonly";
+              description = "GitHub, read-only: repositories, files, issues, pull requests and Actions runs.";
+              bearerTokenEnv = "GITHUB_MCP_TOKEN";
+              headers = {
+                X-MCP-Toolsets = "context,repos,issues,pull_requests,actions";
+                X-MCP-Readonly = "true";
+                X-MCP-Lockdown = "true";
+              };
             };
             homeassistant_admin = {
               url = haEndpoint;
