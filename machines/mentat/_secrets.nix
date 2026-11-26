@@ -5,6 +5,13 @@ in {
   config = {
     sops = {
       secrets = {
+        # ixian's MAC address (aa:bb:cc:dd:ee:ff), the target of the
+        # Wake-on-LAN magic packet wake-ixian sends (_wol.nix). Kept out of
+        # this public repo; root-only, read through LoadCredential.
+        "wol/ixian-mac" = {
+          sopsFile = ./secrets.sops.yaml;
+        };
+
         "alloy/.env" = {
           restartUnits = ["alloy.service"];
         };
