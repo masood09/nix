@@ -16,6 +16,10 @@
     summary,
     description ? "",
     noData ? "OK", # "OK" = don't fire on missing data; "Alerting" = fire
+    # One evaluation at "now" instead of a 10-minute range: for expressions
+    # that already look far back themselves (last_over_time over days), where
+    # repeating that at every 30 s step would be wasted work.
+    instant ? false,
   }: {
     inherit uid title;
     condition = "C";
@@ -34,9 +38,8 @@
         datasourceUid = promUid;
         model = {
           refId = "A";
-          inherit expr;
-          range = true;
-          instant = false;
+          inherit expr instant;
+          range = !instant;
           intervalMs = 30000;
           maxDataPoints = 43200;
           datasource = {
@@ -91,6 +94,16 @@
       }
     ];
   };
+
+  # ixian suspends itself when idle (machines/ixian/_suspend.nix). Before it
+  # sleeps it reports node_suspended=1 and the RTC wake it set (0 if none)
+  # through its textfile collector; after waking it reports 0. A sleeping host
+  # sends nothing, so the last report is read back with last_over_time. It
+  # sleeps at most from one weekend's RTC wake to the next, inside the 7 days.
+  suspendingHost = "ixian";
+  silent = "(1 - (count(alloy_build_info{instance=\"${suspendingHost}\"}) or vector(0)))";
+  plannedSleep = "(max(last_over_time(node_suspended{instance=\"${suspendingHost}\"}[7d])) or vector(0))";
+  plannedWake = "max(last_over_time(node_suspend_expected_wake_timestamp_seconds{instance=\"${suspendingHost}\"}[7d]))";
 in {
   apiVersion = 1;
   groups = [
@@ -191,16 +204,40 @@ in {
         })
         # Dead-man's switch: the fleet uses remote-write (no per-target `up`), so
         # this watches the count of hosts reporting telemetry. Threshold is the
-        # expected number of Alloy agents reporting to this Prometheus; bump it
-        # when hosts are added/removed. noData=Alerting so a total blackout fires.
+        # expected number of Alloy agents reporting to this Prometheus, not
+        # counting ixian (it suspends on purpose; the two rules below cover it);
+        # bump it when hosts are added/removed. noData=Alerting so a total
+        # blackout fires.
         (mkAlert {
           uid = "t1_host_silent";
           title = "Host silent (telemetry stopped)";
-          expr = "count(group by (instance) (alloy_build_info))";
+          expr = "count(group by (instance) (alloy_build_info{instance!=\"${suspendingHost}\"}))";
           op = "lt";
-          threshold = 8;
+          threshold = 7;
           noData = "Alerting";
           summary = "Fewer hosts are reporting telemetry than expected — a host or its Alloy agent is down.";
+        })
+        # ixian sends nothing and its last report wasn't a planned suspend:
+        # a crash, power cut, or network loss rather than idle sleep.
+        (mkAlert {
+          uid = "t1_ixian_silent";
+          title = "ixian silent (not a planned suspend)";
+          expr = "${silent} * (1 - ${plannedSleep})";
+          op = "gt";
+          threshold = 0;
+          instant = true;
+          summary = "ixian stopped sending telemetry without reporting a planned suspend — it may have crashed or lost power or network.";
+        })
+        # ixian suspended with an RTC wake set (the weekly upgrade or nix-gc)
+        # and is still silent 30 minutes after it.
+        (mkAlert {
+          uid = "t1_ixian_wake_overdue";
+          title = "ixian didn't wake as planned";
+          expr = "${silent} * ${plannedSleep} * ((time() - ${plannedWake}) > bool 1800) * (${plannedWake} > bool 0)";
+          op = "gt";
+          threshold = 0;
+          instant = true;
+          summary = "ixian was due to wake from suspend for a scheduled job over 30 minutes ago and is still silent.";
         })
       ];
     }
