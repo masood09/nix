@@ -230,6 +230,31 @@ in {
           enable = lib.mkEnableOption "Whether to enable GPG.";
         };
 
+        grafana-mcp = {
+          enable = lib.mkEnableOption "read-only Grafana MCP access (logs, metrics, alerts) for Claude Code and OpenCode";
+
+          host = lib.mkOption {
+            type = lib.types.str;
+            default = "heartbeat";
+            description = ''
+              NixOS configuration running Grafana. Its
+              homelab.services.grafana.webDomain gives the URL.
+            '';
+          };
+
+          tokenFile = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            example = lib.literalExpression ''config.sops.secrets."grafana/mcp-token".path'';
+            description = ''
+              File holding a token of a Grafana service account with the
+              Viewer role, readable by the user. mcp-grafana reads it at
+              start, so the token never enters the Nix store. Null leaves the
+              server out.
+            '';
+          };
+        };
+
         kitty = {
           enable = lib.mkEnableOption "Whether to enable kitty terminal.";
         };

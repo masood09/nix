@@ -112,6 +112,12 @@
             maxContextLength = 131072;
           };
         };
+        # Read-only fleet logs, metrics and alerts for Claude Code and
+        # OpenCode, through Grafana instead of SSH.
+        grafana-mcp = {
+          enable = true;
+          tokenFile = config.sops.secrets."grafana/mcp-token".path;
+        };
         # Bitwarden system-auth unlock: install the polkit action and grant it
         # silently for the active session so the vault auto-unlocks at launch.
         # Safe here because usul autologins from the boot password and the login

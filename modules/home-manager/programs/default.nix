@@ -30,6 +30,7 @@
     ./_gh.nix
     ./_git.nix
     ./_gpg.nix
+    ./_grafana-mcp.nix
     ./_neovim.nix
     ./_opencode.nix
     ./_qwen-code.nix
