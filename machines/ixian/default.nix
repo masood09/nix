@@ -10,6 +10,7 @@
     ./hardware-configuration.nix
     ./_config.nix
     ./_controller-wake.nix
+    ./_game-state.nix
     ./_gamectl.nix
     ./_networking.nix
     ./_secrets.nix
