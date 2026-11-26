@@ -66,6 +66,11 @@
       marker=${lib.escapeShellArg marker}
       delay=${toString cfg.inferenceDelay}
       gaming_delay=${toString cfg.gamingDelay}
+      after_gaming_start=${
+        if cfg.startStrataAfterGaming
+        then "yes"
+        else "no"
+      }
       session_units=(${lib.escapeShellArgs sessionUnits})
       update_units=(${lib.escapeShellArgs updateUnits})
 
@@ -117,9 +122,15 @@
         applied "$ok"
       }
 
+      # $1 = "no": leave Strata stopped (leaving gaming mode on a host that
+      # suspends when idle; it starts Strata itself on its next wake).
       apply_inference() {
-        local ok=ok
-        echo "inference mode: stopping the Steam session, starting Strata"
+        local ok=ok start="''${1:-yes}"
+        if [ "$start" = no ]; then
+          echo "inference mode: stopping the Steam session, leaving Strata stopped"
+        else
+          echo "inference mode: stopping the Steam session, starting Strata"
+        fi
         # One unit per call: with several units, systemctl (systemd 262)
         # enqueues them as one batch whose polkit check carries no single
         # unit name, so the per-unit rule cannot allow it ("Failed to
@@ -138,6 +149,10 @@
         # starts, and a start skipped by it still exits 0. Removing the
         # marker after the start would leave Strata silently stopped.
         rm -f "$marker"
+        if [ "$start" = no ]; then
+          applied "$ok"
+          return
+        fi
         # --no-block: Strata's ExecStartPre can regenerate a run config for
         # minutes, and the loop must keep watching Home Assistant meanwhile.
         systemctl start --no-block strata.service || { echo "starting Strata failed" >&2; ok=fail; }
@@ -199,7 +214,7 @@
               if [ $((now - off_since)) -ge "$delay" ]; then
                 mode=inference
                 off_since=""
-                apply_inference
+                apply_inference "$after_gaming_start"
               fi
             elif due; then
               apply_inference

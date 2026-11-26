@@ -206,6 +206,9 @@ in {
         # modules/services/console-mode.
         console-mode = {
           enable = true;
+          # ixian suspends shortly after game mode ends (_suspend.nix), so
+          # loading the model in between would be wasted.
+          startStrataAfterGaming = false;
           homeAssistant = {
             headerFile = config.sops.templates."console-mode-ha.header".path;
           };

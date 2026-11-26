@@ -23,9 +23,12 @@
 #     remote wakeup. The xHCI controller's own wakeup flag is on by default.
 #
 # When ixian suspends: idle-suspend.service (_idle-suspend.py, whose header
-# has the rules) after 20 min without an LLM request, 5 min after game mode
+# has the rules) after 20 min without an LLM request, 1 min after game mode
 # ends, or 10 min after a wake that didn't lead anywhere. It unloads Strata
 # first, and sets the RTC alarm so the weekly upgrade and nix-gc run awake.
+# Leaving game mode doesn't start Strata (console-mode's
+# startStrataAfterGaming = false in _config.nix), so that minute is only a
+# buffer, not a model load.
 {
   config,
   lib,
@@ -56,7 +59,7 @@ in {
               "--idle"
               "1200"
               "--after-gaming"
-              "300"
+              "60"
               "--after-wake"
               "600"
               "--controller-grace"

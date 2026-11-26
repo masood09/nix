@@ -63,6 +63,17 @@
             '';
           };
 
+          startStrataAfterGaming = lib.mkOption {
+            type = lib.types.bool;
+            default = true;
+            description = ''
+              Whether leaving gaming mode starts Strata. Turn it off on a host
+              that suspends when idle: a model load right before the suspend
+              is wasted, and the idle service starts Strata on the next wake.
+              Inference mode at startup (boot, a deploy) still starts Strata.
+            '';
+          };
+
           gamingDelay = lib.mkOption {
             type = lib.types.ints.unsigned;
             default = 10;
