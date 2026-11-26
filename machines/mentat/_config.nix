@@ -47,15 +47,18 @@
         };
 
         # Gateway for ixian (heavy) and heartbeat (light, 24/7), reached over
-        # the tailnet with the shared backend key. heavy falls back to light
-        # while ixian is gaming (model-router then answers 503 at once). See
-        # modules/services/litellm.
+        # the tailnet with the shared backend key. ixian is reached through
+        # the local wake proxy (_wol.nix): if ixian has suspended itself, a
+        # heavy request wakes it and waits a minute or two instead of failing.
+        # No fallbacks on purpose: heavy means heavy, so while ixian is gaming
+        # (model-router answers 503 at once) heavy fails rather than quietly
+        # answering from light. See modules/services/litellm.
         litellm = {
           enable = true;
           environmentFile = config.sops.templates."litellm.env".path;
           backends = {
             ixian = {
-              apiBase = "http://ixian.dns.headscale.mantannest.com:8922/v1";
+              apiBase = "http://127.0.0.1:${toString config.homelab.wakeProxy.port}/v1";
               models = lib.concatMap (size: [
                 "qwen3.8-flash-next-${size}"
                 "qwen3.8-flash-next-${size}-uncensored"
@@ -123,10 +126,6 @@
             # fallback entry: an automatic agent -> heavy would defeat
             # reserving ixian for work the harness itself judges complex.
             agent = "lfm3-1-7b";
-          };
-          fallbacks = {
-            heavy = ["light"];
-            heavy-uncensored = ["light-uncensored"];
           };
           # Authentik app litellm (infra-tofu), limited to homelab-admins, who
           # are LiteLLM's proxy_admins. Clients use keys, not the UI.
