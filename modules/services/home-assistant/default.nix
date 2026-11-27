@@ -133,6 +133,13 @@ in {
               # "Operation not permitted" on every start.
               "--cap-add=NET_ADMIN"
               "--cap-add=NET_RAW"
+              # The unit stops the container with a bare `podman stop`, which
+              # SIGKILLs it after podman's default 10 s. Home Assistant needs
+              # longer to shut down (the recorder flushes and closes its
+              # SQLite database last), so every restart, nightly backup
+              # included, left the database unclean. systemd's stop timeout
+              # below stays above this.
+              "--stop-timeout=120"
             ];
           };
         };
@@ -174,6 +181,11 @@ in {
           podman-home-assistant = {
             requires = ["home-assistant-seed.service"];
             after = ["home-assistant-seed.service"];
+            # Longer than the container's --stop-timeout, so podman's graceful
+            # stop runs out before systemd kills the unit.
+            serviceConfig = {
+              TimeoutStopSec = lib.mkForce 150;
+            };
           };
         };
       }
