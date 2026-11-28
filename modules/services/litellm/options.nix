@@ -27,6 +27,36 @@
         description = "Largest completion a client should request from these models.";
       };
 
+      # What the engine behind these models accepts and produces. Clients
+      # read them off the catalog instead of guessing: programs.pi writes
+      # them into Pi's `input` and `reasoning` fields and programs.opencode
+      # into OpenCode's `capabilities`, and both only offer image attachments
+      # to models whose input media types include image. Values match how the
+      # engines are started: Strata runs Qwen3.8's picture reader
+      # (strata.vision = "cpu") and llama.cpp serves the Gemmas with their
+      # mmproj projectors, while LFM3-1.7B has none.
+      supportsVision = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Whether requests may include images, i.e. the engine runs a picture projector.";
+      };
+
+      # Whether the engine behind these models produces thinking, i.e.
+      # whether clients should offer thinking controls at all. Only a model
+      # that answers with `reasoning_content` belongs here: Pi shows a
+      # thinking level for `reasoning` models, and OpenCode builds reasoning
+      # variants from `capabilities.reasoning`. Strata does produce it
+      # (checked 2026-11-28 through this gateway on qwen3.8), while
+      # heartbeat's llama.cpp router passes `--chat-template-kwargs
+      # {"enable_thinking":false}` to every model section
+      # (modules/services/llama-cpp), so the Gemmas and LFM3 answer directly
+      # and a probe on lfm3-1-7b returned no `reasoning_content`.
+      supportsReasoning = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Whether the engine's models produce thinking (reasoning_content).";
+      };
+
       # Local inference has no API price, so this carries the list price of the
       # public API serving the same model; the spend dashboard then shows what
       # a request would have cost in the cloud. Values are USD per token, and

@@ -39,11 +39,22 @@
     then backend.contextLength
     else lib.min backend.contextLength cfg.litellm.maxContextLength;
 
+  # OpenCode only offers image attachments for models whose input media types
+  # include image (opencode.ai/docs/attachments). capabilities.reasoning with
+  # supported and no controls marks a thinking model without generating
+  # effort variants, which is what we want: ixian's reasoning_effort and
+  # reasoning_budget_tokens defaults are set server-side (machines/ixian).
   entry = label: backend: {
     name = label;
     limit = {
       context = contextOf backend;
       output = backend.maxOutputTokens;
+    };
+    capabilities = {
+      input = ["text"] ++ lib.optional backend.supportsVision "image";
+      reasoning = {
+        supported = backend.supportsReasoning;
+      };
     };
   };
 

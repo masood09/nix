@@ -67,6 +67,14 @@
               # counts against output; 32K is Qwen's recommended length.
               contextLength = 262144;
               maxOutputTokens = 32768;
+              # Qwen3.8 is a vision model: Strata launches it with its picture
+              # reader on the CPU (strata.vision), verified end-to-end through
+              # this gateway on 2026-11-28 (a base64 PNG reached qwen3.8 and
+              # came back described correctly). Qwen also thinks: Strata
+              # answers with reasoning_content, at reasoning_effort = "low"
+              # and reasoning_budget_tokens = 1024 (machines/ixian).
+              supportsVision = true;
+              supportsReasoning = true;
               # Shadow pricing: the local quants are based on Qwen3.8 Flash
               # Next, and Alibaba's first-party API lists it at $0.15/M input,
               # $0.47/M output (LiteLLM's dashscope/qwen3.8-flash entry,
@@ -86,6 +94,12 @@
               # (homelab.services.llama-cpp.contextSize).
               contextLength = 16384;
               maxOutputTokens = 8192;
+              # The Gemmas carry their mmproj projectors (modules/services/
+              # llama-cpp), so heartbeat accepts images too. Thinking stays
+              # off: that module's router passes enable_thinking=false to the
+              # chat template, so requests get no reasoning_content and
+              # clients should not offer thinking controls.
+              supportsVision = true;
               # Shadow pricing: Google's API serves Gemma 4 free of charge, so
               # price against the hosted rate LiteLLM tracks (DeepInfra's
               # gemma-4-E4B-it: $0.02/M input, $0.10/M output, checked 2026-11).
@@ -101,6 +115,9 @@
             heartbeat-agent = {
               apiBase = "http://heartbeat.dns.headscale.mantannest.com:8921/v1";
               models = ["lfm3-1-7b"];
+              # LFM3-1.7B has no projector in llama-cpp.models, so this backend
+              # keeps supportsVision false, and its template's default thinking
+              # is disabled the same way as the Gemmas' (enable_thinking=false).
               contextLength = 65536;
               maxOutputTokens = 32768;
               # Shadow pricing: OpenRouter's hosted listing of the same

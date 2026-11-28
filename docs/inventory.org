@@ -492,6 +492,7 @@ Defined in =nix/pkgs/= and auto-discovered.
 | Blocky            | DNS ad/tracker filtering (same as caretaker) |
 | Caddy             | Serves =llm.mantannest.com= (tailnet + LAN DNS only) |
 | LiteLLM           | Gateway on 127.0.0.1:8923 (Podman, upstream non-root image pinned by digest); routes to ixian (heavy) and heartbeat (light) over the tailnet with the backend key; ixian is reached through the local wake proxy, which wakes a suspended ixian instead of failing the request; deliberately no fallbacks - while ixian games, model-router answers 503 and heavy fails rather than quietly answering from light; virtual keys per client; UI login via Authentik |
+| LiteLLM capabilities | Each backend declares =supportsVision= (picture projector loaded) and =supportsReasoning= (answers with =reasoning_content=) under =homelab.services.litellm.backends.*=; =programs.pi= and =programs.opencode= publish them to their model catalogs, which is what lets Pi attach images to heavy and hides the thinking control on heartbeat's models (its llama.cpp router sets =enable_thinking=false=) |
 | Podman            | Image store on a ZFS dataset              |
 | smartctl-exporter | Single NVMe SMART health                     |
 | Tailscale         | ZFS dataset                                  |

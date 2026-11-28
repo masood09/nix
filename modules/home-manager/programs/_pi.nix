@@ -58,12 +58,16 @@
   # Pi's schema (docs/models-configuration.md): id is the model name sent to
   # the API, contextWindow/maxTokens drive compaction and completion sizes.
   # `name` is a display name, also matched by /model and --model patterns;
-  # prettify the dashed catalog names.
+  # prettify the dashed catalog names. `input` and `reasoning` come from the
+  # engine's own capabilities: Pi only attaches images for a model whose
+  # input lists image, and only offers /thinking for reasoning models.
   entry = label: backend: {
     id = label;
     name = lib.replaceStrings ["-"] [" "] label;
     contextWindow = contextOf backend;
     maxTokens = backend.maxOutputTokens;
+    reasoning = backend.supportsReasoning;
+    input = ["text"] ++ lib.optional backend.supportsVision "image";
   };
 
   models =
