@@ -24,6 +24,8 @@ keys:
     age1nz95puflzkel7f0e9exj9d4pl0y2tu9gfust6nwevd6njtkrg5gq8x6c5q
   - &mentat
     age1kcccds4znkeumxnad6qgegyas7gqrhyc9a0xq26x5zez9fltjucqgfrxhe
+  - &guild
+    age1u32rjej6fr2elng272qx6nu793kz2k2ncvffzcf8vgvg8fj9pp7qvr5klg
   # --- Admin key (shared across dev machines: usul, work-okta) ---
   - &masoodahmed
     age1s90xwvtqw9at892s8tyde9lp8vu3rs2lde7pwh7hayuc2sahmv6qmkwpff
@@ -46,6 +48,7 @@ creation_rules:
           - *heartbeat
           - *sonic
           - *mentat
+          - *guild
           - *masoodahmed
 
   # Scoped secrets — headscale DNS only needs meshcontrol
@@ -114,6 +117,12 @@ creation_rules:
     key_groups:
       - age:
         - *mentat
+        - *masoodahmed
+
+  - path_regex: ^machines/guild/secrets\.sops\.yaml$
+    key_groups:
+      - age:
+        - *guild
         - *masoodahmed
 
 stores:
