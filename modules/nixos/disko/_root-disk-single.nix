@@ -104,13 +104,14 @@ in {
 
           "root/var/log" = mkLegacy "/var/log" {};
 
-          # 10G reservation prevents pool from filling completely (ZFS needs free space)
+          # Reservation prevents pool from filling completely (ZFS needs free
+          # space); homelab.disks.rootReservation, 10G by default.
           "root/reserved" = {
             type = "zfs_fs";
             options = {
               canmount = "off";
               mountpoint = "none";
-              refreservation = "10G";
+              refreservation = config.homelab.disks.rootReservation;
             };
           };
         }

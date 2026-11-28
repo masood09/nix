@@ -22,6 +22,19 @@
           default = [];
           description = "Disk-by-id list for the data pool";
         };
+
+        rootReservation = lib.mkOption {
+          type = lib.types.str;
+          default = "10G";
+          example = "24G";
+          description = ''
+            refreservation of rpool/root/reserved in the shared ZFS root
+            layouts (modules/nixos/disko/_root-disk*.nix): space held back so
+            the pool never fills completely. A ZFS size, not a percentage; to
+            keep ~20% free, set it from the pool's size. Changing it on an
+            installed pool needs a matching `zfs set refreservation=`.
+          '';
+        };
       };
     };
   };
