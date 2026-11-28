@@ -417,6 +417,24 @@ in {
               '';
             };
           };
+
+          themes = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = ["gruvbox-dark"];
+            example = ["gruvbox-dark" "tokyo-night"];
+            description = ''
+              Theme names from pkgs.oh-pi-themes to install into
+              ~/.pi/agent/themes. Names must match a theme file in that
+              package (themes/<name>.json), and Pi requires the file name to
+              match the theme's own name field.
+
+              This directory is the only place Pi hot-reloads a theme from, so
+              the files are linked here rather than referenced through the
+              themes setting. Installing a theme does not select it: the
+              selection is the theme key in ~/.pi/agent/settings.json, which
+              this module leaves to Pi (/settings -> Theme).
+            '';
+          };
         };
 
         prism-launcher = {

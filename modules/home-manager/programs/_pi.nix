@@ -19,7 +19,14 @@
 #
 # settings.json is left entirely to the user: Pi's own /model and /thinking
 # Ctrl+S saves write the default model and thinking level there, and a
-# declarative file would fight them on every activation.
+# declarative file would fight them on every activation. The one exception is
+# the theme files (home.file below), which are data Pi reads from that
+# directory — the theme key that selects one still lives in settings.json.
+#
+# Themes come from pkgs.oh-pi-themes (nix/pkgs/oh-pi-themes) and are linked
+# into ~/.pi/agent/themes, the only directory Pi hot-reloads themes from; the
+# alternative (`pi install npm:@ifi/oh-pi-themes`) runs npm at startup and
+# records itself in settings.json, which is exactly what the block above avoids.
 {
   homelabCfg,
   inputs,
@@ -67,6 +74,15 @@
     if models ? heavy
     then "heavy"
     else lib.head (lib.attrNames models);
+
+  # Pi matches a theme by its name, and its own docs require the file name to
+  # match ("Use the theme name as the filename"), so the package's
+  # themes/<name>.json is linked under the same name.
+  themeFiles = lib.listToAttrs (map (name:
+    lib.nameValuePair ".pi/agent/themes/${name}.json" {
+      source = "${pkgs.oh-pi-themes}/themes/${name}.json";
+    })
+  cfg.themes);
 in {
   config = lib.mkIf cfg.enable {
     home = {
@@ -74,26 +90,30 @@ in {
         inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.pi
       ];
 
-      file.".pi/agent/models.json" = lib.mkIf (cfg.litellm.apiKeyFile != null) {
-        text = builtins.toJSON {
-          # Editor validation/completion, per Pi's models docs.
-          "$schema" = "https://pi.dev/schemas/models.schema.json";
+      file =
+        {
+          ".pi/agent/models.json" = lib.mkIf (cfg.litellm.apiKeyFile != null) {
+            text = builtins.toJSON {
+              # Editor validation/completion, per Pi's models docs.
+              "$schema" = "https://pi.dev/schemas/models.schema.json";
 
-          providers.litellm = {
-            baseUrl = "https://${gateway.webDomain}/v1";
-            api = "openai-completions";
-            # Resolved at request time (never cached), so the key stays in
-            # the sops secret, out of the Nix store and out of the file.
-            apiKey = "!cat ${cfg.litellm.apiKeyFile}";
-            # LiteLLM authenticates with the x-litellm-api-key header like
-            # every client here; sending Authorization: Bearer as well would
-            # compete with it (docs/models.md: an explicit Authorization
-            # overrides Pi's default OpenAI auth header).
-            authHeader = false;
-            models = lib.attrValues models;
+              providers.litellm = {
+                baseUrl = "https://${gateway.webDomain}/v1";
+                api = "openai-completions";
+                # Resolved at request time (never cached), so the key stays in
+                # the sops secret, out of the Nix store and out of the file.
+                apiKey = "!cat ${cfg.litellm.apiKeyFile}";
+                # LiteLLM authenticates with the x-litellm-api-key header like
+                # every client here; sending Authorization: Bearer as well would
+                # compete with it (docs/models.md: an explicit Authorization
+                # overrides Pi's default OpenAI auth header).
+                authHeader = false;
+                models = lib.attrValues models;
+              };
+            };
           };
-        };
-      };
+        }
+        // themeFiles;
     };
   };
 }
