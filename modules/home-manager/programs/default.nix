@@ -33,6 +33,7 @@
     ./_litellm-mcp.nix
     ./_neovim.nix
     ./_opencode.nix
+    ./_pi.nix
     ./_qwen-code.nix
 
     # Cloud & infrastructure

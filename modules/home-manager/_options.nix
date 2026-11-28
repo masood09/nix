@@ -26,6 +26,7 @@ in {
                 "claude-code"
                 "codex"
                 "opencode"
+                "pi"
                 "qwen-code"
               ]
             );
@@ -352,6 +353,57 @@ in {
           enable = lib.mkEnableOption "Whether to enable OpenTofu.";
         };
 
+        pi = {
+          enable = lib.mkEnableOption "Whether to enable the pi coding agent.";
+
+          litellm = {
+            host = lib.mkOption {
+              type = lib.types.str;
+              default = "mentat";
+              description = ''
+                NixOS configuration running the LiteLLM gateway. Pi's model
+                list is generated from its homelab.services.litellm catalog,
+                so it never needs editing here.
+              '';
+            };
+
+            minContextLength = lib.mkOption {
+              type = lib.types.ints.positive;
+              default = 65536;
+              description = ''
+                Only models whose backend has at least this context are listed.
+                Pi's agent prompt is far smaller than OpenCode's, but sessions
+                still grow well past heartbeat's short-context engines, and
+                those are the fleet's slowest, so they are left out by default.
+              '';
+            };
+
+            maxContextLength = lib.mkOption {
+              type = lib.types.nullOr lib.types.ints.positive;
+              default = null;
+              example = 131072;
+              description = ''
+                Upper bound on the context Pi is told each model has; a model
+                gets the smaller of this and its backend's context. Pi
+                compacts sessions against it, so long sessions stay faster and
+                cheaper to prefill. Null uses the backend's context.
+              '';
+            };
+
+            apiKeyFile = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              example = lib.literalExpression ''config.sops.secrets."litellm/pi-key".path'';
+              description = ''
+                File holding Pi's LiteLLM virtual key, readable by the user.
+                Pi's models.json and mcp.json reference it as a "!cat" command
+                evaluated at request time, so the key never enters the Nix
+                store. Null leaves the gateway out.
+              '';
+            };
+          };
+        };
+
         prism-launcher = {
           enable = lib.mkEnableOption "Whether to enable Prism Launcher.";
         };
@@ -437,6 +489,10 @@ in {
 
         opencode = {
           enable = lib.mkDefault (hasAiTool "opencode");
+        };
+
+        pi = {
+          enable = lib.mkDefault (hasAiTool "pi");
         };
 
         qwen-code = {
