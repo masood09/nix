@@ -168,7 +168,9 @@ in {
               MCP servers LiteLLM offers to clients at https://<webDomain>/mcp,
               keyed by name. A server is closed to every key until the key (or
               its team) is granted it in the UI or API, so adding one gives no
-              existing key access.
+              existing key access. Split them into connectable groups with
+              homelab.mcp.bundles (machines/mentat/_mcp.nix): each group is
+              served at https://<webDomain>/mcp/<servers> as well.
             '';
           };
 

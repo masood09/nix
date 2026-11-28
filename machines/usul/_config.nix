@@ -122,8 +122,12 @@
           };
         };
         # Claude Code, OpenCode and Pi use the MCP servers behind LiteLLM
-        # (read-only fleet logs, metrics and alerts from Grafana, so far),
-        # each with its own LiteLLM key.
+        # (fleet logs, metrics and alerts from Grafana, Nix option lookup, Home
+        # Assistant, GitHub, web search), each client with its own LiteLLM key.
+        # One connection per bundle, so a client connects to the servers it
+        # wants; bundles are defined on the gateway (machines/mentat/_mcp.nix)
+        # and selected here, e.g. bundles = ["grafana" "nixos"]. Null (here)
+        # offers all of them.
         litellm-mcp = {
           enable = true;
           claudeCodeKeyFile = config.sops.secrets."litellm/claude-code-key".path;

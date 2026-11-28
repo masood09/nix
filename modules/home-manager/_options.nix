@@ -247,6 +247,21 @@ in {
             '';
           };
 
+          bundles = lib.mkOption {
+            type = lib.types.nullOr (lib.types.listOf lib.types.str);
+            default = null;
+            example = ["observability" "nix" "search"];
+            description = ''
+              MCP bundles to offer as separate client connections, named as in
+              the gateway host's homelab.mcp.bundles (machines/mentat/_mcp.nix).
+              Each becomes its own MCP connection at
+              https://<webDomain>/mcp/<servers>, which the client can connect to
+              or disconnect from on its own; the key still decides which of them
+              it may reach. Null offers every bundle the gateway defines. An
+              unknown name is a build error.
+            '';
+          };
+
           claudeCodeKeyFile = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default = null;

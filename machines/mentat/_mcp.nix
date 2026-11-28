@@ -57,6 +57,16 @@
 # directly, which is acceptable while mentat runs only DNS, LiteLLM and the
 # wake proxy. That matters most for homeassistant_admin, whose endpoint has
 # no gate but the LiteLLM grant.
+#
+# Clients used to get every server a key can reach through one connection at
+# https://<webDomain>/mcp, so enabling or disabling one enabled or disabled
+# all of them. bundles splits them into named groups instead, and LiteLLM
+# serves each group on its own endpoint: https://<webDomain>/mcp/<servers>
+# (a comma-separated list of server names, and /mcp/<name>, is the documented
+# per-server selection; it narrows what a key may reach, it never grants
+# more). Clients then hold one connection per bundle, connected or
+# disconnected on its own, and read-only work never loads the 117 Home
+# Assistant tools. Keep the names free of '-', ',' and spaces.
 {
   config,
   inputs,
@@ -66,6 +76,9 @@
   ...
 }: let
   cfg = config.homelab.mcp;
+  # Read the server list where it lives, not through cfg (homelab.mcp), so
+  # defining homelab.mcp.bundles cannot recurse on itself.
+  litellmCfg = config.homelab.services.litellm;
   grafana = outputs.nixosConfigurations.heartbeat.config.homelab.services.grafana;
   mcpGrafana = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.mcp-grafana;
   mcpNixos = inputs.mcp-nixos.packages.${pkgs.stdenv.hostPlatform.system}.mcp-nixos;
@@ -73,6 +86,13 @@
   mcpSearxng = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.mcp-searxng;
   heartbeat = outputs.nixosConfigurations.heartbeat.config;
   searxng = heartbeat.homelab.services.searxng;
+
+  # Set once the servers above exist, so a server rename can't leave a bundle
+  # naming a server LiteLLM no longer has (the assertion checks the rest).
+  # One bundle per server, each named after it: a client can then connect to
+  # any subset. Grouping servers into a shared bundle is a local override here
+  # (obs = ["grafana" "nixos"]; the gateway serves /mcp/grafana,nixos).
+  bundles = lib.mapAttrs (name: _: [name]) litellmCfg.mcpServers;
   # heartbeat's address on mentat's own subnet (the server VLAN): the only
   # private destination mcp-searxng may reach. MagicDNS would resolve
   # SearXNG's domain to heartbeat's tailnet address, which stays blocked, so
@@ -140,11 +160,40 @@ in {
             description = "Loopback port of the SearXNG MCP server (docs/service-registry.org).";
           };
         };
+
+        # Named groups of servers, offered to clients one connection per
+        # group (see the header comment). Keyed by bundle name; the values are
+        # names in homelab.services.litellm.mcpServers.
+        bundles = lib.mkOption {
+          type = lib.types.attrsOf (lib.types.listOf lib.types.str);
+          default = {};
+          example = {observability = ["grafana"];};
+          description = ''
+            MCP bundles LiteLLM exposes at https://<webDomain>/mcp/<servers>,
+            so a client connects to the groups it wants instead of taking
+            every server on one connection. Which bundles a client is offered
+            is programs.litellm-mcp.bundles; a key without a bundle's grant
+            gets nothing from it either way.
+          '';
+        };
       };
     };
   };
 
   config = {
+    assertions = [
+      {
+        assertion = lib.all (b: lib.all (s: litellmCfg.mcpServers ? ${s}) b) (lib.attrValues bundles);
+        message = "homelab.mcp.bundles may only name servers in homelab.services.litellm.mcpServers.";
+      }
+      {
+        # A bundle name is a URL path segment (https://<webDomain>/mcp/<name>)
+        # and a client connection name.
+        assertion = lib.all (n: builtins.match "[a-zA-Z0-9_]+" n != null) (lib.attrNames bundles);
+        message = "homelab.mcp.bundles names may contain only letters, digits and '_'.";
+      }
+    ];
+
     # mcp-searxng reaches SearXNG over the server VLAN, the one private
     # destination its IPAddressAllow keeps open (see heartbeatLan).
     networking = {
@@ -154,6 +203,8 @@ in {
     };
 
     homelab = {
+      mcp.bundles = bundles;
+
       services = {
         litellm = {
           mcpServers = {
