@@ -24,6 +24,14 @@
           owner = config.homelab.primaryUser.userName;
         };
 
+        # Pi's LiteLLM virtual key (created in the LiteLLM UI, allowed every
+        # model the gateway serves and the granted MCP servers). Pi cats it
+        # as the user at request time, so it is owned by the primary user.
+        "litellm/pi-key" = {
+          sopsFile = ./secrets.sops.yaml;
+          owner = config.homelab.primaryUser.userName;
+        };
+
         "zed/discord-zfs-webhook" = {};
       };
     };

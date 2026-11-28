@@ -99,6 +99,7 @@
             "claude-code"
             "codex"
             "opencode"
+            "pi"
             "qwen-code"
           ];
         };
@@ -112,9 +113,17 @@
             maxContextLength = 131072;
           };
         };
-        # Claude Code and OpenCode use the MCP servers behind LiteLLM (read-only
-        # fleet logs, metrics and alerts from Grafana, so far), each with its
-        # own LiteLLM key.
+        # Pi gets the same gateway treatment: catalog-generated models.json
+        # with its own virtual key, compacting at the same 128K cap.
+        pi = {
+          litellm = {
+            apiKeyFile = config.sops.secrets."litellm/pi-key".path;
+            maxContextLength = 131072;
+          };
+        };
+        # Claude Code, OpenCode and Pi use the MCP servers behind LiteLLM
+        # (read-only fleet logs, metrics and alerts from Grafana, so far),
+        # each with its own LiteLLM key.
         litellm-mcp = {
           enable = true;
           claudeCodeKeyFile = config.sops.secrets."litellm/claude-code-key".path;
