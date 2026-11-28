@@ -502,6 +502,29 @@ Defined in =nix/pkgs/= and auto-discovered.
 |-----------+----------------|
 | fastfetch | rpool          |
 
+*** guild
+
+- *Purpose:* CI/CD & Binary Cache Server (services to come); future Hermes agent host
+- *Storage:* Single-disk encrypted ZFS root on 128 GB SATA (=rpool=,
+  impermanence); two encrypted single-disk data pools keyed from sops:
+  =cipool= (1 TB NVMe, CI builds and binary cache) and =agentpool= (1 TB
+  SATA, Hermes agent)
+
+**** Services
+
+| Service           | Notes                                     |
+|-------------------+-------------------------------------------|
+| Alloy             | Logs and metrics to heartbeat             |
+| Backup            | Disabled (no state yet)                   |
+| smartctl-exporter | SMART health for the three SSDs           |
+| Tailscale         | Joins the tailnet                         |
+
+**** Programs
+
+| Program   | Notes |
+|-----------+-------|
+| fastfetch | rpool, cipool, agentpool |
+
 *** commrelay
 
 - *Purpose:* Secure federated messaging (Matrix Synapse)
