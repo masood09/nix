@@ -24,6 +24,7 @@
     ./_zoxide.nix
 
     # Development
+    ./_agent-skills.nix
     ./_claude-code.nix
     ./_codex-cli.nix
     ./_emacs.nix

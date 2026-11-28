@@ -130,6 +130,15 @@
       url = "github:yokoffing/Betterfox";
       flake = false;
     };
+    # Matt Pocock's agent skills (SKILL.md trees). `flake = false`: it is a
+    # plain source tree consumed as directories to link, never built, so it is
+    # pinned like any other input and updated with
+    # `nix flake update mattpocock-skills`. Consumed by
+    # modules/home-manager/programs/_agent-skills.nix.
+    mattpocock-skills = {
+      url = "github:mattpocock/skills";
+      flake = false;
+    };
     # Noctalia desktop shell (v5). The `cachix` branch plus NO nixpkgs
     # `follows` lets us pull prebuilt binaries from noctalia.cachix.org
     # instead of compiling locally; the trade-off is a separate nixpkgs

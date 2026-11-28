@@ -17,6 +17,32 @@ in {
   options = {
     homelab = {
       programs = {
+        agent-skills = {
+          enable = lib.mkEnableOption "Matt Pocock's agent skills for Pi.";
+
+          categories = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = ["engineering" "productivity"];
+            example = ["engineering"];
+            description = ''
+              Buckets of github:mattpocock/skills to install. `misc` is frozen
+              and unmaintained upstream and holds Claude-Code-only hooks,
+              `in-progress` and `deprecated` are excluded by default.
+            '';
+          };
+
+          overrides = lib.mkOption {
+            type = lib.types.attrsOf lib.types.path;
+            default = {};
+            example = {grilling = ./agent-skills/grilling;};
+            description = ''
+              Skill directories from this repo, keyed by skill name, that
+              shadow the read-only upstream copy. Upstream takes no pull
+              requests, so any local change to a skill belongs here.
+            '';
+          };
+        };
+
         ai_tools = {
           enable = lib.mkEnableOption "Whether to enable AI tooling selection.";
 
@@ -512,6 +538,12 @@ in {
         # `mkDefault` keeps the new aggregate selector as the preferred machine
         # interface while still allowing an explicit per-tool override if a
         # machine ever needs to diverge temporarily.
+        # Skills follow Pi for now: _agent-skills.nix only writes Pi's skill
+        # directory, so the skills arrive exactly where Pi does.
+        agent-skills = {
+          enable = lib.mkDefault (hasAiTool "pi");
+        };
+
         claude-code = {
           enable = lib.mkDefault (hasAiTool "claude-code");
         };
