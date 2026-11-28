@@ -71,7 +71,7 @@ in {
           enable = true;
         };
 
-        # Qwen3.8-Flash-Next IQ3_S (served as qwen3.8-flash-next-iq3_s), 256K
+        # Qwen3.8-Flash-Next IQ3_XXS (served as qwen3.8-flash-next-iq3_xxs), 256K
         # context (the model's trained length, no rope scaling), one request
         # at a time, CPU picture reader, on 127.0.0.1:8916. Conversation
         # memory is upstream's default int8 (~13.7 KB/token, ~3.6 GB at 256K);
@@ -83,15 +83,19 @@ in {
         # chat set; prompts up to 200K tokens): IQ2_XS, IQ3_XXS and IQ3_S ran
         # at 32K-256K without swapping or low-RAM mode, and all scored 13/13
         # with and without the speed projection, so the set could not tell
-        # them apart. IQ3_S is upstream's best-rated size ("matches the full
-        # model on the published tests"). At 256K with a 200K-token prompt it
-        # left 8.1 GB of RAM free (IQ3_XXS: 9.3 GB), read prompts at
-        # ~1,800 tok/s like every size, and replied at 44 tok/s on short
-        # answers and ~58 on long ones (IQ3_XXS: 54 and ~60). With the file
-        # cache down to ~9 GB, its first long prompt stalled ~40 s on disk
-        # reads once; later ones read at full speed. Keep other memory-hungry
-        # work off ixian while long conversations run. (The 2026-11-04 note
-        # that IQ3_XXS swapped ~29 GB at 128K did not reproduce.)
+        # them apart. The default is IQ3_XXS (moved off IQ3_S on 2026-11-28):
+        # with quality indistinguishable it is the faster and lighter choice,
+        # replying at 54 tok/s on short answers and ~60 on long ones (IQ3_S:
+        # 44 and ~58) and leaving 9.3 GB of RAM free at 256K with a 200K-token
+        # prompt (IQ3_S: 8.1 GB); every size reads prompts at ~1,800 tok/s.
+        # IQ3_S, upstream's best-rated size ("matches the full model on the
+        # published tests"), stays in models, so a request naming
+        # qwen3.8-flash-next-iq3_s still gets it, for one model load. On IQ3_S
+        # with the file cache down to ~9 GB, its first long prompt stalled
+        # ~40 s on disk reads once; later ones read at full speed. Keep other
+        # memory-hungry work off ixian while long conversations run. (The
+        # 2026-11-04 note that IQ3_XXS swapped ~29 GB at 128K did not
+        # reproduce.)
         # Qwen3.6-35B-A3B was tried and dropped: its engine keeps conversation
         # memory in fp32 on the card (~45 KB/token, no --kv), so 256K ran the
         # 16 GB RX 9070 out of memory at load.
@@ -103,7 +107,7 @@ in {
         strata = {
           enable = true;
           family = "qwen";
-          model = "iq3_s";
+          model = "iq3_xxs";
           # Sizes model-router may switch to (each benchmarked at 256K on
           # 2026-11-16 without swapping). Each start regenerates whichever
           # sizes are stale, so a switch is one model load.
