@@ -301,6 +301,7 @@
       watchfulsystem = mkNixOSConfig ./machines/watchfulsystem;
 
       caretaker = mkNixOSConfig ./machines/caretaker;
+      guild = mkNixOSConfig ./machines/guild;
       heartbeat = mkNixOSConfig ./machines/heartbeat;
       mentat = mkNixOSConfig ./machines/mentat;
 

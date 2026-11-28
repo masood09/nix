@@ -1,0 +1,215 @@
+#+TITLE: Installing NixOS on guild
+#+AUTHOR: Masood Ahmed
+#+OPTIONS: toc:nil num:nil
+
+This document installs the =guild= configuration on a Lenovo ThinkCentre M920
+(i5-8500, 64 GB): the fleet's future CI/CD and binary-cache server and a host
+for a Hermes agent. The machine has no monitor, so everything runs over SSH.
+
+The initial system uses:
+
+- UEFI + GRUB installed as removable (=\EFI\BOOT\BOOTX64.EFI=), so the
+  firmware boots it with no boot entry
+- Encrypted single-disk ZFS root (=rpool=, no swap) on the 128 GB SATA disk
+  (shared layout, =modules/nixos/disko/_root-disk-single.nix=, as on mentat)
+- Impermanence: root rolled back to =rpool/root/empty@start= on every boot,
+  persistent state under =/nix/persist=
+- Two encrypted single-disk data pools, keyed from sops secrets (no
+  passphrase) and imported at boot (=machines/guild/disko/default.nix=):
+  - =cipool= on =nvme-CT1000P3PSSD8_25014D6B1BD7= (CI builds, binary cache)
+  - =agentpool= on =ata-Patriot_P220_1024GB_P2204IBB25040902529= (Hermes agent)
+- Static address on the 10 GbE port (=enp1s0f1=, server VLAN; set in
+  =machines/guild/_networking.nix=); the onboard port (=eno1=) is left for
+  the Hermes agent
+- initrd SSH for remote unlock on port 2222, over both ports (10 GbE static,
+  onboard by DHCP as a fallback)
+- Normal SSH on port 22222, Tailscale and Alloy
+
+* 0. Firmware (done 2026-11-27)
+
+The BIOS stays at =M1UKT56A= (2020): the M920 is not on LVFS, and Lenovo's
+other routes need a screen. Intel microcode is loaded by NixOS at boot.
+
+Boot Mode is =Auto= (UEFI with a legacy fallback) and the boot order has USB
+first. Settings can be read and written from a running Linux through Lenovo's
+=think-lmi= driver, without a BIOS password:
+
+#+begin_src bash
+B=/sys/class/firmware-attributes/thinklmi/attributes
+sudo cat "$B/Boot Mode/current_value" "$B/Primary Boot Sequence/current_value"
+#+end_src
+
+Never set =UEFI Only= on this headless machine: on 2026-11-27 that left it
+unbootable from the stick and it needed a monitor to recover. Keep a working
+fallback for every boot change.
+
+* 1. Boot the installer and connect
+
+Boot the =nixiso= stick (=just build-iso=; its =nixos= user has the SSH keys).
+Confirm UEFI mode and the disks:
+
+#+begin_src bash
+ssh nixos@<GUILD_IP>       # the installer's DHCP address on either port
+sudo su -
+[ -d /sys/firmware/efi ] && echo UEFI
+ls -l /dev/disk/by-id/ | grep -vE 'part|wwn-|eui'
+#+end_src
+
+Expect the three IDs above plus the USB stick. Kernel names change between
+boots (the 128 GB disk was =sda= under Proxmox and =sdb= in the installer), so
+only ever use the by-id names.
+
+* 2. Clear the old data disks
+
+The 1 TB SATA disk held a Proxmox ZFS pool and the NVMe a Ceph OSD (LVM).
+Remove their signatures so nothing stale is activated:
+
+#+begin_src bash
+for d in /dev/disk/by-id/ata-Patriot_P220_1024GB_P2204IBB25040902529 \
+         /dev/disk/by-id/nvme-CT1000P3PSSD8_25014D6B1BD7; do
+  wipefs -a "$d"
+  blkdiscard -f "$d"
+done
+#+end_src
+
+* 3. Generate the data-pool keys
+
+The pools' container datasets read their keys from
+=file:///run/secrets/<pool>_key=. In the installer, write them there by hand
+so disko can create the pools; on the installed system sops-nix puts the same
+values there (step 6):
+
+#+begin_src bash
+mkdir -p /run/secrets
+for p in cipool agentpool; do
+  tr -dc 'A-Za-z0-9_@%+=:,.~-' </dev/urandom | head -c 64 > /run/secrets/${p}_key
+  chmod 0400 /run/secrets/${p}_key
+done
+wc -c /run/secrets/*_key   # 64 each
+#+end_src
+
+* 4. Partition, encrypt and mount
+
+This destroys all three disks. It prompts only for the ZFS encryption
+passphrase of =rpool=; the data pools use the key files:
+
+#+begin_src bash
+nix --experimental-features "nix-command flakes" \
+  --option tarball-ttl 0 \
+  run --refresh github:nix-community/disko -- \
+  --mode destroy,format,mount \
+  --flake github:masood09/nix#guild
+#+end_src
+
+Verify:
+
+#+begin_src bash
+zpool list                          # rpool, cipool, agentpool
+zfs get -r keystatus,encryptionroot cipool agentpool
+findmnt -R /mnt                     # /mnt/boot, /mnt/nix, ...
+#+end_src
+
+* 5. Host keys
+
+#+begin_src bash
+mkdir -pv /mnt/nix/{secret/{initrd,age},persist/etc/ssh}
+chmod 0700 /mnt/nix/secret
+
+ssh-keygen -t ed25519 -N "" -C "" \
+  -f /mnt/nix/secret/initrd/ssh_host_ed25519_key
+
+ssh-keygen -t ed25519 -N "" -C "" \
+  -f /mnt/nix/secret/age/ssh_ed25519_key
+
+nix-shell --extra-experimental-features flakes -p ssh-to-age \
+  --run 'cat /mnt/nix/secret/age/ssh_ed25519_key.pub | ssh-to-age'
+#+end_src
+
+* 6. Register guild in sops (on a dev machine)
+
+Using the age public key from step 5:
+
+1. Add a =&guild= key to =.sops.yaml=, add it to the =secrets/secrets.sops.yaml=
+   creation rule, and add a rule for =^machines/guild/secrets\.sops\.yaml$=
+   (=guild= + =masoodahmed=).
+2. Re-key the shared file so guild can read =alloy/.env=, =user/password= and
+   =zed/discord-zfs-webhook=:
+   #+begin_src bash
+   sops updatekeys secrets/secrets.sops.yaml
+   #+end_src
+3. Create the machine file with the two pool keys from step 3 (copy them over
+   the SSH session) and a Headscale pre-auth key:
+   #+begin_src bash
+   sops machines/guild/secrets.sops.yaml
+   # cipool_key: <contents of /run/secrets/cipool_key>
+   # agentpool_key: <contents of /run/secrets/agentpool_key>
+   # tailscale:
+   #   preauth-key: <key>
+   #+end_src
+   The values must match byte for byte (64 characters, no newline), or the
+   pools will not unlock at boot.
+4. Commit and push, so the install sees the secrets.
+
+* 7. Install
+
+#+begin_src bash
+nixos-install \
+  --no-root-passwd \
+  --root /mnt \
+  --flake github:masood09/nix#guild \
+  --option tarball-ttl 0
+#+end_src
+
+* 8. Boot order, cleanup and reboot
+
+Put the SATA disks before USB, keeping the stick as a fallback: if guild does
+not boot, the firmware falls through to the installer and the machine stays
+reachable. Read the current sequence and its allowed values first, write the
+same items back with the disks ahead of USB (drop nothing), then read it back:
+
+#+begin_src bash
+B=/sys/class/firmware-attributes/thinklmi/attributes
+cat "$B/Primary Boot Sequence/current_value" "$B/Primary Boot Sequence/possible_values"
+echo "<same items, SATA/NVMe before USB>" > "$B/Primary Boot Sequence/current_value"
+cat "$B/Primary Boot Sequence/current_value"
+
+umount -Rl /mnt
+zpool export -a
+reboot
+#+end_src
+
+* 9. Remote unlock and first login
+
+The initrd listens on port 2222 on the 10 GbE static address and on the
+onboard port's DHCP address:
+
+#+begin_src bash
+ssh -p 2222 root@<GUILD_IP>
+zfs load-key -a
+#+end_src
+
+If the boot stays waiting, answer the pending prompt with
+=systemd-tty-ask-password-agent= (see =modules/nixos/_remote-unlock.nix=).
+
+After boot, sops-nix writes the pool keys to =/run/secrets= and
+=cipool= and =agentpool= are imported with their keys loaded. Then:
+
+#+begin_src bash
+ssh -p 22222 masoodahmed@<GUILD_IP>
+#+end_src
+
+* 10. Verify
+
+#+begin_src bash
+hostname
+zpool status              # rpool, cipool, agentpool ONLINE
+zfs get -r keystatus cipool agentpool   # available
+swapon --show             # empty: no swap
+systemctl --failed
+ip route                  # one default route, via enp1s0f1
+ip -br addr show eno1     # no address on the host
+tailscale status
+#+end_src
+
+Reboot once more and unlock again to confirm the root rolls back and both
+data pools come back with their keys.
