@@ -115,8 +115,13 @@
             };
           };
           aliases = {
-            heavy = "qwen3.8-flash-next-iq3_s";
-            heavy-uncensored = "qwen3.8-flash-next-iq3_s-uncensored";
+            # IQ3_XXS rather than IQ3_S: ixian's 2026-11-16 benchmark scored
+            # every size 13/13, and IQ3_XXS is the faster, lighter one of the
+            # indistinguishable set (see machines/ixian/_config.nix). IQ3_S
+            # stays in the catalog, so a client naming it outright still gets
+            # it after one model load.
+            heavy = "qwen3.8-flash-next-iq3_xxs";
+            heavy-uncensored = "qwen3.8-flash-next-iq3_xxs-uncensored";
             light = "gemma-4-e4b";
             light-uncensored = "gemma-4-e4b-uncensored";
             # Agentic model for harnesses (Hermes): tool calls measured
